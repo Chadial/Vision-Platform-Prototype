@@ -163,6 +163,12 @@ class SimulatedCameraDriver(CameraDriver):
         normalized_format = pixel_format.lower()
         if normalized_format == "mono8":
             return bytes(((x + y + frame_id) % 256) for y in range(height) for x in range(width))
+        if normalized_format == "mono16":
+            return b"".join(
+                (((x * 257) + (y * 257) + frame_id) % 65536).to_bytes(2, byteorder="little")
+                for y in range(height)
+                for x in range(width)
+            )
         if normalized_format == "rgb8":
             return bytes(
                 component

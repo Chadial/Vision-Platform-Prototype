@@ -4,10 +4,14 @@ import struct
 import zlib
 from pathlib import Path
 
+from camera_app.imaging.opencv_adapter import OpenCvFrameAdapter
 from camera_app.models.captured_frame import CapturedFrame
 
 
 class FrameWriter:
+    def __init__(self, opencv_adapter: OpenCvFrameAdapter | None = None) -> None:
+        self._opencv_adapter = opencv_adapter
+
     def write_frame(
         self,
         frame: CapturedFrame,
@@ -19,11 +23,16 @@ class FrameWriter:
 
         extension = target_path.suffix.lower()
         if extension == ".png":
+            if self._should_use_opencv_grayscale_path(frame):
+                return self._write_lossless_grayscale(frame, target_path, create_directories)
             self._write_png(frame, target_path)
             return target_path
 
+        if extension in {".tif", ".tiff"}:
+            return self._write_lossless_grayscale(frame, target_path, create_directories)
+
         if extension in {".raw", ".bin"}:
-            target_path.write_bytes(self._get_frame_buffer(frame))
+            target_path.write_bytes(frame.get_buffer_bytes())
             return target_path
 
         raise RuntimeError(f"Unsupported snapshot file extension '{target_path.suffix}'.")
@@ -32,7 +41,7 @@ class FrameWriter:
         if frame.width <= 0 or frame.height <= 0:
             raise RuntimeError("Frame dimensions must be positive to save a PNG image.")
 
-        raw_buffer = self._get_frame_buffer(frame)
+        raw_buffer = frame.get_buffer_bytes()
         normalized_format = (frame.pixel_format or "").strip().lower()
 
         if normalized_format == "mono8":
@@ -77,17 +86,26 @@ class FrameWriter:
         )
         target_path.write_bytes(png_bytes)
 
+    def _write_lossless_grayscale(
+        self,
+        frame: CapturedFrame,
+        target_path: Path,
+        create_directories: bool,
+    ) -> Path:
+        if self._opencv_adapter is None:
+            raise RuntimeError(
+                "Lossless grayscale PNG/TIFF output for this pixel format requires the optional OpenCV path."
+            )
+        return self._opencv_adapter.save_lossless_grayscale(
+            frame,
+            target_path,
+            create_directories=create_directories,
+        )
+
     @staticmethod
-    def _get_frame_buffer(frame: CapturedFrame) -> bytes:
-        raw_frame = frame.raw_frame
-        get_buffer = getattr(raw_frame, "get_buffer", None)
-        if callable(get_buffer):
-            return bytes(get_buffer())
-
-        if isinstance(raw_frame, (bytes, bytearray, memoryview)):
-            return bytes(raw_frame)
-
-        raise RuntimeError("Frame does not expose a writable buffer.")
+    def _should_use_opencv_grayscale_path(frame: CapturedFrame) -> bool:
+        normalized_format = (frame.pixel_format or "").strip().lower()
+        return normalized_format in {"mono10", "mono12", "mono14", "mono16"}
 
     @staticmethod
     def _convert_bgr_to_rgb(buffer: bytes) -> bytes:

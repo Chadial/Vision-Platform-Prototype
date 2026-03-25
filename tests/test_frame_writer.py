@@ -15,6 +15,18 @@ class _FakeRawFrame:
         return self._buffer
 
 
+class _FakeOpenCvAdapter:
+    def __init__(self) -> None:
+        self.calls: list[tuple[CapturedFrame, Path, bool]] = []
+
+    def save_lossless_grayscale(self, frame: CapturedFrame, target_path: Path, create_directories: bool = True) -> Path:
+        self.calls.append((frame, target_path, create_directories))
+        if create_directories:
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+        target_path.write_bytes(b"opencv")
+        return target_path
+
+
 class FrameWriterTests(unittest.TestCase):
     def test_write_frame_creates_png_file_for_mono8_frame(self) -> None:
         frame = CapturedFrame(
@@ -61,6 +73,56 @@ class FrameWriterTests(unittest.TestCase):
 
             with self.assertRaisesRegex(RuntimeError, "Unsupported snapshot file extension"):
                 FrameWriter().write_frame(frame, target_path)
+
+    def test_write_frame_raises_for_mono16_png_without_optional_opencv_path(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(b"\x01\x00\x02\x00\x03\x00\x04\x00"),
+            width=2,
+            height=2,
+            pixel_format="Mono16",
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            target_path = Path(temp_dir) / "snapshot.png"
+
+            with self.assertRaisesRegex(RuntimeError, "requires the optional OpenCV path"):
+                FrameWriter().write_frame(frame, target_path)
+
+    def test_write_frame_uses_optional_opencv_path_for_mono16_png(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(b"\x01\x00\x02\x00\x03\x00\x04\x00"),
+            width=2,
+            height=2,
+            pixel_format="Mono16",
+        )
+        adapter = _FakeOpenCvAdapter()
+
+        with TemporaryDirectory() as temp_dir:
+            target_path = Path(temp_dir) / "snapshot.png"
+
+            saved_path = FrameWriter(opencv_adapter=adapter).write_frame(frame, target_path)
+
+            self.assertEqual(saved_path, target_path)
+            self.assertEqual(len(adapter.calls), 1)
+            self.assertTrue(target_path.exists())
+
+    def test_write_frame_uses_optional_opencv_path_for_tiff_output(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(bytes([1, 2, 3, 4])),
+            width=2,
+            height=2,
+            pixel_format="Mono8",
+        )
+        adapter = _FakeOpenCvAdapter()
+
+        with TemporaryDirectory() as temp_dir:
+            target_path = Path(temp_dir) / "snapshot.tiff"
+
+            saved_path = FrameWriter(opencv_adapter=adapter).write_frame(frame, target_path)
+
+            self.assertEqual(saved_path, target_path)
+            self.assertEqual(len(adapter.calls), 1)
+            self.assertEqual(adapter.calls[0][1], target_path)
 
 
 if __name__ == "__main__":

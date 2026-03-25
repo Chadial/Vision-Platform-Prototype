@@ -17,6 +17,17 @@ class CapturedFrame:
     pixel_format: Optional[str] = None
     timestamp_utc: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
+    def get_buffer_bytes(self) -> bytes:
+        raw_frame = self.raw_frame
+        get_buffer = getattr(raw_frame, "get_buffer", None)
+        if callable(get_buffer):
+            return bytes(get_buffer())
+
+        if isinstance(raw_frame, (bytes, bytearray, memoryview)):
+            return bytes(raw_frame)
+
+        raise RuntimeError("Frame does not expose a writable buffer.")
+
     def to_preview_frame_info(self) -> PreviewFrameInfo:
         return PreviewFrameInfo(
             frame_id=self.frame_id,

@@ -38,6 +38,15 @@ class SimulatedCameraDriverTests(unittest.TestCase):
         self.assertEqual(frame.pixel_format, "Rgb8")
         self.assertEqual(len(frame.raw_frame), 12)
 
+    def test_simulated_driver_supports_mono16_generated_frames(self) -> None:
+        driver = SimulatedCameraDriver(width=2, height=2, pixel_format="Mono16")
+        driver.initialize()
+
+        frame = driver.capture_snapshot()
+
+        self.assertEqual(frame.pixel_format, "Mono16")
+        self.assertEqual(len(frame.raw_frame), 8)
+
     def test_preview_service_reads_frames_from_simulated_driver(self) -> None:
         driver = SimulatedCameraDriver(width=3, height=2, pixel_format="Mono8")
         driver.initialize()
