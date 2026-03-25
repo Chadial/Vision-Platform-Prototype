@@ -92,3 +92,11 @@ Optional sample images can be provided from a directory containing `.pgm` or `.p
 ```powershell
 .\.venv\Scripts\python.exe .\run_simulated_demo.py --save-directory .\captures\simulated --sample-dir .\demo_samples
 ```
+
+## Simulated Command Flow Demo
+
+Run a host-style command sequence through the `CommandController` with the simulated driver:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_command_flow_demo.py --base-directory .\captures\commands --run-name run_001 --frame-limit 3 --target-frame-rate 10
+```

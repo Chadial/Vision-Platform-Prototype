@@ -11,12 +11,12 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `feature/phase-2e-snapshot-smoke`
+- `main`
 
 ## Roadmap Position
 
-- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, and the Simulation/Demo path are functionally implemented; Host Integration is implemented as a typed command/status surface and still open for AMB-specific payload shaping.
-- Against `GlobalRoadmap.md`: the Python structuring phase is functionally complete, including the separated real/simulated driver paths; the AMB-facing command/status phase is now started with an explicit subsystem status contract, and the next major step is AMB-specific payload shaping plus real-hardware validation.
+- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, and Host Integration are functionally implemented; Validation is now partially implemented through request-model tests, controller-flow tests, and runnable simulated demos.
+- Against `GlobalRoadmap.md`: the Python structuring phase is functionally complete, including the separated real/simulated driver paths and the external command/status contract; the next major step remains real-hardware validation, while any stricter payload mapping stays optional for the later C# handover.
 
 ## Current Summary
 
@@ -36,6 +36,7 @@ The repository currently provides a structured Python prototype for the camera s
 - camera configuration now models ROI offsets and ROI size in addition to exposure, gain, pixel format, and acquisition frame rate
 - recording requests can now carry a target frame rate and log it alongside ROI metadata
 - smoke-test entry point for explicit camera id usage such as `cam2`
+- command-flow demo for host-style external control using the simulated driver
 - a clear architectural basis for separating real hardware drivers from future simulation/demo drivers
 - a working simulated driver for hardware-free preview, snapshot, and recording flows
 
@@ -111,12 +112,20 @@ The repository currently provides a structured Python prototype for the camera s
 - save-directory requests now support append-to-directory or create-new-subdirectory behavior
 - deeper host-specific payload shaping is still open
 
+### Validation
+
+- unit coverage exists for naming, preview, recording, driver integration, and command-controller behavior
+- dedicated tests now cover the external request model mappings and save-directory resolution rules
+- a simulated command-flow demo now validates a host-style `configure -> set save directory -> snapshot -> recording -> status` sequence
+- runnable demo entry points exist for both the direct simulated service flow and the command-controller flow
+- real hardware validation is still pending separately from the simulator-backed validation
+
 ### Preview
 
 - service layer exists and is test-covered
 - no actual UI preview window or browser preview yet
 - hardware validation is currently blocked because the camera is not available
-- no simulated preview/image source exists yet
+- simulated preview exists through `SimulatedCameraDriver`, but no dedicated UI rendering layer exists yet
 
 ### Simulation vs. Real Hardware
 
@@ -144,13 +153,15 @@ The repository currently provides a structured Python prototype for the camera s
 .\.venv\Scripts\python.exe -m unittest tests.test_recording_service
 .\.venv\Scripts\python.exe -m unittest tests.test_simulated_camera_driver
 .\.venv\Scripts\python.exe -m unittest tests.test_simulated_demo
+.\.venv\Scripts\python.exe -m unittest tests.test_command_flow_demo
 .\.venv\Scripts\python.exe -m unittest tests.test_command_controller
+.\.venv\Scripts\python.exe -m unittest tests.test_request_models
 ```
 
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when `cam2` is available.
-2. Define the AMB-specific command/status payload mapping on top of `SubsystemStatus`.
-3. Add explicit host-facing response/result objects if the next integration step needs more than direct return values.
+2. Decide whether `docs/ROADMAP.md` Phase 7 should be declared complete now or after one real-hardware validation pass.
+3. Define a stricter payload mapping only if the later C# or host integration really needs it.
 4. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
-5. Merge to `main` after the current Phase-2 branch is reviewed and accepted.
+5. Keep the Python core stable as the handover baseline for the later C# phase.
