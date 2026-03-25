@@ -30,6 +30,12 @@ Avoid:
 - hidden defaults that are not visible to the caller
 - mixing camera hardware settings with save-path settings in one request
 
+Operational preconditions:
+
+- camera-side commands require an initialized camera service
+- snapshot and recording require either an explicit `save_directory` in the request or a previously configured default save directory
+- an explicit request `save_directory` overrides the default save directory
+
 ## Command Terms
 
 Use these request names for external control:
@@ -175,6 +181,7 @@ Notes:
 - At least one stop condition should be given.
 - `target_frame_rate` is a pacing target for recording acquisition.
 - `target_frame_rate` does not replace camera-side acquisition settings; it is part of recording control.
+- `save_directory` may be omitted if a default save directory was set earlier.
 
 Examples:
 

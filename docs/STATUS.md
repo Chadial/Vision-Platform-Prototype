@@ -15,8 +15,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Roadmap Position
 
-- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, and Host Integration are functionally implemented; Validation is now partially implemented through request-model tests, controller-flow tests, runnable simulated demos, and the new optional OpenCV adapter tests. Optional OpenCV Integration is partially implemented at the Python level.
-- Against `GlobalRoadmap.md`: the Python structuring phase is functionally complete, including the separated real/simulated driver paths and the external command/status contract; the optional Phase 3c OpenCV path now exists for local preview inspection and grayscale-safe export, while the next major mandatory step remains real-hardware validation.
+- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path are functionally implemented. Phase 8 Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Phase 9 Real Hardware Evaluation remains open.
+- Against `GlobalRoadmap.md`: the Python structuring phase and the simulation path are functionally complete, including the host-neutral command/status contract and the optional Phase 3c OpenCV inspection path. The next mandatory milestone against the global roadmap remains Phase 3b real-hardware evaluation before the Python baseline can be treated as hardware-validated.
 
 ## Current Summary
 
@@ -42,6 +42,7 @@ The repository currently provides a structured Python prototype for the camera s
 - a working simulated driver for hardware-free preview, snapshot, and recording flows
 - optional OpenCV preview demo on top of the simulated preview service
 - optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
+- additional service hardening so preview/recording cleanup resets internal state defensively even when acquisition stop fails during recovery
 
 ## Completed Work
 
@@ -133,6 +134,8 @@ The repository currently provides a structured Python prototype for the camera s
 - simulated demo and command-flow demo now return a shared typed result model instead of loosely shaped dictionaries
 - frame output validation now rejects unsupported pixel-format and file-extension combinations such as RGB-to-TIFF before writing
 - dedicated OpenCV smoke-demo tests now verify the preview and save demo entry points against the simulator-backed path
+- preview and recording cleanup now preserve stable service state even when `stop_acquisition()` itself fails during shutdown or recovery
+- additional tests now verify that startup failures keep their original exception even if cleanup also fails afterwards
 - real hardware validation is still pending separately from the simulator-backed validation
 
 ### Preview
@@ -160,6 +163,7 @@ The repository currently provides a structured Python prototype for the camera s
 - lossless grayscale save now supports `.png` and `.tiff` through the optional adapter for `Mono8` and unpacked higher-bit grayscale formats such as `Mono16`
 - the standard-library writer remains the default for dependency-free `Mono8`, `Rgb8`, and `Bgr8` PNG output
 - packed grayscale formats are still not decoded automatically and should be transformed explicitly before using the OpenCV save path if required
+- simulator-backed validation for the optional path is complete, but hardware-backed validation is still pending
 
 ## Known Constraints
 
@@ -170,27 +174,14 @@ The repository currently provides a structured Python prototype for the camera s
 ## Verified Test Commands
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_vimbax_camera_driver
-.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service
-.\.venv\Scripts\python.exe -m unittest tests.test_frame_writer
-.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_smoke
-.\.venv\Scripts\python.exe -m unittest tests.test_preview_service
-.\.venv\Scripts\python.exe -m unittest tests.test_file_naming
-.\.venv\Scripts\python.exe -m unittest tests.test_recording_service
-.\.venv\Scripts\python.exe -m unittest tests.test_simulated_camera_driver
-.\.venv\Scripts\python.exe -m unittest tests.test_simulated_demo
-.\.venv\Scripts\python.exe -m unittest tests.test_command_flow_demo
-.\.venv\Scripts\python.exe -m unittest tests.test_command_controller
-.\.venv\Scripts\python.exe -m unittest tests.test_request_models
-.\.venv\Scripts\python.exe -m unittest tests.test_opencv_adapter
-.\.venv\Scripts\python.exe -m unittest tests.test_opencv_preview
+.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos
 ```
 
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when `cam2` is available.
 2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-3. Decide whether `docs/ROADMAP.md` Phase 8 can be declared complete after one real-hardware validation pass and whether Phase 10 should then be marked fully complete.
+3. Decide whether `docs/ROADMAP.md` Phase 8 can be declared complete after one real-hardware validation pass and whether the optional OpenCV path can then be treated as hardware-validated.
 4. Define a stricter payload mapping only if the later C# or host integration really needs it.
 5. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
 6. Keep the Python core stable as the handover baseline for the later C# phase.

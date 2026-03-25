@@ -34,9 +34,7 @@ class PreviewService:
         except Exception:
             self._stop_event.set()
             self._worker_thread = None
-            if self._acquisition_started:
-                self._driver.stop_acquisition()
-                self._acquisition_started = False
+            self._stop_acquisition_safely(suppress_errors=True)
             raise
 
     def stop(self) -> None:
@@ -44,9 +42,7 @@ class PreviewService:
         if self._worker_thread is not None:
             self._worker_thread.join(timeout=max(self._poll_interval_seconds * 4, 0.2))
             self._worker_thread = None
-        if self._acquisition_started:
-            self._driver.stop_acquisition()
-            self._acquisition_started = False
+        self._stop_acquisition_safely()
 
     @property
     def is_running(self) -> bool:
@@ -78,3 +74,18 @@ class PreviewService:
             except Exception:
                 self._logger.exception("Preview polling failed.")
             sleep(self._poll_interval_seconds)
+
+    def _stop_acquisition_safely(self, suppress_errors: bool = False) -> None:
+        if not self._acquisition_started:
+            return
+
+        try:
+            self._driver.stop_acquisition()
+        except Exception:
+            self._acquisition_started = False
+            if suppress_errors:
+                self._logger.exception("Preview acquisition stop failed during cleanup.")
+                return
+            raise
+        else:
+            self._acquisition_started = False

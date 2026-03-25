@@ -126,6 +126,43 @@ class PreviewServiceTests(unittest.TestCase):
         fake_driver.stop_acquisition.assert_called_once_with()
         self.assertFalse(service.is_running)
 
+    def test_stop_clears_state_even_if_driver_stop_fails(self) -> None:
+        fake_driver = MagicMock()
+        fake_driver.get_latest_frame.return_value = None
+        fake_driver.stop_acquisition.side_effect = RuntimeError("stop failed")
+        service = PreviewService(fake_driver, poll_interval_seconds=0.01)
+
+        service.start()
+
+        with self.assertRaisesRegex(RuntimeError, "stop failed"):
+            service.stop()
+
+        self.assertFalse(service.is_running)
+        self.assertFalse(service._acquisition_started)
+
+    def test_start_preserves_original_error_if_cleanup_stop_also_fails(self) -> None:
+        fake_driver = MagicMock()
+        fake_driver.stop_acquisition.side_effect = RuntimeError("stop failed")
+        service = PreviewService(fake_driver)
+
+        original_thread_class = service.__class__.__dict__["start"].__globals__["Thread"]
+
+        class _BrokenThread:
+            def __init__(self, *args, **kwargs) -> None:
+                raise RuntimeError("thread setup failed")
+
+        service.__class__.__dict__["start"].__globals__["Thread"] = _BrokenThread
+        try:
+            with self.assertLogs("camera_app.services.preview_service", level="ERROR") as logs:
+                with self.assertRaisesRegex(RuntimeError, "thread setup failed"):
+                    service.start()
+        finally:
+            service.__class__.__dict__["start"].__globals__["Thread"] = original_thread_class
+
+        self.assertTrue(any("Preview acquisition stop failed during cleanup." in message for message in logs.output))
+        self.assertFalse(service.is_running)
+        self.assertFalse(service._acquisition_started)
+
 
 if __name__ == "__main__":
     unittest.main()

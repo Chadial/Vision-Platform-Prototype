@@ -10,6 +10,16 @@ The current goal is not to build a full UI, but to establish a maintainable appl
 - future compatibility with external host control
 - future portability to desktop UI and web UI
 
+## Current State
+
+The repository is currently a simulator-validated Python prototype with:
+
+- clean driver/service/storage/control separation
+- working simulated preview, snapshot, recording, and host-style command flow
+- optional OpenCV-based preview inspection and grayscale-safe export paths
+
+Real hardware is currently not available, so the repository should not yet be treated as hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`GlobalRoadmap.md`](GlobalRoadmap.md).
+
 ## Repository Layout
 
 ```text
@@ -223,6 +233,14 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 For host-facing command formulation and request examples, see [`docs/COMMANDS.md`](docs/COMMANDS.md).
 For real-device validation steps, see [`docs/HARDWARE_EVALUATION.md`](docs/HARDWARE_EVALUATION.md).
+
+## Verified Simulator Test Block
+
+Run the current simulator-/service-focused verification block with:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos
+```
 
 ## Smoke Test
 

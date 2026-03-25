@@ -76,7 +76,7 @@ class RecordingService:
             return self.get_status()
         except Exception:
             self._stop_event.set()
-            self._finalize_recording()
+            self._finalize_recording(suppress_errors=True)
             raise
 
     def stop_recording(self) -> RecordingStatus:
@@ -195,7 +195,7 @@ class RecordingService:
             finally:
                 self._frame_queue.task_done()
 
-        self._finalize_recording()
+        self._finalize_recording(suppress_errors=True)
 
     def _record_error(self, message: str) -> None:
         self._logger.error(message, exc_info=True)
@@ -288,8 +288,9 @@ class RecordingService:
     def _current_system_time_utc() -> str:
         return datetime.now(timezone.utc).isoformat()
 
-    def _finalize_recording(self) -> None:
+    def _finalize_recording(self, suppress_errors: bool = False) -> None:
         with self._cleanup_lock:
+            stop_error: Exception | None = None
             has_active_recording = (
                 self._active_request is not None
                 or self._producer_thread is not None
@@ -297,8 +298,14 @@ class RecordingService:
                 or self._status.is_recording
             )
             if has_active_recording and self._acquisition_started and not self._acquisition_stopped:
-                self._driver.stop_acquisition()
-                self._acquisition_stopped = True
+                try:
+                    self._driver.stop_acquisition()
+                except Exception as exc:
+                    stop_error = exc
+                    if suppress_errors:
+                        self._logger.exception("Recording acquisition stop failed during cleanup.")
+                finally:
+                    self._acquisition_stopped = True
 
             self._producer_thread = None
             self._writer_thread = None
@@ -315,3 +322,6 @@ class RecordingService:
                 self._status.is_recording = False
                 self._status.save_directory = None
                 self._status.active_file_stem = None
+
+            if stop_error is not None and not suppress_errors:
+                raise stop_error

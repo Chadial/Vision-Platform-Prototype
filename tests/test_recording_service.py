@@ -64,6 +64,24 @@ class _FailingStartDriver(_FakeRecordingDriver):
         raise RuntimeError("camera start failed")
 
 
+class _FailingStopDriver(_FakeRecordingDriver):
+    def stop_acquisition(self) -> None:
+        self.stop_calls += 1
+        raise RuntimeError("camera stop failed")
+
+
+class _IdleFailingStopDriver(_FailingStopDriver):
+    def __init__(self) -> None:
+        super().__init__([])
+        self.start_calls = 0
+
+    def start_acquisition(self) -> None:
+        self.start_calls += 1
+
+    def get_latest_frame(self) -> CapturedFrame | None:
+        return None
+
+
 class RecordingServiceTests(unittest.TestCase):
     def test_start_recording_writes_raw_sequence_until_frame_limit(self) -> None:
         frames = [
@@ -376,6 +394,65 @@ class RecordingServiceTests(unittest.TestCase):
         self.assertIsNone(status.active_file_stem)
         self.assertEqual(driver.start_calls, 0)
         self.assertEqual(driver.stop_calls, 0)
+
+    def test_stop_recording_clears_state_even_if_camera_stop_fails(self) -> None:
+        driver = _IdleFailingStopDriver()
+        service = RecordingService(driver, poll_interval_seconds=0.001)
+
+        with TemporaryDirectory() as temp_dir:
+            request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="series",
+                file_extension=".raw",
+                frame_limit=10,
+                queue_size=2,
+            )
+
+            service.start_recording(request)
+            try:
+                service.stop_recording()
+            except RuntimeError as exc:
+                self.assertIn("camera stop failed", str(exc))
+
+        status = service.get_status()
+        self.assertFalse(status.is_recording)
+        self.assertIsNone(status.save_directory)
+        self.assertIsNone(status.active_file_stem)
+        self.assertEqual(driver.start_calls, 1)
+        self.assertGreaterEqual(driver.stop_calls, 1)
+
+    def test_start_recording_preserves_original_error_if_cleanup_stop_fails(self) -> None:
+        driver = _FailingStopDriver([])
+        service = RecordingService(driver, poll_interval_seconds=0.001)
+
+        original_open_recording_log = service._open_recording_log
+
+        def failing_open_recording_log(request: RecordingRequest) -> None:
+            service._acquisition_started = True
+            raise RuntimeError("log setup failed")
+
+        service._open_recording_log = failing_open_recording_log
+        try:
+            with TemporaryDirectory() as temp_dir:
+                request = RecordingRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="series",
+                    file_extension=".raw",
+                    frame_limit=3,
+                )
+
+                with self.assertLogs("camera_app.services.recording_service", level="ERROR") as logs:
+                    with self.assertRaisesRegex(RuntimeError, "log setup failed"):
+                        service.start_recording(request)
+        finally:
+            service._open_recording_log = original_open_recording_log
+
+        status = service.get_status()
+        self.assertFalse(status.is_recording)
+        self.assertIsNone(status.save_directory)
+        self.assertIsNone(status.active_file_stem)
+        self.assertTrue(any("Recording acquisition stop failed during cleanup." in message for message in logs.output))
+        self.assertEqual(driver.stop_calls, 1)
 
 
 if __name__ == "__main__":

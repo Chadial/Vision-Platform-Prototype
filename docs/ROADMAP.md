@@ -180,8 +180,9 @@ Use this for:
 
 Status:
 
-- not implemented yet
-- suitable as the next optional Python-side extension after hardware evaluation or in parallel with local inspection needs
+- partially completed at the Python level
+- optional preview inspection and grayscale-safe save paths are implemented for simulator-backed use
+- still requires real-hardware validation before treating the optional path as hardware-proven
 
 ## Current Recommended Order
 
@@ -189,5 +190,5 @@ From the current repository state, the practical next steps are:
 
 1. run the real hardware evaluation checklist
 2. decide whether Phase 8 can be marked complete after that run
-3. add optional OpenCV preview and grayscale-safe inspection if live visual inspection is needed
+3. validate the already implemented optional OpenCV path against real hardware frames if that inspection path is needed
 4. keep the Python core stable as the handover baseline for the later C# phase

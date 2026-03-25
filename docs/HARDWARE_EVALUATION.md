@@ -13,6 +13,12 @@ It is intended to answer:
 
 This checklist should be used before treating the Python prototype as hardware-validated.
 
+Current repository note:
+
+- simulator-backed validation is already strong
+- the optional OpenCV preview/save path is already implemented and simulator-tested
+- neither of those facts closes Phase 8 or Phase 9 without at least one real-hardware validation pass
+
 ## Preconditions
 
 Before starting:
@@ -330,3 +336,5 @@ If this checklist passes on real hardware, the Python repository can be treated 
 - hardware validated at prototype level
 
 That is the right point to freeze the Python baseline and use it as the handover reference for the later C# phase.
+
+Until then, keep the project status phrased as simulator-validated rather than fully hardware-validated.
