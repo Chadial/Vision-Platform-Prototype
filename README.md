@@ -68,6 +68,7 @@ For the first prototype stage, keep the dependency surface small and start with 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 For host-facing command formulation and request examples, see [`docs/COMMANDS.md`](docs/COMMANDS.md).
+For real-device validation steps, see [`docs/HARDWARE_EVALUATION.md`](docs/HARDWARE_EVALUATION.md).
 
 ## Smoke Test
 

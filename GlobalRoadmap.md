@@ -56,6 +56,8 @@ sollen moeglichst ueber dieselbe Kernlogik laufen.
 | 2a | Simulationspfad | Hardwarefreie Entwicklung, Tests und Demos | Python |
 | 3 | AMB-nahe Schnittstelle modellieren | externe Kommandos, Save Path, Status | Python |
 | 3a | Optionaler Transport-/Payload-Vertrag | nur bei Bedarf: hostspezifische DTOs oder API-Payloads | spaeter mit C# mitdenken |
+| 3b | Hardware-Evaluierung | echtes Geraet gegen Python-Prototyp validieren | Python + Kamera |
+| 3c | Optionaler OpenCV-Pfad | lokale Stream-Anzeige und verlustfreie Sichtpruefung | Python + OpenCV |
 | 4 | C#-Uebertragung | teamfaehiges Kamera-Subsystem | Visual Studio |
 | 5 | Integration in AMB-Software | direkte Steuerung aus Hauptsoftware | C# |
 | 6 | WebUI-faehige Architektur | Browser, Tablet, Mobil | .NET / Web |
@@ -223,6 +225,68 @@ Das ist eher ein **optional vorgezogener Vorgriff auf Phase 4**, wenn die C#-Ueb
 
 ---
 
+## Phase 3b - Hardware-Evaluierung des Python-Prototyps
+
+### Ziel
+
+Den strukturell fertigen Python-Prototyp nicht nur simulatorgestuetzt, sondern mit echter Kamera validieren.
+
+### Pruefpunkte
+
+- Kamerainitialisierung und sauberer Shutdown
+- explizite Kameraauswahl per id
+- Exposure, Gain, Pixel Format und ROI auf echter Hardware
+- Snapshot auf echter Hardware
+- Preview-Datenfluss auf echter Hardware
+- Recording auf echter Hardware
+- Verhalten bei nicht unterstuetzten Features oder Fehlern
+
+### Ergebnis
+
+Ein Python-Baseline-Stand, der nicht nur architektonisch, sondern auch hardwareseitig belastbar ist.
+
+---
+
+## Phase 3c - Optionaler OpenCV-Pfad fuer Anzeige und Sichtpruefung
+
+### Ziel
+
+Eine lokale Desktop-Anzeige fuer Stream-Inspektion und verlustfreie Sichtpruefung ergaenzen, ohne die Kernarchitektur an OpenCV zu binden.
+
+### Wichtig
+
+OpenCV soll hier:
+
+- fuer Anzeige und Inspektion helfen
+- nicht die Kernlogik dominieren
+- nicht still die Messdaten veraendern
+
+### Geeignete Einsaetze
+
+- lokales Preview-Fenster mit `cv2.imshow()`
+- Konvertierung von Frames in ein Anzeigeformat
+- Sichtpruefung von ROI, Fokus und Belichtung
+- verlustfreie Speicherung in sichtbaren Grauwertformaten statt `.raw`, wenn die Daten fuer DIC geeignet bleiben muessen
+
+### Datenregel fuer DIC-nahe Nutzung
+
+- keine verlustbehaftete Speicherung
+- keine unerklaerte Normalisierung
+- keine Gamma- oder Kontrastmanipulation der gespeicherten Messdaten
+- Anzeige-Konvertierung und gespeicherte Nutzdaten strikt trennen
+
+### Empfohlene Richtung
+
+- `Mono8` moeglichst als verlustfreies `.png`
+- hoeherwertige Graustufen moeglichst als 16-Bit-`.png` oder `.tiff`
+- OpenCV nur als optionale Adapter- oder Demo-Schicht
+
+### Ergebnis
+
+Ein zusaetzlicher lokaler Sichtpruefungsweg, der spaetere DIC-Auswertung nicht untergraebt und die Python-Basis trotzdem schlank laesst.
+
+---
+
 ## Phase 4 - Uebertragung nach C# / Visual Studio
 
 ### Ziel
@@ -257,7 +321,8 @@ Ein teamfaehiges Kamera-Subsystem in C#.
 4. Recording starten/stoppen
 5. Save Path / Dateinamenslogik
 6. Statusmodell
-7. AMB-Integration
+7. Host-/AMB-Integration
+8. optional OpenCV- oder Anzeigeentscheidungen nur dann uebernehmen, wenn sie sich im Python-Pfad als wirklich nuetzlich erwiesen haben
 
 ### Optionaler Hinweis aus Phase 3a
 
