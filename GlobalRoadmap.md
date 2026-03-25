@@ -7,7 +7,7 @@ Eine skalierbare Kamera-Architektur, die:
 - kurzfristig in **Python** schnell zum Laufen gebracht wird
 - mittelfristig in **C# / Visual Studio** vom Team uebernommen werden kann
 - langfristig eine **WebUI** fuer Desktop, Tablet und Smartphone erlaubt
-- sauber mit der **AMB-Control-Software** zusammenarbeitet
+- sauber mit einer **externen Host-Software** zusammenarbeitet
 - Snapshot und "Video"-Speicherung inklusive frei vorgebbarem Speicherpfad unterstuetzt
 - einen klar getrennten Pfad fuer **echte Hardware** und **Simulation/Demo-Betrieb** erlaubt
 
@@ -32,7 +32,7 @@ Stattdessen in dieser Reihenfolge:
 Die Kamera- und Recording-Logik soll **vom UI entkoppelt** werden, sodass spaeter wahlweise
 
 - eine lokale Desktop-Anwendung
-- eine integrierte AMB-Software-Loesung
+- eine integrierte Host-Software-Loesung
 - oder eine WebUI
 
 darauf aufsetzen kann.
@@ -54,12 +54,12 @@ sollen moeglichst ueber dieselbe Kernlogik laufen.
 | 1 | Kamera zum Laufen bringen | Livebild, Snapshot, Speichern | PyCharm + Python |
 | 2 | Python sauber strukturieren | Services, Requests, Logging, Recording | PyCharm |
 | 2a | Simulationspfad | Hardwarefreie Entwicklung, Tests und Demos | Python |
-| 3 | AMB-nahe Schnittstelle modellieren | externe Kommandos, Save Path, Status | Python |
+| 3 | Host-nahe Schnittstelle modellieren | externe Kommandos, Save Path, Status | Python |
 | 3a | Optionaler Transport-/Payload-Vertrag | nur bei Bedarf: hostspezifische DTOs oder API-Payloads | spaeter mit C# mitdenken |
 | 3b | Hardware-Evaluierung | echtes Geraet gegen Python-Prototyp validieren | Python + Kamera |
 | 3c | Optionaler OpenCV-Pfad | lokale Stream-Anzeige und verlustfreie Sichtpruefung | Python + OpenCV |
 | 4 | C#-Uebertragung | teamfaehiges Kamera-Subsystem | Visual Studio |
-| 5 | Integration in AMB-Software | direkte Steuerung aus Hauptsoftware | C# |
+| 5 | Integration in Host-Software | direkte Steuerung aus Hauptsoftware | C# |
 | 6 | WebUI-faehige Architektur | Browser, Tablet, Mobil | .NET / Web |
 
 ---
@@ -183,13 +183,13 @@ Ein simulierter Kamerapfad soll Preview, Snapshot und Recording auch ohne angesc
 
 ---
 
-## Phase 3 - Schnittstelle zur AMB-Software gedanklich vorbereiten
+## Phase 3 - Schnittstelle zur Host-Software gedanklich vorbereiten
 
 ### Ziel
 
-Die Kamera-Software nicht als isoliertes Tool denken, sondern als Subsystem der AMB-Control-Software.
+Die Kamera-Software nicht als isoliertes Tool denken, sondern als Subsystem einer uebergeordneten Host-Software.
 
-### Eingehende Befehle aus AMB-Software
+### Eingehende Befehle aus Host-Software
 
 - Konfiguration setzen
 - Speicherpfad setzen
@@ -321,7 +321,7 @@ Ein teamfaehiges Kamera-Subsystem in C#.
 4. Recording starten/stoppen
 5. Save Path / Dateinamenslogik
 6. Statusmodell
-7. Host-/AMB-Integration
+7. Host-Integration
 8. optional OpenCV- oder Anzeigeentscheidungen nur dann uebernehmen, wenn sie sich im Python-Pfad als wirklich nuetzlich erwiesen haben
 
 ### Optionaler Hinweis aus Phase 3a
@@ -338,21 +338,21 @@ Ein eigenstaendiges Kamera-Modul, das spaeter direkt vom Team wartbar ist.
 
 ---
 
-## Phase 5 - Integration in die AMB-Control-Software
+## Phase 5 - Integration in die Host-Software
 
 ### Ziel
 
-Die AMB-Software wird Master, die Kamera ist ein Subsystem.
+Die Host-Software wird Master, die Kamera ist ein Subsystem.
 
 ### Rollenverteilung
 
 | Systemteil | Rolle |
 | --- | --- |
-| AMB-Control-Software | gibt Befehle und Parameter vor |
+| Host-Software | gibt Befehle und Parameter vor |
 | Kamera-Modul | fuehrt Preview, Snapshot, Recording, Logging aus |
 | Dateisystem | speichert Bilder / Serien / Logs |
 
-### Typische Steuerdaten aus AMB
+### Typische Steuerdaten aus der Host-Software
 
 - Save Path
 - Dateinamensschema
@@ -467,7 +467,7 @@ Sie wird spaeter auf eine bereits saubere Service-Struktur gesetzt.
 | M5 | Python sauber strukturiert | Services + Modelle vorhanden |
 | M5a | Simulationspfad vorhanden | Demo- und Testbetrieb auch ohne Hardware |
 | M6 | C#-Port Grundgeruest | Kamera-Modul in Visual Studio |
-| M7 | AMB-Ansteuerung | Befehle aus Hauptsoftware moeglich |
+| M7 | Host-Ansteuerung | Befehle aus Hauptsoftware moeglich |
 | M8 | WebUI-Vorbereitung | Architektur dafuer sauber genug |
 | M9 | erste WebUI | Browseransicht mit Status + Preview |
 
@@ -487,7 +487,7 @@ Sie wird spaeter auf eine bereits saubere Service-Struktur gesetzt.
 
 - gleiche Struktur in C#
 - Teamkompatibles Kamera-Modul
-- AMB-Integration
+- Host-Integration
 
 ### Langfristig
 

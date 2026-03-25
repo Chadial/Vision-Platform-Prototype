@@ -3,16 +3,21 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "camera-prototype"
+name = "camera-subsystem-prototype"
 version = "0.1.0"
 description = "Camera subsystem prototype prepared for later C#/.NET handover."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+opencv = [
+    "numpy>=1.26",
+    "opencv-python>=4.10",
+]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-

@@ -13,8 +13,8 @@ The software must support:
 - camera configuration from an external control software
 - future migration toward a web-capable architecture
 
-The external master system is the AMB control software.  
-This camera project is a subsystem, not the top-level application.
+The camera project is intended to be embeddable into a larger host application.  
+It should not assume it is the top-level application.
 
 ---
 

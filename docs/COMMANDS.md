@@ -11,7 +11,7 @@ The goal is:
 - minimal hidden behavior
 - easy portability from Python to C#
 
-This is a command manual for the application core. It is not tied to a GUI, HTTP API, or AMB-specific transport.
+This is a command manual for the application core. It is not tied to a GUI, HTTP API, or any host-specific transport.
 
 ## General Rule
 

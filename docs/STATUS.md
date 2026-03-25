@@ -15,8 +15,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Roadmap Position
 
-- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, and Host Integration are functionally implemented; Validation is now partially implemented through request-model tests, controller-flow tests, and runnable simulated demos.
-- Against `GlobalRoadmap.md`: the Python structuring phase is functionally complete, including the separated real/simulated driver paths and the external command/status contract; the next major step remains real-hardware validation, while any stricter payload mapping stays optional for the later C# handover.
+- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, and Host Integration are functionally implemented; Validation is now partially implemented through request-model tests, controller-flow tests, runnable simulated demos, and the new optional OpenCV adapter tests. Optional OpenCV Integration is partially implemented at the Python level.
+- Against `GlobalRoadmap.md`: the Python structuring phase is functionally complete, including the separated real/simulated driver paths and the external command/status contract; the optional Phase 3c OpenCV path now exists for local preview inspection and grayscale-safe export, while the next major mandatory step remains real-hardware validation.
 
 ## Current Summary
 
@@ -28,9 +28,10 @@ The repository currently provides a structured Python prototype for the camera s
 - `VimbaXCameraDriver` initialization, camera selection, configuration, and single-frame capture
 - snapshot save flow with explicit target path
 - preview service with latest-frame buffering and polling loop
+- optional OpenCV imaging adapter for preview-window display and grayscale-safe export
 - recording base flow with bounded queue, writer loop, and frame-limit stop condition
 - command-controller support for default save-directory resolution and consolidated subsystem status
-- explicit `SubsystemStatus` model with AMB-facing command readiness flags
+- explicit `SubsystemStatus` model with host-facing command readiness flags
 - camera status metadata that identifies hardware vs. simulation source kind and active driver name
 - external request models for configuration, save-directory changes, snapshot save, and recording start/stop
 - camera configuration now models ROI offsets and ROI size in addition to exposure, gain, pixel format, and acquisition frame rate
@@ -39,6 +40,8 @@ The repository currently provides a structured Python prototype for the camera s
 - command-flow demo for host-style external control using the simulated driver
 - a clear architectural basis for separating real hardware drivers from future simulation/demo drivers
 - a working simulated driver for hardware-free preview, snapshot, and recording flows
+- optional OpenCV preview demo on top of the simulated preview service
+- optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
 
 ## Completed Work
 
@@ -65,6 +68,7 @@ The repository currently provides a structured Python prototype for the camera s
 
 - snapshot request to target-path flow implemented
 - frame writer added for `.png`, `.raw`, and `.bin`
+- frame writer can now use an optional OpenCV adapter for higher-bit grayscale `.png` and `.tiff`
 - snapshot logging added
 - snapshot smoke-test flow added
 
@@ -74,6 +78,7 @@ The repository currently provides a structured Python prototype for the camera s
 - latest-frame buffer implemented
 - polling-based preview refresh implemented
 - preview frame metadata exposure implemented
+- optional OpenCV preview window adapter implemented above `PreviewService`
 
 ### Recording Flow
 
@@ -118,22 +123,34 @@ The repository currently provides a structured Python prototype for the camera s
 - dedicated tests now cover the external request model mappings and save-directory resolution rules
 - a simulated command-flow demo now validates a host-style `configure -> set save directory -> snapshot -> recording -> status` sequence
 - runnable demo entry points exist for both the direct simulated service flow and the command-controller flow
+- dedicated tests now cover the optional OpenCV adapter, preview-window bridge, and Mono16 simulated frames
 - real hardware validation is still pending separately from the simulator-backed validation
 
 ### Preview
 
 - service layer exists and is test-covered
-- no actual UI preview window or browser preview yet
+- an optional OpenCV preview window now exists above the service layer
+- no browser preview or non-OpenCV UI layer yet
 - hardware validation is currently blocked because the camera is not available
-- simulated preview exists through `SimulatedCameraDriver`, but no dedicated UI rendering layer exists yet
+- simulated preview exists through `SimulatedCameraDriver`
 
 ### Simulation vs. Real Hardware
 
 - architecture now explicitly expects separate real-hardware and simulated driver implementations
 - `SimulatedCameraDriver` is implemented for generated frames and `.pgm`/`.ppm` sample image sequences
 - a simulated demo entry point exists for preview, snapshot, and recording without hardware
+- simulated generation now also covers `Mono16` frames for grayscale-save-path validation
 - sample-image demo support is limited to `.pgm` and `.ppm` files for now
 - real hardware validation is still required separately from simulation
+
+### Optional OpenCV Integration
+
+- optional `camera_app.imaging` layer now contains `OpenCvFrameAdapter` and `OpenCvPreviewWindow`
+- OpenCV remains outside `CameraDriver` and outside the mandatory core dependency set
+- preview display can now run through `cv2.imshow()` on top of `PreviewService`
+- lossless grayscale save now supports `.png` and `.tiff` through the optional adapter for `Mono8` and unpacked higher-bit grayscale formats such as `Mono16`
+- the standard-library writer remains the default for dependency-free `Mono8`, `Rgb8`, and `Bgr8` PNG output
+- packed grayscale formats are still not decoded automatically and should be transformed explicitly before using the OpenCV save path if required
 
 ## Known Constraints
 
@@ -156,12 +173,15 @@ The repository currently provides a structured Python prototype for the camera s
 .\.venv\Scripts\python.exe -m unittest tests.test_command_flow_demo
 .\.venv\Scripts\python.exe -m unittest tests.test_command_controller
 .\.venv\Scripts\python.exe -m unittest tests.test_request_models
+.\.venv\Scripts\python.exe -m unittest tests.test_opencv_adapter
+.\.venv\Scripts\python.exe -m unittest tests.test_opencv_preview
 ```
 
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when `cam2` is available.
-2. Decide whether `docs/ROADMAP.md` Phase 7 should be declared complete now or after one real-hardware validation pass.
-3. Define a stricter payload mapping only if the later C# or host integration really needs it.
-4. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
-5. Keep the Python core stable as the handover baseline for the later C# phase.
+2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
+3. Decide whether `docs/ROADMAP.md` Phase 8 can be declared complete after one real-hardware validation pass and whether Phase 10 should then be marked fully complete.
+4. Define a stricter payload mapping only if the later C# or host integration really needs it.
+5. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
+6. Keep the Python core stable as the handover baseline for the later C# phase.

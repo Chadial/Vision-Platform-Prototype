@@ -19,6 +19,7 @@ Before starting:
 
 - the target camera is physically connected
 - the correct Vimba X environment is installed
+- `vmbpy` is installed into the active project virtual environment from the local Vimba X wheel
 - the project virtual environment is available
 - the camera is visible to the SDK
 - the intended camera id is known, for example `cam2` or `DEV_Cam2`
@@ -29,6 +30,58 @@ Recommended Python executable:
 ```powershell
 .\.venv\Scripts\python.exe
 ```
+
+## Vimba X Installation Baseline
+
+Use the official Allied Vision Vimba X SDK installation as the hardware access baseline.
+
+Recommended Windows package:
+
+- `VimbaX_Setup-2026-1-Win64.exe`
+
+Typical useful locations after installation:
+
+- Viewer / Driver Installer: `Vimba X/bin`
+- Examples: `C:\Users\Public\Documents\Allied Vision\Vimba X`
+- Documentation: included in the SDK installation and also available online
+
+Install `VmbPy` from the local wheel that comes with the Vimba X installation:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install "C:\Path\To\vmbpy-X.Y.Z-py-none-any.whl"
+```
+
+If needed, optional extras can be installed from that same wheel:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install "C:\Path\To\vmbpy-X.Y.Z-py-none-any.whl[numpy,opencv]"
+```
+
+Equivalent project-bootstrap form:
+
+```powershell
+.\scripts\bootstrap.ps1 -VmbPyWheel "C:\Path\To\vmbpy-X.Y.Z-py-none-any.whl"
+```
+
+Or, if the OpenCV path is also required:
+
+```powershell
+.\scripts\bootstrap.ps1 -IncludeOpenCv -VmbPyWheel "C:\Path\To\vmbpy-X.Y.Z-py-none-any.whl"
+```
+
+Do not treat a plain PyPI install as sufficient for the full hardware path, because the full Vimba X environment also provides drivers and transport-layer components.
+
+## First SDK Verification
+
+Before running the checklist below, verify that the SDK can enumerate cameras:
+
+```powershell
+.\.venv\Scripts\python.exe -c "from vmbpy import *; \
+with VmbSystem.get_instance() as vmb: \
+    print(vmb.get_all_cameras())"
+```
+
+If cameras are listed, the Vimba X SDK and Python binding are available to the environment used by this project.
 
 ## What To Record
 
