@@ -189,6 +189,52 @@ class CommandControllerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "roi_width"):
             controller.apply_configuration(ApplyConfigurationRequest(roi_width=0))
 
+    def test_start_recording_rejects_path_like_file_stem_before_calling_service(self) -> None:
+        recording_service = MagicMock()
+        controller = CommandController(MagicMock(), MagicMock(), recording_service)
+        controller.set_save_directory(Path("captures/default"))
+
+        with self.assertRaisesRegex(ValueError, "file_stem"):
+            controller.start_recording(RecordingRequest(save_directory=None, file_stem="nested/series", frame_limit=3))
+
+        recording_service.start_recording.assert_not_called()
+
+    def test_set_save_directory_request_rejects_path_like_subdirectory_name(self) -> None:
+        controller = CommandController(MagicMock(), MagicMock(), MagicMock())
+
+        with self.assertRaisesRegex(ValueError, "path separators"):
+            controller.set_save_directory(
+                SetSaveDirectoryRequest(
+                    base_directory=Path("captures"),
+                    mode="new_subdirectory",
+                    subdirectory_name="run/001",
+                )
+            )
+
+    def test_save_snapshot_rejects_uninitialized_camera_before_calling_service(self) -> None:
+        camera_service = MagicMock()
+        camera_service.get_status.return_value = CameraStatus(is_initialized=False)
+        snapshot_service = MagicMock()
+        controller = CommandController(camera_service, snapshot_service, MagicMock())
+        controller.set_save_directory(Path("captures/default"))
+
+        with self.assertRaisesRegex(RuntimeError, "not initialized"):
+            controller.save_snapshot(SnapshotRequest(save_directory=None, file_stem="image_001", file_extension=".png"))
+
+        snapshot_service.save_snapshot.assert_not_called()
+
+    def test_start_recording_rejects_uninitialized_camera_before_calling_service(self) -> None:
+        camera_service = MagicMock()
+        camera_service.get_status.return_value = CameraStatus(is_initialized=False)
+        recording_service = MagicMock()
+        controller = CommandController(camera_service, MagicMock(), recording_service)
+        controller.set_save_directory(Path("captures/default"))
+
+        with self.assertRaisesRegex(RuntimeError, "not initialized"):
+            controller.start_recording(RecordingRequest(save_directory=None, file_stem="series", frame_limit=3))
+
+        recording_service.start_recording.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

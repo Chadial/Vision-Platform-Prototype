@@ -5,6 +5,7 @@ from time import sleep
 
 from camera_app.drivers.simulated_camera_driver import SimulatedCameraDriver
 from camera_app.imaging.opencv_preview import OpenCvPreviewWindow
+from camera_app.smoke.demo_result import DemoRunResult
 from camera_app.services.preview_service import PreviewService
 
 
@@ -12,7 +13,7 @@ def run_opencv_preview_demo(
     sample_dir: Path | None = None,
     poll_interval_seconds: float = 0.03,
     frame_limit: int | None = None,
-) -> int:
+) -> DemoRunResult:
     sample_paths = []
     if sample_dir is not None:
         sample_paths = sorted(
@@ -37,4 +38,4 @@ def run_opencv_preview_demo(
         preview_service.stop()
         driver.shutdown()
 
-    return rendered_frames
+    return DemoRunResult(success=True, rendered_frames=rendered_frames)

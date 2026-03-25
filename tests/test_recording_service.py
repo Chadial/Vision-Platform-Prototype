@@ -58,6 +58,12 @@ class _StreamingRecordingDriver:
             return frame
 
 
+class _FailingStartDriver(_FakeRecordingDriver):
+    def start_acquisition(self) -> None:
+        self.start_calls += 1
+        raise RuntimeError("camera start failed")
+
+
 class RecordingServiceTests(unittest.TestCase):
     def test_start_recording_writes_raw_sequence_until_frame_limit(self) -> None:
         frames = [
@@ -228,6 +234,36 @@ class RecordingServiceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "target_frame_rate must be greater than zero"):
                 service.start_recording(request)
 
+    def test_start_recording_rejects_invalid_file_extension(self) -> None:
+        driver = _FakeRecordingDriver([])
+        service = RecordingService(driver)
+
+        with TemporaryDirectory() as temp_dir:
+            request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="series",
+                file_extension=".tar.gz",
+                frame_limit=3,
+            )
+
+            with self.assertRaisesRegex(ValueError, "single extension segment"):
+                service.start_recording(request)
+
+    def test_start_recording_rejects_path_like_file_stem(self) -> None:
+        driver = _FakeRecordingDriver([])
+        service = RecordingService(driver)
+
+        with TemporaryDirectory() as temp_dir:
+            request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="nested/series",
+                file_extension=".raw",
+                frame_limit=3,
+            )
+
+            with self.assertRaisesRegex(ValueError, "file_stem"):
+                service.start_recording(request)
+
     def test_recording_log_includes_target_frame_rate_and_roi(self) -> None:
         frames = [
             CapturedFrame(
@@ -276,6 +312,70 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# roi_y: 22", log_lines)
             self.assertIn("# roi_width: 333", log_lines)
             self.assertIn("# roi_height: 222", log_lines)
+
+    def test_stop_recording_is_idempotent_when_idle(self) -> None:
+        driver = _FakeRecordingDriver([])
+        service = RecordingService(driver)
+
+        first_status = service.stop_recording()
+        second_status = service.stop_recording()
+
+        self.assertFalse(first_status.is_recording)
+        self.assertFalse(second_status.is_recording)
+        self.assertEqual(driver.stop_calls, 0)
+
+    def test_start_recording_cleans_up_if_camera_start_fails(self) -> None:
+        driver = _FailingStartDriver([])
+        service = RecordingService(driver, poll_interval_seconds=0.001)
+
+        with TemporaryDirectory() as temp_dir:
+            request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="series",
+                file_extension=".raw",
+                frame_limit=3,
+            )
+
+            with self.assertRaisesRegex(RuntimeError, "camera start failed"):
+                service.start_recording(request)
+
+            status = service.get_status()
+            self.assertFalse(status.is_recording)
+            self.assertIsNone(status.save_directory)
+            self.assertIsNone(status.active_file_stem)
+            self.assertEqual(driver.start_calls, 1)
+            self.assertEqual(driver.stop_calls, 0)
+
+    def test_start_recording_cleans_up_if_log_open_fails(self) -> None:
+        driver = _FakeRecordingDriver([])
+        service = RecordingService(driver, poll_interval_seconds=0.001)
+
+        original_open_recording_log = service._open_recording_log
+
+        def failing_open_recording_log(request: RecordingRequest) -> None:
+            raise RuntimeError("log setup failed")
+
+        service._open_recording_log = failing_open_recording_log
+        try:
+            with TemporaryDirectory() as temp_dir:
+                request = RecordingRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="series",
+                    file_extension=".raw",
+                    frame_limit=3,
+                )
+
+                with self.assertRaisesRegex(RuntimeError, "log setup failed"):
+                    service.start_recording(request)
+        finally:
+            service._open_recording_log = original_open_recording_log
+
+        status = service.get_status()
+        self.assertFalse(status.is_recording)
+        self.assertIsNone(status.save_directory)
+        self.assertIsNone(status.active_file_stem)
+        self.assertEqual(driver.start_calls, 0)
+        self.assertEqual(driver.stop_calls, 0)
 
 
 if __name__ == "__main__":

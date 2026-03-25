@@ -15,11 +15,12 @@ class SimulatedDemoTests(unittest.TestCase):
                 frame_limit=2,
             )
 
-            self.assertTrue(result["snapshot_path"].exists())
+            self.assertTrue(result.success)
+            self.assertTrue(result.snapshot_path.exists())
             self.assertTrue((Path(temp_dir) / "demo_recording_000000.raw").exists())
             self.assertTrue((Path(temp_dir) / "demo_recording_recording_log.csv").exists())
-            self.assertEqual(result["recording_status"].frames_written, 2)
-            self.assertIsNotNone(result["preview_frame_info"])
+            self.assertEqual(result.recording_status.frames_written, 2)
+            self.assertIsNotNone(result.preview_frame_info)
 
 
 if __name__ == "__main__":

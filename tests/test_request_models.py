@@ -52,6 +52,16 @@ class RequestModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "subdirectory_name"):
             request.resolve_directory()
 
+    def test_set_save_directory_request_rejects_path_like_subdirectory_name(self) -> None:
+        request = SetSaveDirectoryRequest(
+            base_directory=Path("captures"),
+            mode="new_subdirectory",
+            subdirectory_name="run/001",
+        )
+
+        with self.assertRaisesRegex(ValueError, "path separators"):
+            request.resolve_directory()
+
     def test_save_snapshot_request_maps_to_snapshot_request(self) -> None:
         request = SaveSnapshotRequest(
             file_stem="snapshot_001",

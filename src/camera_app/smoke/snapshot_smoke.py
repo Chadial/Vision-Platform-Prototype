@@ -20,6 +20,9 @@ def run_snapshot_smoke(
     camera_service: CameraService | None = None,
     snapshot_service: SnapshotService | None = None,
 ) -> Path:
+    if (camera_service is None) != (snapshot_service is None):
+        raise ValueError("run_snapshot_smoke requires both camera_service and snapshot_service, or neither.")
+
     owns_services = camera_service is None or snapshot_service is None
     driver = VimbaXCameraDriver() if owns_services else None
     camera_service = camera_service or CameraService(driver)

@@ -124,6 +124,23 @@ class FrameWriterTests(unittest.TestCase):
             self.assertEqual(len(adapter.calls), 1)
             self.assertEqual(adapter.calls[0][1], target_path)
 
+    def test_write_frame_rejects_tiff_for_rgb_output(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(bytes([1, 2, 3])),
+            width=1,
+            height=1,
+            pixel_format="Rgb8",
+        )
+        adapter = _FakeOpenCvAdapter()
+
+        with TemporaryDirectory() as temp_dir:
+            target_path = Path(temp_dir) / "snapshot.tiff"
+
+            with self.assertRaisesRegex(RuntimeError, "not supported for TIFF output"):
+                FrameWriter(opencv_adapter=adapter).write_frame(frame, target_path)
+
+            self.assertEqual(len(adapter.calls), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

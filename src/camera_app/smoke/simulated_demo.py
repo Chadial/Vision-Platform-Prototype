@@ -9,6 +9,7 @@ from camera_app.logging.log_service import configure_logging
 from camera_app.models.camera_configuration import CameraConfiguration
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.snapshot_request import SnapshotRequest
+from camera_app.smoke.demo_result import DemoRunResult
 from camera_app.services.camera_service import CameraService
 from camera_app.services.preview_service import PreviewService
 from camera_app.services.recording_service import RecordingService
@@ -20,7 +21,7 @@ def run_simulated_demo(
     file_stem: str,
     sample_image_paths: list[Path] | None = None,
     frame_limit: int = 3,
-) -> dict:
+) -> DemoRunResult:
     driver = SimulatedCameraDriver(sample_image_paths=sample_image_paths or [])
     camera_service = CameraService(driver)
     snapshot_service = SnapshotService(driver)
@@ -58,12 +59,13 @@ def run_simulated_demo(
         while recording_service.get_status().is_recording:
             sleep(0.01)
 
-        return {
-            "snapshot_path": snapshot_path,
-            "preview_frame_info": preview_info,
-            "recording_status": recording_service.get_status(),
-            "initial_recording_status": recording_status,
-        }
+        return DemoRunResult(
+            success=True,
+            snapshot_path=snapshot_path,
+            preview_frame_info=preview_info,
+            recording_status=recording_service.get_status(),
+            initial_recording_status=recording_status,
+        )
     finally:
         camera_service.shutdown()
 
@@ -102,7 +104,7 @@ def main() -> int:
         sample_image_paths=sample_paths,
         frame_limit=args.frame_limit,
     )
-    print(result["snapshot_path"])
+    print(result.snapshot_path)
     return 0
 
 

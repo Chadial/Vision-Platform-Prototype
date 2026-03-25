@@ -15,6 +15,7 @@ from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.recording_status import RecordingStatus
 from camera_app.storage.file_naming import build_recording_frame_path, build_recording_log_path
 from camera_app.storage.frame_writer import FrameWriter
+from camera_app.validation.request_validation import validate_recording_request
 
 
 class RecordingService:
@@ -39,6 +40,7 @@ class RecordingService:
         self._stop_event = Event()
         self._cleanup_lock = Lock()
         self._acquisition_stopped = False
+        self._acquisition_started = False
         self._recording_deadline: float | None = None
         self._next_frame_due_at: float | None = None
         self._recording_log_handle: TextIO | None = None
@@ -47,30 +49,35 @@ class RecordingService:
     def start_recording(self, request: RecordingRequest) -> RecordingStatus:
         self._validate_request(request)
         self.stop_recording()
+        try:
+            with self._status_lock:
+                self._status = RecordingStatus(
+                    is_recording=True,
+                    save_directory=request.save_directory,
+                    active_file_stem=request.file_stem,
+                )
 
-        with self._status_lock:
-            self._status = RecordingStatus(
-                is_recording=True,
-                save_directory=request.save_directory,
-                active_file_stem=request.file_stem,
+            self._active_request = request
+            self._frame_queue = Queue(maxsize=request.queue_size)
+            self._stop_event.clear()
+            self._acquisition_stopped = False
+            self._recording_deadline = (
+                monotonic() + request.duration_seconds if request.duration_seconds is not None else None
             )
+            self._next_frame_due_at = monotonic()
+            self._open_recording_log(request)
+            self._driver.start_acquisition()
+            self._acquisition_started = True
 
-        self._active_request = request
-        self._frame_queue = Queue(maxsize=request.queue_size)
-        self._stop_event.clear()
-        self._acquisition_stopped = False
-        self._recording_deadline = (
-            monotonic() + request.duration_seconds if request.duration_seconds is not None else None
-        )
-        self._next_frame_due_at = monotonic()
-        self._open_recording_log(request)
-        self._driver.start_acquisition()
-
-        self._producer_thread = Thread(target=self._producer_loop, name="RecordingProducer", daemon=True)
-        self._writer_thread = Thread(target=self._writer_loop, name="RecordingWriter", daemon=True)
-        self._producer_thread.start()
-        self._writer_thread.start()
-        return self.get_status()
+            self._producer_thread = Thread(target=self._producer_loop, name="RecordingProducer", daemon=True)
+            self._writer_thread = Thread(target=self._writer_loop, name="RecordingWriter", daemon=True)
+            self._producer_thread.start()
+            self._writer_thread.start()
+            return self.get_status()
+        except Exception:
+            self._stop_event.set()
+            self._finalize_recording()
+            raise
 
     def stop_recording(self) -> RecordingStatus:
         self._stop_event.set()
@@ -96,6 +103,7 @@ class RecordingService:
             )
 
     def _validate_request(self, request: RecordingRequest) -> None:
+        validate_recording_request(request)
         if not request.file_stem:
             raise ValueError("RecordingRequest.file_stem must not be empty.")
         if request.queue_size <= 0:
@@ -190,7 +198,7 @@ class RecordingService:
         self._finalize_recording()
 
     def _record_error(self, message: str) -> None:
-        self._logger.exception(message)
+        self._logger.error(message, exc_info=True)
         with self._status_lock:
             self._status.last_error = message
 
@@ -288,7 +296,7 @@ class RecordingService:
                 or self._writer_thread is not None
                 or self._status.is_recording
             )
-            if has_active_recording and not self._acquisition_stopped:
+            if has_active_recording and self._acquisition_started and not self._acquisition_stopped:
                 self._driver.stop_acquisition()
                 self._acquisition_stopped = True
 
@@ -298,9 +306,12 @@ class RecordingService:
             self._active_request = None
             self._recording_deadline = None
             self._next_frame_due_at = None
+            self._acquisition_started = False
             if self._recording_log_handle is not None:
                 self._recording_log_handle.close()
                 self._recording_log_handle = None
                 self._recording_log_writer = None
             with self._status_lock:
                 self._status.is_recording = False
+                self._status.save_directory = None
+                self._status.active_file_stem = None

@@ -14,6 +14,12 @@ from camera_app.models.subsystem_status import SubsystemStatus
 from camera_app.services.camera_service import CameraService
 from camera_app.services.recording_service import RecordingService
 from camera_app.services.snapshot_service import SnapshotService
+from camera_app.validation.request_validation import (
+    validate_camera_configuration,
+    validate_recording_request,
+    validate_save_directory_request,
+    validate_snapshot_request,
+)
 
 
 class CommandController:
@@ -31,22 +37,28 @@ class CommandController:
     def apply_configuration(self, config: CameraConfiguration | ApplyConfigurationRequest) -> None:
         if isinstance(config, ApplyConfigurationRequest):
             config = config.to_camera_configuration()
-        self._validate_configuration(config)
+        self._require_initialized_camera("apply configuration")
+        validate_camera_configuration(config)
         self._camera_service.apply_configuration(config)
 
     def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> None:
         if isinstance(path, SetSaveDirectoryRequest):
+            validate_save_directory_request(path)
             path = path.resolve_directory()
         self._default_save_directory = path
 
     def save_snapshot(self, request: SnapshotRequest | SaveSnapshotRequest):
         if isinstance(request, SaveSnapshotRequest):
             request = request.to_snapshot_request()
+        self._require_initialized_camera("save a snapshot")
+        validate_snapshot_request(request)
         return self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
 
     def start_recording(self, request: RecordingRequest | StartRecordingRequest):
         if isinstance(request, StartRecordingRequest):
             request = request.to_recording_request()
+        self._require_initialized_camera("start recording")
+        validate_recording_request(request)
         return self._recording_service.start_recording(self._resolve_recording_request(request))
 
     def stop_recording(self, request: StopRecordingRequest | None = None):
@@ -81,18 +93,7 @@ class CommandController:
             raise ValueError("RecordingRequest.save_directory is not set and no default save directory is configured.")
         return replace(request, save_directory=resolved_save_directory)
 
-    @staticmethod
-    def _validate_configuration(config: CameraConfiguration) -> None:
-        if config.exposure_time_us is not None and config.exposure_time_us <= 0:
-            raise ValueError("CameraConfiguration.exposure_time_us must be greater than zero.")
-        for name, value in (
-            ("roi_offset_x", config.roi_offset_x),
-            ("roi_offset_y", config.roi_offset_y),
-            ("roi_width", config.roi_width),
-            ("roi_height", config.roi_height),
-        ):
-            if value is not None and value < 0:
-                raise ValueError(f"CameraConfiguration.{name} must be zero or greater.")
-        for name, value in (("roi_width", config.roi_width), ("roi_height", config.roi_height)):
-            if value == 0:
-                raise ValueError(f"CameraConfiguration.{name} must be greater than zero when provided.")
+    def _require_initialized_camera(self, action: str) -> None:
+        camera_status = self._camera_service.get_status()
+        if not camera_status.is_initialized:
+            raise RuntimeError(f"Cannot {action} because the camera is not initialized.")

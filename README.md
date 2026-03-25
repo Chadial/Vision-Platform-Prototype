@@ -269,3 +269,17 @@ Optional sample images can be loaded from a directory containing `.pgm` or `.ppm
 ```powershell
 .\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --sample-dir .\demo_samples
 ```
+
+## Optional OpenCV Save Demo
+
+Save one simulated grayscale frame through the optional OpenCV-backed lossless save path:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_opencv_save_demo.py --save-directory .\captures\opencv_save_demo
+```
+
+Example with explicit `Mono8` PNG output:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_opencv_save_demo.py --save-directory .\captures\opencv_save_demo --pixel-format Mono8 --file-extension .png
+```

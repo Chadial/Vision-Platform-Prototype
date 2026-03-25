@@ -83,6 +83,49 @@ class PreviewServiceTests(unittest.TestCase):
         self.assertTrue(any("Preview polling failed" in message for message in logs.output))
         self.assertIsNotNone(service.get_latest_frame_info())
 
+    def test_stop_is_idempotent_when_preview_never_started(self) -> None:
+        fake_driver = MagicMock()
+        service = PreviewService(fake_driver)
+
+        service.stop()
+        service.stop()
+
+        fake_driver.stop_acquisition.assert_not_called()
+
+    def test_start_does_not_double_start_acquisition_when_already_running(self) -> None:
+        fake_driver = MagicMock()
+        fake_driver.get_latest_frame.return_value = None
+        service = PreviewService(fake_driver, poll_interval_seconds=0.01)
+
+        service.start()
+        try:
+            service.start()
+        finally:
+            service.stop()
+
+        fake_driver.start_acquisition.assert_called_once_with()
+
+    def test_start_stops_acquisition_if_worker_creation_fails(self) -> None:
+        fake_driver = MagicMock()
+        service = PreviewService(fake_driver)
+
+        original_thread_class = service.__class__.__dict__["start"].__globals__["Thread"]
+
+        class _BrokenThread:
+            def __init__(self, *args, **kwargs) -> None:
+                raise RuntimeError("thread setup failed")
+
+        service.__class__.__dict__["start"].__globals__["Thread"] = _BrokenThread
+        try:
+            with self.assertRaisesRegex(RuntimeError, "thread setup failed"):
+                service.start()
+        finally:
+            service.__class__.__dict__["start"].__globals__["Thread"] = original_thread_class
+
+        fake_driver.start_acquisition.assert_called_once_with()
+        fake_driver.stop_acquisition.assert_called_once_with()
+        self.assertFalse(service.is_running)
+
 
 if __name__ == "__main__":
     unittest.main()

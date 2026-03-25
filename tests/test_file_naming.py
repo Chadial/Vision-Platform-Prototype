@@ -30,6 +30,23 @@ class FileNamingTests(unittest.TestCase):
         )
         self.assertEqual(build_recording_log_path(request), Path("captures/series_recording_log.csv"))
 
+    def test_build_snapshot_path_rejects_path_like_file_stem(self) -> None:
+        request = SnapshotRequest(save_directory=Path("captures"), file_stem="nested/image", file_extension=".png")
+
+        with self.assertRaisesRegex(ValueError, "file_stem"):
+            build_snapshot_path(request)
+
+    def test_build_recording_frame_path_rejects_multi_segment_extension(self) -> None:
+        request = RecordingRequest(
+            save_directory=Path("captures"),
+            file_stem="series",
+            file_extension=".tar.gz",
+            frame_limit=3,
+        )
+
+        with self.assertRaisesRegex(ValueError, "single extension segment"):
+            build_recording_frame_path(request, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

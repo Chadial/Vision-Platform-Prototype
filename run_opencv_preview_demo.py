@@ -35,12 +35,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    rendered_frames = run_opencv_preview_demo(
+    result = run_opencv_preview_demo(
         sample_dir=args.sample_dir,
         poll_interval_seconds=args.poll_interval_seconds,
         frame_limit=args.frame_limit,
     )
-    print(f"Rendered {rendered_frames} frames.")
+    print(f"Rendered {result.rendered_frames} frames.")
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ from camera_app.models.save_snapshot_request import SaveSnapshotRequest
 from camera_app.models.set_save_directory_request import SetSaveDirectoryRequest
 from camera_app.models.start_recording_request import StartRecordingRequest
 from camera_app.models.stop_recording_request import StopRecordingRequest
+from camera_app.smoke.demo_result import DemoRunResult
 from camera_app.services.camera_service import CameraService
 from camera_app.services.recording_service import RecordingService
 from camera_app.services.snapshot_service import SnapshotService
@@ -24,7 +25,7 @@ def run_simulated_command_flow(
     recording_stem: str = "recording",
     frame_limit: int = 3,
     target_frame_rate: float | None = None,
-) -> dict:
+) -> DemoRunResult:
     driver = SimulatedCameraDriver()
     camera_service = CameraService(driver)
     snapshot_service = SnapshotService(driver)
@@ -75,12 +76,13 @@ def run_simulated_command_flow(
 
         final_status = controller.get_status()
         stop_status = controller.stop_recording(StopRecordingRequest())
-        return {
-            "snapshot_path": snapshot_path,
-            "initial_recording_status": initial_recording_status,
-            "final_status": final_status,
-            "stop_status": stop_status,
-        }
+        return DemoRunResult(
+            success=True,
+            snapshot_path=snapshot_path,
+            initial_recording_status=initial_recording_status,
+            final_status=final_status,
+            stop_status=stop_status,
+        )
     finally:
         camera_service.shutdown()
 
@@ -113,7 +115,7 @@ def main() -> int:
         frame_limit=args.frame_limit,
         target_frame_rate=args.target_frame_rate,
     )
-    print(result["snapshot_path"])
+    print(result.snapshot_path)
     return 0
 
 

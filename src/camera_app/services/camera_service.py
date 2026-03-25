@@ -16,6 +16,8 @@ class CameraService:
         return self._camera_status
 
     def apply_configuration(self, config: CameraConfiguration) -> None:
+        if not self._camera_status.is_initialized:
+            raise RuntimeError("Camera is not initialized.")
         self._driver.apply_configuration(config)
         self._last_configuration = deepcopy(config)
 

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from camera_app.imaging.opencv_adapter import OpenCvFrameAdapter
 from camera_app.models.captured_frame import CapturedFrame
+from camera_app.validation.output_validation import validate_frame_output_combination
 
 
 class FrameWriter:
@@ -22,6 +23,7 @@ class FrameWriter:
             target_path.parent.mkdir(parents=True, exist_ok=True)
 
         extension = target_path.suffix.lower()
+        validate_frame_output_combination(frame.pixel_format, extension)
         if extension == ".png":
             if self._should_use_opencv_grayscale_path(frame):
                 return self._write_lossless_grayscale(frame, target_path, create_directories)

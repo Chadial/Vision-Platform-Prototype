@@ -52,6 +52,17 @@ class SnapshotSmokeTests(unittest.TestCase):
 
         fake_camera_service.shutdown.assert_called_once_with()
 
+    def test_run_snapshot_smoke_rejects_partial_service_injection(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(ValueError, "both camera_service and snapshot_service, or neither"):
+                run_snapshot_smoke(
+                    camera_id="cam2",
+                    save_directory=Path(temp_dir),
+                    file_stem="smoke_snapshot",
+                    camera_service=MagicMock(),
+                    snapshot_service=None,
+                )
+
 
 if __name__ == "__main__":
     unittest.main()

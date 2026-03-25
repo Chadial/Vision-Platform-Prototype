@@ -5,6 +5,7 @@ from camera_app.drivers.camera_driver import CameraDriver
 from camera_app.models.snapshot_request import SnapshotRequest
 from camera_app.storage.file_naming import build_snapshot_path
 from camera_app.storage.frame_writer import FrameWriter
+from camera_app.validation.request_validation import validate_snapshot_request
 
 
 class SnapshotService:
@@ -14,6 +15,7 @@ class SnapshotService:
         self._logger = logging.getLogger(__name__)
 
     def save_snapshot(self, request: SnapshotRequest) -> Path:
+        validate_snapshot_request(request)
         target_path = build_snapshot_path(request)
         self._logger.info("Saving snapshot to '%s'.", target_path)
 

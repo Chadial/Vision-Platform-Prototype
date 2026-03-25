@@ -19,22 +19,34 @@ class PreviewService:
         self._lock = Lock()
         self._stop_event = Event()
         self._worker_thread: Thread | None = None
+        self._acquisition_started = False
 
     def start(self) -> None:
         if self.is_running:
             return
 
         self._driver.start_acquisition()
-        self._stop_event.clear()
-        self._worker_thread = Thread(target=self._run_preview_loop, name="PreviewService", daemon=True)
-        self._worker_thread.start()
+        self._acquisition_started = True
+        try:
+            self._stop_event.clear()
+            self._worker_thread = Thread(target=self._run_preview_loop, name="PreviewService", daemon=True)
+            self._worker_thread.start()
+        except Exception:
+            self._stop_event.set()
+            self._worker_thread = None
+            if self._acquisition_started:
+                self._driver.stop_acquisition()
+                self._acquisition_started = False
+            raise
 
     def stop(self) -> None:
         self._stop_event.set()
         if self._worker_thread is not None:
             self._worker_thread.join(timeout=max(self._poll_interval_seconds * 4, 0.2))
             self._worker_thread = None
-        self._driver.stop_acquisition()
+        if self._acquisition_started:
+            self._driver.stop_acquisition()
+            self._acquisition_started = False
 
     @property
     def is_running(self) -> bool:

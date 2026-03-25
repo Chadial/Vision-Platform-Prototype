@@ -124,6 +124,15 @@ The repository currently provides a structured Python prototype for the camera s
 - a simulated command-flow demo now validates a host-style `configure -> set save directory -> snapshot -> recording -> status` sequence
 - runnable demo entry points exist for both the direct simulated service flow and the command-controller flow
 - dedicated tests now cover the optional OpenCV adapter, preview-window bridge, and Mono16 simulated frames
+- request and path validation is now hardened for snapshot, recording, file naming, and save-directory commands
+- additional tests now cover invalid file stems, unsupported extension shapes, and invalid save-directory subpaths
+- preview and recording services now handle repeated stop calls and startup failures more defensively
+- additional tests now cover cleanup and stable state recovery when preview thread setup or recording startup fails
+- command-controller calls now reject uninitialized camera operations before delegating into snapshot or recording services
+- snapshot smoke execution now rejects partially injected service dependencies to avoid inconsistent test and demo wiring
+- simulated demo and command-flow demo now return a shared typed result model instead of loosely shaped dictionaries
+- frame output validation now rejects unsupported pixel-format and file-extension combinations such as RGB-to-TIFF before writing
+- dedicated OpenCV smoke-demo tests now verify the preview and save demo entry points against the simulator-backed path
 - real hardware validation is still pending separately from the simulator-backed validation
 
 ### Preview

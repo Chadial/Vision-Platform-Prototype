@@ -69,6 +69,22 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertTrue(any("Saving snapshot" in message for message in logs.output))
             self.assertTrue(any("Snapshot save failed" in message for message in logs.output))
 
+    def test_save_snapshot_rejects_invalid_file_stem(self) -> None:
+        fake_driver = MagicMock()
+        service = SnapshotService(fake_driver)
+
+        with TemporaryDirectory() as temp_dir:
+            request = SnapshotRequest(
+                save_directory=Path(temp_dir),
+                file_stem="nested/capture",
+                file_extension=".png",
+            )
+
+            with self.assertRaisesRegex(ValueError, "file_stem"):
+                service.save_snapshot(request)
+
+            fake_driver.capture_snapshot.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
