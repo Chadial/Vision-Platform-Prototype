@@ -1,0 +1,2 @@
+"""Camera application prototype package."""
+
