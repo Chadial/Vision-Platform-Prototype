@@ -134,6 +134,7 @@ class VimbaXCameraDriverTests(unittest.TestCase):
     def test_capture_snapshot_returns_frame_metadata_and_updates_latest_frame(self) -> None:
         fake_frame = MagicMock()
         fake_frame.get_id.return_value = 42
+        fake_frame.get_timestamp.return_value = 123456789
         fake_frame.get_width.return_value = 1920
         fake_frame.get_height.return_value = 1080
         fake_frame.get_pixel_format.return_value = "Mono8"
@@ -149,6 +150,7 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         fake_camera.get_frame.assert_called_once_with(timeout_ms=1500)
         self.assertIs(captured_frame.raw_frame, fake_frame)
         self.assertEqual(captured_frame.frame_id, 42)
+        self.assertEqual(captured_frame.camera_timestamp, 123456789)
         self.assertEqual(captured_frame.width, 1920)
         self.assertEqual(captured_frame.height, 1080)
         self.assertEqual(captured_frame.pixel_format, "Mono8")

@@ -66,6 +66,7 @@ class VimbaXCameraDriver(CameraDriver):
         return CapturedFrame(
             raw_frame=frame,
             frame_id=self._try_read_frame_value(frame, "get_id"),
+            camera_timestamp=self._try_read_frame_value(frame, "get_timestamp"),
             timestamp_utc=datetime.now(timezone.utc),
             width=self._try_read_frame_value(frame, "get_width", 0),
             height=self._try_read_frame_value(frame, "get_height", 0),

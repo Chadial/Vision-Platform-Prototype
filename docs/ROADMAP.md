@@ -41,6 +41,14 @@
 - keep the first end-to-end path small and reproducible
 - use this as the baseline before preview and recording work
 
+### Phase 2f: Simulation and Demo Path
+
+- add a simulated `CameraDriver` implementation separate from SDK-backed drivers
+- support deterministic generated frames or sample image sequences for preview, snapshot, and recording demos
+- keep services and command handling identical between simulated and real hardware paths
+- use the simulation path when hardware is unavailable for validation or demonstrations
+- make the chosen source explicit so demo behavior is not confused with real camera acquisition
+
 ## Phase 3: Snapshot Flow
 
 - implement snapshot request validation
@@ -70,6 +78,7 @@
 
 - add tests for naming, validation, queue behavior, and state transitions
 - add small run examples or smoke-test scripts
+- validate both real-hardware and simulated-driver workflows where practical
 
 ## Initial Deliverables
 

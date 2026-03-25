@@ -5,9 +5,8 @@ from typing import Optional
 
 @dataclass(slots=True)
 class SnapshotRequest:
-    save_directory: Path
+    save_directory: Optional[Path]
     file_stem: str
     file_extension: str = ".png"
     create_directories: bool = True
     camera_id: Optional[str] = None
-

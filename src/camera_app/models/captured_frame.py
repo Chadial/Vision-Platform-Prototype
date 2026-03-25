@@ -13,6 +13,7 @@ class CapturedFrame:
     width: int
     height: int
     frame_id: Optional[int] = None
+    camera_timestamp: Optional[int] = None
     pixel_format: Optional[str] = None
     timestamp_utc: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 

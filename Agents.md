@@ -43,6 +43,7 @@ Assume the current stage is:
 - Allied Vision / Vimba X context is likely
 - later handover to a C# software team is expected
 - long-term architecture should remain UI-agnostic
+- real camera hardware may be temporarily unavailable during development
 
 When making implementation decisions, prefer patterns that are easy to port from Python to C#.
 
@@ -81,6 +82,14 @@ Prefer this conceptual split:
   desktop preview, future web UI, or host integration
 
 Do not mix SDK calls directly into UI code unless explicitly asked for a quick throwaway prototype.
+
+Use the same separation for **real hardware** and **simulated sources**:
+
+- real camera access belongs in SDK-specific driver implementations
+- simulated or demo behavior belongs in separate driver implementations
+- services should work against the same `CameraDriver` abstraction for both paths
+
+This keeps testing and demos possible even when hardware is unavailable.
 
 ---
 
@@ -143,6 +152,9 @@ Prefer patterns such as:
 - explicit stop conditions
 
 Do not assume that preview frame rate and recording frame rate are the same.
+
+When hardware is unavailable, prefer a **simulated camera driver** over bypassing the architecture.
+For demo scenarios, simulated drivers may use deterministic generated frames or real sample image sequences, as long as that behavior remains explicit and separate from SDK code.
 
 ---
 
@@ -331,6 +343,35 @@ When creating or updating code, also improve local clarity through:
 
 Avoid comment noise.  
 Comment intent, constraints, and edge cases — not trivial syntax.
+
+---
+
+## Documentation source of truth
+
+Use the following project documents together and keep their roles distinct:
+
+- `Agents.md`  
+  working rules, architecture constraints, implementation behavior, and repository conventions
+
+- `docs/ROADMAP.md`  
+  implementation roadmap for the repository-specific phased delivery plan
+
+- `GlobalRoadmap.md`  
+  higher-level long-term roadmap from Python prototype to C# handover and later web-capable architecture
+
+- `docs/STATUS.md`  
+  current implementation status, known gaps, verified progress, and next recommended steps
+
+When updating `docs/STATUS.md`, always relate the current state to both:
+
+- `docs/ROADMAP.md`
+- `GlobalRoadmap.md`
+
+This means status updates should explicitly state:
+
+- what is complete against the repository roadmap
+- what is complete or still missing against the global roadmap
+- which next step is recommended in that context
 
 ---
 
