@@ -102,6 +102,41 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         exposure_feature.set.assert_called_once_with(1500.0)
         pixel_format_feature.set.assert_called_once_with("Mono8")
 
+    def test_apply_configuration_sets_roi_features_when_provided(self) -> None:
+        offset_x_feature = MagicMock()
+        offset_x_feature.is_writeable.return_value = True
+        offset_y_feature = MagicMock()
+        offset_y_feature.is_writeable.return_value = True
+        width_feature = MagicMock()
+        width_feature.is_writeable.return_value = True
+        height_feature = MagicMock()
+        height_feature.is_writeable.return_value = True
+
+        fake_camera = MagicMock()
+        fake_camera.get_feature_by_name.side_effect = lambda name: {
+            "OffsetX": offset_x_feature,
+            "OffsetY": offset_y_feature,
+            "Width": width_feature,
+            "Height": height_feature,
+        }[name]
+
+        driver = VimbaXCameraDriver()
+        driver._camera = fake_camera
+
+        driver.apply_configuration(
+            CameraConfiguration(
+                roi_offset_x=10,
+                roi_offset_y=20,
+                roi_width=300,
+                roi_height=200,
+            )
+        )
+
+        offset_x_feature.set.assert_called_once_with(10)
+        offset_y_feature.set.assert_called_once_with(20)
+        width_feature.set.assert_called_once_with(300)
+        height_feature.set.assert_called_once_with(200)
+
     def test_apply_configuration_requires_initialized_camera(self) -> None:
         driver = VimbaXCameraDriver()
 

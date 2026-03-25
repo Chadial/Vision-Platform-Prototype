@@ -1,0 +1,19 @@
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+
+from camera_app.models.camera_configuration import CameraConfiguration
+from camera_app.models.camera_status import CameraStatus
+from camera_app.models.recording_status import RecordingStatus
+
+
+@dataclass(slots=True)
+class SubsystemStatus:
+    camera: CameraStatus
+    recording: RecordingStatus
+    configuration: Optional[CameraConfiguration] = None
+    default_save_directory: Optional[Path] = None
+    can_apply_configuration: bool = False
+    can_save_snapshot: bool = False
+    can_start_recording: bool = False
+    can_stop_recording: bool = False

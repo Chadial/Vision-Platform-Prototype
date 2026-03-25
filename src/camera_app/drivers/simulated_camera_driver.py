@@ -56,6 +56,8 @@ class SimulatedCameraDriver(CameraDriver):
             self._status = CameraStatus(
                 is_initialized=True,
                 is_acquiring=False,
+                source_kind="simulation",
+                driver_name=self.__class__.__name__,
                 camera_id=self._camera_id,
                 camera_name=self._camera_name,
                 camera_model="Simulated",
@@ -81,6 +83,10 @@ class SimulatedCameraDriver(CameraDriver):
             gain=config.gain,
             pixel_format=config.pixel_format or self._configuration.pixel_format or self._default_pixel_format,
             acquisition_frame_rate=config.acquisition_frame_rate,
+            roi_offset_x=config.roi_offset_x,
+            roi_offset_y=config.roi_offset_y,
+            roi_width=config.roi_width,
+            roi_height=config.roi_height,
         )
 
     def start_acquisition(self) -> None:

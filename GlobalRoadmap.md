@@ -55,6 +55,7 @@ sollen moeglichst ueber dieselbe Kernlogik laufen.
 | 2 | Python sauber strukturieren | Services, Requests, Logging, Recording | PyCharm |
 | 2a | Simulationspfad | Hardwarefreie Entwicklung, Tests und Demos | Python |
 | 3 | AMB-nahe Schnittstelle modellieren | externe Kommandos, Save Path, Status | Python |
+| 3a | Optionaler Transport-/Payload-Vertrag | nur bei Bedarf: hostspezifische DTOs oder API-Payloads | spaeter mit C# mitdenken |
 | 4 | C#-Uebertragung | teamfaehiges Kamera-Subsystem | Visual Studio |
 | 5 | Integration in AMB-Software | direkte Steuerung aus Hauptsoftware | C# |
 | 6 | WebUI-faehige Architektur | Browser, Tablet, Mobil | .NET / Web |
@@ -208,6 +209,18 @@ GetStatus()
 
 Schon der Python-Prototyp wird so gebaut, dass seine Struktur spaeter gut nach C# portierbar ist.
 
+### Phase 3a - optionaler Hinweis fuer spaetere Host-/API-Vertraege
+
+Falls spaeter ein ganz konkreter Transportvertrag gebraucht wird, zum Beispiel:
+
+- JSON-Payloads
+- C#-DTOs
+- klar versionierte Request-/Response-Vertraege
+
+dann ist das **kein Pflichtteil der Python-Phase 3**.
+
+Das ist eher ein **optional vorgezogener Vorgriff auf Phase 4**, wenn die C#-Uebertragung oder eine konkrete Host-Integration ihn wirklich braucht.
+
 ---
 
 ## Phase 4 - Uebertragung nach C# / Visual Studio
@@ -245,6 +258,14 @@ Ein teamfaehiges Kamera-Subsystem in C#.
 5. Save Path / Dateinamenslogik
 6. Statusmodell
 7. AMB-Integration
+
+### Optionaler Hinweis aus Phase 3a
+
+Falls ein konkreter Host-, API- oder Integrationsvertrag benoetigt wird, ist hier der passende Zeitpunkt, um:
+
+- C#-DTOs fuer Requests und Responses festzulegen
+- Feldnamen und Datentypen verbindlich zu machen
+- spaetere JSON- oder IPC-Payloads sauber abzuleiten
 
 ### Ergebnis
 

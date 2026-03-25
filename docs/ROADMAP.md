@@ -74,6 +74,12 @@
 - support external save directory changes
 - expose consolidated status to AMB or future UI
 
+### Phase 6a: Optional Host Payload Contract
+
+- optional only if a concrete transport or host interface is needed
+- define host-facing request/response DTOs or API payload shapes
+- keep this aligned with the later C# handover instead of forcing it into the Python prototype too early
+
 ## Phase 7: Validation
 
 - add tests for naming, validation, queue behavior, and state transitions

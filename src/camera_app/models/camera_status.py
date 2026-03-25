@@ -6,6 +6,8 @@ from typing import Optional
 class CameraStatus:
     is_initialized: bool = False
     is_acquiring: bool = False
+    source_kind: Optional[str] = None
+    driver_name: Optional[str] = None
     camera_id: Optional[str] = None
     camera_name: Optional[str] = None
     camera_model: Optional[str] = None

@@ -40,6 +40,7 @@ class RecordingService:
         self._cleanup_lock = Lock()
         self._acquisition_stopped = False
         self._recording_deadline: float | None = None
+        self._next_frame_due_at: float | None = None
         self._recording_log_handle: TextIO | None = None
         self._recording_log_writer: csv.writer | None = None
 
@@ -61,6 +62,7 @@ class RecordingService:
         self._recording_deadline = (
             monotonic() + request.duration_seconds if request.duration_seconds is not None else None
         )
+        self._next_frame_due_at = monotonic()
         self._open_recording_log(request)
         self._driver.start_acquisition()
 
@@ -104,6 +106,8 @@ class RecordingService:
             raise ValueError("RecordingRequest.frame_limit must be greater than zero.")
         if request.duration_seconds is not None and request.duration_seconds <= 0:
             raise ValueError("RecordingRequest.duration_seconds must be greater than zero.")
+        if request.target_frame_rate is not None and request.target_frame_rate <= 0:
+            raise ValueError("RecordingRequest.target_frame_rate must be greater than zero.")
 
     def _producer_loop(self) -> None:
         assert self._frame_queue is not None
@@ -119,6 +123,12 @@ class RecordingService:
             if self._active_request.frame_limit is not None and next_frame_index >= self._active_request.frame_limit:
                 self._stop_event.set()
                 break
+            if self._active_request.target_frame_rate is not None:
+                assert self._next_frame_due_at is not None
+                now = monotonic()
+                if now < self._next_frame_due_at:
+                    sleep(min(self._next_frame_due_at - now, self._poll_interval_seconds))
+                    continue
 
             try:
                 frame = self._driver.get_latest_frame()
@@ -134,6 +144,8 @@ class RecordingService:
                 self._frame_queue.put((next_frame_index, frame), timeout=self._poll_interval_seconds)
                 last_frame_key = frame_key
                 next_frame_index += 1
+                if self._active_request.target_frame_rate is not None:
+                    self._next_frame_due_at = monotonic() + (1.0 / self._active_request.target_frame_rate)
             except Full:
                 with self._status_lock:
                     self._status.dropped_frames += 1
@@ -215,6 +227,7 @@ class RecordingService:
             ("camera_id", request.camera_id or ""),
             ("frame_limit", "" if request.frame_limit is None else str(request.frame_limit)),
             ("duration_seconds", "" if request.duration_seconds is None else str(request.duration_seconds)),
+            ("target_frame_rate", "" if request.target_frame_rate is None else str(request.target_frame_rate)),
             ("continues_previous_series", "false"),
             (
                 "exposure_time_us",
@@ -231,10 +244,22 @@ class RecordingService:
                 if configuration is None or configuration.acquisition_frame_rate is None
                 else str(configuration.acquisition_frame_rate),
             ),
-            ("roi_x", ""),
-            ("roi_y", ""),
-            ("roi_width", ""),
-            ("roi_height", ""),
+            (
+                "roi_x",
+                "" if configuration is None or configuration.roi_offset_x is None else str(configuration.roi_offset_x),
+            ),
+            (
+                "roi_y",
+                "" if configuration is None or configuration.roi_offset_y is None else str(configuration.roi_offset_y),
+            ),
+            (
+                "roi_width",
+                "" if configuration is None or configuration.roi_width is None else str(configuration.roi_width),
+            ),
+            (
+                "roi_height",
+                "" if configuration is None or configuration.roi_height is None else str(configuration.roi_height),
+            ),
         ]
 
     def _write_recording_log_entry(self, image_name: str, frame: CapturedFrame) -> None:
@@ -272,6 +297,7 @@ class RecordingService:
             self._frame_queue = None
             self._active_request = None
             self._recording_deadline = None
+            self._next_frame_due_at = None
             if self._recording_log_handle is not None:
                 self._recording_log_handle.close()
                 self._recording_log_handle = None

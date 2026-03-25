@@ -25,6 +25,8 @@ class VimbaXCameraDriver(CameraDriver):
         return CameraStatus(
             is_initialized=True,
             is_acquiring=False,
+            source_kind="hardware",
+            driver_name=self.__class__.__name__,
             camera_id=camera.get_id(),
             camera_name=camera.get_name(),
             camera_model=camera.get_model(),
@@ -130,6 +132,14 @@ class VimbaXCameraDriver(CameraDriver):
 
         if config.acquisition_frame_rate is not None:
             self._set_feature_value("AcquisitionFrameRate", config.acquisition_frame_rate)
+        if config.roi_offset_x is not None:
+            self._set_feature_value("OffsetX", config.roi_offset_x)
+        if config.roi_offset_y is not None:
+            self._set_feature_value("OffsetY", config.roi_offset_y)
+        if config.roi_width is not None:
+            self._set_feature_value("Width", config.roi_width)
+        if config.roi_height is not None:
+            self._set_feature_value("Height", config.roi_height)
 
     def start_acquisition(self) -> None:
         self._status.is_acquiring = True

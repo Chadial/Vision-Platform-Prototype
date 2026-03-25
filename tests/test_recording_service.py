@@ -111,11 +111,16 @@ class RecordingServiceTests(unittest.TestCase):
             log_lines = log_path.read_text(encoding="utf-8").splitlines()
             self.assertIn(f"# save_directory: {temp_dir}", log_lines)
             self.assertIn("# frame_limit: 3", log_lines)
+            self.assertIn("# target_frame_rate: ", log_lines)
             self.assertIn("# continues_previous_series: false", log_lines)
             self.assertIn("# exposure_time_us: 2500.0", log_lines)
             self.assertIn("# gain: 1.5", log_lines)
             self.assertIn("# pixel_format: Mono8", log_lines)
             self.assertIn("# acquisition_frame_rate: 12.0", log_lines)
+            self.assertIn("# roi_x: ", log_lines)
+            self.assertIn("# roi_y: ", log_lines)
+            self.assertIn("# roi_width: ", log_lines)
+            self.assertIn("# roi_height: ", log_lines)
             data_rows = list(csv.reader(line for line in log_lines if not line.startswith("# ")))
             self.assertEqual(data_rows[0], ["image_name", "frame_id", "camera_timestamp", "system_timestamp_utc"])
             self.assertEqual(data_rows[1][0], "series_000000.raw")
@@ -206,6 +211,71 @@ class RecordingServiceTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "duration_seconds must be greater than zero"):
                 service.start_recording(request)
+
+    def test_start_recording_rejects_non_positive_target_frame_rate(self) -> None:
+        driver = _FakeRecordingDriver([])
+        service = RecordingService(driver)
+
+        with TemporaryDirectory() as temp_dir:
+            request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="series",
+                file_extension=".raw",
+                frame_limit=3,
+                target_frame_rate=0,
+            )
+
+            with self.assertRaisesRegex(ValueError, "target_frame_rate must be greater than zero"):
+                service.start_recording(request)
+
+    def test_recording_log_includes_target_frame_rate_and_roi(self) -> None:
+        frames = [
+            CapturedFrame(
+                raw_frame=bytes([index]),
+                width=1,
+                height=1,
+                frame_id=index,
+                camera_timestamp=1000 + index,
+            )
+            for index in range(2)
+        ]
+        driver = _FakeRecordingDriver(frames)
+        service = RecordingService(
+            driver,
+            poll_interval_seconds=0.001,
+            configuration_provider=lambda: CameraConfiguration(
+                exposure_time_us=2500.0,
+                acquisition_frame_rate=25.0,
+                roi_offset_x=11,
+                roi_offset_y=22,
+                roi_width=333,
+                roi_height=222,
+            ),
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            service.start_recording(
+                RecordingRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="series",
+                    file_extension=".raw",
+                    frame_limit=2,
+                    target_frame_rate=8.0,
+                )
+            )
+
+            for _ in range(100):
+                status = service.get_status()
+                if not status.is_recording and status.frames_written == 2:
+                    break
+                sleep(0.01)
+
+            log_lines = (Path(temp_dir) / "series_recording_log.csv").read_text(encoding="utf-8").splitlines()
+            self.assertIn("# target_frame_rate: 8.0", log_lines)
+            self.assertIn("# roi_x: 11", log_lines)
+            self.assertIn("# roi_y: 22", log_lines)
+            self.assertIn("# roi_width: 333", log_lines)
+            self.assertIn("# roi_height: 222", log_lines)
 
 
 if __name__ == "__main__":

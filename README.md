@@ -67,6 +67,8 @@ For the first prototype stage, keep the dependency surface small and start with 
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
+For host-facing command formulation and request examples, see [`docs/COMMANDS.md`](docs/COMMANDS.md).
+
 ## Smoke Test
 
 Run the minimal end-to-end snapshot smoke test with an explicit camera id and output directory:

@@ -10,6 +10,7 @@ class RecordingRequest:
     file_extension: str = ".png"
     frame_limit: Optional[int] = None
     duration_seconds: Optional[float] = None
+    target_frame_rate: Optional[float] = None
     queue_size: int = 128
     create_directories: bool = True
     camera_id: Optional[str] = None

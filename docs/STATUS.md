@@ -15,8 +15,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Roadmap Position
 
-- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, and the Simulation/Demo path are functionally implemented; Host Integration is partially implemented.
-- Against `GlobalRoadmap.md`: the Python structuring phase is functionally complete, including the separated real/simulated driver paths; the next major step is the AMB-facing command/status phase plus real-hardware validation.
+- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, and the Simulation/Demo path are functionally implemented; Host Integration is implemented as a typed command/status surface and still open for AMB-specific payload shaping.
+- Against `GlobalRoadmap.md`: the Python structuring phase is functionally complete, including the separated real/simulated driver paths; the AMB-facing command/status phase is now started with an explicit subsystem status contract, and the next major step is AMB-specific payload shaping plus real-hardware validation.
 
 ## Current Summary
 
@@ -30,6 +30,11 @@ The repository currently provides a structured Python prototype for the camera s
 - preview service with latest-frame buffering and polling loop
 - recording base flow with bounded queue, writer loop, and frame-limit stop condition
 - command-controller support for default save-directory resolution and consolidated subsystem status
+- explicit `SubsystemStatus` model with AMB-facing command readiness flags
+- camera status metadata that identifies hardware vs. simulation source kind and active driver name
+- external request models for configuration, save-directory changes, snapshot save, and recording start/stop
+- camera configuration now models ROI offsets and ROI size in addition to exposure, gain, pixel format, and acquisition frame rate
+- recording requests can now carry a target frame rate and log it alongside ROI metadata
 - smoke-test entry point for explicit camera id usage such as `cam2`
 - a clear architectural basis for separating real hardware drivers from future simulation/demo drivers
 - a working simulated driver for hardware-free preview, snapshot, and recording flows
@@ -78,6 +83,7 @@ The repository currently provides a structured Python prototype for the camera s
 - recording log header includes session metadata such as start signal time, stop conditions, save path, and known camera settings
 - frame-limit stop condition implemented
 - duration-based stop condition implemented
+- target-frame-rate pacing implemented for recording requests
 - recording state and error tracking implemented
 
 ## Partially Implemented
@@ -87,9 +93,10 @@ The repository currently provides a structured Python prototype for the camera s
 - `frame_limit` stop condition is implemented
 - `duration_seconds` stop condition is implemented
 - both stop conditions can be combined
+- `target_frame_rate` can now be provided to pace acquisition in the recording producer loop
 - each recording writes a CSV log with image name, frame id, camera timestamp, and system UTC timestamp
 - each recording log starts with metadata header lines for start signal time, save path, stop conditions, continuation flag, and known camera settings
-- ROI fields are reserved in the log header but not populated yet because ROI is not modeled in `CameraConfiguration`
+- ROI fields in the log header are populated when ROI is present in `CameraConfiguration`
 - no trigger-based recording yet
 - no hardware-backed continuous acquisition validation yet
 
@@ -97,8 +104,12 @@ The repository currently provides a structured Python prototype for the camera s
 
 - command surface exists
 - default save directory can now be resolved into snapshot and recording requests
-- controller now exposes consolidated camera, configuration, recording, and save-directory status
-- deeper AMB-specific command/status shaping is still open
+- controller now exposes a typed `SubsystemStatus` model instead of an untyped dictionary
+- subsystem status now includes command readiness flags for configuration, snapshot, recording start, and recording stop
+- camera status now exposes whether the active source is `hardware` or `simulation` together with the driver name
+- external request types now exist for `ApplyConfigurationRequest`, `SetSaveDirectoryRequest`, `SaveSnapshotRequest`, `StartRecordingRequest`, and `StopRecordingRequest`
+- save-directory requests now support append-to-directory or create-new-subdirectory behavior
+- deeper host-specific payload shaping is still open
 
 ### Preview
 
@@ -139,7 +150,7 @@ The repository currently provides a structured Python prototype for the camera s
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when `cam2` is available.
-2. Shape the controller/status model further for AMB-facing integration needs.
-3. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
-4. Model ROI and additional camera settings if they are needed for the next integration step.
+2. Define the AMB-specific command/status payload mapping on top of `SubsystemStatus`.
+3. Add explicit host-facing response/result objects if the next integration step needs more than direct return values.
+4. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
 5. Merge to `main` after the current Phase-2 branch is reviewed and accepted.
