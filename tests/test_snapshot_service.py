@@ -4,9 +4,8 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
 
 from tests import _path_setup
-from camera_app.models.captured_frame import CapturedFrame
-from camera_app.models.snapshot_request import SnapshotRequest
-from camera_app.services.snapshot_service import SnapshotService
+from vision_platform.models import CapturedFrame, SnapshotRequest
+from vision_platform.services.recording_service import SnapshotService
 
 
 class _FakeRawFrame:

@@ -12,6 +12,7 @@ class DemoRunResult:
     saved_path: Path | None = None
     rendered_frames: int = 0
     preview_frame_info: Any | None = None
+    focus_preview_state: Any | None = None
     initial_interval_capture_status: Any | None = None
     interval_capture_status: Any | None = None
     initial_recording_status: Any | None = None

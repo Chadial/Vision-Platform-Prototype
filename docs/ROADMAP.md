@@ -6,7 +6,19 @@ This roadmap reflects the actual implementation flow reconstructed from the curr
 
 It is intentionally different from the original idealized phase order.
 
-The codebase progressed iteratively, with snapshot, preview, recording, simulation, host control, and validation overlapping in practice.
+The codebase progressed iteratively, with snapshot, preview, recording, simulation, host control, validation, and repository reorganization overlapping in practice.
+
+## Phase 0: Repository Reorganization Toward The Vision Platform
+
+- align the repository with `ProjectDescription.md` and `ProjectAgents.md`
+- create repository-level module workspaces for apps, integrations, services, and libraries
+- add `README.md`, `STATUS.md`, and `ROADMAP.md` per key module
+- introduce `src/vision_platform` as the platform-facing namespace while preserving `src/camera_app`
+
+Status:
+
+- completed for the first reorganization round
+- physical code migration remains intentionally incremental
 
 ## Reconstructed Delivery Flow
 

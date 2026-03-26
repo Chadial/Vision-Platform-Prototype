@@ -306,6 +306,55 @@ Use a simple trunk-based workflow.
 - separate structural refactors from SDK integration work
 - merge only after the affected scope has been validated locally
 
+Operational rules from now on:
+
+- never develop directly on `main` for substantive changes
+- create one branch per coherent work package, not per day and not per tiny edit
+- branch names must describe scope, for example:
+  - `feature/reorg-platform-imports`
+  - `feature/roi-foundation`
+  - `fix/recording-cleanup-state`
+  - `docs/module-roadmaps`
+- one branch must not mix unrelated concerns, especially not:
+  - architecture reorganization and feature work
+  - functional changes and broad formatting churn
+  - hardware integration changes and documentation-only edits
+- commits must stay focused and ordered so they can be reviewed independently
+- before merge, run the relevant local validation for the touched scope
+- merge to `main` only when the branch is in a stable, documented, test-backed state
+- for mixed or partially completed repository states, use `docs/branch_backlog.md` as the required file-to-branch assignment before staging or committing
+
+Preferred commit structure:
+
+- commit 1: structural move or namespace prep
+- commit 2: behavioral adaptation
+- commit 3: tests
+- commit 4: docs/status/roadmap updates
+
+Commit message format:
+
+- `<type>: <scope> <intent>`
+- preferred types:
+  - `feat:`
+  - `fix:`
+  - `refactor:`
+  - `test:`
+  - `docs:`
+  - `chore:`
+
+Examples:
+
+- `refactor: move platform-facing imports to vision_platform`
+- `test: migrate service tests to vision_platform namespace`
+- `docs: update module roadmap after namespace migration`
+
+Definition of ready to merge:
+
+- relevant tests pass locally
+- affected docs are updated if structure, status, or roadmap changed
+- no unrelated file churn is bundled in the branch
+- the branch leaves the repository in a runnable or at least internally consistent state
+
 Preferred branch examples:
 
 - `feature/phase-2a-driver-init`
@@ -361,6 +410,12 @@ Use the following project documents together and keep their roles distinct:
 
 - `docs/STATUS.md`  
   current implementation status, known gaps, verified progress, and next recommended steps
+
+- `docs/git_strategy.md`
+  operational git workflow, branch structure, commit discipline, and merge rules
+
+- `docs/branch_backlog.md`
+  assignment of still-open worktree changes to future branches so unfinished work does not leak into `main`
 
 When updating `docs/STATUS.md`, always relate the current state to both:
 

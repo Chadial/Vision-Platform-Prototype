@@ -11,12 +11,12 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main`
+- `feature/focus-core-baseline`
 
 ## Roadmap Position
 
-- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path are functionally implemented. Phase 8 Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Phase 9 Real Hardware Evaluation remains open.
-- Against `GlobalRoadmap.md`: the Python structuring phase and the simulation path are functionally complete, including the host-neutral command/status contract and the optional Phase 3c OpenCV inspection path. The next mandatory milestone against the global roadmap remains Phase 3b real-hardware evaluation before the Python baseline can be treated as hardware-validated.
+- Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface.
+- Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, and a first manual-focus baseline are in place. Tracking/API modules and real-hardware validation remain open. The next mandatory milestone against the global roadmap remains real-hardware evaluation of the current Python baseline.
 
 ## Current Summary
 
@@ -47,6 +47,13 @@ The repository currently provides a structured Python prototype for the camera s
 - optional OpenCV preview demo on top of the simulated preview service
 - optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
 - additional service hardening so preview/recording cleanup resets internal state defensively even when acquisition stop fails during recovery
+- new repository-level module workspaces for apps, integrations, services, and libraries
+- new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
+- new shared foundation modules for common models, ROI groundwork, and focus groundwork
+- physical migration of control and imaging implementation into `src/vision_platform`, with `camera_app` retained as a compatibility shim for those areas
+- physical migration of file naming and frame writing into `src/vision_platform.services.recording_service`, with `camera_app.storage` retained as a compatibility shim
+- physical migration of stream-service internals, camera drivers, and prototype demo entry points into `src/vision_platform`, with legacy `camera_app` modules retained as compatibility shims
+- first implemented focus baseline with Laplace scoring, ROI-aware overlay anchors, and preview-consumer integration
 
 ## Completed Work
 
@@ -57,6 +64,7 @@ The repository currently provides a structured Python prototype for the camera s
 - logging setup scaffold added
 - file naming scaffold added
 - command controller skeleton added
+- portable focus/ROI model extensions now include overlay-ready focus payloads and ROI centroid support
 
 ### Camera Access
 
@@ -68,14 +76,17 @@ The repository currently provides a structured Python prototype for the camera s
 - frame metadata model added through `CapturedFrame`
 - real hardware currently runs through `VimbaXCameraDriver`
 - hardware-free development now runs through `SimulatedCameraDriver`
+- platform-owned driver implementations now live in `vision_platform.integrations.camera`
 
 ### Snapshot Flow
 
 - snapshot request to target-path flow implemented
 - frame writer added for `.png`, `.raw`, and `.bin`
+- `FrameWriter` implementation now lives in `vision_platform.services.recording_service`
 - frame writer can now use an optional OpenCV adapter for higher-bit grayscale `.png` and `.tiff`
 - snapshot logging added
 - snapshot smoke-test flow added
+- snapshot smoke entry point now lives in `vision_platform.apps.opencv_prototype`
 
 ### Preview Flow
 
@@ -84,18 +95,29 @@ The repository currently provides a structured Python prototype for the camera s
 - polling-based preview refresh implemented
 - preview frame metadata exposure implemented
 - optional OpenCV preview window adapter implemented above `PreviewService`
+- `PreviewService`, `SharedFrameSource`, and `CameraStreamService` now live in `vision_platform.services.stream_service`
+- `FocusPreviewService` now derives focus state from preview frames without embedding analysis logic into the stream loop or window layer
 
 ### Recording Flow
 
 - basic producer/consumer pipeline implemented
 - bounded queue implemented
 - sequential recording file naming implemented
+- recording naming helpers now live in `vision_platform.services.recording_service`
 - per-recording CSV log file implemented
 - recording log header includes session metadata such as start signal time, stop conditions, save path, and known camera settings
 - frame-limit stop condition implemented
 - duration-based stop condition implemented
 - target-frame-rate pacing implemented for recording requests
 - recording state and error tracking implemented
+
+### Focus And ROI Foundations
+
+- portable ROI definitions now expose bounds and centroid helpers for later overlay consumers
+- ROI remains a reusable geometry/selection input instead of a UI-owned concern
+- `focus_core` now provides a baseline Laplace evaluator for manual focus decisions
+- focus evaluation remains consumer-driven, so stream layers expose frames while preview-facing consumers decide when focus is computed
+- overlay-ready focus payloads now exist for preview and display consumers without coupling UI code into the analysis layer
 
 ## Partially Implemented
 
@@ -122,6 +144,7 @@ The repository currently provides a structured Python prototype for the camera s
 ### Host Integration
 
 - command surface exists
+- `CommandController` implementation now lives in `vision_platform.control`, while `camera_app.control` remains as a compatibility import
 - default save directory can now be resolved into snapshot and recording requests
 - controller now exposes a typed `SubsystemStatus` model instead of an untyped dictionary
 - subsystem status now includes command readiness flags for configuration, snapshot, recording start, and recording stop
@@ -151,6 +174,7 @@ The repository currently provides a structured Python prototype for the camera s
 - dedicated OpenCV smoke-demo tests now verify the preview and save demo entry points against the simulator-backed path
 - preview and recording cleanup now preserve stable service state even when `stop_acquisition()` itself fails during shutdown or recovery
 - additional tests now verify that startup failures keep their original exception even if cleanup also fails afterwards
+- additional tests now cover baseline focus scoring, ROI-centroid geometry, preview-focus consumption, stream-level focus integration, and the simulated focus-preview smoke/demo path
 - real hardware validation is still pending separately from the simulator-backed validation
 
 ### Preview
@@ -159,7 +183,9 @@ The repository currently provides a structured Python prototype for the camera s
 - preview can now run against an optional shared frame source instead of starting an independent acquisition loop
 - `CameraStreamService` now exposes that shared-acquisition path as the preferred composition point for live preview plus concurrent recording
 - `CameraStreamService` can now also create `IntervalCaptureService` for preview plus timed single-image saving from the same stream
+- `CameraStreamService` can now also create `FocusPreviewService` so focus state can be derived from the same preview path
 - an optional OpenCV preview window now exists above the service layer
+- the preview demo can now optionally compose focus state while keeping the window class itself free of focus logic
 - no browser preview or non-OpenCV UI layer yet
 - hardware validation is currently blocked because the camera is not available
 - simulated preview exists through `SimulatedCameraDriver`
@@ -169,6 +195,8 @@ The repository currently provides a structured Python prototype for the camera s
 - architecture now explicitly expects separate real-hardware and simulated driver implementations
 - `SimulatedCameraDriver` is implemented for generated frames and `.pgm`/`.ppm` sample image sequences
 - a simulated demo entry point exists for preview, snapshot, and recording without hardware
+- a simulated focus-preview smoke/demo path now exists for preview-to-focus validation without hardware
+- the simulated and Vimba X drivers now live physically in `vision_platform.integrations.camera`
 - simulator-backed tests now verify that preview and recording can share one acquisition loop without fighting over the driver
 - simulator-backed tests now also verify preview plus timed interval capture from the same shared stream
 - simulated generation now also covers `Mono16` frames for grayscale-save-path validation
@@ -177,9 +205,12 @@ The repository currently provides a structured Python prototype for the camera s
 
 ### Optional OpenCV Integration
 
-- optional `camera_app.imaging` layer now contains `OpenCvFrameAdapter` and `OpenCvPreviewWindow`
+- optional OpenCV implementation now lives in `vision_platform.imaging`
+- `camera_app.imaging` remains as a compatibility shim for legacy imports
+- the app-facing OpenCV demos now live in `vision_platform.apps.opencv_prototype`
 - OpenCV remains outside `CameraDriver` and outside the mandatory core dependency set
 - preview display can now run through `cv2.imshow()` on top of `PreviewService`
+- the preview demo can now optionally carry focus state alongside the rendered preview path without moving analysis into the OpenCV window class
 - lossless grayscale save now supports `.png` and `.tiff` through the optional adapter for `Mono8` and unpacked higher-bit grayscale formats such as `Mono16`
 - the standard-library writer remains the default for dependency-free `Mono8`, `Rgb8`, and `Bgr8` PNG output
 - packed grayscale formats are still not decoded automatically and should be transformed explicitly before using the OpenCV save path if required
@@ -194,14 +225,13 @@ The repository currently provides a structured Python prototype for the camera s
 ## Verified Test Commands
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_interval_capture_service tests.test_camera_stream_service tests.test_bootstrap tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos
+.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_interval_capture_service tests.test_camera_stream_service tests.test_bootstrap tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos tests.test_focus_core tests.test_focus_preview_service tests.test_focus_preview_demo tests.test_vision_platform_namespace
 ```
 
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when the target camera is available.
 2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-3. Decide whether `docs/ROADMAP.md` Phase 8 can be declared complete after one real-hardware validation pass and whether the optional OpenCV path can then be treated as hardware-validated.
+3. Decide whether the next analysis increment should be ROI-first edge/detail metrics or a richer preview overlay composition path.
 4. Define a stricter payload mapping only if the later C# or host integration really needs it.
-5. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
-6. Keep the Python core stable as the handover baseline for the later C# phase.
+5. Keep the Python core stable as the handover baseline for the later C# phase.

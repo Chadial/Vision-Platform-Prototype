@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
-from camera_app.smoke.simulated_demo import run_simulated_demo
+from vision_platform.apps.opencv_prototype.simulated_demo import run_simulated_demo
 
 
 class SimulatedDemoTests(unittest.TestCase):

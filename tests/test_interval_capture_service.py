@@ -4,10 +4,9 @@ from time import sleep
 import unittest
 
 from tests import _path_setup
-from camera_app.models.captured_frame import CapturedFrame
-from camera_app.models.interval_capture_request import IntervalCaptureRequest
-from camera_app.services.interval_capture_service import IntervalCaptureService
-from camera_app.services.shared_frame_source import SharedFrameSource
+from vision_platform.models import CapturedFrame, IntervalCaptureRequest
+from vision_platform.services.recording_service import IntervalCaptureService
+from vision_platform.services.stream_service import SharedFrameSource
 
 
 class _StreamingIntervalDriver:

@@ -1,544 +1,178 @@
-# Roadmap Kamera-Software: Python -> C# -> WebUI
+# Global Roadmap
 
-## Zielbild
+## Purpose
 
-Eine skalierbare Kamera-Architektur, die:
+This document is the platform-wide master roadmap for evolving the current Python camera prototype into a modular vision platform that can later be handed over to a C#/.NET team and eventually support multiple frontends and external interfaces.
 
-- kurzfristig in **Python** schnell zum Laufen gebracht wird
-- mittelfristig in **C# / Visual Studio** vom Team uebernommen werden kann
-- langfristig eine **WebUI** fuer Desktop, Tablet und Smartphone erlaubt
-- sauber mit einer **externen Host-Software** zusammenarbeitet
-- Snapshot und "Video"-Speicherung inklusive frei vorgebbarem Speicherpfad unterstuetzt
-- einen klar getrennten Pfad fuer **echte Hardware** und **Simulation/Demo-Betrieb** erlaubt
+Detailed implementation planning should increasingly move into the module-local `ROADMAP.md` files. This document stays at the master-roadmap level.
 
----
+## Platform Modules
 
-## Leitprinzip
+- camera / integration
+- stream / frame pipeline
+- recording / persistence
+- display / interaction / overlays
+- ROI / masks
+- focus global / local
+- edge / tracking / drift logic
+- API / feeds / external systems
+- postprocess
+- multiple frontends
 
-Nicht sofort alles gleichzeitig lernen und bauen.
+## Cross-Cutting Rules
 
-Stattdessen in dieser Reihenfolge:
+- preserve a working Python baseline
+- keep hardware access, UI, orchestration, and reusable analysis logic separate
+- treat simulation as a first-class development path
+- favor typed, portable contracts that can survive a later C# handover
+- avoid forcing web or desktop framework choices into the core too early
 
-1. **Kamera verstehen**
-2. **funktionierenden Prototyp bauen**
-3. **Code sauber strukturieren**
-4. **gleiche Struktur in C# nachziehen**
-5. **spaeter WebUI darueberlegen**
+## Master Phases
 
----
+| Phase | Focus | Outcome |
+| --- | --- | --- |
+| 0 | Repository reorganization | platform modules visible in repo structure and docs |
+| 1 | Python subsystem baseline | stable camera, snapshot, preview, recording flows |
+| 2 | Integration and streaming hardening | shared acquisition, command flow, simulator parity, hardware checks |
+| 3 | Common analysis foundations | shared models, ROI, focus groundwork |
+| 4 | Interactive analysis MVP | ROI-driven focus and overlay-capable prototype |
+| 5 | Tracking and drift preparation | edge/tracking kernels and feed-ready results |
+| 6 | External interfaces | API/feed or host integration contracts |
+| 7 | C# handover path | core concepts ready for direct port or parallel implementation |
+| 8 | Additional frontends | desktop app, web-capable path, postprocess tooling |
 
-## Architektur-Ziel in einem Satz
+## Phase 0: Repository Reorganization
 
-Die Kamera- und Recording-Logik soll **vom UI entkoppelt** werden, sodass spaeter wahlweise
+### Goal
 
-- eine lokale Desktop-Anwendung
-- eine integrierte Host-Software-Loesung
-- oder eine WebUI
+Turn the repository from a camera-centric code package into an explicitly modular platform repository without breaking the working Python baseline.
 
-darauf aufsetzen kann.
+### Completed In This Round
 
-Dasselbe sollte fuer die Bildquelle gelten:
+- repository-level module folders for apps, integrations, services, and libraries
+- per-module `README.md`, `STATUS.md`, and `ROADMAP.md`
+- `MODULE_INDEX.md`
+- reorganization documents in `docs/`
+- `src/vision_platform` namespace mirroring the current stable implementation
 
-- echte Kamerahardware
-- simulierte Testquelle
-- Demoquelle auf Basis echter Beispielbilder
+### Still Open
 
-sollen moeglichst ueber dieselbe Kernlogik laufen.
+- progressive physical relocation of implementation files out of `src/camera_app`
+- tests that exercise the new namespace more broadly
 
----
+## Phase 1: Python Subsystem Baseline
 
-## Roadmap-Phasen
+### Scope
 
-| Phase | Fokus | Ziel | Primaeres Tool |
-|---|---|---|---|
-| 1 | Kamera zum Laufen bringen | Livebild, Snapshot, Speichern | PyCharm + Python |
-| 2 | Python sauber strukturieren | Services, Requests, Logging, Recording | PyCharm |
-| 2a | Simulationspfad | Hardwarefreie Entwicklung, Tests und Demos | Python |
-| 3 | Host-nahe Schnittstelle modellieren | externe Kommandos, Save Path, Status | Python |
-| 3a | Optionaler Transport-/Payload-Vertrag | nur bei Bedarf: hostspezifische DTOs oder API-Payloads | spaeter mit C# mitdenken |
-| 3b | Hardware-Evaluierung | echtes Geraet gegen Python-Prototyp validieren | Python + Kamera |
-| 3c | Optionaler OpenCV-Pfad | lokale Stream-Anzeige und verlustfreie Sichtpruefung | Python + OpenCV |
-| 4 | C#-Uebertragung | teamfaehiges Kamera-Subsystem | Visual Studio |
-| 5 | Integration in Host-Software | direkte Steuerung aus Hauptsoftware | C# |
-| 6 | WebUI-faehige Architektur | Browser, Tablet, Mobil | .NET / Web |
+- camera initialization
+- snapshot saving
+- live preview buffering
+- recording and interval capture
+- deterministic save paths and naming
+- simulator-backed demos and smoke paths
 
----
+### Status
 
-## Phase 1 - Python / PyCharm / Kamera-MVP
+- functionally completed
+- still needs repeated real-hardware confirmation to be treated as validated baseline
 
-### Ziel
+## Phase 2: Integration And Streaming Hardening
 
-Ein kleiner, funktionierender Prototyp mit:
+### Scope
 
-- Kamera finden
-- Livebild anzeigen
-- Snapshot speichern
-- einfachen Kameraeinstellungen
-- erstem Logging
+- shared acquisition path for preview plus recording
+- host-neutral command surface
+- simulator parity with hardware path
+- hardware evaluation and recovery behavior
 
-### Lernfokus
+### Status
 
-- Python-Grundlagen
-- PyCharm bedienen
-- Virtual Environment
-- SDK installieren
-- OpenCV oder einfacher Preview-Weg
-- Debugging
+- mostly completed on the simulator-backed path
+- real-hardware evaluation remains the main open item
 
-### Ergebnis
+## Phase 3: Common Analysis Foundations
 
-Ein erstes Testprogramm wie:
+### Scope
 
-- `main.py`
-- `camera_test.py`
+- shared frame metadata contracts
+- ROI definitions and mask foundations
+- focus request/result contracts
+- analysis-ready module boundaries for later tracking and overlays
 
-Mit Funktionen:
+### Status
 
-- Start Live Preview
-- Taste oder Befehl fuer Snapshot
-- Bildspeicherung in lokalen Ordner
-- einfacher Log-Eintrag
+- initial groundwork completed in this round
+- no full analysis implementation yet
 
-### Wichtig
+## Phase 4: Interactive Analysis MVP
 
-Hier geht es **nicht** um schoene Software, sondern um:
+### Scope
 
-- Kamera verstehen
-- SDK verstehen
-- Datenfluss verstehen
+- interactive ROI handling
+- global and local focus metrics
+- overlay-ready live display
+- snapshot analysis using the same contracts
 
-Wenn die Hardware nicht verfuegbar ist, ist ein kleiner Simulationspfad sinnvoll, um Datenfluss, Logging und Speicherverhalten trotzdem weiterentwickeln zu koennen.
+### Status
 
----
+- not implemented yet
 
-## Phase 2 - Python-Prototyp sauber strukturieren
+## Phase 5: Tracking And Drift Preparation
 
-### Ziel
+### Scope
 
-Vom Skript zur kleinen Softwarestruktur wechseln.
+- edge/profile analysis
+- feature tracking or drift indication
+- first crack-tip-oriented heuristics if the image data supports it
 
-### Modulidee
+### Status
 
-```text
-camera_app/
-|- main.py
-|- models.py
-|- camera_config.py
-|- camera_driver.py
-|- preview_service.py
-|- recording_service.py
-|- log_service.py
-|- images/
-`- logs/
-```
+- prepared structurally only
 
-### Zielklassen
+## Phase 6: External Interfaces
 
-- `CameraConfiguration`
-- `SnapshotRequest`
-- `RecordingRequest`
-- `CameraStatus`
-- `PreviewFrameInfo`
+### Scope
 
-### Zielservices
+- host-facing contract hardening
+- feed or API exposure of status and analysis results
+- later automation hooks
 
-- `CameraDriver`
-- `PreviewService`
-- `RecordingService`
-- `LogService`
+### Status
 
-### Ergebnis
+- command-style Python controller exists
+- transport/API contract is still intentionally deferred
 
-Python kann dann bereits:
+## Phase 7: C# Handover Path
 
-- Konfiguration anwenden
-- Snapshot speichern
-- Recording starten / stoppen
-- Speicherpfad entgegennehmen
-- Status zurueckgeben
-- Preview und Recording trennen
-- zwischen echter Kamera und Simulation unterscheiden, ohne die Service-Struktur zu aendern
+### Scope
 
----
+- keep Python structures aligned with likely C# service and model boundaries
+- identify modules ready for direct port
+- make contracts explicit enough for a .NET team to own them
 
-## Phase 2a - Simulationspfad fuer Entwicklung und Demo
+### Status
 
-### Ziel
+- architecture is being shaped for this path
+- no C# implementation exists yet in this repository
 
-Ein simulierter Kamerapfad soll Preview, Snapshot und Recording auch ohne angeschlossene Kamera ermoeglichen.
+## Phase 8: Additional Frontends
 
-### Nutzen
+### Scope
 
-- Entwicklung laeuft weiter, wenn Hardware nicht verfuegbar ist
-- Demo-Szenarien koennen stabil vorbereitet werden
-- Service- und Loggingverhalten kann ohne Kamera validiert werden
-- echte Beispielbilder koennen fuer realistische Demos genutzt werden
+- sustained OpenCV prototype
+- later desktop frontend
+- later web-capable frontend path
+- later postprocess tooling
 
-### Anforderungen
+### Status
 
-- eigene Driver-Implementierung getrennt vom SDK-Treiber
-- wahlweise deterministische Testframes oder Beispielbild-Sequenzen
-- identische Nutzung ueber `CameraDriver`, `SnapshotService`, `PreviewService` und `RecordingService`
-- klar erkennbar, ob echte Hardware oder Simulation verwendet wird
+- OpenCV prototype path exists
+- desktop, web, and postprocess fronts are prepared structurally only
 
----
+## Recommended Next Platform Steps
 
-## Phase 3 - Schnittstelle zur Host-Software gedanklich vorbereiten
-
-### Ziel
-
-Die Kamera-Software nicht als isoliertes Tool denken, sondern als Subsystem einer uebergeordneten Host-Software.
-
-### Eingehende Befehle aus Host-Software
-
-- Konfiguration setzen
-- Speicherpfad setzen
-- Snapshot ausloesen
-- Recording starten
-- Recording stoppen
-- Status abfragen
-
-### Daraus abgeleitete Methoden
-
-ApplyConfiguration(config)
-SetSaveDirectory(path)
-SaveSnapshot(request)
-StartRecording(request)
-StopRecording()
-GetStatus()
-
-### Vorteil
-
-Schon der Python-Prototyp wird so gebaut, dass seine Struktur spaeter gut nach C# portierbar ist.
-
-### Phase 3a - optionaler Hinweis fuer spaetere Host-/API-Vertraege
-
-Falls spaeter ein ganz konkreter Transportvertrag gebraucht wird, zum Beispiel:
-
-- JSON-Payloads
-- C#-DTOs
-- klar versionierte Request-/Response-Vertraege
-
-dann ist das **kein Pflichtteil der Python-Phase 3**.
-
-Das ist eher ein **optional vorgezogener Vorgriff auf Phase 4**, wenn die C#-Uebertragung oder eine konkrete Host-Integration ihn wirklich braucht.
-
----
-
-## Phase 3b - Hardware-Evaluierung des Python-Prototyps
-
-### Ziel
-
-Den strukturell fertigen Python-Prototyp nicht nur simulatorgestuetzt, sondern mit echter Kamera validieren.
-
-### Pruefpunkte
-
-- Kamerainitialisierung und sauberer Shutdown
-- explizite Kameraauswahl per id
-- Exposure, Gain, Pixel Format und ROI auf echter Hardware
-- Snapshot auf echter Hardware
-- Preview-Datenfluss auf echter Hardware
-- Recording auf echter Hardware
-- Verhalten bei nicht unterstuetzten Features oder Fehlern
-
-### Ergebnis
-
-Ein Python-Baseline-Stand, der nicht nur architektonisch, sondern auch hardwareseitig belastbar ist.
-
----
-
-## Phase 3c - Optionaler OpenCV-Pfad fuer Anzeige und Sichtpruefung
-
-### Ziel
-
-Eine lokale Desktop-Anzeige fuer Stream-Inspektion und verlustfreie Sichtpruefung ergaenzen, ohne die Kernarchitektur an OpenCV zu binden.
-
-### Wichtig
-
-OpenCV soll hier:
-
-- fuer Anzeige und Inspektion helfen
-- nicht die Kernlogik dominieren
-- nicht still die Messdaten veraendern
-
-### Geeignete Einsaetze
-
-- lokales Preview-Fenster mit `cv2.imshow()`
-- Konvertierung von Frames in ein Anzeigeformat
-- Sichtpruefung von ROI, Fokus und Belichtung
-- verlustfreie Speicherung in sichtbaren Grauwertformaten statt `.raw`, wenn die Daten fuer DIC geeignet bleiben muessen
-
-### Datenregel fuer DIC-nahe Nutzung
-
-- keine verlustbehaftete Speicherung
-- keine unerklaerte Normalisierung
-- keine Gamma- oder Kontrastmanipulation der gespeicherten Messdaten
-- Anzeige-Konvertierung und gespeicherte Nutzdaten strikt trennen
-
-### Empfohlene Richtung
-
-- `Mono8` moeglichst als verlustfreies `.png`
-- hoeherwertige Graustufen moeglichst als 16-Bit-`.png` oder `.tiff`
-- OpenCV nur als optionale Adapter- oder Demo-Schicht
-
-### Ergebnis
-
-Ein zusaetzlicher lokaler Sichtpruefungsweg, der spaetere DIC-Auswertung nicht untergraebt und die Python-Basis trotzdem schlank laesst.
-
----
-
-## Phase 4 - Uebertragung nach C# / Visual Studio
-
-### Ziel
-
-Ein teamfaehiges Kamera-Subsystem in C#.
-
-### Lernfokus
-
-- C#-Klassen
-- Interfaces
-- Projekte / Solutions
-- Visual Studio
-- Events / Callbacks
-- Logging
-- grundlegende Threading-/Async-Konzepte
-
-### Zielstruktur in C#
-
-- `ICameraDriver`
-- `CameraService`
-- `RecordingService`
-- `SnapshotService`
-- `CameraConfiguration`
-- `RecordingRequest`
-- `CameraStatus`
-
-### Reihenfolge
-
-1. Kamera finden
-2. Snapshot
-3. Preview
-4. Recording starten/stoppen
-5. Save Path / Dateinamenslogik
-6. Statusmodell
-7. Host-Integration
-8. optional OpenCV- oder Anzeigeentscheidungen nur dann uebernehmen, wenn sie sich im Python-Pfad als wirklich nuetzlich erwiesen haben
-
-### Optionaler Hinweis aus Phase 3a
-
-Falls ein konkreter Host-, API- oder Integrationsvertrag benoetigt wird, ist hier der passende Zeitpunkt, um:
-
-- C#-DTOs fuer Requests und Responses festzulegen
-- Feldnamen und Datentypen verbindlich zu machen
-- spaetere JSON- oder IPC-Payloads sauber abzuleiten
-
-### Ergebnis
-
-Ein eigenstaendiges Kamera-Modul, das spaeter direkt vom Team wartbar ist.
-
----
-
-## Phase 5 - Integration in die Host-Software
-
-### Ziel
-
-Die Host-Software wird Master, die Kamera ist ein Subsystem.
-
-### Rollenverteilung
-
-| Systemteil | Rolle |
-| --- | --- |
-| Host-Software | gibt Befehle und Parameter vor |
-| Kamera-Modul | fuehrt Preview, Snapshot, Recording, Logging aus |
-| Dateisystem | speichert Bilder / Serien / Logs |
-
-### Typische Steuerdaten aus der Host-Software
-
-- Save Path
-- Dateinamensschema
-- Snapshot-Befehl
-- Start/Stop Recording
-- Metadaten zum Versuch
-- ggf. Trigger-Informationen
-
-### Ziel
-
-Kein loses Paralleltool, sondern eine sauber eingebundene Funktion innerhalb des Gesamtsystems.
-
----
-
-## Phase 6 - WebUI-faehige Architektur
-
-### Ziel
-
-Spaeter soll dieselbe Kernlogik auch von einer Weboberflaeche aus bedient werden koennen.
-
-### Wichtig
-
-Die WebUI wird **nicht** zuerst gebaut.  
-Sie wird spaeter auf eine bereits saubere Service-Struktur gesetzt.
-
-### Dafuer muss heute schon getrennt werden
-
-- **Kernlogik**
-- **Hardware-Anbindung**
-- **UI**
-
-### Spaetere Zielkanaele
-
-- Desktop-Browser
-- Tablet
-- Smartphone
-- ggf. interne Netzwerknutzung
-
-### Was die WebUI spaeter koennen soll
-
-- Livebild anzeigen
-- Status anzeigen
-- Snapshot ausloesen
-- Recording starten/stoppen
-- Konfigurationswerte aendern
-- Speicherpfade und Dateinamen kontrollieren
-
----
-
-## Begriffssortierung fuer spaetere .NET-Webwelt
-
-| Begriff | Bedeutung fuer dich |
-| ------------------ | --------------------------------------------- |
-| Backend | enthaelt Kamera- und Recording-Logik |
-| API | Befehlszugang fuer UI oder andere Software |
-| WebUI | sichtbare Oberflaeche im Browser |
-| Echtzeit-Updates | Statusaenderungen ohne manuelles Aktualisieren |
-| responsiv | Layout passt sich Tablet / Handy / Desktop an |
-| modularer Monolith | eine Anwendung, aber intern sauber getrennt |
-
-### Vereinfachte mentale Sortierung
-
-- **Kernlogik** = was die Kamera tun kann
-- **Schnittstelle** = wie andere Software Befehle gibt
-- **UI** = wie ein Mensch das bedient
-- **WebUI** = UI im Browser statt klassischem Desktopfenster
-
----
-
-## Lernpfad
-
-## 1. Jetzt sofort lernen
-
-- Python-Basis
-- PyCharm
-- Kamera-SDK-Grundlagen
-- Bildanzeige
-- Snapshot / Speichern
-- Logging
-
-## 2. Danach lernen
-
-- Python-Klassen sauber strukturieren
-- Requests / Statusmodelle
-- Service-Denken
-- Trennung von Preview und Recording
-- Trennung von echter Hardware und Simulation
-
-## 3. Danach lernen
-
-- Visual Studio
-- C#-Klassen und Interfaces
-- Portierung der Python-Struktur nach C#
-
-## 4. Erst spaeter lernen
-
-- .NET-Webkonzepte
-- WebUI
-- Browserbedienung
-- responsive Layouts
-
----
-
-## Empfohlene Milestones
-
-| Milestone | Beschreibung | Ergebnis |
-| --------- | -------------------------- | ---------------------------------------- |
-| M1 | Kamera laeuft in Python | Livebild sichtbar |
-| M2 | Snapshot funktioniert | Einzelbild speicherbar |
-| M3 | Save Path steuerbar | Bilder landen kontrolliert im Zielordner |
-| M4 | Recording-Grundfunktion | Bildserie / "Video"-aehnliche Speicherung |
-| M5 | Python sauber strukturiert | Services + Modelle vorhanden |
-| M5a | Simulationspfad vorhanden | Demo- und Testbetrieb auch ohne Hardware |
-| M6 | C#-Port Grundgeruest | Kamera-Modul in Visual Studio |
-| M7 | Host-Ansteuerung | Befehle aus Hauptsoftware moeglich |
-| M8 | WebUI-Vorbereitung | Architektur dafuer sauber genug |
-| M9 | erste WebUI | Browseransicht mit Status + Preview |
-
-## Minimaler Umsetzungsplan
-
-### Kurzfristig
-
-- Python in PyCharm
-- Kamera-Prototyp
-- Livebild
-- Snapshot
-- Save Path
-- Logging
-- bei Bedarf Simulationsquelle oder Beispielbildquelle fuer Demos und testsichere Entwicklung
-
-### Mittelfristig
-
-- gleiche Struktur in C#
-- Teamkompatibles Kamera-Modul
-- Host-Integration
-
-### Langfristig
-
-- WebUI
-- Tablet-/Mobil-Unterstuetzung
-- UI austauschbar, Kern bleibt gleich
-
----
-
-## Entscheidungsregel
-
-Wenn unklar ist, was als Naechstes kommt, dann gilt:
-
-**Immer zuerst den naechsten technisch verwertbaren Baustein bauen, nicht die spaetere Idealwelt.**
-
-Also jetzt:
-
-1. Kamera laeuft
-2. Snapshot laeuft
-3. Speichern laeuft
-4. Recording laeuft
-5. Simulationspfad fuer hardwarefreie Entwicklung steht
-6. Struktur wird sauber
-7. erst dann C#
-8. erst dann WebUI
-
----
-
-## Konkrete naechste Schritte
-
-### Naechster praktischer Schritt
-
-- PyCharm-Projekt anlegen
-- Kamera-SDK lokal testen
-- erstes Minimalprogramm fuer Livebild und Snapshot bauen
-
-### Danach
-
-- Modulstruktur definieren
-- Requests und Statusobjekte anlegen
-- Save-Path von aussen uebergebbar machen
-- Simulationspfad fuer Preview, Snapshot und Recording vorbereiten
-
-### Danach
-
-- Portierungsplan nach C# vorbereiten
-
----
-
-## Merksatz
-
-**Python ist dein schneller Lern- und Prototypingpfad.  
-C# ist dein teamfaehiger Produktpfad.  
-WebUI ist deine spaetere Skalierungsschicht.**
+1. Run the current Python baseline against real camera hardware again.
+2. Add a first real focus metric on top of the new foundation modules.
+3. Decide how ROI objects should enter preview and snapshot workflows without mixing UI and analysis responsibilities.
+4. Expand tests to cover the `vision_platform` namespace as the preferred future import surface.
+5. After that, move selected implementation files physically behind the already established platform module boundaries.

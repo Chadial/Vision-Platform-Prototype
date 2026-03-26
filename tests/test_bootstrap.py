@@ -3,12 +3,14 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
-from camera_app.bootstrap import build_camera_subsystem, build_simulated_camera_subsystem
-from camera_app.drivers.simulated_camera_driver import SimulatedCameraDriver
-from camera_app.models.apply_configuration_request import ApplyConfigurationRequest
-from camera_app.models.save_snapshot_request import SaveSnapshotRequest
-from camera_app.models.set_save_directory_request import SetSaveDirectoryRequest
-from camera_app.models.start_interval_capture_request import StartIntervalCaptureRequest
+from vision_platform import build_camera_subsystem, build_simulated_camera_subsystem
+from vision_platform.integrations.camera import SimulatedCameraDriver
+from vision_platform.models import (
+    ApplyConfigurationRequest,
+    SaveSnapshotRequest,
+    SetSaveDirectoryRequest,
+    StartIntervalCaptureRequest,
+)
 
 
 class BootstrapTests(unittest.TestCase):

@@ -3,8 +3,8 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
-from camera_app.imaging.opencv_adapter import OpenCvFrameAdapter
-from camera_app.models.captured_frame import CapturedFrame
+from vision_platform.imaging import OpenCvFrameAdapter
+from vision_platform.models import CapturedFrame
 
 
 class _FakeArray:

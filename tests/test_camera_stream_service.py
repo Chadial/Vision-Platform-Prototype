@@ -4,12 +4,11 @@ from time import sleep
 import unittest
 
 from tests import _path_setup
-from camera_app.drivers.simulated_camera_driver import SimulatedCameraDriver
-from camera_app.models.camera_configuration import CameraConfiguration
-from camera_app.models.interval_capture_request import IntervalCaptureRequest
-from camera_app.models.recording_request import RecordingRequest
-from camera_app.services.camera_service import CameraService
-from camera_app.services.camera_stream_service import CameraStreamService
+from vision_platform.integrations.camera import SimulatedCameraDriver
+from vision_platform.libraries.common_models import RoiDefinition
+from vision_platform.models import CameraConfiguration, IntervalCaptureRequest, RecordingRequest
+from vision_platform.services.recording_service import CameraService
+from vision_platform.services.stream_service import CameraStreamService
 
 
 class CameraStreamServiceTests(unittest.TestCase):
@@ -115,6 +114,47 @@ class CameraStreamServiceTests(unittest.TestCase):
             finally:
                 stream_service.stop_preview()
                 camera_service.shutdown()
+
+    def test_stream_service_can_produce_focus_state_from_simulated_preview(self) -> None:
+        driver = SimulatedCameraDriver(width=6, height=6, pixel_format="Mono8")
+        camera_service = CameraService(driver)
+        camera_service.initialize(camera_id="sim-focus")
+        camera_service.apply_configuration(CameraConfiguration(pixel_format="Mono8"))
+        stream_service = CameraStreamService(
+            driver,
+            preview_poll_interval_seconds=0.001,
+            shared_poll_interval_seconds=0.001,
+        )
+        focus_preview_service = stream_service.create_focus_preview_service()
+        roi = RoiDefinition(
+            roi_id="focus-zone",
+            shape="rectangle",
+            points=((1.0, 1.0), (5.0, 1.0), (5.0, 5.0), (1.0, 5.0)),
+        )
+
+        stream_service.start_preview()
+        try:
+            focus_state = None
+            for _ in range(100):
+                focus_state = focus_preview_service.refresh_once(roi=roi)
+                if focus_state is not None and focus_state.result.is_valid:
+                    break
+                sleep(0.01)
+
+            self.assertIsNotNone(focus_state)
+            self.assertTrue(focus_state.result.is_valid)
+            self.assertEqual(focus_state.result.method, "laplace")
+            self.assertEqual(focus_state.overlay.roi_id, "focus-zone")
+            self.assertEqual(focus_state.overlay.region_bounds, (1.0, 1.0, 5.0, 5.0))
+            self.assertEqual(focus_state.overlay.anchor_x, 3.0)
+            self.assertEqual(focus_state.overlay.anchor_y, 3.0)
+            self.assertEqual(
+                focus_preview_service.get_latest_focus_state().result.source_frame_id,
+                focus_state.result.source_frame_id,
+            )
+        finally:
+            stream_service.stop_preview()
+            camera_service.shutdown()
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+from vision_platform.libraries.common_models.frame_models import FrameData, FrameMetadata
 from camera_app.models.preview_frame_info import PreviewFrameInfo
 
 
@@ -35,4 +36,17 @@ class CapturedFrame:
             width=self.width,
             height=self.height,
             pixel_format=self.pixel_format,
+        )
+
+    def to_frame_data(self) -> FrameData:
+        return FrameData(
+            data=self.get_buffer_bytes(),
+            metadata=FrameMetadata(
+                frame_id=self.frame_id,
+                camera_timestamp=self.camera_timestamp,
+                captured_utc=self.timestamp_utc,
+                pixel_format=self.pixel_format,
+                width=self.width,
+                height=self.height,
+            ),
         )

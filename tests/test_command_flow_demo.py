@@ -3,7 +3,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
-from camera_app.smoke.command_flow_demo import run_simulated_command_flow
+from vision_platform.apps.opencv_prototype.command_flow_demo import run_simulated_command_flow
 
 
 class CommandFlowDemoTests(unittest.TestCase):
