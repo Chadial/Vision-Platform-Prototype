@@ -104,6 +104,35 @@ class FocusCoreTests(unittest.TestCase):
         self.assertFalse(result.is_valid)
         self.assertEqual(result.score, 0.0)
 
+    def test_disabled_roi_falls_back_to_whole_frame_scoring(self) -> None:
+        frame = FrameData(
+            data=_mono8_frame_bytes(
+                [
+                    [0, 255, 0, 255, 0],
+                    [255, 0, 255, 0, 255],
+                    [0, 255, 0, 255, 0],
+                    [255, 0, 255, 0, 255],
+                    [0, 255, 0, 255, 0],
+                ]
+            ),
+            metadata=FrameMetadata(width=5, height=5, pixel_format="Mono8", frame_id=9),
+        )
+        disabled_roi_request = FocusRequest(
+            method="laplace",
+            roi=RoiDefinition(
+                roi_id="ignored-roi",
+                shape="rectangle",
+                points=((1.0, 1.0), (4.0, 4.0)),
+                enabled=False,
+            ),
+        )
+
+        full_result = evaluate_focus(frame)
+        disabled_roi_result = evaluate_focus(frame, request=disabled_roi_request)
+
+        self.assertTrue(disabled_roi_result.is_valid)
+        self.assertEqual(full_result.score, disabled_roi_result.score)
+
 
 if __name__ == "__main__":
     unittest.main()
