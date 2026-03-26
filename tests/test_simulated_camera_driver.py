@@ -4,14 +4,10 @@ from time import sleep
 import unittest
 
 from tests import _path_setup
-from camera_app.drivers.simulated_camera_driver import SimulatedCameraDriver
-from camera_app.models.camera_configuration import CameraConfiguration
-from camera_app.models.snapshot_request import SnapshotRequest
-from camera_app.models.recording_request import RecordingRequest
-from camera_app.services.preview_service import PreviewService
-from camera_app.services.recording_service import RecordingService
-from camera_app.services.shared_frame_source import SharedFrameSource
-from camera_app.services.snapshot_service import SnapshotService
+from vision_platform.integrations.camera import SimulatedCameraDriver
+from vision_platform.models import CameraConfiguration, RecordingRequest, SnapshotRequest
+from vision_platform.services.recording_service import RecordingService, SnapshotService
+from vision_platform.services.stream_service import PreviewService, SharedFrameSource
 
 
 class SimulatedCameraDriverTests(unittest.TestCase):

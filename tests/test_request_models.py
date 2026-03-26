@@ -2,12 +2,14 @@ from pathlib import Path
 import unittest
 
 from tests import _path_setup
-from camera_app.models.apply_configuration_request import ApplyConfigurationRequest
-from camera_app.models.interval_capture_request import IntervalCaptureRequest
-from camera_app.models.save_snapshot_request import SaveSnapshotRequest
-from camera_app.models.set_save_directory_request import SetSaveDirectoryRequest
-from camera_app.models.start_interval_capture_request import StartIntervalCaptureRequest
-from camera_app.models.start_recording_request import StartRecordingRequest
+from vision_platform.models import (
+    ApplyConfigurationRequest,
+    IntervalCaptureRequest,
+    SaveSnapshotRequest,
+    SetSaveDirectoryRequest,
+    StartIntervalCaptureRequest,
+    StartRecordingRequest,
+)
 
 
 class RequestModelTests(unittest.TestCase):

@@ -4,8 +4,8 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
-from camera_app.models.camera_configuration import CameraConfiguration
-from camera_app.smoke.snapshot_smoke import run_snapshot_smoke
+from vision_platform.models import CameraConfiguration
+from vision_platform.apps.opencv_prototype.snapshot_smoke import run_snapshot_smoke
 
 
 class SnapshotSmokeTests(unittest.TestCase):

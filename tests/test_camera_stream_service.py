@@ -4,12 +4,10 @@ from time import sleep
 import unittest
 
 from tests import _path_setup
-from camera_app.drivers.simulated_camera_driver import SimulatedCameraDriver
-from camera_app.models.camera_configuration import CameraConfiguration
-from camera_app.models.interval_capture_request import IntervalCaptureRequest
-from camera_app.models.recording_request import RecordingRequest
-from camera_app.services.camera_service import CameraService
-from camera_app.services.camera_stream_service import CameraStreamService
+from vision_platform.integrations.camera import SimulatedCameraDriver
+from vision_platform.models import CameraConfiguration, IntervalCaptureRequest, RecordingRequest
+from vision_platform.services.recording_service import CameraService
+from vision_platform.services.stream_service import CameraStreamService
 
 
 class CameraStreamServiceTests(unittest.TestCase):

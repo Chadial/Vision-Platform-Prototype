@@ -3,12 +3,12 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 from tests import _path_setup
-from camera_app.models.camera_configuration import CameraConfiguration
-from camera_app.drivers.vimbax_camera_driver import VimbaXCameraDriver
+from vision_platform.models import CameraConfiguration
+from vision_platform.integrations.camera import VimbaXCameraDriver
 
 
 class VimbaXCameraDriverTests(unittest.TestCase):
-    @patch("camera_app.drivers.vimbax_camera_driver.VmbSystem")
+    @patch("vision_platform.integrations.camera.vimbax_camera_driver.VmbSystem")
     def test_initialize_uses_first_camera_when_no_id_is_given(self, vmb_system_type: MagicMock) -> None:
         fake_camera = MagicMock()
         fake_camera.get_id.return_value = "CAM-001"
@@ -34,7 +34,7 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         fake_vmb_system.__enter__.assert_called_once()
         fake_camera.__enter__.assert_called_once()
 
-    @patch("camera_app.drivers.vimbax_camera_driver.VmbSystem")
+    @patch("vision_platform.integrations.camera.vimbax_camera_driver.VmbSystem")
     def test_initialize_uses_explicit_camera_id(self, vmb_system_type: MagicMock) -> None:
         fake_camera = MagicMock()
         fake_camera.get_id.return_value = "CAM-123"
@@ -54,7 +54,7 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         self.assertEqual(status.camera_id, "CAM-123")
         fake_vmb_system.get_camera_by_id.assert_called_once_with("CAM-123")
 
-    @patch("camera_app.drivers.vimbax_camera_driver.VmbSystem")
+    @patch("vision_platform.integrations.camera.vimbax_camera_driver.VmbSystem")
     def test_shutdown_closes_camera_and_system(self, vmb_system_type: MagicMock) -> None:
         fake_camera = MagicMock()
         fake_camera.get_id.return_value = "CAM-001"

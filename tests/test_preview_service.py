@@ -3,9 +3,8 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
-from camera_app.models.captured_frame import CapturedFrame
-from camera_app.services.preview_service import PreviewService
-from camera_app.services.shared_frame_source import SharedFrameSource
+from vision_platform.models import CapturedFrame
+from vision_platform.services.stream_service import PreviewService, SharedFrameSource
 
 
 class PreviewServiceTests(unittest.TestCase):
@@ -69,7 +68,7 @@ class PreviewServiceTests(unittest.TestCase):
 
         service = PreviewService(fake_driver, poll_interval_seconds=0.01)
 
-        with self.assertLogs("camera_app.services.preview_service", level="ERROR") as logs:
+        with self.assertLogs("vision_platform.services.stream_service.preview_service", level="ERROR") as logs:
             service.start()
             try:
                 for _ in range(20):
@@ -154,7 +153,7 @@ class PreviewServiceTests(unittest.TestCase):
 
         service.__class__.__dict__["start"].__globals__["Thread"] = _BrokenThread
         try:
-            with self.assertLogs("camera_app.services.preview_service", level="ERROR") as logs:
+            with self.assertLogs("vision_platform.services.stream_service.preview_service", level="ERROR") as logs:
                 with self.assertRaisesRegex(RuntimeError, "thread setup failed"):
                     service.start()
         finally:
