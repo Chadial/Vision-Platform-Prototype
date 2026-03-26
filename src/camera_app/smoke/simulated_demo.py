@@ -7,12 +7,12 @@ from time import sleep
 from camera_app.drivers.simulated_camera_driver import SimulatedCameraDriver
 from camera_app.logging.log_service import configure_logging
 from camera_app.models.camera_configuration import CameraConfiguration
+from camera_app.models.interval_capture_request import IntervalCaptureRequest
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.snapshot_request import SnapshotRequest
 from camera_app.smoke.demo_result import DemoRunResult
 from camera_app.services.camera_service import CameraService
-from camera_app.services.preview_service import PreviewService
-from camera_app.services.recording_service import RecordingService
+from camera_app.services.camera_stream_service import CameraStreamService
 from camera_app.services.snapshot_service import SnapshotService
 
 
@@ -20,16 +20,22 @@ def run_simulated_demo(
     save_directory: Path,
     file_stem: str,
     sample_image_paths: list[Path] | None = None,
+    interval_seconds: float = 0.05,
+    interval_frame_count: int = 3,
     frame_limit: int = 3,
 ) -> DemoRunResult:
     driver = SimulatedCameraDriver(sample_image_paths=sample_image_paths or [])
     camera_service = CameraService(driver)
     snapshot_service = SnapshotService(driver)
-    recording_service = RecordingService(
+    stream_service = CameraStreamService(
         driver,
+        preview_poll_interval_seconds=0.001,
+        shared_poll_interval_seconds=0.001,
+    )
+    recording_service = stream_service.create_recording_service(
         configuration_provider=camera_service.get_last_configuration,
     )
-    preview_service = PreviewService(driver, poll_interval_seconds=0.001)
+    interval_capture_service = stream_service.create_interval_capture_service()
 
     try:
         camera_service.initialize(camera_id="sim-demo")
@@ -39,12 +45,37 @@ def run_simulated_demo(
             SnapshotRequest(save_directory=save_directory, file_stem=f"{file_stem}_snapshot", file_extension=".png")
         )
 
-        preview_service.start()
+        stream_service.start_preview()
         try:
-            preview_service.refresh_once()
-            preview_info = preview_service.get_latest_frame_info()
+            for _ in range(100):
+                stream_service.refresh_preview_once()
+                preview_info = stream_service.get_latest_frame_info()
+                if preview_info is not None:
+                    break
+                sleep(0.01)
+
+            interval_capture_status = interval_capture_service.start_capture(
+                IntervalCaptureRequest(
+                    save_directory=save_directory,
+                    file_stem=f"{file_stem}_interval",
+                    file_extension=".raw",
+                    interval_seconds=interval_seconds,
+                    max_frame_count=interval_frame_count,
+                )
+            )
+
+            for _ in range(300):
+                current_interval_status = interval_capture_service.get_status()
+                if (
+                    not current_interval_status.is_capturing
+                    and current_interval_status.frames_written == interval_frame_count
+                ):
+                    break
+                sleep(0.01)
+
+            final_interval_capture_status = interval_capture_service.get_status()
         finally:
-            preview_service.stop()
+            stream_service.stop_preview()
 
         recording_status = recording_service.start_recording(
             RecordingRequest(
@@ -63,6 +94,8 @@ def run_simulated_demo(
             success=True,
             snapshot_path=snapshot_path,
             preview_frame_info=preview_info,
+            initial_interval_capture_status=interval_capture_status,
+            interval_capture_status=final_interval_capture_status,
             recording_status=recording_service.get_status(),
             initial_recording_status=recording_status,
         )
@@ -79,6 +112,18 @@ def _build_argument_parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help="Optional directory containing .pgm or .ppm sample images for the simulation source.",
+    )
+    parser.add_argument(
+        "--interval-seconds",
+        type=float,
+        default=0.05,
+        help="Capture one frame at this interval from the shared preview stream.",
+    )
+    parser.add_argument(
+        "--interval-frame-count",
+        type=int,
+        default=3,
+        help="Number of interval-capture frames to save from the shared preview stream.",
     )
     parser.add_argument("--frame-limit", type=int, default=3, help="Number of frames to record in demo mode.")
     return parser
@@ -102,6 +147,8 @@ def main() -> int:
         save_directory=args.save_directory,
         file_stem=args.file_stem,
         sample_image_paths=sample_paths,
+        interval_seconds=args.interval_seconds,
+        interval_frame_count=args.interval_frame_count,
         frame_limit=args.frame_limit,
     )
     print(result.snapshot_path)

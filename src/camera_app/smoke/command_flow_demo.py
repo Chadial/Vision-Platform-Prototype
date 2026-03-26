@@ -4,36 +4,32 @@ import argparse
 from pathlib import Path
 from time import sleep
 
-from camera_app.control.command_controller import CommandController
-from camera_app.drivers.simulated_camera_driver import SimulatedCameraDriver
+from camera_app.bootstrap import build_simulated_camera_subsystem
 from camera_app.logging.log_service import configure_logging
 from camera_app.models.apply_configuration_request import ApplyConfigurationRequest
 from camera_app.models.save_snapshot_request import SaveSnapshotRequest
 from camera_app.models.set_save_directory_request import SetSaveDirectoryRequest
+from camera_app.models.start_interval_capture_request import StartIntervalCaptureRequest
 from camera_app.models.start_recording_request import StartRecordingRequest
+from camera_app.models.stop_interval_capture_request import StopIntervalCaptureRequest
 from camera_app.models.stop_recording_request import StopRecordingRequest
 from camera_app.smoke.demo_result import DemoRunResult
-from camera_app.services.camera_service import CameraService
-from camera_app.services.recording_service import RecordingService
-from camera_app.services.snapshot_service import SnapshotService
 
 
 def run_simulated_command_flow(
     base_directory: Path,
     run_name: str,
     snapshot_stem: str = "snapshot",
+    interval_stem: str = "interval",
+    interval_seconds: float = 0.05,
+    interval_frame_count: int = 3,
     recording_stem: str = "recording",
     frame_limit: int = 3,
     target_frame_rate: float | None = None,
 ) -> DemoRunResult:
-    driver = SimulatedCameraDriver()
-    camera_service = CameraService(driver)
-    snapshot_service = SnapshotService(driver)
-    recording_service = RecordingService(
-        driver,
-        configuration_provider=camera_service.get_last_configuration,
-    )
-    controller = CommandController(camera_service, snapshot_service, recording_service)
+    subsystem = build_simulated_camera_subsystem()
+    camera_service = subsystem.camera_service
+    controller = subsystem.command_controller
 
     try:
         camera_service.initialize(camera_id="sim-command-flow")
@@ -62,6 +58,25 @@ def run_simulated_command_flow(
             )
         )
 
+        subsystem.stream_service.start_preview()
+        try:
+            initial_interval_capture_status = controller.start_interval_capture(
+                StartIntervalCaptureRequest(
+                    file_stem=interval_stem,
+                    file_extension=".raw",
+                    interval_seconds=interval_seconds,
+                    max_frame_count=interval_frame_count,
+                )
+            )
+
+            while controller.get_status().interval_capture.is_capturing:
+                sleep(0.01)
+
+            interval_capture_status = controller.get_status().interval_capture
+            stop_interval_capture_status = controller.stop_interval_capture(StopIntervalCaptureRequest())
+        finally:
+            subsystem.stream_service.stop_preview()
+
         initial_recording_status = controller.start_recording(
             StartRecordingRequest(
                 file_stem=recording_stem,
@@ -79,9 +94,14 @@ def run_simulated_command_flow(
         return DemoRunResult(
             success=True,
             snapshot_path=snapshot_path,
+            initial_interval_capture_status=initial_interval_capture_status,
+            interval_capture_status=interval_capture_status,
             initial_recording_status=initial_recording_status,
             final_status=final_status,
-            stop_status=stop_status,
+            stop_status={
+                "recording": stop_status,
+                "interval_capture": stop_interval_capture_status,
+            },
         )
     finally:
         camera_service.shutdown()
@@ -92,6 +112,19 @@ def _build_argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--base-directory", type=Path, required=True, help="Base output directory for the run.")
     parser.add_argument("--run-name", default="command_run_001", help="Subdirectory name for this command-driven run.")
     parser.add_argument("--snapshot-stem", default="snapshot", help="Snapshot file stem.")
+    parser.add_argument("--interval-stem", default="interval", help="Interval-capture file stem.")
+    parser.add_argument(
+        "--interval-seconds",
+        type=float,
+        default=0.05,
+        help="Capture one frame at this interval from the shared preview stream.",
+    )
+    parser.add_argument(
+        "--interval-frame-count",
+        type=int,
+        default=3,
+        help="Number of interval-capture frames to save from the shared preview stream.",
+    )
     parser.add_argument("--recording-stem", default="recording", help="Recording file stem.")
     parser.add_argument("--frame-limit", type=int, default=3, help="Number of frames to record.")
     parser.add_argument(
@@ -111,6 +144,9 @@ def main() -> int:
         base_directory=args.base_directory,
         run_name=args.run_name,
         snapshot_stem=args.snapshot_stem,
+        interval_stem=args.interval_stem,
+        interval_seconds=args.interval_seconds,
+        interval_frame_count=args.interval_frame_count,
         recording_stem=args.recording_stem,
         frame_limit=args.frame_limit,
         target_frame_rate=args.target_frame_rate,

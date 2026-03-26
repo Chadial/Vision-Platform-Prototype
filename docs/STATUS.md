@@ -31,6 +31,9 @@ The repository currently provides a structured Python prototype for the camera s
 - optional OpenCV imaging adapter for preview-window display and grayscale-safe export
 - recording base flow with bounded queue, writer loop, and frame-limit stop condition
 - command-controller support for default save-directory resolution and consolidated subsystem status
+- `CameraStreamService` as a small orchestration layer for shared live acquisition across preview and recording
+- `IntervalCaptureService` for deterministic timed single-image capture from the shared live stream
+- `camera_app.bootstrap` as a small composition root for consistently wiring driver, services, stream orchestration, and command controller
 - explicit `SubsystemStatus` model with host-facing command readiness flags
 - camera status metadata that identifies hardware vs. simulation source kind and active driver name
 - external request models for configuration, save-directory changes, snapshot save, and recording start/stop
@@ -40,6 +43,7 @@ The repository currently provides a structured Python prototype for the camera s
 - command-flow demo for host-style external control using the simulated driver
 - a clear architectural basis for separating real hardware drivers from future simulation/demo drivers
 - a working simulated driver for hardware-free preview, snapshot, and recording flows
+- a shared frame-source path that lets preview and recording consume one acquisition loop together
 - optional OpenCV preview demo on top of the simulated preview service
 - optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
 - additional service hardening so preview/recording cleanup resets internal state defensively even when acquisition stop fails during recovery
@@ -107,22 +111,33 @@ The repository currently provides a structured Python prototype for the camera s
 - no trigger-based recording yet
 - no hardware-backed continuous acquisition validation yet
 
+### Interval Capture
+
+- `IntervalCaptureService` now supports timed single-image saving from a running shared acquisition
+- interval capture uses explicit stop conditions via `max_frame_count`, `duration_seconds`, or explicit stop
+- interval capture writes deterministic sequential filenames and can run in parallel with preview on the simulator-backed path
+- interval capture is now exposed through bootstrap wiring and the host-facing command controller
+- hardware-backed validation is still open
+
 ### Host Integration
 
 - command surface exists
 - default save directory can now be resolved into snapshot and recording requests
 - controller now exposes a typed `SubsystemStatus` model instead of an untyped dictionary
 - subsystem status now includes command readiness flags for configuration, snapshot, recording start, and recording stop
+- subsystem status now also includes interval-capture status together with start/stop readiness flags
 - camera status now exposes whether the active source is `hardware` or `simulation` together with the driver name
-- external request types now exist for `ApplyConfigurationRequest`, `SetSaveDirectoryRequest`, `SaveSnapshotRequest`, `StartRecordingRequest`, and `StopRecordingRequest`
+- external request types now exist for `ApplyConfigurationRequest`, `SetSaveDirectoryRequest`, `SaveSnapshotRequest`, `StartRecordingRequest`, `StopRecordingRequest`, `StartIntervalCaptureRequest`, and `StopIntervalCaptureRequest`
 - save-directory requests now support append-to-directory or create-new-subdirectory behavior
+- host-style command flow now covers interval capture from the shared stream in addition to snapshot and recording
 - deeper host-specific payload shaping is still open
 
 ### Validation
 
 - unit coverage exists for naming, preview, recording, driver integration, and command-controller behavior
 - dedicated tests now cover the external request model mappings and save-directory resolution rules
-- a simulated command-flow demo now validates a host-style `configure -> set save directory -> snapshot -> recording -> status` sequence
+- a simulated command-flow demo now validates a host-style `configure -> set save directory -> snapshot -> interval capture -> recording -> status` sequence
+- the direct simulated demo now also validates interval-based single-image saving from the shared stream before recording
 - runnable demo entry points exist for both the direct simulated service flow and the command-controller flow
 - dedicated tests now cover the optional OpenCV adapter, preview-window bridge, and Mono16 simulated frames
 - request and path validation is now hardened for snapshot, recording, file naming, and save-directory commands
@@ -141,6 +156,9 @@ The repository currently provides a structured Python prototype for the camera s
 ### Preview
 
 - service layer exists and is test-covered
+- preview can now run against an optional shared frame source instead of starting an independent acquisition loop
+- `CameraStreamService` now exposes that shared-acquisition path as the preferred composition point for live preview plus concurrent recording
+- `CameraStreamService` can now also create `IntervalCaptureService` for preview plus timed single-image saving from the same stream
 - an optional OpenCV preview window now exists above the service layer
 - no browser preview or non-OpenCV UI layer yet
 - hardware validation is currently blocked because the camera is not available
@@ -151,6 +169,8 @@ The repository currently provides a structured Python prototype for the camera s
 - architecture now explicitly expects separate real-hardware and simulated driver implementations
 - `SimulatedCameraDriver` is implemented for generated frames and `.pgm`/`.ppm` sample image sequences
 - a simulated demo entry point exists for preview, snapshot, and recording without hardware
+- simulator-backed tests now verify that preview and recording can share one acquisition loop without fighting over the driver
+- simulator-backed tests now also verify preview plus timed interval capture from the same shared stream
 - simulated generation now also covers `Mono16` frames for grayscale-save-path validation
 - sample-image demo support is limited to `.pgm` and `.ppm` files for now
 - real hardware validation is still required separately from simulation
@@ -174,7 +194,7 @@ The repository currently provides a structured Python prototype for the camera s
 ## Verified Test Commands
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos
+.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_interval_capture_service tests.test_camera_stream_service tests.test_bootstrap tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos
 ```
 
 ## Next Recommended Steps

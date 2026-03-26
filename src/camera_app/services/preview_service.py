@@ -7,12 +7,19 @@ from time import sleep
 from camera_app.drivers.camera_driver import CameraDriver
 from camera_app.models.captured_frame import CapturedFrame
 from camera_app.models.preview_frame_info import PreviewFrameInfo
+from camera_app.services.shared_frame_source import SharedFrameSource
 
 
 class PreviewService:
-    def __init__(self, driver: CameraDriver, poll_interval_seconds: float = 0.05) -> None:
+    def __init__(
+        self,
+        driver: CameraDriver,
+        poll_interval_seconds: float = 0.05,
+        shared_frame_source: SharedFrameSource | None = None,
+    ) -> None:
         self._driver = driver
         self._poll_interval_seconds = poll_interval_seconds
+        self._shared_frame_source = shared_frame_source
         self._logger = logging.getLogger(__name__)
         self._latest_frame: CapturedFrame | None = None
         self._latest_frame_info: PreviewFrameInfo | None = None
@@ -25,7 +32,10 @@ class PreviewService:
         if self.is_running:
             return
 
-        self._driver.start_acquisition()
+        if self._shared_frame_source is not None:
+            self._shared_frame_source.acquire()
+        else:
+            self._driver.start_acquisition()
         self._acquisition_started = True
         try:
             self._stop_event.clear()
@@ -49,7 +59,11 @@ class PreviewService:
         return self._worker_thread is not None and self._worker_thread.is_alive()
 
     def refresh_once(self) -> PreviewFrameInfo | None:
-        frame = self._driver.get_latest_frame()
+        frame = (
+            self._shared_frame_source.get_latest_frame()
+            if self._shared_frame_source is not None
+            else self._driver.get_latest_frame()
+        )
         if frame is None:
             return None
 
@@ -80,7 +94,10 @@ class PreviewService:
             return
 
         try:
-            self._driver.stop_acquisition()
+            if self._shared_frame_source is not None:
+                self._shared_frame_source.release()
+            else:
+                self._driver.stop_acquisition()
         except Exception:
             self._acquisition_started = False
             if suppress_errors:

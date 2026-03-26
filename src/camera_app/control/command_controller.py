@@ -4,18 +4,24 @@ from typing import Optional
 
 from camera_app.models.apply_configuration_request import ApplyConfigurationRequest
 from camera_app.models.camera_configuration import CameraConfiguration
+from camera_app.models.interval_capture_request import IntervalCaptureRequest
+from camera_app.models.interval_capture_status import IntervalCaptureStatus
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.save_snapshot_request import SaveSnapshotRequest
 from camera_app.models.snapshot_request import SnapshotRequest
+from camera_app.models.start_interval_capture_request import StartIntervalCaptureRequest
 from camera_app.models.start_recording_request import StartRecordingRequest
+from camera_app.models.stop_interval_capture_request import StopIntervalCaptureRequest
 from camera_app.models.stop_recording_request import StopRecordingRequest
 from camera_app.models.set_save_directory_request import SetSaveDirectoryRequest
 from camera_app.models.subsystem_status import SubsystemStatus
 from camera_app.services.camera_service import CameraService
+from camera_app.services.interval_capture_service import IntervalCaptureService
 from camera_app.services.recording_service import RecordingService
 from camera_app.services.snapshot_service import SnapshotService
 from camera_app.validation.request_validation import (
     validate_camera_configuration,
+    validate_interval_capture_request,
     validate_recording_request,
     validate_save_directory_request,
     validate_snapshot_request,
@@ -28,10 +34,12 @@ class CommandController:
         camera_service: CameraService,
         snapshot_service: SnapshotService,
         recording_service: RecordingService,
+        interval_capture_service: IntervalCaptureService | None = None,
     ) -> None:
         self._camera_service = camera_service
         self._snapshot_service = snapshot_service
         self._recording_service = recording_service
+        self._interval_capture_service = interval_capture_service
         self._default_save_directory: Optional[Path] = None
 
     def apply_configuration(self, config: CameraConfiguration | ApplyConfigurationRequest) -> None:
@@ -64,21 +72,47 @@ class CommandController:
     def stop_recording(self, request: StopRecordingRequest | None = None):
         return self._recording_service.stop_recording()
 
+    def start_interval_capture(self, request: IntervalCaptureRequest | StartIntervalCaptureRequest):
+        if self._interval_capture_service is None:
+            raise RuntimeError("Interval capture service is not configured.")
+        if isinstance(request, StartIntervalCaptureRequest):
+            request = request.to_interval_capture_request()
+        self._require_initialized_camera("start interval capture")
+        validate_interval_capture_request(request)
+        return self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
+
+    def stop_interval_capture(self, request: StopIntervalCaptureRequest | None = None):
+        if self._interval_capture_service is None:
+            raise RuntimeError("Interval capture service is not configured.")
+        return self._interval_capture_service.stop_capture()
+
     def get_status(self) -> SubsystemStatus:
         camera_status = self._camera_service.get_status()
         configuration = self._camera_service.get_last_configuration()
         recording_status = self._recording_service.get_status()
+        interval_capture_status = (
+            self._interval_capture_service.get_status()
+            if self._interval_capture_service is not None
+            else IntervalCaptureStatus()
+        )
         can_save_to_disk = camera_status.is_initialized and self._default_save_directory is not None
 
         return SubsystemStatus(
             camera=camera_status,
             configuration=configuration,
             recording=recording_status,
+            interval_capture=interval_capture_status,
             default_save_directory=self._default_save_directory,
             can_apply_configuration=camera_status.is_initialized,
             can_save_snapshot=can_save_to_disk,
             can_start_recording=can_save_to_disk and not recording_status.is_recording,
             can_stop_recording=recording_status.is_recording,
+            can_start_interval_capture=(
+                can_save_to_disk
+                and self._interval_capture_service is not None
+                and not interval_capture_status.is_capturing
+            ),
+            can_stop_interval_capture=interval_capture_status.is_capturing,
         )
 
     def _resolve_snapshot_request(self, request: SnapshotRequest) -> SnapshotRequest:
@@ -91,6 +125,14 @@ class CommandController:
         resolved_save_directory = request.save_directory or self._default_save_directory
         if resolved_save_directory is None:
             raise ValueError("RecordingRequest.save_directory is not set and no default save directory is configured.")
+        return replace(request, save_directory=resolved_save_directory)
+
+    def _resolve_interval_capture_request(self, request: IntervalCaptureRequest) -> IntervalCaptureRequest:
+        resolved_save_directory = request.save_directory or self._default_save_directory
+        if resolved_save_directory is None:
+            raise ValueError(
+                "IntervalCaptureRequest.save_directory is not set and no default save directory is configured."
+            )
         return replace(request, save_directory=resolved_save_directory)
 
     def _require_initialized_camera(self, action: str) -> None:

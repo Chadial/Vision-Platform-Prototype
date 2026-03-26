@@ -59,6 +59,7 @@ Status:
 Status:
 
 - completed at service level
+- `CameraStreamService` now provides a host-friendly composition point for preview on a shared live acquisition
 - no dedicated desktop or browser preview UI in the core repository
 
 ## Phase 5: Recording Pipeline
@@ -73,6 +74,8 @@ Status:
 Status:
 
 - completed for simulator-backed validation
+- preview and recording can now share one acquisition loop through a common frame source
+- interval-based single-image capture from that shared live stream is now implemented in the Python prototype
 - still missing trigger-based recording
 - still needs repeated real-hardware validation
 
@@ -99,6 +102,7 @@ Status:
 Status:
 
 - completed for the current Python scope
+- bootstrap helpers now provide a consistent Python composition root for host-facing service wiring
 
 ### Phase 7a: Optional Payload Contract
 

@@ -2,9 +2,15 @@ from pathlib import Path
 import unittest
 
 from tests import _path_setup
+from camera_app.models.interval_capture_request import IntervalCaptureRequest
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.snapshot_request import SnapshotRequest
-from camera_app.storage.file_naming import build_recording_frame_path, build_recording_log_path, build_snapshot_path
+from camera_app.storage.file_naming import (
+    build_interval_capture_frame_path,
+    build_recording_frame_path,
+    build_recording_log_path,
+    build_snapshot_path,
+)
 
 
 class FileNamingTests(unittest.TestCase):
@@ -46,6 +52,17 @@ class FileNamingTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "single extension segment"):
             build_recording_frame_path(request, 0)
+
+    def test_build_interval_capture_frame_path_uses_zero_padded_index(self) -> None:
+        request = IntervalCaptureRequest(
+            save_directory=Path("captures"),
+            file_stem="interval",
+            interval_seconds=1.0,
+            file_extension="png",
+            max_frame_count=3,
+        )
+
+        self.assertEqual(build_interval_capture_frame_path(request, 2), Path("captures/interval_000002.png"))
 
 
 if __name__ == "__main__":

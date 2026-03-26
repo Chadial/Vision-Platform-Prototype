@@ -33,7 +33,7 @@ Avoid:
 Operational preconditions:
 
 - camera-side commands require an initialized camera service
-- snapshot and recording require either an explicit `save_directory` in the request or a previously configured default save directory
+- snapshot, interval capture, and recording require either an explicit `save_directory` in the request or a previously configured default save directory
 - an explicit request `save_directory` overrides the default save directory
 
 ## Command Terms
@@ -45,6 +45,8 @@ Use these request names for external control:
 - `SaveSnapshotRequest`
 - `StartRecordingRequest`
 - `StopRecordingRequest`
+- `StartIntervalCaptureRequest`
+- `StopIntervalCaptureRequest`
 - `SubsystemStatus`
 
 These names are intentionally neutral. They fit:
@@ -226,6 +228,59 @@ StopRecordingRequest(
 )
 ```
 
+### `StartIntervalCaptureRequest`
+
+Use this request to save one frame at a fixed interval from a running live stream.
+
+Fields:
+
+- `file_stem`
+- `interval_seconds`
+- `file_extension`
+- `save_directory`
+- `max_frame_count`
+- `duration_seconds`
+- `create_directories`
+- `camera_id`
+
+Stop conditions:
+
+- `max_frame_count`
+- `duration_seconds`
+- explicit stop via `StopIntervalCaptureRequest`
+
+Notes:
+
+- At least one stop condition should be given.
+- `save_directory` may be omitted if a default save directory was set earlier.
+- This command is intended for timed single-image capture, not full-rate recording.
+
+Example:
+
+```python
+StartIntervalCaptureRequest(
+    file_stem="interval",
+    interval_seconds=1.0,
+    max_frame_count=10,
+)
+```
+
+### `StopIntervalCaptureRequest`
+
+Use this request to stop an active interval capture explicitly.
+
+Fields:
+
+- `reason`
+
+Example:
+
+```python
+StopIntervalCaptureRequest(
+    reason="external_request",
+)
+```
+
 ## Recommended Command Sequence
 
 Typical host control sequence:
@@ -233,9 +288,11 @@ Typical host control sequence:
 1. Initialize the camera service.
 2. Apply camera configuration.
 3. Set or update the save directory.
-4. Save a snapshot or start a recording.
-5. Poll `SubsystemStatus` when needed.
-6. Stop recording explicitly if the stop condition is not purely automatic.
+4. Save a snapshot.
+5. Optionally start interval capture when timed single-image saving from the live stream is needed.
+6. Start a recording when a full-rate frame series is needed.
+7. Poll `SubsystemStatus` when needed.
+8. Stop recording or interval capture explicitly if the stop condition is not purely automatic.
 
 Example sequence:
 
@@ -264,6 +321,14 @@ controller.save_snapshot(
     )
 )
 
+controller.start_interval_capture(
+    StartIntervalCaptureRequest(
+        file_stem="interval",
+        interval_seconds=1.0,
+        max_frame_count=10,
+    )
+)
+
 controller.start_recording(
     StartRecordingRequest(
         file_stem="recording",
@@ -282,11 +347,14 @@ It currently provides:
 - `camera`
 - `configuration`
 - `recording`
+- `interval_capture`
 - `default_save_directory`
 - `can_apply_configuration`
 - `can_save_snapshot`
 - `can_start_recording`
 - `can_stop_recording`
+- `can_start_interval_capture`
+- `can_stop_interval_capture`
 
 This status model is intended for:
 
@@ -321,6 +389,8 @@ Keep these concerns separate:
 - one-shot image saving via `SaveSnapshotRequest`
 - series acquisition via `StartRecordingRequest`
 - stop control via `StopRecordingRequest`
+- timed single-image capture via `StartIntervalCaptureRequest`
+- interval-capture stop control via `StopIntervalCaptureRequest`
 
 This separation should survive the later C# migration.
 

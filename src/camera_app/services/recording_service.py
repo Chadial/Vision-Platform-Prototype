@@ -13,6 +13,7 @@ from camera_app.models.camera_configuration import CameraConfiguration
 from camera_app.models.captured_frame import CapturedFrame
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.recording_status import RecordingStatus
+from camera_app.services.shared_frame_source import SharedFrameSource
 from camera_app.storage.file_naming import build_recording_frame_path, build_recording_log_path
 from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_recording_request
@@ -25,11 +26,13 @@ class RecordingService:
         frame_writer: FrameWriter | None = None,
         poll_interval_seconds: float = 0.01,
         configuration_provider: Callable[[], CameraConfiguration | None] | None = None,
+        shared_frame_source: SharedFrameSource | None = None,
     ) -> None:
         self._driver = driver
         self._frame_writer = frame_writer or FrameWriter()
         self._poll_interval_seconds = poll_interval_seconds
         self._configuration_provider = configuration_provider
+        self._shared_frame_source = shared_frame_source
         self._logger = logging.getLogger(__name__)
         self._status_lock = Lock()
         self._status = RecordingStatus()
@@ -66,7 +69,10 @@ class RecordingService:
             )
             self._next_frame_due_at = monotonic()
             self._open_recording_log(request)
-            self._driver.start_acquisition()
+            if self._shared_frame_source is not None:
+                self._shared_frame_source.acquire()
+            else:
+                self._driver.start_acquisition()
             self._acquisition_started = True
 
             self._producer_thread = Thread(target=self._producer_loop, name="RecordingProducer", daemon=True)
@@ -139,7 +145,11 @@ class RecordingService:
                     continue
 
             try:
-                frame = self._driver.get_latest_frame()
+                frame = (
+                    self._shared_frame_source.get_latest_frame()
+                    if self._shared_frame_source is not None
+                    else self._driver.get_latest_frame()
+                )
                 if frame is None:
                     sleep(self._poll_interval_seconds)
                     continue
@@ -299,7 +309,10 @@ class RecordingService:
             )
             if has_active_recording and self._acquisition_started and not self._acquisition_stopped:
                 try:
-                    self._driver.stop_acquisition()
+                    if self._shared_frame_source is not None:
+                        self._shared_frame_source.release()
+                    else:
+                        self._driver.stop_acquisition()
                 except Exception as exc:
                     stop_error = exc
                     if suppress_errors:

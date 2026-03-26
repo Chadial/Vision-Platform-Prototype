@@ -10,6 +10,7 @@ from camera_app.models.snapshot_request import SnapshotRequest
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.services.preview_service import PreviewService
 from camera_app.services.recording_service import RecordingService
+from camera_app.services.shared_frame_source import SharedFrameSource
 from camera_app.services.snapshot_service import SnapshotService
 
 
@@ -107,6 +108,68 @@ class SimulatedCameraDriverTests(unittest.TestCase):
             self.assertEqual(recording_service.get_status().frames_written, 3)
             self.assertTrue((Path(temp_dir) / "sim_recording_000000.raw").exists())
             self.assertTrue((Path(temp_dir) / "sim_recording_recording_log.csv").exists())
+
+    def test_preview_and_recording_can_share_one_acquisition_loop(self) -> None:
+        driver = SimulatedCameraDriver(width=2, height=2, pixel_format="Mono8")
+        driver.initialize()
+        shared_frame_source = SharedFrameSource(driver, poll_interval_seconds=0.001)
+        preview_service = PreviewService(
+            driver,
+            poll_interval_seconds=0.001,
+            shared_frame_source=shared_frame_source,
+        )
+        recording_service = RecordingService(
+            driver,
+            poll_interval_seconds=0.001,
+            shared_frame_source=shared_frame_source,
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            preview_service.start()
+            try:
+                for _ in range(100):
+                    if preview_service.get_latest_frame_info() is not None:
+                        break
+                    sleep(0.01)
+
+                recording_service.start_recording(
+                    RecordingRequest(
+                        save_directory=Path(temp_dir),
+                        file_stem="shared_recording",
+                        file_extension=".raw",
+                        frame_limit=3,
+                        queue_size=4,
+                        target_frame_rate=1.0,
+                    )
+                )
+
+                preview_frame_id_before = preview_service.get_latest_frame_info().frame_id
+
+                for _ in range(400):
+                    status = recording_service.get_status()
+                    preview_info = preview_service.get_latest_frame_info()
+                    if not status.is_recording and status.frames_written == 3 and preview_info is not None:
+                        break
+                    sleep(0.01)
+
+                final_status = recording_service.get_status()
+                self.assertFalse(final_status.is_recording)
+                self.assertEqual(final_status.frames_written, 3)
+                self.assertIsNotNone(preview_service.get_latest_frame_info())
+                self.assertGreater(preview_service.get_latest_frame_info().frame_id, preview_frame_id_before)
+                self.assertTrue((Path(temp_dir) / "shared_recording_000000.raw").exists())
+                self.assertTrue((Path(temp_dir) / "shared_recording_recording_log.csv").exists())
+
+                preview_frame_during_idle = preview_service.get_latest_frame_info().frame_id
+                for _ in range(100):
+                    latest_info = preview_service.get_latest_frame_info()
+                    if latest_info is not None and latest_info.frame_id > preview_frame_during_idle:
+                        break
+                    sleep(0.01)
+
+                self.assertGreater(preview_service.get_latest_frame_info().frame_id, preview_frame_during_idle)
+            finally:
+                preview_service.stop()
 
     def test_simulated_driver_uses_sample_pgm_sequence(self) -> None:
         with TemporaryDirectory() as temp_dir:

@@ -15,7 +15,11 @@ The current goal is not to build a full UI, but to establish a maintainable appl
 The repository is currently a simulator-validated Python prototype with:
 
 - clean driver/service/storage/control separation
-- working simulated preview, snapshot, recording, and host-style command flow
+- `CameraStreamService` as the intended orchestration point for shared live acquisition
+- `camera_app.bootstrap` as the intended composition point for wiring the subsystem consistently
+- working simulated preview, snapshot, interval capture, recording, and host-style command flow
+- an optional shared-acquisition path so preview and recording can consume the same live frame stream
+- `IntervalCaptureService` for timed single-image saving from the shared live stream
 - optional OpenCV-based preview inspection and grayscale-safe export paths
 
 Real hardware is currently not available, so the repository should not yet be treated as hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`GlobalRoadmap.md`](GlobalRoadmap.md).
@@ -227,6 +231,24 @@ For this repository, the intended order is:
 3. Pick one of the requirements files for the install path you need.
 4. Use [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1) for fast Windows setup, or this README for the exact manual commands.
 
+## Subsystem Bootstrap
+
+For application code, prefer the Python-side bootstrap helpers instead of manually instantiating every service:
+
+- `build_camera_subsystem(driver)` for a provided driver
+- `build_simulated_camera_subsystem(...)` for the simulator-backed path
+
+These helpers wire:
+
+- `CameraService`
+- `SnapshotService`
+- `CameraStreamService`
+- `RecordingService`
+- `IntervalCaptureService`
+- `CommandController`
+
+from one consistent composition root.
+
 ## Next Implementation Steps
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md).
@@ -239,7 +261,7 @@ For real-device validation steps, see [`docs/HARDWARE_EVALUATION.md`](docs/HARDW
 Run the current simulator-/service-focused verification block with:
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos
+.\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_interval_capture_service tests.test_camera_stream_service tests.test_bootstrap tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos
 ```
 
 ## Smoke Test
@@ -260,6 +282,14 @@ Run the hardware-free simulation path with generated frames:
 .\.venv\Scripts\python.exe .\run_simulated_demo.py --save-directory .\captures\simulated --file-stem demo
 ```
 
+This demo performs snapshot saving, interval-based single-image saving from the shared preview stream, and a short recording in one run.
+
+Example with explicit interval-capture settings:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_simulated_demo.py --save-directory .\captures\simulated --file-stem demo --interval-seconds 0.25 --interval-frame-count 5 --frame-limit 3
+```
+
 Optional sample images can be provided from a directory containing `.pgm` or `.ppm` files:
 
 ```powershell
@@ -272,6 +302,14 @@ Run a host-style command sequence through the `CommandController` with the simul
 
 ```powershell
 .\.venv\Scripts\python.exe .\run_command_flow_demo.py --base-directory .\captures\commands --run-name run_001 --frame-limit 3 --target-frame-rate 10
+```
+
+This command-flow demo also exercises interval capture from the shared preview stream before starting the recording flow.
+
+Example with explicit interval-capture settings:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_command_flow_demo.py --base-directory .\captures\commands --run-name run_001 --interval-seconds 0.5 --interval-frame-count 4 --frame-limit 3 --target-frame-rate 10
 ```
 
 ## Optional OpenCV Preview Demo

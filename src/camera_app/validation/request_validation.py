@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from camera_app.models.camera_configuration import CameraConfiguration
+from camera_app.models.interval_capture_request import IntervalCaptureRequest
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.snapshot_request import SnapshotRequest
 
@@ -23,6 +24,13 @@ def validate_recording_request(request: RecordingRequest) -> None:
     _validate_file_extension(request.file_extension, "RecordingRequest.file_extension")
     if request.save_directory is not None:
         _validate_directory_path(request.save_directory, "RecordingRequest.save_directory")
+
+
+def validate_interval_capture_request(request: IntervalCaptureRequest) -> None:
+    _validate_file_stem(request.file_stem, "IntervalCaptureRequest.file_stem")
+    _validate_file_extension(request.file_extension, "IntervalCaptureRequest.file_extension")
+    if request.save_directory is not None:
+        _validate_directory_path(request.save_directory, "IntervalCaptureRequest.save_directory")
 
 
 def validate_save_directory_request(request: "SetSaveDirectoryRequest") -> None:

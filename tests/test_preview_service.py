@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 from tests import _path_setup
 from camera_app.models.captured_frame import CapturedFrame
 from camera_app.services.preview_service import PreviewService
+from camera_app.services.shared_frame_source import SharedFrameSource
 
 
 class PreviewServiceTests(unittest.TestCase):
@@ -162,6 +163,36 @@ class PreviewServiceTests(unittest.TestCase):
         self.assertTrue(any("Preview acquisition stop failed during cleanup." in message for message in logs.output))
         self.assertFalse(service.is_running)
         self.assertFalse(service._acquisition_started)
+
+    def test_preview_service_can_use_shared_frame_source(self) -> None:
+        fake_frame = CapturedFrame(
+            raw_frame=b"",
+            width=640,
+            height=480,
+            frame_id=11,
+            pixel_format="Mono8",
+            timestamp_utc=datetime.now(timezone.utc),
+        )
+        fake_driver = MagicMock()
+        fake_driver.get_latest_frame.return_value = fake_frame
+        shared_frame_source = SharedFrameSource(fake_driver, poll_interval_seconds=0.01)
+        service = PreviewService(fake_driver, poll_interval_seconds=0.01, shared_frame_source=shared_frame_source)
+
+        service.start()
+        try:
+            for _ in range(20):
+                frame_info = service.get_latest_frame_info()
+                if frame_info is not None:
+                    break
+                from time import sleep
+
+                sleep(0.01)
+        finally:
+            service.stop()
+
+        fake_driver.start_acquisition.assert_called_once_with()
+        fake_driver.stop_acquisition.assert_called_once_with()
+        self.assertIsNotNone(service.get_latest_frame_info())
 
 
 if __name__ == "__main__":

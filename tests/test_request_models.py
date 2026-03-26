@@ -3,8 +3,10 @@ import unittest
 
 from tests import _path_setup
 from camera_app.models.apply_configuration_request import ApplyConfigurationRequest
+from camera_app.models.interval_capture_request import IntervalCaptureRequest
 from camera_app.models.save_snapshot_request import SaveSnapshotRequest
 from camera_app.models.set_save_directory_request import SetSaveDirectoryRequest
+from camera_app.models.start_interval_capture_request import StartIntervalCaptureRequest
 from camera_app.models.start_recording_request import StartRecordingRequest
 
 
@@ -99,6 +101,46 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(recording_request.target_frame_rate, 12.5)
         self.assertEqual(recording_request.queue_size, 16)
         self.assertEqual(recording_request.camera_id, "cam2")
+
+    def test_interval_capture_request_stores_expected_fields(self) -> None:
+        request = IntervalCaptureRequest(
+            save_directory=Path("captures"),
+            file_stem="interval_001",
+            file_extension=".png",
+            interval_seconds=1.0,
+            max_frame_count=5,
+            duration_seconds=10.0,
+            camera_id="cam2",
+        )
+
+        self.assertEqual(request.save_directory, Path("captures"))
+        self.assertEqual(request.file_stem, "interval_001")
+        self.assertEqual(request.file_extension, ".png")
+        self.assertEqual(request.interval_seconds, 1.0)
+        self.assertEqual(request.max_frame_count, 5)
+        self.assertEqual(request.duration_seconds, 10.0)
+        self.assertEqual(request.camera_id, "cam2")
+
+    def test_start_interval_capture_request_maps_to_interval_capture_request(self) -> None:
+        request = StartIntervalCaptureRequest(
+            file_stem="interval_001",
+            interval_seconds=1.0,
+            file_extension=".png",
+            save_directory=Path("captures"),
+            max_frame_count=5,
+            duration_seconds=10.0,
+            camera_id="cam2",
+        )
+
+        interval_capture_request = request.to_interval_capture_request()
+
+        self.assertEqual(interval_capture_request.save_directory, Path("captures"))
+        self.assertEqual(interval_capture_request.file_stem, "interval_001")
+        self.assertEqual(interval_capture_request.file_extension, ".png")
+        self.assertEqual(interval_capture_request.interval_seconds, 1.0)
+        self.assertEqual(interval_capture_request.max_frame_count, 5)
+        self.assertEqual(interval_capture_request.duration_seconds, 10.0)
+        self.assertEqual(interval_capture_request.camera_id, "cam2")
 
 
 if __name__ == "__main__":
