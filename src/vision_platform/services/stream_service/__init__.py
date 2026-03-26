@@ -3,11 +3,13 @@
 from vision_platform.services.stream_service.camera_stream_service import CameraStreamService
 from vision_platform.services.stream_service.focus_preview_service import FocusPreviewService
 from vision_platform.services.stream_service.preview_service import PreviewService
+from vision_platform.services.stream_service.roi_state_service import RoiStateService
 from vision_platform.services.stream_service.shared_frame_source import SharedFrameSource
 
 __all__ = [
     "CameraStreamService",
     "FocusPreviewService",
     "PreviewService",
+    "RoiStateService",
     "SharedFrameSource",
 ]
