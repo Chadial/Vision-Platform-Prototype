@@ -51,6 +51,7 @@ The repository currently provides a structured Python prototype for the camera s
 - new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork
 - physical migration of control and imaging implementation into `src/vision_platform`, with `camera_app` retained as a compatibility shim for those areas
+- physical migration of file naming and frame writing into `src/vision_platform.services.recording_service`, with `camera_app.storage` retained as a compatibility shim
 
 ## Completed Work
 
@@ -77,6 +78,7 @@ The repository currently provides a structured Python prototype for the camera s
 
 - snapshot request to target-path flow implemented
 - frame writer added for `.png`, `.raw`, and `.bin`
+- `FrameWriter` implementation now lives in `vision_platform.services.recording_service`
 - frame writer can now use an optional OpenCV adapter for higher-bit grayscale `.png` and `.tiff`
 - snapshot logging added
 - snapshot smoke-test flow added
@@ -94,6 +96,7 @@ The repository currently provides a structured Python prototype for the camera s
 - basic producer/consumer pipeline implemented
 - bounded queue implemented
 - sequential recording file naming implemented
+- recording naming helpers now live in `vision_platform.services.recording_service`
 - per-recording CSV log file implemented
 - recording log header includes session metadata such as start signal time, stop conditions, save path, and known camera settings
 - frame-limit stop condition implemented
@@ -206,7 +209,7 @@ The repository currently provides a structured Python prototype for the camera s
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when the target camera is available.
-2. Finish the next physical migration round for storage (`file_naming` and `frame_writer`) behind `vision_platform`.
+2. Finish the remaining service-import migration for demos, stream-service paths, and root helper scripts.
 3. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
 4. Start integrating ROI and one baseline focus metric on top of the newly added foundation modules.
 5. Define a stricter payload mapping only if the later C# or host integration really needs it.
