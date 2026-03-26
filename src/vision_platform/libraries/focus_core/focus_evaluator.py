@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from vision_platform.libraries.common_models.focus_models import FocusResult, FocusRequest
-from vision_platform.libraries.common_models.focus_models import FocusRequest
+from vision_platform.libraries.common_models.focus_models import FocusRequest, FocusResult
 from vision_platform.libraries.common_models.frame_models import FrameData
 from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.models import CapturedFrame
@@ -153,7 +152,7 @@ def _decode_intensity_plane(data: bytes, width: int, height: int, pixel_format: 
 
 
 def _apply_roi(plane: list[list[int]], width: int, height: int, request: FocusRequest) -> list[list[int]] | None:
-    if request.roi is None:
+    if request.roi is None or not request.roi.enabled:
         return plane
 
     bounds = roi_bounds(request.roi)
