@@ -1,9 +1,9 @@
 # Status
 
-- maturity: prepared base module
-- implemented: minimal focus request/result contracts plus placeholder evaluator hook
-- working now: module is importable and ready for future service wiring
-- partial: no real focus metric implementation yet
-- known issues: current platform prototype does not yet compute focus values
-- technical debt: focus module is scaffolding only in this round
-- risk: future metric requirements may require NumPy/OpenCV decisions
+- maturity: active baseline module
+- implemented: portable focus request/result contracts and a Laplace-based focus evaluator
+- working now: whole-frame manual-focus scoring for `FrameData` and `CapturedFrame`
+- partial: ROI is supported as an optional bounded evaluation area, but ROI-driven UX is not wired yet
+- known issues: only one numeric score is exposed and no live preview overlay consumes it yet
+- technical debt: edge/detail-oriented second-stage metrics are not implemented yet
+- risk: future metric expansion may still require a deliberate NumPy/OpenCV decision

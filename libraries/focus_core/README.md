@@ -13,12 +13,13 @@ Prepares the reusable focus-analysis boundary so live, snapshot, and postprocess
 ## Functions
 
 - portable focus request/result models
-- placeholder evaluator-availability helper
+- Laplace-based focus evaluation for manual focus guidance
+- evaluator boundary that stays separate from UI and camera drivers
 
 ## Inputs / Outputs
 
-- inputs: frame data, focus request
-- outputs: focus availability or later focus scores/results
+- inputs: `FrameData` or `CapturedFrame`, optional focus request
+- outputs: one numeric focus score plus validity/result metadata
 
 ## Dependencies
 
