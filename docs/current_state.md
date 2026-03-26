@@ -12,12 +12,12 @@ The repository already contains a service-oriented Python prototype under `src/c
 - `smoke` entry points used by the root helper scripts
 - automated tests covering most simulator-backed flows
 
-During the current reorganization, parts of that implementation have already started to move physically into `src/vision_platform`. At this point, `control` and optional `imaging` are implemented there, while `camera_app` keeps compatibility shims for those imports.
+During the current reorganization, parts of that implementation have already started to move physically into `src/vision_platform`. At this point, `control`, optional `imaging`, stream-service internals, camera drivers, and the prototype app entry points are implemented there, while `camera_app` keeps compatibility shims for those imports.
 
 ## Tight Couplings
 
 - the implementation is technically layered, but organizationally concentrated under `src/camera_app`
-- app/demo entry points still point directly at `camera_app.smoke`
+- root helper scripts now target `vision_platform.apps.opencv_prototype`, while `camera_app.smoke` remains as a compatibility layer
 - shared models for future ROI/focus/tracking work did not exist as separate reusable libraries
 - repository-level module ownership was missing, so roadmap and status tracking remained mostly global
 

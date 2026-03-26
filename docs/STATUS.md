@@ -52,6 +52,7 @@ The repository currently provides a structured Python prototype for the camera s
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork
 - physical migration of control and imaging implementation into `src/vision_platform`, with `camera_app` retained as a compatibility shim for those areas
 - physical migration of file naming and frame writing into `src/vision_platform.services.recording_service`, with `camera_app.storage` retained as a compatibility shim
+- physical migration of stream-service internals, camera drivers, and prototype demo entry points into `src/vision_platform`, with legacy `camera_app` modules retained as compatibility shims
 
 ## Completed Work
 
@@ -73,6 +74,7 @@ The repository currently provides a structured Python prototype for the camera s
 - frame metadata model added through `CapturedFrame`
 - real hardware currently runs through `VimbaXCameraDriver`
 - hardware-free development now runs through `SimulatedCameraDriver`
+- platform-owned driver implementations now live in `vision_platform.integrations.camera`
 
 ### Snapshot Flow
 
@@ -82,6 +84,7 @@ The repository currently provides a structured Python prototype for the camera s
 - frame writer can now use an optional OpenCV adapter for higher-bit grayscale `.png` and `.tiff`
 - snapshot logging added
 - snapshot smoke-test flow added
+- snapshot smoke entry point now lives in `vision_platform.apps.opencv_prototype`
 
 ### Preview Flow
 
@@ -90,6 +93,7 @@ The repository currently provides a structured Python prototype for the camera s
 - polling-based preview refresh implemented
 - preview frame metadata exposure implemented
 - optional OpenCV preview window adapter implemented above `PreviewService`
+- `PreviewService`, `SharedFrameSource`, and `CameraStreamService` now live in `vision_platform.services.stream_service`
 
 ### Recording Flow
 
@@ -177,6 +181,7 @@ The repository currently provides a structured Python prototype for the camera s
 - architecture now explicitly expects separate real-hardware and simulated driver implementations
 - `SimulatedCameraDriver` is implemented for generated frames and `.pgm`/`.ppm` sample image sequences
 - a simulated demo entry point exists for preview, snapshot, and recording without hardware
+- the simulated and Vimba X drivers now live physically in `vision_platform.integrations.camera`
 - simulator-backed tests now verify that preview and recording can share one acquisition loop without fighting over the driver
 - simulator-backed tests now also verify preview plus timed interval capture from the same shared stream
 - simulated generation now also covers `Mono16` frames for grayscale-save-path validation
@@ -187,6 +192,7 @@ The repository currently provides a structured Python prototype for the camera s
 
 - optional OpenCV implementation now lives in `vision_platform.imaging`
 - `camera_app.imaging` remains as a compatibility shim for legacy imports
+- the app-facing OpenCV demos now live in `vision_platform.apps.opencv_prototype`
 - OpenCV remains outside `CameraDriver` and outside the mandatory core dependency set
 - preview display can now run through `cv2.imshow()` on top of `PreviewService`
 - lossless grayscale save now supports `.png` and `.tiff` through the optional adapter for `Mono8` and unpacked higher-bit grayscale formats such as `Mono16`
@@ -209,8 +215,7 @@ The repository currently provides a structured Python prototype for the camera s
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when the target camera is available.
-2. Finish the remaining service-import migration for demos, stream-service paths, and root helper scripts.
-3. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-4. Start integrating ROI and one baseline focus metric on top of the newly added foundation modules.
-5. Define a stricter payload mapping only if the later C# or host integration really needs it.
-6. Keep the Python core stable as the handover baseline for the later C# phase.
+2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
+3. Start integrating ROI and one baseline focus metric on top of the newly added foundation modules.
+4. Define a stricter payload mapping only if the later C# or host integration really needs it.
+5. Keep the Python core stable as the handover baseline for the later C# phase.
