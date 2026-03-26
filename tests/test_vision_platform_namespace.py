@@ -6,7 +6,7 @@ from vision_platform.libraries.common_models import FocusOverlayData, FocusReque
 from vision_platform.libraries.focus_core import LaplaceFocusEvaluator, build_focus_overlay_data, focus_score_available
 from vision_platform.libraries.roi_core import roi_bounds, roi_centroid
 from vision_platform.services.recording_service import SnapshotService
-from vision_platform.services.stream_service import CameraStreamService
+from vision_platform.services.stream_service import CameraStreamService, FocusPreviewService
 
 
 class VisionPlatformNamespaceTests(unittest.TestCase):
@@ -16,6 +16,7 @@ class VisionPlatformNamespaceTests(unittest.TestCase):
         self.assertIsInstance(subsystem.driver, SimulatedCameraDriver)
         self.assertIsInstance(subsystem.snapshot_service, SnapshotService)
         self.assertIsInstance(subsystem.stream_service, CameraStreamService)
+        self.assertIsInstance(FocusPreviewService(subsystem.stream_service._preview_service), FocusPreviewService)
 
     def test_foundation_models_are_importable(self) -> None:
         roi = RoiDefinition(
