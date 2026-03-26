@@ -13,6 +13,7 @@ Prepares reusable ROI concepts for live overlay, focus analysis, tracking, and p
 ## Functions
 
 - bounding-box helper for portable ROI definitions
+- centroid helper for display-anchor coordinates
 - placeholder structure for rectangle, ellipse, and freehand support
 
 ## Inputs / Outputs
