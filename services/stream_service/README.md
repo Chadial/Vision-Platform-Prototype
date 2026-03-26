@@ -21,7 +21,7 @@ Owns live acquisition orchestration, preview buffering, and shared-frame distrib
 ## Inputs / Outputs
 
 - inputs: camera drivers, polling configuration
-- outputs: latest frame info, shared live frames, stream lifecycle state, preview-adjacent focus state
+- outputs: latest frame info, shared live frames, stream lifecycle state, preview-adjacent focus state via `CameraStreamService` or `FocusPreviewService`
 
 ## Dependencies
 
