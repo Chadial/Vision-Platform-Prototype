@@ -15,6 +15,7 @@ Prepares the reusable focus-analysis boundary so live, snapshot, and postprocess
 - portable focus request/result models
 - Laplace-based focus evaluation for manual focus guidance
 - evaluator boundary that stays separate from UI and camera drivers
+- read-only overlay-data builder for preview and display consumers
 
 ## Inputs / Outputs
 
