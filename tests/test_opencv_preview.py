@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
-from camera_app.imaging.opencv_preview import OpenCvPreviewWindow
+from vision_platform.imaging import OpenCvPreviewWindow
 
 
 class OpenCvPreviewWindowTests(unittest.TestCase):

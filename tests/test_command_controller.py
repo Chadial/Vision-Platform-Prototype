@@ -3,21 +3,23 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
-from camera_app.control.command_controller import CommandController
-from camera_app.models.apply_configuration_request import ApplyConfigurationRequest
-from camera_app.models.camera_configuration import CameraConfiguration
-from camera_app.models.camera_status import CameraStatus
-from camera_app.models.interval_capture_request import IntervalCaptureRequest
-from camera_app.models.interval_capture_status import IntervalCaptureStatus
-from camera_app.models.recording_request import RecordingRequest
-from camera_app.models.recording_status import RecordingStatus
-from camera_app.models.save_snapshot_request import SaveSnapshotRequest
-from camera_app.models.set_save_directory_request import SetSaveDirectoryRequest
-from camera_app.models.snapshot_request import SnapshotRequest
-from camera_app.models.start_interval_capture_request import StartIntervalCaptureRequest
-from camera_app.models.start_recording_request import StartRecordingRequest
-from camera_app.models.stop_interval_capture_request import StopIntervalCaptureRequest
-from camera_app.models.subsystem_status import SubsystemStatus
+from vision_platform.control import CommandController
+from vision_platform.models import (
+    ApplyConfigurationRequest,
+    CameraConfiguration,
+    CameraStatus,
+    IntervalCaptureRequest,
+    IntervalCaptureStatus,
+    RecordingRequest,
+    RecordingStatus,
+    SaveSnapshotRequest,
+    SetSaveDirectoryRequest,
+    SnapshotRequest,
+    StartIntervalCaptureRequest,
+    StartRecordingRequest,
+    StopIntervalCaptureRequest,
+    SubsystemStatus,
+)
 
 
 class CommandControllerTests(unittest.TestCase):

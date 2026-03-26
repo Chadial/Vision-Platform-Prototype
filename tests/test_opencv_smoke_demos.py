@@ -3,8 +3,8 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
-from camera_app.smoke.opencv_preview_demo import run_opencv_preview_demo
-from camera_app.smoke.opencv_save_demo import run_opencv_save_demo
+from vision_platform.apps.opencv_prototype.preview_demo import run_opencv_preview_demo
+from vision_platform.apps.opencv_prototype.save_demo import run_opencv_save_demo
 
 
 class OpenCvSmokeDemoTests(unittest.TestCase):
