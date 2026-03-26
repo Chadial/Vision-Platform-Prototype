@@ -16,11 +16,12 @@ Owns live acquisition orchestration, preview buffering, and shared-frame distrib
 - `PreviewService`
 - `SharedFrameSource`
 - `CameraStreamService`
+- `FocusPreviewService`
 
 ## Inputs / Outputs
 
 - inputs: camera drivers, polling configuration
-- outputs: latest frame info, shared live frames, stream lifecycle state
+- outputs: latest frame info, shared live frames, stream lifecycle state, preview-adjacent focus state
 
 ## Dependencies
 
