@@ -15,6 +15,7 @@ Provides the current runnable prototype entry points for local preview inspectio
 - OpenCV preview demo
 - OpenCV save demo
 - simulated end-to-end demo
+- simulated preview-to-focus smoke demo
 - host-style command flow demo
 
 ## Inputs / Outputs
@@ -31,4 +32,4 @@ Provides the current runnable prototype entry points for local preview inspectio
 
 ## Usage
 
-Prefer the package entry points under `python -m vision_platform.apps.opencv_prototype...` or the existing root helper scripts.
+Prefer the package entry points under `python -m vision_platform.apps.opencv_prototype...` or the existing root helper scripts such as `run_focus_preview_demo.py`.
