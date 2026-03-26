@@ -3,6 +3,7 @@
 from vision_platform.libraries.common_models.focus_models import (
     FocusMethod,
     FocusOverlayData,
+    FocusPreviewState,
     FocusRequest,
     FocusResult,
 )
@@ -12,6 +13,7 @@ from vision_platform.libraries.common_models.roi_models import RoiDefinition, Ro
 __all__ = [
     "FocusMethod",
     "FocusOverlayData",
+    "FocusPreviewState",
     "FocusRequest",
     "FocusResult",
     "FrameData",

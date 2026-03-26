@@ -46,3 +46,11 @@ class FocusOverlayData:
     roi_id: str | None = None
     source_frame_id: int | None = None
     region_bounds: tuple[float, float, float, float] | None = None
+
+
+@dataclass(slots=True)
+class FocusPreviewState:
+    """Bundle one focus evaluation with its overlay-ready display payload."""
+
+    result: FocusResult
+    overlay: FocusOverlayData
