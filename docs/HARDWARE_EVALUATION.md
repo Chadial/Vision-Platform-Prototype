@@ -28,7 +28,7 @@ Before starting:
 - `vmbpy` is installed into the active project virtual environment from the local Vimba X wheel
 - the project virtual environment is available
 - the camera is visible to the SDK
-- the intended camera id is known, for example `cam2` or `DEV_Cam2`
+- the intended camera id is known, for example `example_camera_id` or `device_camera_id`
 - a writable output directory is available
 
 Recommended Python executable:
@@ -147,7 +147,7 @@ Check:
 Recommended command:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id cam2 --save-directory .\captures\hardware_smoke
+.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\hardware_smoke
 ```
 
 Expected result:
@@ -197,7 +197,7 @@ Check:
 Recommended command:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id cam2 --save-directory .\captures\hardware_smoke --pixel-format Mono8
+.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\hardware_smoke --pixel-format Mono8
 ```
 
 Expected result:

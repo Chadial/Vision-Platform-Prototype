@@ -271,7 +271,7 @@ Run the current simulator-/service-focused verification block with:
 Run the minimal end-to-end snapshot smoke test with an explicit camera id and output directory:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id cam2 --save-directory .\captures\smoke --pixel-format Mono8
+.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\smoke --pixel-format Mono8
 ```
 
 The command prints the saved snapshot path on success.

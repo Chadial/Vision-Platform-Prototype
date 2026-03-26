@@ -39,7 +39,7 @@ The repository currently provides a structured Python prototype for the camera s
 - external request models for configuration, save-directory changes, snapshot save, and recording start/stop
 - camera configuration now models ROI offsets and ROI size in addition to exposure, gain, pixel format, and acquisition frame rate
 - recording requests can now carry a target frame rate and log it alongside ROI metadata
-- smoke-test entry point for explicit camera id usage such as `cam2`
+- smoke-test entry point for explicit camera id usage such as `example_camera_id`
 - command-flow demo for host-style external control using the simulated driver
 - a clear architectural basis for separating real hardware drivers from future simulation/demo drivers
 - a working simulated driver for hardware-free preview, snapshot, and recording flows
@@ -199,7 +199,7 @@ The repository currently provides a structured Python prototype for the camera s
 
 ## Next Recommended Steps
 
-1. Run a real hardware smoke test again when `cam2` is available.
+1. Run a real hardware smoke test again when the target camera is available.
 2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
 3. Decide whether `docs/ROADMAP.md` Phase 8 can be declared complete after one real-hardware validation pass and whether the optional OpenCV path can then be treated as hardware-validated.
 4. Define a stricter payload mapping only if the later C# or host integration really needs it.
