@@ -3,8 +3,8 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
-from camera_app.models.captured_frame import CapturedFrame
-from camera_app.storage.frame_writer import FrameWriter
+from vision_platform.models import CapturedFrame
+from vision_platform.services.recording_service import FrameWriter
 
 
 class _FakeRawFrame:

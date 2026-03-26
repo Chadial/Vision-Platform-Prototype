@@ -6,10 +6,8 @@ import csv
 import unittest
 
 from tests import _path_setup
-from camera_app.models.camera_configuration import CameraConfiguration
-from camera_app.models.captured_frame import CapturedFrame
-from camera_app.models.recording_request import RecordingRequest
-from camera_app.services.recording_service import RecordingService
+from vision_platform.models import CameraConfiguration, CapturedFrame, RecordingRequest
+from vision_platform.services.recording_service import RecordingService
 
 
 class _FakeRecordingDriver:

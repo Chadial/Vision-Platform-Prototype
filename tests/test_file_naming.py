@@ -2,10 +2,8 @@ from pathlib import Path
 import unittest
 
 from tests import _path_setup
-from camera_app.models.interval_capture_request import IntervalCaptureRequest
-from camera_app.models.recording_request import RecordingRequest
-from camera_app.models.snapshot_request import SnapshotRequest
-from camera_app.storage.file_naming import (
+from vision_platform.models import IntervalCaptureRequest, RecordingRequest, SnapshotRequest
+from vision_platform.services.recording_service import (
     build_interval_capture_frame_path,
     build_recording_frame_path,
     build_recording_log_path,
