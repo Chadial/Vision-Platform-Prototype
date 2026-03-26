@@ -20,9 +20,15 @@ class FocusRequest:
 
 @dataclass(slots=True)
 class FocusResult:
-    """Minimal focus-analysis result placeholder for later expansion."""
+    """Portable focus-analysis result for manual focus guidance and later automation."""
 
     method: FocusMethod
     score: float
+    is_valid: bool = True
+    metric_name: str | None = None
     roi_id: str | None = None
     source_frame_id: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.metric_name is None:
+            self.metric_name = self.method
