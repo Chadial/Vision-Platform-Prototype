@@ -1,8 +1,13 @@
 from datetime import datetime, timezone
 import unittest
 
-from vision_platform.libraries.common_models import FocusRequest, FrameData, FrameMetadata, RoiDefinition
-from vision_platform.libraries.focus_core import LaplaceFocusEvaluator, evaluate_focus, focus_score_available
+from vision_platform.libraries.common_models import FocusRequest, FrameData, FrameMetadata, FocusResult, RoiDefinition
+from vision_platform.libraries.focus_core import (
+    LaplaceFocusEvaluator,
+    build_focus_overlay_data,
+    evaluate_focus,
+    focus_score_available,
+)
 from vision_platform.models import CapturedFrame
 
 
@@ -132,6 +137,40 @@ class FocusCoreTests(unittest.TestCase):
 
         self.assertTrue(disabled_roi_result.is_valid)
         self.assertEqual(full_result.score, disabled_roi_result.score)
+
+    def test_overlay_data_uses_frame_center_without_roi(self) -> None:
+        overlay = build_focus_overlay_data(
+            FocusResult(method="laplace", metric_name="laplace_variance", score=12.5, source_frame_id=3),
+            FrameMetadata(width=8, height=6, frame_id=3),
+        )
+
+        self.assertEqual(overlay.anchor_x, 4.0)
+        self.assertEqual(overlay.anchor_y, 3.0)
+        self.assertIsNone(overlay.region_bounds)
+        self.assertEqual(overlay.source_frame_id, 3)
+
+    def test_overlay_data_uses_enabled_roi_centroid(self) -> None:
+        roi = RoiDefinition(
+            roi_id="roi-42",
+            shape="rectangle",
+            points=((2.0, 2.0), (6.0, 2.0), (6.0, 8.0), (2.0, 8.0)),
+        )
+        overlay = build_focus_overlay_data(
+            FocusResult(
+                method="laplace",
+                metric_name="laplace_variance",
+                score=21.0,
+                roi_id="roi-42",
+                source_frame_id=4,
+            ),
+            FrameMetadata(width=10, height=10, frame_id=4),
+            roi=roi,
+        )
+
+        self.assertEqual(overlay.anchor_x, 4.0)
+        self.assertEqual(overlay.anchor_y, 5.0)
+        self.assertEqual(overlay.region_bounds, (2.0, 2.0, 6.0, 8.0))
+        self.assertEqual(overlay.roi_id, "roi-42")
 
 
 if __name__ == "__main__":
