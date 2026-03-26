@@ -5,6 +5,8 @@ __all__ = [
     "FrameWriter",
     "IntervalCaptureService",
     "RecordingService",
+    "SnapshotFocusCapture",
+    "SnapshotFocusService",
     "SnapshotService",
     "build_interval_capture_frame_path",
     "build_recording_frame_path",
@@ -34,6 +36,14 @@ def __getattr__(name: str):
         from vision_platform.services.recording_service.snapshot_service import SnapshotService
 
         return SnapshotService
+    if name == "SnapshotFocusCapture":
+        from vision_platform.services.recording_service.snapshot_focus_service import SnapshotFocusCapture
+
+        return SnapshotFocusCapture
+    if name == "SnapshotFocusService":
+        from vision_platform.services.recording_service.snapshot_focus_service import SnapshotFocusService
+
+        return SnapshotFocusService
     if name == "build_interval_capture_frame_path":
         from vision_platform.services.recording_service.file_naming import build_interval_capture_frame_path
 

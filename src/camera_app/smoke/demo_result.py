@@ -13,6 +13,8 @@ class DemoRunResult:
     rendered_frames: int = 0
     preview_frame_info: Any | None = None
     focus_preview_state: Any | None = None
+    snapshot_focus_capture: Any | None = None
+    display_overlay_payload: Any | None = None
     initial_interval_capture_status: Any | None = None
     interval_capture_status: Any | None = None
     initial_recording_status: Any | None = None
