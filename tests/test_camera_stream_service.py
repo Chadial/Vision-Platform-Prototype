@@ -156,6 +156,44 @@ class CameraStreamServiceTests(unittest.TestCase):
             stream_service.stop_preview()
             camera_service.shutdown()
 
+    def test_stream_service_exposes_shared_roi_state_for_focus_preview_consumers(self) -> None:
+        driver = SimulatedCameraDriver(width=6, height=6, pixel_format="Mono8")
+        camera_service = CameraService(driver)
+        camera_service.initialize(camera_id="sim-focus-state")
+        camera_service.apply_configuration(CameraConfiguration(pixel_format="Mono8"))
+        stream_service = CameraStreamService(
+            driver,
+            preview_poll_interval_seconds=0.001,
+            shared_poll_interval_seconds=0.001,
+        )
+        roi_state_service = stream_service.get_roi_state_service()
+        roi_state_service.set_active_roi(
+            RoiDefinition(
+                roi_id="focus-zone",
+                shape="rectangle",
+                points=((1.0, 1.0), (5.0, 1.0), (5.0, 5.0), (1.0, 5.0)),
+            )
+        )
+        focus_preview_service = stream_service.create_focus_preview_service()
+
+        stream_service.start_preview()
+        try:
+            focus_state = None
+            for _ in range(100):
+                focus_state = focus_preview_service.refresh_once()
+                if focus_state is not None and focus_state.result.is_valid:
+                    break
+                sleep(0.01)
+
+            self.assertIsNotNone(focus_state)
+            self.assertTrue(focus_state.result.is_valid)
+            self.assertEqual(focus_state.result.roi_id, "focus-zone")
+            self.assertEqual(focus_state.overlay.roi_id, "focus-zone")
+            self.assertEqual(focus_state.overlay.region_bounds, (1.0, 1.0, 5.0, 5.0))
+        finally:
+            stream_service.stop_preview()
+            camera_service.shutdown()
+
 
 if __name__ == "__main__":
     unittest.main()
