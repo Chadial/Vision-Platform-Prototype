@@ -97,6 +97,37 @@ class FocusCoreTests(unittest.TestCase):
         self.assertEqual(result.roi_id, "focus-zone")
         self.assertGreater(result.score, 0.0)
 
+    def test_ellipse_roi_limits_focus_scoring_to_the_elliptic_region(self) -> None:
+        evaluator = LaplaceFocusEvaluator()
+        frame = FrameData(
+            data=_mono8_frame_bytes(
+                [
+                    [16, 16, 16, 16, 16, 16, 16],
+                    [16, 16, 0, 255, 0, 16, 16],
+                    [16, 255, 0, 255, 0, 255, 16],
+                    [16, 0, 255, 0, 255, 0, 16],
+                    [16, 255, 0, 255, 0, 255, 16],
+                    [16, 16, 0, 255, 0, 16, 16],
+                    [16, 16, 16, 16, 16, 16, 16],
+                ]
+            ),
+            metadata=FrameMetadata(width=7, height=7, pixel_format="Mono8", frame_id=10),
+        )
+        request = FocusRequest(
+            method="laplace",
+            roi=RoiDefinition(
+                roi_id="ellipse-zone",
+                shape="ellipse",
+                points=((1.0, 1.0), (6.0, 6.0)),
+            ),
+        )
+
+        result = evaluator.evaluate(frame, request=request)
+
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.roi_id, "ellipse-zone")
+        self.assertGreater(result.score, 0.0)
+
     def test_too_small_frames_are_reported_as_invalid(self) -> None:
         frame = FrameData(
             data=_mono8_frame_bytes([[0, 255], [255, 0]]),

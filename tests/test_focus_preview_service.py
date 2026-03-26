@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from vision_platform.models import CapturedFrame
-from vision_platform.services.stream_service import FocusPreviewService
+from vision_platform.services.stream_service import FocusPreviewService, RoiStateService
 from vision_platform.libraries.common_models import RoiDefinition
 
 
@@ -106,6 +106,87 @@ class FocusPreviewServiceTests(unittest.TestCase):
 
         self.assertIsNotNone(focus_state)
         preview_service.refresh_once.assert_called_once_with()
+
+    def test_refresh_once_uses_active_roi_from_state_service(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_mono8_frame_bytes(
+                [
+                    [16, 16, 16, 0, 255, 0],
+                    [16, 16, 16, 255, 0, 255],
+                    [16, 16, 16, 0, 255, 0],
+                    [16, 16, 16, 255, 0, 255],
+                    [16, 16, 16, 0, 255, 0],
+                    [16, 16, 16, 255, 0, 255],
+                ]
+            ),
+            width=6,
+            height=6,
+            frame_id=15,
+            pixel_format="Mono8",
+            timestamp_utc=datetime.now(timezone.utc),
+        )
+        preview_service = MagicMock()
+        preview_service.get_latest_frame.return_value = frame
+        roi_state_service = RoiStateService()
+        roi_state_service.set_active_roi(
+            RoiDefinition(
+                roi_id="state-roi",
+                shape="rectangle",
+                points=((3.0, 1.0), (6.0, 1.0), (6.0, 6.0), (3.0, 6.0)),
+            )
+        )
+
+        service = FocusPreviewService(preview_service, roi_state_service=roi_state_service)
+
+        focus_state = service.refresh_once()
+
+        self.assertIsNotNone(focus_state)
+        self.assertEqual(focus_state.result.roi_id, "state-roi")
+        self.assertEqual(focus_state.overlay.roi_id, "state-roi")
+        self.assertEqual(focus_state.overlay.region_bounds, (3.0, 1.0, 6.0, 6.0))
+
+    def test_refresh_once_prefers_explicit_roi_over_state_service(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_mono8_frame_bytes(
+                [
+                    [16, 16, 16, 0, 255, 0],
+                    [16, 16, 16, 255, 0, 255],
+                    [16, 16, 16, 0, 255, 0],
+                    [16, 16, 16, 255, 0, 255],
+                    [16, 16, 16, 0, 255, 0],
+                    [16, 16, 16, 255, 0, 255],
+                ]
+            ),
+            width=6,
+            height=6,
+            frame_id=16,
+            pixel_format="Mono8",
+            timestamp_utc=datetime.now(timezone.utc),
+        )
+        preview_service = MagicMock()
+        preview_service.get_latest_frame.return_value = frame
+        roi_state_service = RoiStateService()
+        roi_state_service.set_active_roi(
+            RoiDefinition(
+                roi_id="state-roi",
+                shape="rectangle",
+                points=((0.0, 0.0), (3.0, 0.0), (3.0, 3.0), (0.0, 3.0)),
+            )
+        )
+        explicit_roi = RoiDefinition(
+            roi_id="explicit-roi",
+            shape="rectangle",
+            points=((3.0, 1.0), (6.0, 1.0), (6.0, 6.0), (3.0, 6.0)),
+        )
+
+        service = FocusPreviewService(preview_service, roi_state_service=roi_state_service)
+
+        focus_state = service.refresh_once(roi=explicit_roi)
+
+        self.assertIsNotNone(focus_state)
+        self.assertEqual(focus_state.result.roi_id, "explicit-roi")
+        self.assertEqual(focus_state.overlay.roi_id, "explicit-roi")
+        self.assertEqual(focus_state.overlay.region_bounds, (3.0, 1.0, 6.0, 6.0))
 
 
 if __name__ == "__main__":

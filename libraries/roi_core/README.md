@@ -15,12 +15,14 @@ Prepares reusable ROI concepts for live overlay, focus analysis, tracking, and p
 
 - bounding-box helper for portable ROI definitions
 - centroid helper for display-anchor coordinates
-- placeholder structure for rectangle, ellipse, and freehand support
+- frame-clamped pixel-bounds helper for grid-based consumers
+- rectangle and ellipse mask derivation for analysis consumers
+- placeholder structure for freehand support
 
 ## Inputs / Outputs
 
 - inputs: `RoiDefinition`
-- outputs: derived ROI geometry helpers
+- outputs: derived ROI geometry helpers and cropped pixel-grid masks
 
 ## Control Rule
 

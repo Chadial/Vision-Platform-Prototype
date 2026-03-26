@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from vision_platform.libraries.common_models.focus_models import FocusRequest, FocusResult
 from vision_platform.libraries.common_models.frame_models import FrameData
-from vision_platform.libraries.roi_core import roi_bounds
+from vision_platform.libraries.roi_core import roi_mask
 from vision_platform.models import CapturedFrame
 
 
@@ -38,7 +38,7 @@ class LaplaceFocusEvaluator(FocusEvaluator):
             height=frame_data.metadata.height or 0,
             pixel_format=frame_data.metadata.pixel_format,
         )
-        bounded_plane = _apply_roi(
+        bounded_plane, mask = _apply_roi(
             intensity_plane,
             width=frame_data.metadata.width or 0,
             height=frame_data.metadata.height or 0,
@@ -56,6 +56,7 @@ class LaplaceFocusEvaluator(FocusEvaluator):
 
         score = _laplace_variance_score(
             bounded_plane,
+            mask=mask,
             normalize=focus_request.normalize,
             dynamic_range=dynamic_range,
         )
@@ -151,32 +152,40 @@ def _decode_intensity_plane(data: bytes, width: int, height: int, pixel_format: 
     return plane, 255
 
 
-def _apply_roi(plane: list[list[int]], width: int, height: int, request: FocusRequest) -> list[list[int]] | None:
+def _apply_roi(
+    plane: list[list[int]],
+    width: int,
+    height: int,
+    request: FocusRequest,
+) -> tuple[list[list[int]] | None, list[list[bool]] | None]:
     if request.roi is None or not request.roi.enabled:
-        return plane
+        return plane, None
 
-    bounds = roi_bounds(request.roi)
-    if bounds is None:
-        return None
+    masked_roi = roi_mask(request.roi, width=width, height=height)
+    if masked_roi is None:
+        return None, None
 
-    min_x, min_y, max_x, max_y = bounds
-    left = max(0, int(min_x))
-    top = max(0, int(min_y))
-    right = min(width, int(max_x))
-    bottom = min(height, int(max_y))
+    (left, top, right, bottom), mask = masked_roi
     if right - left < 3 or bottom - top < 3:
-        return None
+        return None, None
 
-    return [row[left:right] for row in plane[top:bottom]]
+    return [row[left:right] for row in plane[top:bottom]], mask
 
 
-def _laplace_variance_score(plane: list[list[int]], normalize: bool, dynamic_range: int) -> float:
+def _laplace_variance_score(
+    plane: list[list[int]],
+    mask: list[list[bool]] | None,
+    normalize: bool,
+    dynamic_range: int,
+) -> float:
     responses: list[float] = []
     for y in range(1, len(plane) - 1):
         previous_row = plane[y - 1]
         current_row = plane[y]
         next_row = plane[y + 1]
         for x in range(1, len(current_row) - 1):
+            if mask is not None and not _laplace_kernel_is_inside_mask(mask, x=x, y=y):
+                continue
             response = (
                 previous_row[x]
                 + next_row[x]
@@ -194,3 +203,13 @@ def _laplace_variance_score(plane: list[list[int]], normalize: bool, dynamic_ran
     if not normalize:
         return variance
     return variance / float(dynamic_range * dynamic_range)
+
+
+def _laplace_kernel_is_inside_mask(mask: list[list[bool]], x: int, y: int) -> bool:
+    return (
+        mask[y][x]
+        and mask[y - 1][x]
+        and mask[y + 1][x]
+        and mask[y][x - 1]
+        and mask[y][x + 1]
+    )

@@ -14,6 +14,7 @@ Provides the current runnable prototype entry points for local preview inspectio
 
 - OpenCV preview demo
 - OpenCV preview demo with optional focus-state composition
+- overlay-payload demo that composes active ROI plus preview/snapshot focus and prints a console summary
 - OpenCV save demo
 - simulated end-to-end demo
 - simulated preview-to-focus smoke demo

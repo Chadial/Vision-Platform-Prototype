@@ -15,6 +15,7 @@ Handles snapshot saving, interval capture, recording, and deterministic file out
 ## Functions
 
 - `SnapshotService`
+- `SnapshotFocusService`
 - `RecordingService`
 - `IntervalCaptureService`
 - file naming and frame writing helpers
@@ -22,7 +23,7 @@ Handles snapshot saving, interval capture, recording, and deterministic file out
 ## Inputs / Outputs
 
 - inputs: requests, save paths, frames, optional camera configuration
-- outputs: saved files, recording logs, status objects
+- outputs: saved files, recording logs, status objects, optional snapshot-side focus state
 
 ## Dependencies
 

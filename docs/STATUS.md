@@ -11,12 +11,12 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `feature/focus-core-baseline`
+- `feature/roi-core-mask-baseline`
 
 ## Roadmap Position
 
-- Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface.
-- Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, and a first manual-focus baseline are in place. Tracking/API modules and real-hardware validation remain open. The next mandatory milestone against the global roadmap remains real-hardware evaluation of the current Python baseline.
+- Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, and ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes.
+- Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. Tracking/API modules and real-hardware validation remain open. The next mandatory milestone against the global roadmap remains real-hardware evaluation of the current Python baseline.
 
 ## Current Summary
 
@@ -34,6 +34,10 @@ The repository currently provides a structured Python prototype for the camera s
 - `CameraStreamService` as a small orchestration layer for shared live acquisition across preview and recording
 - `IntervalCaptureService` for deterministic timed single-image capture from the shared live stream
 - `camera_app.bootstrap` as a small composition root for consistently wiring driver, services, stream orchestration, and command controller
+- `RoiStateService` as a small service-layer holder for one active ROI selection that preview-adjacent consumers can reuse
+- `SnapshotFocusService` as a separate snapshot-analysis consumer that can reuse the same active ROI state path without mixing focus logic into snapshot saving
+- `OverlayCompositionService` as a UI-free display composition layer that can merge active ROI plus preview/snapshot focus overlays into one shared payload
+- simulator-backed overlay-payload demo that consumes the shared payload and prints a simple console summary without committing to a concrete renderer
 - explicit `SubsystemStatus` model with host-facing command readiness flags
 - camera status metadata that identifies hardware vs. simulation source kind and active driver name
 - external request models for configuration, save-directory changes, snapshot save, and recording start/stop
@@ -54,6 +58,11 @@ The repository currently provides a structured Python prototype for the camera s
 - physical migration of file naming and frame writing into `src/vision_platform.services.recording_service`, with `camera_app.storage` retained as a compatibility shim
 - physical migration of stream-service internals, camera drivers, and prototype demo entry points into `src/vision_platform`, with legacy `camera_app` modules retained as compatibility shims
 - first implemented focus baseline with Laplace scoring, ROI-aware overlay anchors, and preview-consumer integration
+- ROI core now also provides frame-clamped pixel bounds and rectangle/ellipse mask derivation so analysis consumers can apply ROI selection without reimplementing ROI math
+- stream services now expose a small ROI state path so active ROI selection can be shared with preview-adjacent analysis without moving ROI ownership into UI or stream internals
+- snapshot-side focus analysis can now also consume the same ROI state path while staying separate from snapshot persistence
+- preview- and snapshot-side focus overlays can now be composed together with the active ROI into one shared display payload without introducing a concrete UI dependency
+- the OpenCV prototype app layer now includes a simulator-backed payload demo that exercises this shared display payload through a lightweight console-facing adapter path
 
 ## Completed Work
 
@@ -65,6 +74,8 @@ The repository currently provides a structured Python prototype for the camera s
 - file naming scaffold added
 - command controller skeleton added
 - portable focus/ROI model extensions now include overlay-ready focus payloads and ROI centroid support
+- ROI helper primitives now also include frame-clamped pixel bounds plus rectangle/ellipse mask derivation for analysis consumers
+- common models now also include a shared display overlay payload for later preview, snapshot, or host consumers
 
 ### Camera Access
 
@@ -87,6 +98,8 @@ The repository currently provides a structured Python prototype for the camera s
 - snapshot logging added
 - snapshot smoke-test flow added
 - snapshot smoke entry point now lives in `vision_platform.apps.opencv_prototype`
+- `SnapshotFocusService` now provides a separate snapshot-analysis path for focus evaluation without coupling that behavior into `SnapshotService`
+- `overlay_payload_demo` now validates a demo path that consumes the shared display payload without forcing a concrete window implementation
 
 ### Preview Flow
 
@@ -97,6 +110,7 @@ The repository currently provides a structured Python prototype for the camera s
 - optional OpenCV preview window adapter implemented above `PreviewService`
 - `PreviewService`, `SharedFrameSource`, and `CameraStreamService` now live in `vision_platform.services.stream_service`
 - `FocusPreviewService` now derives focus state from preview frames without embedding analysis logic into the stream loop or window layer
+- `RoiStateService` now lets preview-adjacent consumers reuse one active ROI selection without making ROI a stream-owned concern
 
 ### Recording Flow
 
@@ -114,10 +128,15 @@ The repository currently provides a structured Python prototype for the camera s
 ### Focus And ROI Foundations
 
 - portable ROI definitions now expose bounds and centroid helpers for later overlay consumers
+- portable ROI definitions now also expose frame-clamped pixel bounds and rectangle/ellipse mask derivation for analysis consumers
 - ROI remains a reusable geometry/selection input instead of a UI-owned concern
 - `focus_core` now provides a baseline Laplace evaluator for manual focus decisions
 - focus evaluation remains consumer-driven, so stream layers expose frames while preview-facing consumers decide when focus is computed
 - overlay-ready focus payloads now exist for preview and display consumers without coupling UI code into the analysis layer
+- focus evaluation now consumes ROI mask helpers from `roi_core` instead of keeping ROI pixel-window logic private inside `focus_core`
+- preview-adjacent consumers can now read an active ROI through `RoiStateService`, while explicit per-call ROI still remains possible
+- snapshot-side focus consumers can now reuse the same ROI state path or override it explicitly per call
+- overlay composition is now a separate service-layer concern that can merge active ROI plus preview/snapshot focus states into one UI-free payload
 
 ## Partially Implemented
 
@@ -174,7 +193,7 @@ The repository currently provides a structured Python prototype for the camera s
 - dedicated OpenCV smoke-demo tests now verify the preview and save demo entry points against the simulator-backed path
 - preview and recording cleanup now preserve stable service state even when `stop_acquisition()` itself fails during shutdown or recovery
 - additional tests now verify that startup failures keep their original exception even if cleanup also fails afterwards
-- additional tests now cover baseline focus scoring, ROI-centroid geometry, preview-focus consumption, stream-level focus integration, and the simulated focus-preview smoke/demo path
+- additional tests now cover baseline focus scoring, ROI-centroid geometry, ROI pixel bounds, rectangle/ellipse mask derivation, ROI-state-driven preview-focus consumption, snapshot-side focus capture, UI-free overlay composition, overlay-payload demo consumption, stream-level focus integration, and the simulated focus-preview smoke/demo path
 - real hardware validation is still pending separately from the simulator-backed validation
 
 ### Preview
@@ -232,6 +251,6 @@ The repository currently provides a structured Python prototype for the camera s
 
 1. Run a real hardware smoke test again when the target camera is available.
 2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-3. Decide whether the next analysis increment should be ROI-first edge/detail metrics or a richer preview overlay composition path.
+3. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
 4. Define a stricter payload mapping only if the later C# or host integration really needs it.
 5. Keep the Python core stable as the handover baseline for the later C# phase.
