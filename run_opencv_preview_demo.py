@@ -10,7 +10,7 @@ SRC_PATH = PROJECT_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from camera_app.smoke.opencv_preview_demo import run_opencv_preview_demo
+from vision_platform.apps.opencv_prototype.preview_demo import run_opencv_preview_demo
 
 
 def main() -> None:
