@@ -7,6 +7,7 @@ from vision_platform.libraries.focus_core import LaplaceFocusEvaluator, build_fo
 from vision_platform.libraries.roi_core import roi_bounds, roi_centroid
 from vision_platform.services.recording_service import SnapshotService
 from vision_platform.services.stream_service import CameraStreamService, FocusPreviewService
+from vision_platform.apps.opencv_prototype.focus_preview_demo import run_focus_preview_demo
 
 
 class VisionPlatformNamespaceTests(unittest.TestCase):
@@ -49,6 +50,7 @@ class VisionPlatformNamespaceTests(unittest.TestCase):
             ),
             FocusOverlayData,
         )
+        self.assertTrue(callable(run_focus_preview_demo))
 
 
 if __name__ == "__main__":
