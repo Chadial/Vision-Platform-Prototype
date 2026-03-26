@@ -18,9 +18,9 @@
 | `services/stream_service` | active core | preview/shared acquisition implemented |
 | `services/recording_service` | active core | snapshot, interval capture, recording implemented |
 | `apps/opencv_prototype` | active prototype | runnable wrapper scripts and demos available |
-| `libraries/common_models` | prepared foundation | new portable contracts added |
-| `libraries/roi_core` | prepared foundation | ROI groundwork added |
-| `libraries/focus_core` | prepared foundation | focus groundwork added |
+| `libraries/common_models` | active foundation | portable contracts and overlay-ready analysis payloads added |
+| `libraries/roi_core` | active foundation | ROI bounds and centroid helpers added |
+| `libraries/focus_core` | active baseline | Laplace focus scoring and overlay-ready mapping added |
 
 For each active module:
 

@@ -349,11 +349,27 @@ Run the optional OpenCV-backed preview window on top of the simulated preview se
 .\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --frame-limit 100
 ```
 
+To also compose focus state during preview rendering:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --frame-limit 100 --with-focus
+```
+
 Optional sample images can be loaded from a directory containing `.pgm` or `.ppm` files:
 
 ```powershell
 .\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --sample-dir .\demo_samples
 ```
+
+## Simulated Focus Preview Demo
+
+Run the simulator-backed preview-to-focus smoke path without opening a full preview workflow:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_focus_preview_demo.py
+```
+
+This path exercises preview acquisition, focus evaluation, and overlay-anchor derivation on the simulator-backed route.
 
 ## Optional OpenCV Save Demo
 

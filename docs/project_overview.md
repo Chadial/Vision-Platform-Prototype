@@ -11,8 +11,8 @@ This repository is being reorganized from a camera-subsystem prototype into a mo
 - `services/recording_service`: snapshot, interval capture, recording, deterministic persistence
 - `apps/opencv_prototype`: current runnable prototype and smoke/demo entry points
 - `libraries/common_models`: portable shared contracts for future cross-module and C# handover
-- `libraries/roi_core`: ROI foundation for overlays and analysis
-- `libraries/focus_core`: focus-analysis foundation
+- `libraries/roi_core`: ROI geometry helpers for overlays and analysis consumers
+- `libraries/focus_core`: focus-analysis baseline with overlay-ready result mapping
 
 ## Prepared Platform Modules
 
@@ -40,4 +40,5 @@ This repository is being reorganized from a camera-subsystem prototype into a mo
 - keep stream and recording orchestration separate
 - avoid UI-coupled core logic
 - introduce shared, portable models before analysis and API expansion
+- keep focus consumer-driven and ROI geometry reusable across consumers
 - retain Python pragmatism while preparing a later C# handover
