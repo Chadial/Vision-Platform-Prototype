@@ -17,8 +17,9 @@
 | `integrations/camera` | active core | drivers implemented, hardware validation still open |
 | `services/stream_service` | active core | preview/shared acquisition implemented |
 | `services/recording_service` | active core | snapshot, interval capture, recording implemented |
+| `services/display_service` | active baseline | UI-free overlay composition for preview/snapshot focus and ROI |
 | `apps/opencv_prototype` | active prototype | runnable wrapper scripts and demos available |
-| `libraries/common_models` | active foundation | portable contracts and overlay-ready analysis payloads added |
+| `libraries/common_models` | active foundation | portable contracts and overlay/display payloads added |
 | `libraries/roi_core` | active foundation | ROI bounds and centroid helpers added |
 | `libraries/focus_core` | active baseline | Laplace focus scoring and overlay-ready mapping added |
 

@@ -9,6 +9,7 @@ Provides portable, language-friendly data models that can survive the planned Py
 - normalized frame metadata
 - future-shared ROI definitions
 - future-shared focus request and result contracts
+- shared display payload contracts for later preview, snapshot, and host consumers
 
 ## Functions
 
@@ -17,6 +18,9 @@ Provides portable, language-friendly data models that can survive the planned Py
 - `RoiDefinition`
 - `FocusRequest`
 - `FocusResult`
+- `FocusOverlayData`
+- `DisplayOverlayPayload`
+- `RoiOverlayData`
 
 ## Inputs / Outputs
 
