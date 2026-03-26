@@ -32,3 +32,17 @@ class FocusResult:
     def __post_init__(self) -> None:
         if self.metric_name is None:
             self.metric_name = self.method
+
+
+@dataclass(slots=True)
+class FocusOverlayData:
+    """Portable display payload for preview and overlay consumers."""
+
+    score: float
+    metric_name: str
+    anchor_x: float
+    anchor_y: float
+    is_valid: bool
+    roi_id: str | None = None
+    source_frame_id: int | None = None
+    region_bounds: tuple[float, float, float, float] | None = None
