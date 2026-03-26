@@ -11,12 +11,17 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `feature/roi-core-mask-baseline`
+- `main`
 
 ## Roadmap Position
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, and ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes.
 - Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. Tracking/API modules and real-hardware validation remain open. The next mandatory milestone against the global roadmap remains real-hardware evaluation of the current Python baseline.
+
+## Merge Note
+
+- `feature/roi-core-mask-baseline` has been merged into `main`.
+- The merged ROI/focus/overlay baseline was revalidated on `main` with the targeted simulator-backed regression block before continuing.
 
 ## Current Summary
 
