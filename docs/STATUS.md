@@ -11,12 +11,12 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main`
+- `refactor/move-control-and-imaging-implementation`
 
 ## Roadmap Position
 
-- Against `docs/ROADMAP.md`: Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path are functionally implemented. Phase 8 Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Phase 9 Real Hardware Evaluation remains open.
-- Against `GlobalRoadmap.md`: the Python structuring phase and the simulation path are functionally complete, including the host-neutral command/status contract and the optional Phase 3c OpenCV inspection path. The next mandatory milestone against the global roadmap remains Phase 3b real-hardware evaluation before the Python baseline can be treated as hardware-validated.
+- Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open.
+- Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, and the optional OpenCV prototype path are in place, but the broader platform still lacks implemented ROI/focus/tracking/API modules. The next mandatory milestone against the global roadmap remains real-hardware evaluation of the current Python baseline.
 
 ## Current Summary
 
@@ -47,6 +47,10 @@ The repository currently provides a structured Python prototype for the camera s
 - optional OpenCV preview demo on top of the simulated preview service
 - optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
 - additional service hardening so preview/recording cleanup resets internal state defensively even when acquisition stop fails during recovery
+- new repository-level module workspaces for apps, integrations, services, and libraries
+- new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
+- new shared foundation modules for common models, ROI groundwork, and focus groundwork
+- physical migration of control and imaging implementation into `src/vision_platform`, with `camera_app` retained as a compatibility shim for those areas
 
 ## Completed Work
 
@@ -122,6 +126,7 @@ The repository currently provides a structured Python prototype for the camera s
 ### Host Integration
 
 - command surface exists
+- `CommandController` implementation now lives in `vision_platform.control`, while `camera_app.control` remains as a compatibility import
 - default save directory can now be resolved into snapshot and recording requests
 - controller now exposes a typed `SubsystemStatus` model instead of an untyped dictionary
 - subsystem status now includes command readiness flags for configuration, snapshot, recording start, and recording stop
@@ -177,7 +182,8 @@ The repository currently provides a structured Python prototype for the camera s
 
 ### Optional OpenCV Integration
 
-- optional `camera_app.imaging` layer now contains `OpenCvFrameAdapter` and `OpenCvPreviewWindow`
+- optional OpenCV implementation now lives in `vision_platform.imaging`
+- `camera_app.imaging` remains as a compatibility shim for legacy imports
 - OpenCV remains outside `CameraDriver` and outside the mandatory core dependency set
 - preview display can now run through `cv2.imshow()` on top of `PreviewService`
 - lossless grayscale save now supports `.png` and `.tiff` through the optional adapter for `Mono8` and unpacked higher-bit grayscale formats such as `Mono16`
@@ -200,8 +206,8 @@ The repository currently provides a structured Python prototype for the camera s
 ## Next Recommended Steps
 
 1. Run a real hardware smoke test again when the target camera is available.
-2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-3. Decide whether `docs/ROADMAP.md` Phase 8 can be declared complete after one real-hardware validation pass and whether the optional OpenCV path can then be treated as hardware-validated.
-4. Define a stricter payload mapping only if the later C# or host integration really needs it.
-5. Extend simulation support if needed beyond `.pgm` and `.ppm` sample sequences.
+2. Finish the next physical migration round for storage (`file_naming` and `frame_writer`) behind `vision_platform`.
+3. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
+4. Start integrating ROI and one baseline focus metric on top of the newly added foundation modules.
+5. Define a stricter payload mapping only if the later C# or host integration really needs it.
 6. Keep the Python core stable as the handover baseline for the later C# phase.
