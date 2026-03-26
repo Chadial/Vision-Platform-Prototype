@@ -1,9 +1,10 @@
-# Camera Subsystem Prototype
+# Camera Subsystem Prototype for Allied Vision Vimba X
 
-Python prototype for a camera subsystem that will later be handed over to a C#/.NET team.
+Python prototype for a camera subsystem built around Allied Vision Vimba X and prepared for later handover to a C#/.NET team.
 
 The current goal is not to build a full UI, but to establish a maintainable application core with:
 
+- Allied Vision / Vimba X camera integration
 - camera driver isolation
 - explicit command and status models
 - snapshot and recording services
@@ -14,6 +15,7 @@ The current goal is not to build a full UI, but to establish a maintainable appl
 
 The repository is currently a simulator-validated Python prototype with:
 
+- a core architecture built for Allied Vision / Vimba X while keeping SDK-specific code isolated in the driver layer
 - clean driver/service/storage/control separation
 - `CameraStreamService` as the intended orchestration point for shared live acquisition
 - `camera_app.bootstrap` as the intended composition point for wiring the subsystem consistently
