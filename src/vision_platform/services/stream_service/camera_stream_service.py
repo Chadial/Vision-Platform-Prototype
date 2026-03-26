@@ -9,6 +9,7 @@ from vision_platform.services.recording_service import (
     RecordingService,
 )
 from vision_platform.services.recording_service.frame_writer import FrameWriter
+from vision_platform.services.stream_service.focus_preview_service import FocusPreviewService
 from vision_platform.services.stream_service.preview_service import PreviewService
 from vision_platform.services.stream_service.shared_frame_source import SharedFrameSource
 
@@ -77,6 +78,9 @@ class CameraStreamService:
             poll_interval_seconds=poll_interval_seconds,
             shared_frame_source=self._shared_frame_source,
         )
+
+    def create_focus_preview_service(self) -> FocusPreviewService:
+        return FocusPreviewService(self._preview_service)
 
 
 __all__ = ["CameraStreamService"]
