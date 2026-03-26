@@ -1,4 +1,4 @@
-# Camera Subsystem Prototype for Allied Vision Vimba X
+# Camera Subsystem Prototype and Vision Platform Reorganization
 
 Python prototype for a camera subsystem built around Allied Vision Vimba X and prepared for later handover to a C#/.NET team.
 
@@ -10,6 +10,15 @@ The current goal is not to build a full UI, but to establish a maintainable appl
 - snapshot and recording services
 - future compatibility with external host control
 - future portability to desktop UI and web UI
+
+The repository is now also organized as the first step toward a broader modular vision platform. The stable implementation still lives in `src/camera_app`, while the repository structure and the new `src/vision_platform` namespace expose module boundaries for:
+
+- camera integration
+- stream/frame orchestration
+- recording/persistence
+- OpenCV prototype apps
+- shared common models
+- ROI and focus foundations
 
 ## Current State
 
@@ -29,21 +38,19 @@ Real hardware is currently not available, so the repository should not yet be tr
 ## Repository Layout
 
 ```text
+apps/
+integrations/
+libraries/
+services/
 src/
   camera_app/
-    control/
-    drivers/
-    imaging/
-    logging/
-    models/
-    services/
-    storage/
+  vision_platform/
 tests/
 docs/
 test_vimba.py
 ```
 
-`test_vimba.py` is kept as a minimal SDK smoke test and is not part of the planned application structure.
+Repository-level module workspaces now contain `README.md`, `STATUS.md`, and `ROADMAP.md` files so the platform can be evolved per module. `test_vimba.py` is still kept as a minimal SDK smoke test and is not part of the planned application structure.
 
 ## Planned Architecture
 
@@ -53,6 +60,16 @@ test_vimba.py
 - `storage`: file naming and frame writing
 - `control`: host-facing command surface
 - `logging`: central logging setup
+
+The new platform-facing namespace mirrors that structure at a higher level:
+
+- `vision_platform.integrations.camera`
+- `vision_platform.services.stream_service`
+- `vision_platform.services.recording_service`
+- `vision_platform.apps.opencv_prototype`
+- `vision_platform.libraries.common_models`
+- `vision_platform.libraries.roi_core`
+- `vision_platform.libraries.focus_core`
 
 ## Setup
 
@@ -254,6 +271,16 @@ from one consistent composition root.
 ## Next Implementation Steps
 
 See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+
+For the repository reorganization state and target module layout, see:
+
+- [`docs/project_overview.md`](docs/project_overview.md)
+- [`docs/current_state.md`](docs/current_state.md)
+- [`docs/target_structure.md`](docs/target_structure.md)
+- [`docs/migration_plan.md`](docs/migration_plan.md)
+- [`docs/git_strategy.md`](docs/git_strategy.md)
+- [`docs/branch_backlog.md`](docs/branch_backlog.md)
+- [`MODULE_INDEX.md`](MODULE_INDEX.md)
 
 For host-facing command formulation and request examples, see [`docs/COMMANDS.md`](docs/COMMANDS.md).
 For real-device validation steps, see [`docs/HARDWARE_EVALUATION.md`](docs/HARDWARE_EVALUATION.md).
