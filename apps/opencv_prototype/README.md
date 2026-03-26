@@ -13,6 +13,7 @@ Provides the current runnable prototype entry points for local preview inspectio
 ## Functions
 
 - OpenCV preview demo
+- OpenCV preview demo with optional focus-state composition
 - OpenCV save demo
 - simulated end-to-end demo
 - simulated preview-to-focus smoke demo

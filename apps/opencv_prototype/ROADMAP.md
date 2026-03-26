@@ -6,6 +6,7 @@
 - add overlay-ready preview composition without embedding analysis logic in the window code
 - define one canonical prototype launch command for preview, save, and simulated workflows
 - validate the new focus-preview smoke path against simulated preview frames
+- carry optional focus-state composition through the preview demo without moving analysis into the window code
 
 ## Later
 
