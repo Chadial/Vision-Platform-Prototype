@@ -2,6 +2,25 @@
 
 Python prototype for a camera subsystem built around Allied Vision Vimba X and prepared for later handover to a C#/.NET team.
 
+## What This Repository Is
+
+This repository is the Python prototype baseline for a modular camera and vision platform.
+
+Its purpose is to:
+
+- validate camera, preview, snapshot, recording, ROI, and focus-related workflows in Python
+- keep the architecture clean enough for later handover to a C#/.NET team
+- preserve a simulator-backed development path when hardware is unavailable
+- prepare a UI-agnostic core that can later support desktop, host-integrated, or web-capable frontends
+
+This is not intended to be a finished end-user product yet. It is the working technical baseline and architecture reference for later phases.
+
+## Where To Read Next
+
+- For the shortest possible project overview, read [`docs/SESSION_START.md`](docs/SESSION_START.md).
+- For the current verified implementation state, read [`docs/STATUS.md`](docs/STATUS.md).
+- For the long-term product and architecture target, read [`docs/ProjectDescription.md`](docs/ProjectDescription.md).
+
 The current goal is not to build a full UI, but to establish a maintainable application core with:
 
 - Allied Vision / Vimba X camera integration
