@@ -117,3 +117,7 @@ def main() -> int:
 
 
 __all__ = ["main", "run_opencv_preview_demo"]
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

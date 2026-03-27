@@ -1,9 +1,12 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
+from unittest.mock import patch
 
 from tests import _path_setup
+from vision_platform.apps.opencv_prototype.hardware_preview_demo import main as hardware_preview_main
 from vision_platform.apps.opencv_prototype.preview_demo import run_opencv_preview_demo
+from vision_platform.apps.opencv_prototype.preview_demo import main as preview_main
 from vision_platform.apps.opencv_prototype.save_demo import run_opencv_save_demo
 
 
@@ -54,6 +57,38 @@ class OpenCvSmokeDemoTests(unittest.TestCase):
             self.assertIsNotNone(result.saved_path)
             self.assertTrue(result.saved_path.exists())
             self.assertEqual(result.saved_path.name, "opencv_demo.tiff")
+
+    def test_preview_demo_main_returns_zero(self) -> None:
+        fake_result = type("Result", (), {"rendered_frames": 3, "focus_preview_state": None})()
+        with patch("vision_platform.apps.opencv_prototype.preview_demo.configure_logging"), patch(
+            "vision_platform.apps.opencv_prototype.preview_demo.run_opencv_preview_demo",
+            return_value=fake_result,
+        ), patch("argparse.ArgumentParser.parse_args", return_value=type("Args", (), {
+            "sample_dir": None,
+            "poll_interval_seconds": 0.03,
+            "frame_limit": 3,
+            "with_focus": False,
+        })()):
+            result = preview_main()
+
+        self.assertEqual(result, 0)
+
+    def test_hardware_preview_demo_main_returns_zero(self) -> None:
+        fake_result = type("Result", (), {
+            "rendered_frames": 3,
+            "preview_frame_info": type("Info", (), {"frame_id": 1, "width": 640, "height": 480, "pixel_format": "Mono8"})(),
+        })()
+        with patch("vision_platform.apps.opencv_prototype.hardware_preview_demo.configure_logging"), patch(
+            "vision_platform.apps.opencv_prototype.hardware_preview_demo.run_hardware_preview_demo",
+            return_value=fake_result,
+        ), patch("argparse.ArgumentParser.parse_args", return_value=type("Args", (), {
+            "camera_id": None,
+            "poll_interval_seconds": 0.03,
+            "frame_limit": None,
+        })()):
+            result = hardware_preview_main()
+
+        self.assertEqual(result, 0)
 
 
 if __name__ == "__main__":
