@@ -16,7 +16,7 @@ Each status update should state progress and gaps against both roadmaps.
 ## Roadmap Position
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation is no longer only simulator-backed: the March 27, 2026 hardware passes now cover an integrated command-flow baseline for snapshot save, preview readiness, interval capture from the shared preview stream, frame-limit recording, duration-only recording, target-frame-rate recording, supported alternate pixel format capture (`Mono10` as `.raw`), and explicit hardware-side failures for invalid camera id, unsupported pixel format, and invalid ROI increment choices on the Allied Vision `1800 U-1240m`. Phase 9 can therefore be treated as prototype-level hardware-validated for the current camera baseline, with remaining work limited to edge-case expansion rather than baseline viability. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, and ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes.
-- Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls while keeping those concerns explicitly in the UI/display layer. The shared contract layer under `libraries/common_models` now also intentionally exposes some target-facing surface ahead of full implementation, with feature readiness expected to be marked in module-local status docs. Tracking/API modules remain open, but the Python camera baseline can now be regarded as architecturally, simulator-, and prototype-level hardware-validated for the tested camera path. The next mandatory milestones against the global roadmap are operator-facing UI expansion and any deliberate follow-up on remaining hardware edge cases.
+- Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls, a dedicated bottom status band, and operator toggles for crosshair and focus-status visibility while keeping those concerns explicitly in the UI/display layer. The shared contract layer under `libraries/common_models` now also intentionally exposes some target-facing surface ahead of full implementation, with feature readiness expected to be marked in module-local status docs. Tracking/API modules remain open, but the Python camera baseline can now be regarded as architecturally, simulator-, and prototype-level hardware-validated for the tested camera path. The next mandatory milestones against the global roadmap are the remaining operator-facing UI controls on top of that status-band/toggle baseline and any deliberate follow-up on remaining hardware edge cases.
 
 ## Merge Note
 
@@ -64,7 +64,7 @@ The repository currently provides a structured Python prototype for the vision p
 - Vimba X acquisition-frame-rate control now enables `AcquisitionFrameRateEnable` automatically when a rate is configured, while `CameraStatus` also exposes the reported hardware frame-rate value and whether camera-side frame-rate control is enabled
 - camera initialization can now best-effort probe a live capability profile for hardware-backed runtime validation, while capability-probe failures degrade softly to generic validation and are exposed through `CameraStatus` instead of blocking camera use
 - the OpenCV hardware-preview path treats that probe state as a warning-only concern: successful probing stays silent, while capability-probe failures may be surfaced as a status-bar/overlay warning for operators
-- the OpenCV hardware-preview path now also supports click-based point selection with image-space coordinate display and `c`-based coordinate copy, using a reusable coordinate-export formatter that can later be reused by an embedded host GUI
+- the OpenCV hardware-preview path now also supports click-based point selection with image-space coordinate display in a dedicated bottom status band and `c`-based coordinate copy, using a reusable coordinate-export formatter that can later be reused by an embedded host GUI
 - new repository-level module workspaces for apps, integrations, services, and libraries
 - new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork
@@ -234,7 +234,7 @@ The repository currently provides a structured Python prototype for the vision p
 - an optional OpenCV preview window now exists above the service layer
 - a first real-hardware preview demo now exists on top of the optional OpenCV layer for local desktop inspection
 - the preview demo can now optionally compose focus state while keeping the window class itself free of focus logic
-- fit-to-window and zoom are now implemented in the OpenCV prototype UI layer; pan, cursor-aware zoom anchoring, status bar, and menu-band controls remain for the next UI/display-facing step
+- fit-to-window and zoom are now implemented in the OpenCV prototype UI layer, and a dedicated bottom status band now keeps preview status text out of the image viewport; crosshair and focus-status toggles also now exist in that same UI layer, while pan, cursor-aware zoom anchoring, FPS/status enrichment, ROI tools, snapshot shortcut handling, and menu-band controls remain for the next UI/display-facing steps
 - click-based point selection, crosshair display, coordinate readout, and `c`-based coordinate copy now exist as the first operator-facing point-inspection baseline in that same OpenCV preview path
 - no browser preview or non-OpenCV UI layer yet
 - the real-hardware preview path is implemented and historically verified, but the physical hardware is currently not attached locally
@@ -262,8 +262,9 @@ The repository currently provides a structured Python prototype for the vision p
 - preview display can now run through `cv2.imshow()` on top of `PreviewService`
 - preview display can now also run against a real Vimba X camera through the optional OpenCV prototype path
 - the preview demo can now optionally carry focus state alongside the rendered preview path without moving analysis into the OpenCV window class
-- fit-to-window and zoom are now implemented as frontend/display concerns rather than core-service concerns
-- pan, cursor-aware zoom anchoring, status bar widgets, ROI drawing tools, and menu-band controls remain planned in that same frontend/display layer
+- fit-to-window and zoom are now implemented as frontend/display concerns rather than core-service concerns, and a dedicated bottom status band now separates status text from the image viewport
+- crosshair visibility and focus-status visibility can now be toggled directly in the OpenCV preview loop without moving that state into the camera or stream layers
+- pan, cursor-aware zoom anchoring, FPS/status enrichment, ROI drawing tools, snapshot shortcut handling, and menu-band controls remain planned in that same frontend/display layer
 - lossless grayscale save now supports `.png` and `.tiff` through the optional adapter for `Mono8` and unpacked higher-bit grayscale formats such as `Mono16`
 - the standard-library writer remains the default for dependency-free `Mono8`, `Rgb8`, and `Bgr8` PNG output
 - packed grayscale formats are still not decoded automatically and should be transformed explicitly before using the OpenCV save path if required
@@ -285,8 +286,8 @@ The repository currently provides a structured Python prototype for the vision p
 ## Next Recommended Steps
 
 1. Add any still-needed hardware-side timeout or disconnect checks if they are practical to reproduce without destabilizing the setup.
-2. Start the next OpenCV UI/operator branch from `docs/session_workpackages/opencv_ui_operator_block.md`.
-3. Structure the next operator-facing OpenCV UI block around a dedicated status band, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the menu/control band.
+2. Continue the active OpenCV UI/operator branch from `docs/session_workpackages/opencv_ui_operator_block.md`.
+3. Build the next operator-facing OpenCV UI slices around FPS/status enrichment, ROI tools, snapshot shortcut, and the menu/control band.
 4. Extend the viewport path toward pan, cursor-aware zoom anchoring, and overlay-safe viewport transforms without leaking screen concerns into the core.
 5. Revisit optional OpenCV hardware checks only after a camera is connected again, especially for higher-bit grayscale formats delivered by Vimba X.
 6. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
