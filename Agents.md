@@ -505,6 +505,15 @@ This means status updates should explicitly state:
 - what is complete or still missing against the global roadmap
 - which next step is recommended in that context
 
+For module-local documentation, keep these meanings strict:
+
+- `README.md` describes module purpose, boundaries, and intended contract surface
+- `ROADMAP.md` may include target-facing or planned contract surface that is not fully implemented yet, as long as that future intent is explicit
+- `STATUS.md` must describe the current implemented state, current gaps, current next step, and any exposed-but-not-yet-implemented contract elements
+- when a model, enum, request field, or shape is intentionally exposed ahead of implementation, `STATUS.md` must mark that feature as prepared, partial, deferred, or otherwise not yet supported end-to-end
+- if a failed or rejected approach would help prevent repeated dead-end work, record that outcome briefly in the relevant module `STATUS.md` or `ROADMAP.md`
+- keep module-local `STATUS.md` and `ROADMAP.md` aligned so target intent and current reality do not drift apart
+
 ---
 
 ## Preferred output style for this repository
