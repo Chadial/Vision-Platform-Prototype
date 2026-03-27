@@ -11,6 +11,9 @@ It is intended to answer:
 - do snapshot, preview, and recording behave correctly on hardware
 - which gaps remain between simulator-backed validation and real-device validation
 
+For the tested device capability surface itself, use `docs/HARDWARE_CAPABILITIES.md` alongside this checklist.
+For a machine-readable exported profile, see `docs/hardware_profiles/`.
+
 This checklist should be used before treating the Python prototype as hardware-validated.
 
 Current repository note:

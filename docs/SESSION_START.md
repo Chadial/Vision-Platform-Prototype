@@ -80,6 +80,7 @@ Read these for every new session:
   - that module's `ROADMAP.md`
 - For hardware-specific work:
   - `docs/HARDWARE_EVALUATION.md`
+  - `docs/HARDWARE_CAPABILITIES.md`
   - `docs/archive/session_workpackages/hardware_validation_phase_9.md`
 
 ## Working Defaults

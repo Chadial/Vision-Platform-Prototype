@@ -1,0 +1,267 @@
+{
+  "probe_utc": "2026-03-27T14:47:00+00:00",
+  "camera": {
+    "camera_id": "DEV_1AB22C046D81",
+    "name": "Allied Vision 1800 U-1240m",
+    "model": "1800 U-1240m",
+    "serial": "N/A",
+    "interface_id": "VimbaUSBInterface_0x0"
+  },
+  "software": {
+    "vmbpy_version": "1.2.1"
+  },
+  "feature_count": 200,
+  "features": {
+    "DeviceVendorName": {
+      "type": "StringFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": "Allied Vision"
+    },
+    "DeviceFamilyName": {
+      "type": "StringFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": "ALVIUM"
+    },
+    "DeviceModelName": {
+      "type": "StringFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": "1800 U-1240m"
+    },
+    "DeviceSerialNumber": {
+      "type": "StringFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": "067WH"
+    },
+    "DeviceFirmwareVersion": {
+      "type": "StringFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": "13.0.71D891FE"
+    },
+    "DeviceVersion": {
+      "type": "StringFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": "14816"
+    },
+    "DeviceSFNCVersionMajor": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": 2
+    },
+    "DeviceSFNCVersionMinor": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": 7
+    },
+    "DeviceSFNCVersionSubMinor": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": 1
+    },
+    "DeviceLinkSpeed": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": 450000000
+    },
+    "DeviceLinkThroughputLimit": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 200000000,
+      "range": [
+        42750000,
+        450000000
+      ],
+      "increment": 1
+    },
+    "SensorWidth": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": 4024
+    },
+    "SensorHeight": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": 3036
+    },
+    "PixelFormat": {
+      "type": "EnumFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": "Mono10",
+      "entries": [
+        "Mono8",
+        "Mono10",
+        "Mono10p",
+        "Mono12",
+        "Mono12p"
+      ]
+    },
+    "ExposureTime": {
+      "type": "FloatFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 9973.736,
+      "range": [
+        42.278,
+        9999975.403
+      ],
+      "increment": 40.208
+    },
+    "Gain": {
+      "type": "FloatFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 3.0,
+      "range": [
+        0.0,
+        27.000001907348633
+      ],
+      "increment": 0.10000000149011612
+    },
+    "AcquisitionFrameRateEnable": {
+      "type": "BoolFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": true
+    },
+    "AcquisitionFrameRate": {
+      "type": "FloatFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 4.999088764190674,
+      "range": [
+        0.37806829810142517,
+        8.022730827331543
+      ]
+    },
+    "AcquisitionMode": {
+      "type": "EnumFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": "Continuous",
+      "entries": [
+        "SingleFrame",
+        "MultiFrame",
+        "Continuous"
+      ]
+    },
+    "TriggerMode": {
+      "type": "EnumFeature",
+      "is_readable": true,
+      "is_writeable": false,
+      "value": "Off",
+      "entries": [
+        "Off",
+        "On"
+      ]
+    },
+    "TriggerSource": {
+      "type": "EnumFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": "Software"
+    },
+    "LineSelector": {
+      "type": "EnumFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": "Line0"
+    },
+    "LineMode": {
+      "type": "EnumFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": "Input"
+    },
+    "UserSetSelector": {
+      "type": "EnumFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": "Default"
+    },
+    "ChunkModeActive": {
+      "type": "BoolFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": false
+    },
+    "BinningHorizontal": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 1,
+      "range": [
+        1,
+        8
+      ],
+      "increment": 1
+    },
+    "BinningVertical": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 1,
+      "range": [
+        1,
+        8
+      ],
+      "increment": 1
+    },
+    "Width": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 2000,
+      "range": [
+        8,
+        4024
+      ],
+      "increment": 8
+    },
+    "Height": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 1500,
+      "range": [
+        8,
+        3036
+      ],
+      "increment": 2
+    },
+    "OffsetX": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 0,
+      "range": [
+        0,
+        0
+      ],
+      "increment": 2
+    },
+    "OffsetY": {
+      "type": "IntFeature",
+      "is_readable": true,
+      "is_writeable": true,
+      "value": 0,
+      "range": [
+        0,
+        0
+      ],
+      "increment": 2
+    }
+  }
+}
