@@ -35,4 +35,4 @@ Provides the current runnable prototype entry points for local preview inspectio
 
 ## Usage
 
-Prefer the package entry points under `python -m vision_platform.apps.opencv_prototype...` or the existing root helper scripts such as `run_focus_preview_demo.py` and `run_hardware_preview_demo.py`.
+Prefer the package entry points under `python -m vision_platform.apps.opencv_prototype...` or the launcher scripts under `scripts/launchers/` such as `scripts/launchers/run_focus_preview_demo.py` and `scripts/launchers/run_hardware_preview_demo.py`.
