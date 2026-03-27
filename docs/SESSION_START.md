@@ -8,7 +8,7 @@ Read this first to get from zero context to a workable repository overview witho
 
 ## Current Baseline
 
-- The repository is a Python-first camera subsystem prototype with a parallel repository reorganization toward `src/vision_platform`.
+- The repository is a Python-first vision platform prototype with a parallel repository reorganization toward `src/vision_platform`.
 - Legacy compatibility still exists under `src/camera_app`, but new platform-facing code is being moved into `src/vision_platform`.
 - The core baseline is implemented for snapshot, preview, recording, interval capture, simulated drivers, and host-style command flow.
 - The optional OpenCV prototype now includes a first real-hardware preview path with viewport-based `fit-to-window` and zoom controls.

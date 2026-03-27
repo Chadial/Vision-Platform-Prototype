@@ -25,7 +25,7 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Summary
 
-The repository currently provides a structured Python prototype for the camera subsystem with:
+The repository currently provides a structured Python prototype for the vision platform with:
 
 - package layout under `src/camera_app/`
 - request, configuration, and status models

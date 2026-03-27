@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "camera-subsystem-prototype"
+name = "vision-platform-prototype"
 version = "0.1.0"
-description = "Camera subsystem prototype prepared for later C#/.NET handover."
+description = "Vision platform prototype with Allied Vision Vimba X integration."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
