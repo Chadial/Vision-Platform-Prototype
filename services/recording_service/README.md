@@ -30,3 +30,8 @@ Handles snapshot saving, interval capture, recording, and deterministic file out
 - `services/stream_service`
 - `integrations/camera`
 - `libraries/common_models`
+
+## Implementation Location
+
+- current implementation is split between `src/vision_platform/services/recording_service` and remaining compatibility paths under `src/camera_app/services`
+- naming and frame-writing paths already live under `src/vision_platform/services/recording_service`

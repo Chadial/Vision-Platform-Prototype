@@ -32,3 +32,7 @@ Prepares the reusable focus-analysis boundary so live, snapshot, and postprocess
 ## Dependencies
 
 - `libraries/common_models`
+
+## Implementation Location
+
+- current implementation lives under `src/vision_platform/libraries/focus_core`

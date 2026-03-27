@@ -37,3 +37,8 @@ Owns live acquisition orchestration, preview buffering, and shared-frame distrib
 - `integrations/camera`
 - `services/recording_service`
 - `libraries/common_models`
+
+## Implementation Location
+
+- current platform-owned implementation lives under `src/vision_platform/services/stream_service`
+- some recording-adjacent compatibility paths still remain under `src/camera_app/services`
