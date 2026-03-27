@@ -16,7 +16,7 @@ Each status update should state progress and gaps against both roadmaps.
 ## Roadmap Position
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, and ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes.
-- Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls while keeping those concerns explicitly in the UI/display layer. Tracking/API modules and full real-hardware validation remain open. The next mandatory milestones against the global roadmap are broader hardware validation and the next operator-facing preview/UI block.
+- Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls while keeping those concerns explicitly in the UI/display layer. The shared contract layer under `libraries/common_models` now also intentionally exposes some target-facing surface ahead of full implementation, with feature readiness expected to be marked in module-local status docs. Tracking/API modules and full real-hardware validation remain open. The next mandatory milestones against the global roadmap are broader hardware validation and the next operator-facing preview/UI block.
 
 ## Merge Note
 
@@ -61,11 +61,13 @@ The repository currently provides a structured Python prototype for the vision p
 - new repository-level module workspaces for apps, integrations, services, and libraries
 - new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork
+- common model contracts now intentionally allow some future-facing surface to appear before full downstream implementation, with readiness expected to be marked in module-local docs
 - physical migration of control and imaging implementation into `src/vision_platform`, with `camera_app` retained as a compatibility shim for those areas
 - physical migration of file naming and frame writing into `src/vision_platform.services.recording_service`, with `camera_app.storage` retained as a compatibility shim
 - physical migration of stream-service internals, camera drivers, and prototype demo entry points into `src/vision_platform`, with legacy `camera_app` modules retained as compatibility shims
 - first implemented focus baseline with Laplace scoring, ROI-aware overlay anchors, and preview-consumer integration
 - ROI core now also provides frame-clamped pixel bounds and rectangle/ellipse mask derivation so analysis consumers can apply ROI selection without reimplementing ROI math
+- freehand ROI remains a target contract direction only and is not yet implemented through ROI-core mask derivation or downstream analysis consumers
 - stream services now expose a small ROI state path so active ROI selection can be shared with preview-adjacent analysis without moving ROI ownership into UI or stream internals
 - snapshot-side focus analysis can now also consume the same ROI state path while staying separate from snapshot persistence
 - preview- and snapshot-side focus overlays can now be composed together with the active ROI into one shared display payload without introducing a concrete UI dependency
@@ -140,6 +142,7 @@ The repository currently provides a structured Python prototype for the vision p
 
 - portable ROI definitions now expose bounds and centroid helpers for later overlay consumers
 - portable ROI definitions now also expose frame-clamped pixel bounds and rectangle/ellipse mask derivation for analysis consumers
+- `common_models` may now expose some target-facing contract surface ahead of end-to-end implementation, with readiness expected to be marked in module status docs
 - ROI remains a reusable geometry/selection input instead of a UI-owned concern
 - `focus_core` now provides a baseline Laplace evaluator for manual focus decisions
 - focus evaluation remains consumer-driven, so stream layers expose frames while preview-facing consumers decide when focus is computed
@@ -148,6 +151,7 @@ The repository currently provides a structured Python prototype for the vision p
 - preview-adjacent consumers can now read an active ROI through `RoiStateService`, while explicit per-call ROI still remains possible
 - snapshot-side focus consumers can now reuse the same ROI state path or override it explicitly per call
 - overlay composition is now a separate service-layer concern that can merge active ROI plus preview/snapshot focus states into one UI-free payload
+- live preview-adjacent consumers now derive focus state from preview frames, while richer metric selection and operator-facing overlay controls remain open
 
 ## Partially Implemented
 
@@ -254,7 +258,8 @@ The repository currently provides a structured Python prototype for the vision p
 ## Known Constraints
 
 - real hardware is available again for targeted preview validation, but broader hardware validation is still incomplete
-- the terminal default `python` points to Python 3.6 on this machine
+- the terminal default `python` may differ from the project interpreter on this machine
+- the project virtual environment currently uses Python 3.14.3 at `.\.venv\Scripts\python.exe`
 - project tests should be run with `.\.venv\Scripts\python.exe`
 
 ## Verified Test Commands

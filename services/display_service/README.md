@@ -25,3 +25,8 @@ Composes UI-free display payloads from existing preview, snapshot, focus, and RO
 - `libraries/roi_core`
 - `services/stream_service`
 - `services/recording_service`
+
+## Implementation Location
+
+- current implementation lives under `src/vision_platform/services/display_service`
+- current lightweight payload consumer lives under `src/vision_platform/apps/opencv_prototype/overlay_payload_demo.py`

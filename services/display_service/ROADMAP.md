@@ -4,7 +4,7 @@
 
 - decide whether preview and snapshot overlays should be ordered as named layers or remain fixed payload fields
 - define how future overlay consumers should add tracking or warning layers without leaking UI logic into services
-- wire a demo or adapter that consumes the shared payload without making it a required dependency
+- decide whether the existing console-oriented payload demo should remain lightweight or gain an optional renderer-facing adapter
 
 ## Later
 

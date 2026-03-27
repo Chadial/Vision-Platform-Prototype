@@ -18,11 +18,11 @@
 | `integrations/camera` | active core | drivers implemented, hardware validation still open |
 | `services/stream_service` | active core | preview/shared acquisition implemented |
 | `services/recording_service` | active core | snapshot, interval capture, recording implemented |
-| `services/display_service` | active baseline | UI-free overlay composition for preview/snapshot focus and ROI |
+| `services/display_service` | active baseline | UI-free overlay composition implemented; lightweight payload demo exists, renderer-facing adapter still open |
 | `apps/opencv_prototype` | active prototype | simulator and first real-hardware preview path available; viewport-based preview controls now implemented |
-| `libraries/common_models` | active foundation | portable contracts and overlay/display payloads added |
-| `libraries/roi_core` | active foundation | ROI bounds and centroid helpers added |
-| `libraries/focus_core` | active baseline | Laplace focus scoring and overlay-ready mapping added |
+| `libraries/common_models` | active foundation | portable contracts and overlay/display payloads added; some target-facing contract elements are intentionally ahead of implementation and must be marked in module status |
+| `libraries/roi_core` | active foundation | ROI bounds, centroid, pixel bounds, and rectangle/ellipse mask helpers implemented; freehand remains deferred |
+| `libraries/focus_core` | active baseline | Laplace focus scoring and overlay-ready mapping added; live preview-adjacent consumers now use the baseline |
 
 For each active module:
 

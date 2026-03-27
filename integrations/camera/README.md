@@ -24,9 +24,14 @@ Contains camera-SDK-facing integration concerns and isolates real hardware acces
 
 ## Dependencies
 
-- `src/camera_app/drivers`
+- `src/vision_platform/integrations/camera`
 - `libraries/common_models`
 
 ## Usage
 
-The new namespace is `vision_platform.integrations.camera`, currently backed by the stable `camera_app.drivers` implementation.
+Prefer the `vision_platform.integrations.camera` namespace.
+
+## Implementation Location
+
+- current platform-owned driver implementations live under `src/vision_platform/integrations/camera`
+- legacy compatibility imports may still bridge through `src/camera_app` in some paths during the migration period

@@ -34,3 +34,7 @@ Prepares reusable ROI concepts for live overlay, focus analysis, tracking, and p
 ## Dependencies
 
 - `libraries/common_models`
+
+## Implementation Location
+
+- current implementation lives under `src/vision_platform/libraries/roi_core`

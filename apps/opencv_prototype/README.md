@@ -36,3 +36,9 @@ Provides the current runnable prototype entry points for local preview inspectio
 ## Usage
 
 Prefer the package entry points under `python -m vision_platform.apps.opencv_prototype...` or the launcher scripts under `scripts/launchers/` such as `scripts/launchers/run_focus_preview_demo.py` and `scripts/launchers/run_hardware_preview_demo.py`.
+
+## Implementation Location
+
+- app entry points currently live under `src/vision_platform/apps/opencv_prototype`
+- optional OpenCV imaging helpers currently live under `src/vision_platform/imaging`
+- some legacy compatibility paths still remain under `src/camera_app/smoke`

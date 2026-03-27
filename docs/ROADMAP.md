@@ -19,6 +19,7 @@ Status:
 
 - completed for the first reorganization round
 - physical code migration remains intentionally incremental
+- module-local `README.md`, `STATUS.md`, and `ROADMAP.md` now carry distinct roles and should keep target contract surface separate from implemented state
 
 ## Reconstructed Delivery Flow
 
@@ -202,6 +203,7 @@ Status:
 - optional preview inspection and grayscale-safe save paths are implemented for simulator-backed use
 - a first real-hardware OpenCV preview demo now exists for local inspection
 - a first viewport-based preview path with fit-to-window and zoom controls now exists in the OpenCV prototype layer
+- a lightweight overlay-payload demo already exists, while renderer-facing overlay adapters and richer operator controls remain open
 - still requires real-hardware validation before treating the optional path as hardware-proven
 
 ## Current Recommended Order
