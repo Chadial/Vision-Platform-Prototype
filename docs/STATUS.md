@@ -62,6 +62,7 @@ The repository currently provides a structured Python prototype for the vision p
 - additional shared-stream cleanup hardening so real-hardware preview-backed acquisition can shut down without Vimba X `Invalid Camera` errors after the integrated Phase 9 run
 - hardware-backed validation now also covers duration-only recording, target-frame-rate recording, explicit invalid camera id / invalid pixel format / invalid ROI increment failures, and a supported alternate `Mono10` snapshot-save path
 - Vimba X acquisition-frame-rate control now enables `AcquisitionFrameRateEnable` automatically when a rate is configured, while `CameraStatus` also exposes the reported hardware frame-rate value and whether camera-side frame-rate control is enabled
+- camera initialization can now best-effort probe a live capability profile for hardware-backed runtime validation, while capability-probe failures degrade softly to generic validation and are exposed through `CameraStatus` instead of blocking camera use
 - new repository-level module workspaces for apps, integrations, services, and libraries
 - new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork
@@ -192,6 +193,7 @@ The repository currently provides a structured Python prototype for the vision p
 - save-directory requests now support append-to-directory or create-new-subdirectory behavior
 - host-style command flow now covers interval capture from the shared stream in addition to snapshot and recording
 - deeper host-specific payload shaping is still open
+- runtime capability-aware configuration validation is now available without any UI dependency, and it automatically falls back to generic request validation when live probing is unavailable
 
 ### Validation
 
@@ -218,6 +220,7 @@ The repository currently provides a structured Python prototype for the vision p
 - the first two integrated hardware runs exposed cleanup-side Vimba X `Invalid Camera` errors during shared-stream shutdown; the follow-up cleanup ordering and timeout hardening removed those errors on the subsequent `run_003` validation pass
 - additional March 27, 2026 runs now verify duration-only recording, target-frame-rate recording, `Mono10` raw snapshot capture, and explicit hardware-side failures for invalid camera id, unsupported pixel format `Mono16`, and invalid ROI width increment values
 - the tested camera reports `AcquisitionFrameRate` as present and read-only by default, but the driver now enables `AcquisitionFrameRateEnable` automatically before setting a requested rate and exposes the read-back state through `CameraStatus`
+- capability-aware configuration validation now consumes live or stored `CameraCapabilityProfile` data in the service/control layer, while failed hardware capability probes only disable the extra device-specific validation instead of failing camera initialization
 
 ### Preview
 

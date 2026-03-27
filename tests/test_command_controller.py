@@ -249,6 +249,23 @@ class CommandControllerTests(unittest.TestCase):
         forwarded_config = camera_service.apply_configuration.call_args.args[0]
         self.assertEqual(forwarded_config.acquisition_frame_rate, 5.0)
 
+    def test_apply_configuration_uses_camera_service_capability_profile_when_no_override_is_set(self) -> None:
+        camera_service = MagicMock()
+        camera_service.get_capability_profile.return_value = self._build_capability_profile(
+            PixelFormat=FeatureCapability(
+                name="PixelFormat",
+                feature_type="EnumFeature",
+                is_writeable=True,
+                entries=("Mono8", "Mono10"),
+            )
+        )
+        controller = CommandController(camera_service, MagicMock(), MagicMock())
+
+        with self.assertRaisesRegex(ValueError, "PixelFormat"):
+            controller.apply_configuration(ApplyConfigurationRequest(pixel_format="Mono16"))
+
+        camera_service.apply_configuration.assert_not_called()
+
     def test_start_recording_rejects_path_like_file_stem_before_calling_service(self) -> None:
         recording_service = MagicMock()
         controller = CommandController(MagicMock(), MagicMock(), recording_service)

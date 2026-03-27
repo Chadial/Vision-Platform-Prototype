@@ -56,7 +56,7 @@ class CommandController:
             config = config.to_camera_configuration()
         self._require_initialized_camera("apply configuration")
         validate_camera_configuration(config)
-        self._configuration_validation_service.validate(config, self._capability_profile)
+        self._configuration_validation_service.validate(config, self._get_effective_capability_profile())
         self._camera_service.apply_configuration(config)
 
     def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
@@ -152,6 +152,14 @@ class CommandController:
         camera_status = self._camera_service.get_status()
         if not camera_status.is_initialized:
             raise RuntimeError(f"Cannot {action} because the camera is not initialized.")
+
+    def _get_effective_capability_profile(self) -> CameraCapabilityProfile | None:
+        if self._capability_profile is not None:
+            return self._capability_profile
+        capability_profile = self._camera_service.get_capability_profile()
+        if isinstance(capability_profile, CameraCapabilityProfile):
+            return capability_profile
+        return None
 
 
 __all__ = ["CommandController"]

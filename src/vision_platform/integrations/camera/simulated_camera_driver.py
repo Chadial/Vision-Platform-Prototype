@@ -88,6 +88,8 @@ class SimulatedCameraDriver(CameraDriver):
                 interface_id=self._status.interface_id,
                 reported_acquisition_frame_rate=self._status.reported_acquisition_frame_rate,
                 acquisition_frame_rate_enabled=self._status.acquisition_frame_rate_enabled,
+                capabilities_available=self._status.capabilities_available,
+                capability_probe_error=self._status.capability_probe_error,
                 last_error=self._status.last_error,
             )
 
