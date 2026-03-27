@@ -76,6 +76,16 @@ class OpenCvFrameAdapter:
         cv2_module = self._require_cv2()
         cv2_module.namedWindow(window_name, getattr(cv2_module, "WINDOW_NORMAL", 0))
 
+    def set_mouse_callback(self, window_name: str, callback) -> None:
+        cv2_module = self._require_cv2()
+        set_mouse_callback = getattr(cv2_module, "setMouseCallback", None)
+        if set_mouse_callback is None:
+            return
+        set_mouse_callback(window_name, callback)
+
+    def get_left_button_down_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_LBUTTONDOWN", None)
+
     def get_window_image_size(self, window_name: str) -> tuple[int, int] | None:
         cv2_module = self._require_cv2()
         get_rect = getattr(cv2_module, "getWindowImageRect", None)
@@ -232,6 +242,20 @@ class OpenCvFrameAdapter:
         line_type = getattr(cv2_module, "LINE_AA", 16)
         color = 255 if len(image.shape) == 2 else (255, 255, 255)
         put_text(image, overlay_text, (12, 28), font, 0.7, color, 2, line_type)
+
+    def draw_crosshair(self, image: Any, x: int, y: int, size: int = 12) -> None:
+        cv2_module = self._require_cv2()
+        line = getattr(cv2_module, "line", None)
+        circle = getattr(cv2_module, "circle", None)
+        if line is None:
+            return
+
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        line(image, (x - size, y), (x + size, y), color, 1, line_type)
+        line(image, (x, y - size), (x, y + size), color, 1, line_type)
+        if circle is not None:
+            circle(image, (x, y), 3, color, 1, line_type)
 
 
 __all__ = ["OpenCvFrameAdapter"]

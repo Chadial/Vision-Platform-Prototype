@@ -21,6 +21,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
 
         self.assertTrue(rendered)
         adapter.create_window.assert_called_once_with("Preview")
+        adapter.set_mouse_callback.assert_called_once()
         adapter.render_into_viewport.assert_called_once()
         adapter.show_image.assert_called_once_with("Preview", "viewport-image", delay_ms=7)
 
@@ -102,7 +103,40 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
 
         overlay_text = window._build_overlay_text()
 
-        self.assertEqual(overlay_text, "FIT 1.25x | i=in o=out f=fit q=quit")
+        self.assertEqual(overlay_text, "FIT 1.25x | i=in o=out f=fit c=copy q=quit")
+
+    def test_mouse_click_selects_source_point_and_copy_uses_formatted_coordinates(self) -> None:
+        preview_service = MagicMock()
+        copy_callback = MagicMock()
+        adapter = MagicMock()
+        adapter.get_left_button_down_event.return_value = 1
+        window = OpenCvPreviewWindow(
+            preview_service,
+            frame_adapter=adapter,
+            clipboard_copy_callback=copy_callback,
+        )
+        window._last_viewport_mapping = window._build_viewport_mapping(
+            frame_width=100,
+            frame_height=50,
+            viewport_width=200,
+            viewport_height=100,
+            display_scale=2.0,
+        )
+
+        window._handle_mouse_event(event=1, x=40, y=20)
+        window._handle_shortcuts(ord("c"))
+
+        copy_callback.assert_called_once_with("x=20, y=10")
+        self.assertEqual(window._selected_point, (20, 10))
+        self.assertEqual(window._last_status_message, "Copied x=20, y=10")
+
+    def test_copy_without_selection_sets_status_message(self) -> None:
+        preview_service = MagicMock()
+        window = OpenCvPreviewWindow(preview_service, clipboard_copy_callback=MagicMock())
+
+        window._handle_shortcuts(ord("c"))
+
+        self.assertEqual(window._last_status_message, "No point selected")
 
 
 if __name__ == "__main__":

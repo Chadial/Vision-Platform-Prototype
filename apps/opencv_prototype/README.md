@@ -15,6 +15,7 @@ Provides the current runnable prototype entry points for local preview inspectio
 - OpenCV preview demo
 - OpenCV preview demo with optional focus-state composition
 - hardware preview demo with fit-to-window and zoom controls
+- hardware preview demo with fit-to-window, zoom, click-based point selection, and coordinate copy via `c`
 - overlay-payload demo that composes active ROI plus preview/snapshot focus and prints a console summary
 - OpenCV save demo
 - simulated end-to-end demo
