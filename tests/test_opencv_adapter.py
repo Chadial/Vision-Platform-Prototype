@@ -12,6 +12,7 @@ class _FakeArray:
         self.buffer = bytes(buffer)
         self.dtype = dtype
         self.shape = None
+        self.assigned_regions: list[tuple[object, object]] = []
 
     def reshape(self, shape: tuple[int, ...]) -> "_FakeArray":
         self.shape = shape
@@ -22,6 +23,14 @@ class _FakeArray:
         copied.shape = self.shape
         return copied
 
+    def __getitem__(self, key) -> "_FakeArray":
+        sliced = _FakeArray(self.buffer, self.dtype)
+        sliced.shape = self.shape
+        return sliced
+
+    def __setitem__(self, key, value) -> None:
+        self.assigned_regions.append((key, value))
+
 
 class _FakeNumpy:
     uint8 = "uint8"
@@ -30,20 +39,45 @@ class _FakeNumpy:
     def frombuffer(self, buffer: bytes, dtype: str) -> _FakeArray:
         return _FakeArray(buffer, dtype)
 
+    def zeros(self, shape: tuple[int, ...], dtype: str) -> _FakeArray:
+        item_size = 2 if dtype == self.uint16 else 1
+        buffer_size = item_size
+        for size in shape:
+            buffer_size *= size
+        array = _FakeArray(bytes(buffer_size), dtype)
+        array.shape = shape
+        return array
+
 
 class _FakeCv2:
+    WINDOW_NORMAL = 0
+    INTER_AREA = 3
+    WND_PROP_VISIBLE = 4
+    FONT_HERSHEY_SIMPLEX = 0
+    LINE_AA = 16
+
     def __init__(self) -> None:
         self.imshow_calls: list[tuple[str, _FakeArray]] = []
         self.waitkey_calls: list[int] = []
+        self.waitkeyex_calls: list[int] = []
         self.imwrite_calls: list[tuple[str, _FakeArray]] = []
         self.destroyed_windows: list[str] = []
         self.destroy_all_called = False
+        self.named_windows: list[tuple[str, int]] = []
+        self.window_rect = (0, 0, 640, 480)
+        self.window_visible = 1.0
+        self.resize_calls: list[tuple[tuple[int, int], int]] = []
+        self.put_text_calls: list[tuple[str, tuple[int, int]]] = []
 
     def imshow(self, window_name: str, image: _FakeArray) -> None:
         self.imshow_calls.append((window_name, image))
 
     def waitKey(self, delay_ms: int) -> int:
         self.waitkey_calls.append(delay_ms)
+        return 27
+
+    def waitKeyEx(self, delay_ms: int) -> int:
+        self.waitkeyex_calls.append(delay_ms)
         return 27
 
     def imwrite(self, path: str, image: _FakeArray) -> bool:
@@ -55,6 +89,28 @@ class _FakeCv2:
 
     def destroyAllWindows(self) -> None:
         self.destroy_all_called = True
+
+    def namedWindow(self, window_name: str, flags: int) -> None:
+        self.named_windows.append((window_name, flags))
+
+    def getWindowImageRect(self, window_name: str) -> tuple[int, int, int, int]:
+        return self.window_rect
+
+    def getWindowProperty(self, window_name: str, prop_id: int) -> float:
+        return self.window_visible
+
+    def resize(self, image: _FakeArray, size: tuple[int, int], interpolation: int) -> _FakeArray:
+        resized = _FakeArray(image.buffer, image.dtype)
+        if image.shape is not None and len(image.shape) == 2:
+            resized.shape = (size[1], size[0])
+        else:
+            channels = 1 if image.shape is None else image.shape[2]
+            resized.shape = (size[1], size[0], channels)
+        self.resize_calls.append((size, interpolation))
+        return resized
+
+    def putText(self, image: _FakeArray, text: str, position: tuple[int, int], *_args) -> None:
+        self.put_text_calls.append((text, position))
 
 
 class OpenCvFrameAdapterTests(unittest.TestCase):
@@ -88,7 +144,43 @@ class OpenCvFrameAdapterTests(unittest.TestCase):
         self.assertEqual(key_code, 27)
         self.assertEqual(len(fake_cv2.imshow_calls), 1)
         self.assertEqual(fake_cv2.imshow_calls[0][0], "Preview")
-        self.assertEqual(fake_cv2.waitkey_calls, [5])
+        self.assertEqual(fake_cv2.waitkeyex_calls, [5])
+
+    def test_create_window_and_get_window_size_use_window_helpers(self) -> None:
+        fake_cv2 = _FakeCv2()
+        adapter = OpenCvFrameAdapter(cv2_module=fake_cv2, numpy_module=_FakeNumpy())
+
+        adapter.create_window("Preview")
+        size = adapter.get_window_image_size("Preview")
+
+        self.assertEqual(fake_cv2.named_windows, [("Preview", fake_cv2.WINDOW_NORMAL)])
+        self.assertEqual(size, (640, 480))
+
+    def test_render_into_viewport_creates_black_canvas_and_overlay(self) -> None:
+        fake_cv2 = _FakeCv2()
+        adapter = OpenCvFrameAdapter(cv2_module=fake_cv2, numpy_module=_FakeNumpy())
+        frame = CapturedFrame(
+            raw_frame=b"\x00\x7f\xc8\xff",
+            width=2,
+            height=2,
+            pixel_format="Mono8",
+        )
+        image = adapter.to_image(frame)
+
+        viewport_image = adapter.render_into_viewport(image, viewport_width=6, viewport_height=4, scale=1.0, overlay_text="FIT 1.00x")
+
+        self.assertEqual(viewport_image.shape, (4, 6))
+        self.assertEqual(fake_cv2.resize_calls, [((2, 2), fake_cv2.INTER_AREA)])
+        self.assertEqual(fake_cv2.put_text_calls, [("FIT 1.00x", (12, 28))])
+
+    def test_is_window_visible_reads_window_property(self) -> None:
+        fake_cv2 = _FakeCv2()
+        adapter = OpenCvFrameAdapter(cv2_module=fake_cv2, numpy_module=_FakeNumpy())
+
+        self.assertTrue(adapter.is_window_visible("Preview"))
+
+        fake_cv2.window_visible = 0.0
+        self.assertFalse(adapter.is_window_visible("Preview"))
 
     def test_save_lossless_grayscale_writes_png_via_cv2(self) -> None:
         fake_cv2 = _FakeCv2()

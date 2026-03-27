@@ -163,6 +163,8 @@ It should only be introduced as an optional imaging and preview layer on top of 
 - add optional conversion from `CapturedFrame` into an OpenCV-friendly image representation
 - add an optional preview demo that displays simulator or hardware frames with `cv2.imshow()`
 - keep the display path separate from the driver and service core
+- keep screen- and window-specific scaling logic in the preview/display layer instead of the camera core
+- add viewport-oriented preview controls such as fit-to-window, zoom, pan, and overlay-stable display transforms in the optional UI-facing path
 
 Use this for:
 
@@ -198,6 +200,7 @@ Status:
 
 - partially completed at the Python level
 - optional preview inspection and grayscale-safe save paths are implemented for simulator-backed use
+- a first real-hardware OpenCV preview demo now exists for local inspection
 - still requires real-hardware validation before treating the optional path as hardware-proven
 
 ## Current Recommended Order
@@ -207,4 +210,5 @@ From the current repository state, the practical next steps are:
 1. run the real hardware evaluation checklist
 2. decide whether Phase 8 can be marked complete after that run
 3. validate the already implemented optional OpenCV path against real hardware frames if that inspection path is needed
-4. keep the Python core stable as the handover baseline for the later C# phase
+4. define the first UI/display-side viewport policy for fit-to-window, zoom, pan, and overlay transforms without moving those concerns into the core
+5. keep the Python core stable as the handover baseline for the later C# phase

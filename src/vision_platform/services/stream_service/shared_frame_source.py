@@ -59,11 +59,11 @@ class SharedFrameSource:
             self._worker_thread = None
             should_stop_driver = True
 
-        if worker_to_join is not None:
-            worker_to_join.join(timeout=max(self._poll_interval_seconds * 4, 0.2))
-
         if should_stop_driver:
             self._driver.stop_acquisition()
+
+        if worker_to_join is not None:
+            worker_to_join.join(timeout=max(self._poll_interval_seconds * 4, 0.2))
 
     def get_latest_frame(self) -> CapturedFrame | None:
         with self._lock:
@@ -82,6 +82,8 @@ class SharedFrameSource:
                     with self._lock:
                         self._latest_frame = frame
             except Exception:
+                if self._stop_event.is_set():
+                    break
                 self._logger.exception("Shared frame polling failed.")
             sleep(self._poll_interval_seconds)
 
