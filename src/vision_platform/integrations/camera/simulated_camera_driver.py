@@ -74,6 +74,25 @@ class SimulatedCameraDriver(CameraDriver):
             self._frame_counter = 0
             self._sample_index = 0
 
+    def get_status(self) -> CameraStatus:
+        with self._lock:
+            return CameraStatus(
+                is_initialized=self._status.is_initialized,
+                is_acquiring=self._status.is_acquiring,
+                source_kind=self._status.source_kind,
+                driver_name=self._status.driver_name,
+                camera_id=self._status.camera_id,
+                camera_name=self._status.camera_name,
+                camera_model=self._status.camera_model,
+                camera_serial=self._status.camera_serial,
+                interface_id=self._status.interface_id,
+                reported_acquisition_frame_rate=self._status.reported_acquisition_frame_rate,
+                acquisition_frame_rate_enabled=self._status.acquisition_frame_rate_enabled,
+                capabilities_available=self._status.capabilities_available,
+                capability_probe_error=self._status.capability_probe_error,
+                last_error=self._status.last_error,
+            )
+
     def apply_configuration(self, config: CameraConfiguration) -> None:
         self._require_initialized()
         self._configuration = CameraConfiguration(

@@ -11,6 +11,8 @@ from vision_platform.models import CapturedFrame
 class SharedFrameSource:
     """Maintains one shared acquisition loop for multiple consumers."""
 
+    _RELEASE_JOIN_TIMEOUT_SECONDS = 3.0
+
     def __init__(self, driver: CameraDriver, poll_interval_seconds: float = 0.01) -> None:
         self._driver = driver
         self._poll_interval_seconds = poll_interval_seconds
@@ -44,7 +46,6 @@ class SharedFrameSource:
 
     def release(self) -> None:
         worker_to_join: Thread | None = None
-        should_stop_driver = False
 
         with self._lock:
             if self._consumer_count == 0:
@@ -57,13 +58,11 @@ class SharedFrameSource:
             self._stop_event.set()
             worker_to_join = self._worker_thread
             self._worker_thread = None
-            should_stop_driver = True
-
-        if should_stop_driver:
-            self._driver.stop_acquisition()
 
         if worker_to_join is not None:
-            worker_to_join.join(timeout=max(self._poll_interval_seconds * 4, 0.2))
+            worker_to_join.join(timeout=max(self._poll_interval_seconds * 4, self._RELEASE_JOIN_TIMEOUT_SECONDS))
+
+        self._driver.stop_acquisition()
 
     def get_latest_frame(self) -> CapturedFrame | None:
         with self._lock:

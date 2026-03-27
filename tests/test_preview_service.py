@@ -193,6 +193,38 @@ class PreviewServiceTests(unittest.TestCase):
         fake_driver.stop_acquisition.assert_called_once_with()
         self.assertIsNotNone(service.get_latest_frame_info())
 
+    def test_shared_frame_source_releases_worker_before_stopping_driver(self) -> None:
+        fake_driver = MagicMock()
+        shared_frame_source = SharedFrameSource(fake_driver, poll_interval_seconds=0.01)
+        order: list[str] = []
+
+        original_thread_class = shared_frame_source.__class__.__dict__["acquire"].__globals__["Thread"]
+
+        class _FakeThread:
+            def __init__(self, *args, **kwargs) -> None:
+                return None
+
+            def start(self) -> None:
+                order.append("start")
+
+            def join(self, timeout: float | None = None) -> None:
+                order.append("join")
+
+            def is_alive(self) -> bool:
+                return False
+
+        shared_frame_source.__class__.__dict__["acquire"].__globals__["Thread"] = _FakeThread
+        fake_driver.stop_acquisition.side_effect = lambda: order.append("stop")
+        try:
+            shared_frame_source.acquire()
+            shared_frame_source.release()
+        finally:
+            shared_frame_source.__class__.__dict__["acquire"].__globals__["Thread"] = original_thread_class
+
+        self.assertEqual(["start", "join", "stop"], order)
+        fake_driver.start_acquisition.assert_called_once_with()
+        fake_driver.stop_acquisition.assert_called_once_with()
+
 
 if __name__ == "__main__":
     unittest.main()

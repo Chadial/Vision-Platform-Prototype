@@ -11,6 +11,9 @@ It is intended to answer:
 - do snapshot, preview, and recording behave correctly on hardware
 - which gaps remain between simulator-backed validation and real-device validation
 
+For the tested device capability surface itself, use `docs/HARDWARE_CAPABILITIES.md` alongside this checklist.
+For a machine-readable exported profile, see `docs/hardware_profiles/`.
+
 This checklist should be used before treating the Python prototype as hardware-validated.
 
 Current repository note:
@@ -121,6 +124,90 @@ The minimum real-hardware evaluation should cover:
 5. preview acquisition behavior
 6. recording behavior
 7. failure behavior and unsupported settings
+
+## Recommended Integrated Run
+
+Before or alongside the individual checks below, prefer one integrated hardware-backed command flow that exercises:
+
+- initialize
+- optional configuration
+- save-directory resolution
+- snapshot save
+- preview start and first-frame readiness
+- interval capture from the shared preview stream
+- recording with explicit stop conditions
+- shutdown
+
+Recommended command:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\launchers\run_hardware_command_flow.py --base-directory .\captures\hardware_smoke --run-name run_001 --camera-id example_camera_id --pixel-format Mono8 --frame-limit 3 --interval-frame-count 3
+```
+
+This integrated run does not replace the checklist below, but it gives one reproducible Phase 9 baseline that can be repeated after code changes.
+
+## Latest Documented Run
+
+Latest integrated run on March 27, 2026:
+
+- machine: current local development machine
+- camera id: `DEV_1AB22C046D81`
+- camera model: `Allied Vision 1800 U-1240m`
+- command path: `.\scripts\launchers\run_hardware_command_flow.py`
+- output directory: `captures/hardware_smoke/run_003`
+- configuration used: `Mono8`, `frame_limit=3`, `interval_frame_count=3`
+
+Observed result:
+
+- snapshot save passed
+- preview readiness passed
+- interval capture from the shared preview stream passed
+- recording with frame-limit stop passed
+- output artifacts were written with plausible file sizes for `4024x3036 Mono8`
+- the earlier cleanup-side Vimba X `Invalid Camera` errors seen during `run_001` and `run_002` no longer occurred after the shared-frame-source shutdown ordering and timeout hardening
+
+Still not closed by this run:
+
+- broader configuration matrix coverage
+- duration-based hardware recording validation
+- target-frame-rate hardware recording validation
+- explicit invalid-setting and boundary-case checks
+
+Expanded matrix on March 27, 2026 after that baseline:
+
+- `run_004_duration`: combined hardware run with `Mono8`, `Exposure=10000`, `Gain=3.0`, `ROI=2000x1500`
+- `run_005_target_fps`: hardware run with the same configuration and `target_frame_rate=5.0`
+- `run_006_duration_only`: duration-only hardware run with the same configuration and `duration_seconds=1.5`
+- `mono10_snapshot_test`: successful hardware snapshot with supported alternate pixel format `Mono10` saved as `.raw`
+
+Observed result from the expanded matrix:
+
+- `duration_seconds` is now validated on hardware without a simultaneous frame-limit stop condition
+- `target_frame_rate` path executes successfully on hardware and writes the expected file sequence
+- exposure, gain, and ROI size changes are reflected in the hardware-backed recording metadata
+- this camera exposes `OffsetX` and `OffsetY` only at `0`, so ROI validation on this device is effectively width/height validation at zero offset
+- `Mono10` is supported for hardware snapshot capture when saved as `.raw`
+- `AcquisitionFrameRate` is read-only by default on this camera, but `AcquisitionFrameRateEnable` is writeable; enabling it makes the frame-rate feature writeable and allows reduced-rate control such as `5.0 -> 4.9991` fps read back from hardware
+
+Documented hardware-side error checks on March 27, 2026:
+
+- invalid camera id: explicit failure, `No Camera with Id 'DOES_NOT_EXIST' available.`
+- unsupported pixel format: explicit failure when trying `Mono16`, with `No Entry associated with 'Mono16'`
+- unsupported ROI combination: explicit failure for width `2001`, with device-side increment guidance `not a multiple of 8`
+
+## Current Pass / Fail Matrix
+
+Current baseline for camera `DEV_1AB22C046D81` on March 27, 2026:
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Initialization / Shutdown | PASS | Integrated hardware runs completed cleanly after shared-stream cleanup hardening |
+| Explicit Camera Selection | PASS | Hardware runs used explicit camera id `DEV_1AB22C046D81` |
+| Configuration Application | PASS | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; camera-side frame-rate control also works when `AcquisitionFrameRateEnable` is enabled first |
+| Snapshot Save | PASS | `Mono8` and `Mono10` snapshot paths produced plausible files |
+| Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow |
+| Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths all completed on hardware |
+| Error / Boundary Checks | PASS | Invalid camera id, unsupported pixel format, and invalid ROI increment failures were explicit and recoverable |
 
 ## 1. Initialization And Shutdown
 
@@ -278,6 +365,7 @@ Expected result:
 
 Minimum hardware matrix:
 
+- one integrated hardware command-flow run
 - one snapshot with default configuration
 - one snapshot with explicit exposure and pixel format
 - one snapshot with ROI if supported

@@ -12,6 +12,10 @@ class CameraDriver(ABC):
         """Initialize the underlying camera connection."""
 
     @abstractmethod
+    def get_status(self) -> CameraStatus:
+        """Return the latest known camera status."""
+
+    @abstractmethod
     def shutdown(self) -> None:
         """Release SDK and camera resources."""
 

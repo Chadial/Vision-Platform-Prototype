@@ -22,8 +22,9 @@ Read this first to get from zero context to a workable repository overview witho
 - Legacy compatibility still exists under `src/camera_app`, but new platform-facing code is being moved into `src/vision_platform`.
 - The core baseline is implemented for snapshot, preview, recording, interval capture, simulated drivers, and host-style command flow.
 - The optional OpenCV prototype now includes a first real-hardware preview path with viewport-based `fit-to-window` and zoom controls.
+- The OpenCV prototype also now includes a first operator-facing point-selection baseline with crosshair display, coordinate readout, and `c`-based coordinate copy.
 - ROI mask primitives, a first focus baseline, and UI-free overlay payload composition are implemented.
-- Broad real-hardware validation is still incomplete even though targeted hardware preview and smoke checks are working again.
+- Phase 9 hardware validation has been completed for the previously connected camera path, but the physical hardware is currently not attached locally.
 
 ## Current Truth Map
 
@@ -33,6 +34,7 @@ Read this first to get from zero context to a workable repository overview witho
 - module `README.md`: purpose, boundaries, intended contract surface
 - module `STATUS.md`: current implemented state, gaps, risks, next step
 - module `ROADMAP.md`: intended next work and target-facing surface that may run ahead of implementation when marked clearly
+- session work-package handoff notes live under `docs/session_workpackages/`, with completed ones moved to `docs/archive/session_workpackages/`
 
 ## Current Architecture Rules
 
@@ -79,6 +81,10 @@ Read these for every new session:
   - that module's `ROADMAP.md`
 - For hardware-specific work:
   - `docs/HARDWARE_EVALUATION.md`
+  - `docs/HARDWARE_CAPABILITIES.md`
+  - `docs/archive/session_workpackages/hardware_validation_phase_9.md`
+- For the next OpenCV UI/operator work:
+  - `docs/session_workpackages/opencv_ui_operator_block.md`
 
 ## Working Defaults
 

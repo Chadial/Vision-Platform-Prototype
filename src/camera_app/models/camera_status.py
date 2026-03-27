@@ -13,4 +13,8 @@ class CameraStatus:
     camera_model: Optional[str] = None
     camera_serial: Optional[str] = None
     interface_id: Optional[str] = None
+    reported_acquisition_frame_rate: Optional[float] = None
+    acquisition_frame_rate_enabled: Optional[bool] = None
+    capabilities_available: bool = False
+    capability_probe_error: Optional[str] = None
     last_error: Optional[str] = None

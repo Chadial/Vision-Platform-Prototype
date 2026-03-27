@@ -15,6 +15,7 @@ from camera_app.validation.request_validation import (
 )
 from vision_platform.models import (
     ApplyConfigurationRequest,
+    CameraCapabilityProfile,
     CameraConfiguration,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
@@ -29,6 +30,7 @@ from vision_platform.models import (
     StopRecordingRequest,
     SubsystemStatus,
 )
+from vision_platform.services.camera_configuration_validation_service import CameraConfigurationValidationService
 
 
 class CommandController:
@@ -38,19 +40,27 @@ class CommandController:
         snapshot_service: SnapshotService,
         recording_service: RecordingService,
         interval_capture_service: IntervalCaptureService | None = None,
+        capability_profile: CameraCapabilityProfile | None = None,
+        configuration_validation_service: CameraConfigurationValidationService | None = None,
     ) -> None:
         self._camera_service = camera_service
         self._snapshot_service = snapshot_service
         self._recording_service = recording_service
         self._interval_capture_service = interval_capture_service
         self._default_save_directory: Optional[Path] = None
+        self._capability_profile = capability_profile
+        self._configuration_validation_service = configuration_validation_service or CameraConfigurationValidationService()
 
     def apply_configuration(self, config: CameraConfiguration | ApplyConfigurationRequest) -> None:
         if isinstance(config, ApplyConfigurationRequest):
             config = config.to_camera_configuration()
         self._require_initialized_camera("apply configuration")
         validate_camera_configuration(config)
+        self._configuration_validation_service.validate(config, self._get_effective_capability_profile())
         self._camera_service.apply_configuration(config)
+
+    def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
+        self._capability_profile = capability_profile
 
     def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> None:
         if isinstance(path, SetSaveDirectoryRequest):
@@ -142,6 +152,14 @@ class CommandController:
         camera_status = self._camera_service.get_status()
         if not camera_status.is_initialized:
             raise RuntimeError(f"Cannot {action} because the camera is not initialized.")
+
+    def _get_effective_capability_profile(self) -> CameraCapabilityProfile | None:
+        if self._capability_profile is not None:
+            return self._capability_profile
+        capability_profile = self._camera_service.get_capability_profile()
+        if isinstance(capability_profile, CameraCapabilityProfile):
+            return capability_profile
+        return None
 
 
 __all__ = ["CommandController"]

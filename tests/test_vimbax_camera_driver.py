@@ -16,6 +16,16 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         fake_camera.get_model.return_value = "ModelA"
         fake_camera.get_serial.return_value = "SER-001"
         fake_camera.get_interface_id.return_value = "IF-001"
+        fake_rate_feature = MagicMock()
+        fake_rate_feature.is_readable.return_value = True
+        fake_rate_feature.get.return_value = 8.0
+        fake_rate_enable_feature = MagicMock()
+        fake_rate_enable_feature.is_readable.return_value = True
+        fake_rate_enable_feature.get.return_value = False
+        fake_camera.get_feature_by_name.side_effect = lambda name: {
+            "AcquisitionFrameRate": fake_rate_feature,
+            "AcquisitionFrameRateEnable": fake_rate_enable_feature,
+        }[name]
 
         fake_vmb_system = MagicMock()
         fake_vmb_system.get_all_cameras.return_value = [fake_camera]
@@ -31,6 +41,8 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         self.assertEqual(status.camera_model, "ModelA")
         self.assertEqual(status.camera_serial, "SER-001")
         self.assertEqual(status.interface_id, "IF-001")
+        self.assertEqual(status.reported_acquisition_frame_rate, 8.0)
+        self.assertFalse(status.acquisition_frame_rate_enabled)
         fake_vmb_system.__enter__.assert_called_once()
         fake_camera.__enter__.assert_called_once()
 
@@ -42,6 +54,16 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         fake_camera.get_model.return_value = "ModelB"
         fake_camera.get_serial.return_value = "SER-123"
         fake_camera.get_interface_id.return_value = "IF-123"
+        fake_rate_feature = MagicMock()
+        fake_rate_feature.is_readable.return_value = True
+        fake_rate_feature.get.return_value = 8.0
+        fake_rate_enable_feature = MagicMock()
+        fake_rate_enable_feature.is_readable.return_value = True
+        fake_rate_enable_feature.get.return_value = False
+        fake_camera.get_feature_by_name.side_effect = lambda name: {
+            "AcquisitionFrameRate": fake_rate_feature,
+            "AcquisitionFrameRateEnable": fake_rate_enable_feature,
+        }[name]
 
         fake_vmb_system = MagicMock()
         fake_vmb_system.get_camera_by_id.return_value = fake_camera
@@ -101,6 +123,38 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         fake_camera.get_feature_by_name.assert_any_call("PixelFormat")
         exposure_feature.set.assert_called_once_with(1500.0)
         pixel_format_feature.set.assert_called_once_with("Mono8")
+
+    def test_apply_configuration_enables_and_sets_acquisition_frame_rate(self) -> None:
+        frame_rate_enable_feature = MagicMock()
+        frame_rate_enable_feature.is_writeable.return_value = True
+        frame_rate_enable_feature.is_readable.return_value = True
+        frame_rate_enable_feature.get.return_value = True
+        frame_rate_feature = MagicMock()
+        frame_rate_feature.is_writeable.return_value = True
+        frame_rate_feature.is_readable.return_value = True
+        frame_rate_feature.get.return_value = 4.999
+
+        fake_camera = MagicMock()
+        fake_camera.get_id.return_value = "CAM-001"
+        fake_camera.get_name.return_value = "TestCam"
+        fake_camera.get_model.return_value = "ModelA"
+        fake_camera.get_serial.return_value = "SER-001"
+        fake_camera.get_interface_id.return_value = "IF-001"
+        fake_camera.get_feature_by_name.side_effect = lambda name: {
+            "AcquisitionFrameRateEnable": frame_rate_enable_feature,
+            "AcquisitionFrameRate": frame_rate_feature,
+        }[name]
+
+        driver = VimbaXCameraDriver()
+        driver._camera = fake_camera
+        driver._status.is_initialized = True
+
+        driver.apply_configuration(CameraConfiguration(acquisition_frame_rate=5.0))
+
+        frame_rate_enable_feature.set.assert_called_once_with(True)
+        frame_rate_feature.set.assert_called_once_with(5.0)
+        self.assertEqual(driver.get_status().reported_acquisition_frame_rate, 4.999)
+        self.assertTrue(driver.get_status().acquisition_frame_rate_enabled)
 
     def test_apply_configuration_sets_roi_features_when_provided(self) -> None:
         offset_x_feature = MagicMock()
