@@ -13,6 +13,11 @@ Use it for:
 This document is not a replacement for `docs/HARDWARE_EVALUATION.md`.
 It describes the tested device capability surface, while `docs/HARDWARE_EVALUATION.md` describes validation runs and pass/fail state.
 
+Code-side capability helpers now also exist:
+
+- live and JSON export probe: `vision_platform.integrations.camera.capability_probe`
+- normalized runtime profile loader: `vision_platform.services.CameraCapabilityService`
+
 ## Tested Device
 
 Snapshot date:
