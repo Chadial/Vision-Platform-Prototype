@@ -1,5 +1,7 @@
 # Phase 9 Hardware Validation Work Package
 
+Status: completed and archived after hardware validation docs and status updates on March 27, 2026.
+
 ## Purpose
 
 This temporary work package captures the current execution plan for making the real-hardware validation path complete enough to move the repository from simulator-validated toward prototype-level hardware-validated.

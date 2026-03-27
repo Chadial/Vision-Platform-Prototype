@@ -192,6 +192,20 @@ Documented hardware-side error checks on March 27, 2026:
 - unsupported pixel format: explicit failure when trying `Mono16`, with `No Entry associated with 'Mono16'`
 - unsupported ROI combination: explicit failure for width `2001`, with device-side increment guidance `not a multiple of 8`
 
+## Current Pass / Fail Matrix
+
+Current baseline for camera `DEV_1AB22C046D81` on March 27, 2026:
+
+| Area | Result | Notes |
+| --- | --- | --- |
+| Initialization / Shutdown | PASS | Integrated hardware runs completed cleanly after shared-stream cleanup hardening |
+| Explicit Camera Selection | PASS | Hardware runs used explicit camera id `DEV_1AB22C046D81` |
+| Configuration Application | PASS with device constraint | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; `AcquisitionFrameRate` was present but not writeable in the tested mode |
+| Snapshot Save | PASS | `Mono8` and `Mono10` snapshot paths produced plausible files |
+| Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow |
+| Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths all completed on hardware |
+| Error / Boundary Checks | PASS | Invalid camera id, unsupported pixel format, and invalid ROI increment failures were explicit and recoverable |
+
 ## 1. Initialization And Shutdown
 
 Goal:

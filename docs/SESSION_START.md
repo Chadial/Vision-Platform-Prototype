@@ -49,10 +49,6 @@ Read this first to get from zero context to a workable repository overview witho
 3. Continue documenting verified state and next steps as features land.
 4. Broaden real-hardware validation when practical.
 
-## Active Recovery Note
-
-- If work resumes on real-hardware validation, use `docs/session_workpackages/hardware_validation_phase_9.md` as the recovery entry point for the current Phase 9 work package.
-
 ## Mandatory Reads
 
 Read these for every new session:
@@ -84,7 +80,7 @@ Read these for every new session:
   - that module's `ROADMAP.md`
 - For hardware-specific work:
   - `docs/HARDWARE_EVALUATION.md`
-  - `docs/session_workpackages/hardware_validation_phase_9.md`
+  - `docs/archive/session_workpackages/hardware_validation_phase_9.md`
 
 ## Working Defaults
 
