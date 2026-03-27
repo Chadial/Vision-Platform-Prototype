@@ -170,6 +170,28 @@ Still not closed by this run:
 - target-frame-rate hardware recording validation
 - explicit invalid-setting and boundary-case checks
 
+Expanded matrix on March 27, 2026 after that baseline:
+
+- `run_004_duration`: combined hardware run with `Mono8`, `Exposure=10000`, `Gain=3.0`, `ROI=2000x1500`
+- `run_005_target_fps`: hardware run with the same configuration and `target_frame_rate=5.0`
+- `run_006_duration_only`: duration-only hardware run with the same configuration and `duration_seconds=1.5`
+- `mono10_snapshot_test`: successful hardware snapshot with supported alternate pixel format `Mono10` saved as `.raw`
+
+Observed result from the expanded matrix:
+
+- `duration_seconds` is now validated on hardware without a simultaneous frame-limit stop condition
+- `target_frame_rate` path executes successfully on hardware and writes the expected file sequence
+- exposure, gain, and ROI size changes are reflected in the hardware-backed recording metadata
+- this camera exposes `OffsetX` and `OffsetY` only at `0`, so ROI validation on this device is effectively width/height validation at zero offset
+- `Mono10` is supported for hardware snapshot capture when saved as `.raw`
+- `AcquisitionFrameRate` is present on this camera but not writeable in the tested mode, and the driver currently reports that clearly
+
+Documented hardware-side error checks on March 27, 2026:
+
+- invalid camera id: explicit failure, `No Camera with Id 'DOES_NOT_EXIST' available.`
+- unsupported pixel format: explicit failure when trying `Mono16`, with `No Entry associated with 'Mono16'`
+- unsupported ROI combination: explicit failure for width `2001`, with device-side increment guidance `not a multiple of 8`
+
 ## 1. Initialization And Shutdown
 
 Goal:

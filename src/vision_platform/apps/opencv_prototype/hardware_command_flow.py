@@ -178,7 +178,7 @@ def _build_argument_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--recording-stem", default="recording", help="Recording file stem.")
     parser.add_argument("--recording-extension", default=".raw", help="Recording file extension.")
-    parser.add_argument("--frame-limit", type=int, default=3, help="Optional number of frames to record.")
+    parser.add_argument("--frame-limit", type=int, default=None, help="Optional number of frames to record.")
     parser.add_argument(
         "--duration-seconds",
         type=float,
@@ -231,6 +231,10 @@ def main() -> int:
     if configuration == CameraConfiguration():
         configuration = None
 
+    frame_limit = args.frame_limit
+    if frame_limit is None and args.duration_seconds is None:
+        frame_limit = 3
+
     result = run_hardware_command_flow(
         base_directory=args.base_directory,
         run_name=args.run_name,
@@ -243,7 +247,7 @@ def main() -> int:
         interval_frame_count=args.interval_frame_count,
         recording_stem=args.recording_stem,
         recording_extension=args.recording_extension,
-        frame_limit=args.frame_limit,
+        frame_limit=frame_limit,
         duration_seconds=args.duration_seconds,
         target_frame_rate=args.target_frame_rate,
         preview_warmup_timeout_seconds=args.preview_warmup_timeout_seconds,

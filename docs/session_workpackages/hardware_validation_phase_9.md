@@ -50,7 +50,9 @@ State as of March 27, 2026:
 - shared-frame-source cleanup ordering and timeout handling were hardened afterwards
 - the follow-up `run_003` pass completed without those cleanup-side Vimba X errors
 - the validated hardware-backed baseline now covers snapshot save, preview readiness, interval capture from the shared preview stream, and frame-limit recording
-- broader configuration coverage, duration-based recording, target-frame-rate recording, and explicit error-path validation remain open
+- additional hardware runs now cover duration-only recording, target-frame-rate recording, supported `Mono10` snapshot capture as `.raw`, and explicit failures for invalid camera id, unsupported pixel format `Mono16`, and invalid ROI width increments
+- the tested camera exposes `AcquisitionFrameRate` but rejects writes in the exercised mode, which is now documented as a device-specific constraint
+- the remaining open points are now mainly timeout/disconnect edge cases and any contract decision around capability-aware handling of non-writeable camera features
 
 ## Execution Plan
 
