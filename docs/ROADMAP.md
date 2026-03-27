@@ -201,6 +201,7 @@ Status:
 - partially completed at the Python level
 - optional preview inspection and grayscale-safe save paths are implemented for simulator-backed use
 - a first real-hardware OpenCV preview demo now exists for local inspection
+- a first viewport-based preview path with fit-to-window and zoom controls now exists in the OpenCV prototype layer
 - still requires real-hardware validation before treating the optional path as hardware-proven
 
 ## Current Recommended Order
@@ -210,5 +211,6 @@ From the current repository state, the practical next steps are:
 1. run the real hardware evaluation checklist
 2. decide whether Phase 8 can be marked complete after that run
 3. validate the already implemented optional OpenCV path against real hardware frames if that inspection path is needed
-4. define the first UI/display-side viewport policy for fit-to-window, zoom, pan, and overlay transforms without moving those concerns into the core
-5. keep the Python core stable as the handover baseline for the later C# phase
+4. structure the next OpenCV UI block around status bar, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the operator-facing menu/control band
+5. extend the viewport path toward pan and cursor-aware zoom behavior without moving those concerns into the core
+6. keep the Python core stable as the handover baseline for the later C# phase

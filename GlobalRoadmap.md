@@ -117,7 +117,9 @@ Turn the repository from a camera-centric code package into an explicitly modula
 
 ### Status
 
-- not implemented yet
+- partially implemented
+- viewport-based preview controls now exist in the OpenCV prototype path
+- broader interactive ROI, focus-overlay toggles, and operator-facing preview controls remain open
 
 ## Phase 5: Tracking And Drift Preparation
 
@@ -172,12 +174,14 @@ Turn the repository from a camera-centric code package into an explicitly modula
 
 - OpenCV prototype path exists
 - first real-hardware OpenCV preview path now exists for local inspection
+- a first viewport-based OpenCV preview path with fit-to-window and zoom controls now exists as the prototype UI baseline
 - desktop, web, and postprocess fronts are prepared structurally only
 
 ## Recommended Next Platform Steps
 
 1. Run the current Python baseline against real camera hardware again.
 2. Add a first real focus metric on top of the new foundation modules.
-3. Decide how ROI objects should enter preview and snapshot workflows without mixing UI and analysis responsibilities.
-4. Expand tests to cover the `vision_platform` namespace as the preferred future import surface.
-5. After that, move selected implementation files physically behind the already established platform module boundaries.
+3. Structure the next OpenCV prototype UI block around status bar, crosshair, ROI tools, and the operator-facing menu/control band.
+4. Decide how ROI objects should enter preview and snapshot workflows without mixing UI and analysis responsibilities.
+5. Expand tests to cover the `vision_platform` namespace as the preferred future import surface.
+6. After that, move selected implementation files physically behind the already established platform module boundaries.

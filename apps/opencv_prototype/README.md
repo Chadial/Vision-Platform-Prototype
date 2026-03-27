@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provides the current runnable prototype entry points for local preview inspection, snapshot/save checks, and simulator-backed workflow validation.
+Provides the current runnable prototype entry points for local preview inspection, snapshot/save checks, simulator-backed workflow validation, and the first viewport-based hardware preview path.
 
 ## Responsibility
 
@@ -14,6 +14,7 @@ Provides the current runnable prototype entry points for local preview inspectio
 
 - OpenCV preview demo
 - OpenCV preview demo with optional focus-state composition
+- hardware preview demo with fit-to-window and zoom controls
 - overlay-payload demo that composes active ROI plus preview/snapshot focus and prints a console summary
 - OpenCV save demo
 - simulated end-to-end demo
@@ -23,7 +24,7 @@ Provides the current runnable prototype entry points for local preview inspectio
 ## Inputs / Outputs
 
 - inputs: simulator frames or camera-backed frames, CLI arguments, explicit save paths
-- outputs: preview windows, saved image files, capture folders, console summaries
+- outputs: preview windows, viewport-based preview rendering, saved image files, capture folders, console summaries
 
 ## Dependencies
 
@@ -34,4 +35,4 @@ Provides the current runnable prototype entry points for local preview inspectio
 
 ## Usage
 
-Prefer the package entry points under `python -m vision_platform.apps.opencv_prototype...` or the existing root helper scripts such as `run_focus_preview_demo.py`.
+Prefer the package entry points under `python -m vision_platform.apps.opencv_prototype...` or the existing root helper scripts such as `run_focus_preview_demo.py` and `run_hardware_preview_demo.py`.

@@ -190,6 +190,8 @@ spätere API-/Netzwerkadapter
 Zusatzregel für Preview und Anzeige:
 Bildschirmauflösung, Fenstergröße, Zoomfaktor, Pan-Offset, fit-to-window und displayseitige Overlay-Transformationen gehören nicht in den Kamera- oder Recording-Kern. Solche Darstellungsregeln sollen in der Presentation/UI-Schicht oder in einer eng daran gekoppelten Display-Adapter-Schicht liegen.
 
+Für operatornahe Preview-Bedienung gilt dieselbe Regel: Statusleisten, Menü- oder Kontrollbänder, Maus-/Tastaturinteraktion für Crosshair, ROI-Werkzeuge, Fokusanzeige, Snapshot-Buttons oder sensorbezogene UI-Eingaben gehören in die UI-/Display-Schicht und nicht in den Kamera- oder Analysekern.
+
 Diese Trennung muss nicht sofort in perfekter Lehrbuchform umgesetzt werden, aber die Richtung soll klar erkennbar sein.
 
 5. C#-Kompatibilität berücksichtigen

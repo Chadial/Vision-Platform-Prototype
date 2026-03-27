@@ -32,8 +32,9 @@ The repository is currently a simulator-validated Python prototype with:
 - an optional shared-acquisition path so preview and recording can consume the same live frame stream
 - `IntervalCaptureService` for timed single-image saving from the shared live stream
 - optional OpenCV-based preview inspection and grayscale-safe export paths
+- a first real-hardware OpenCV preview path with viewport-based `fit-to-window` and zoom controls
 
-Real hardware is currently not available, so the repository should not yet be treated as hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`GlobalRoadmap.md`](GlobalRoadmap.md).
+Real hardware is available again for targeted preview and smoke validation, but the repository should still not yet be treated as fully hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`GlobalRoadmap.md`](GlobalRoadmap.md).
 
 ## Repository Layout
 
@@ -360,6 +361,22 @@ Optional sample images can be loaded from a directory containing `.pgm` or `.ppm
 ```powershell
 .\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --sample-dir .\demo_samples
 ```
+
+## Optional Hardware Preview Demo
+
+Run the optional OpenCV-backed hardware preview window against a real Vimba X camera:
+
+```powershell
+.\.venv\Scripts\python.exe .\run_hardware_preview_demo.py --camera-id DEV_1AB22C046D81
+```
+
+Current prototype controls:
+
+- `i`: zoom in
+- `o`: zoom out
+- `f`: fit-to-window
+- `q` / `Esc`: quit
+- window `X`: quit
 
 ## Simulated Focus Preview Demo
 
