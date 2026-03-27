@@ -13,12 +13,10 @@
 - add mouse-wheel zoom for the preview viewport
 - zoom around the cursor position when the cursor is inside the image viewport, and fall back to centered zoom when the cursor is outside the image area or no reliable cursor-to-image mapping is available
 - keep fit-to-window available as an explicit reset action that can also use the current cursor position when meaningful viewport-local feedback is available
-- add FPS reporting in the bottom status bar
-- add rectangular ROI-mask creation with the `r` key
-- add elliptical ROI-mask creation with the `e` key
 - for rectangle ROI editing, support corner-handle interaction with click, hold, and drag
 - for ellipse ROI editing, define the shape through the center point plus the upper-right corner of its rectangular bounding box, with that bounding box kept implicit or minimally hinted
 - add snapshot saving through the `+` key
+  - keep this tied to an existing snapshot service path instead of introducing UI-owned save logic
 - add a top menu or control band for operator-facing preview settings
 - allow sensor-array configuration through that menu, including width, height, and X/Y offsets
 - allow shutter time configuration in floating-point milliseconds through that menu

@@ -53,6 +53,7 @@ Treat the following as already implemented baseline, not as still-open work for 
 - viewport-based fit-to-window preview
 - zoom in/out and fit reset through the current OpenCV preview controls
 - dedicated bottom status band that keeps preview status text out of the image viewport
+- rolling FPS readout in that status band
 - warning-only capability-probe hinting
 - click-based single-point selection
 - image-space coordinate readout for the selected point in the status band
@@ -60,6 +61,8 @@ Treat the following as already implemented baseline, not as still-open work for 
 - `x`-based crosshair visibility toggle
 - focus-status display in the status band for focus-aware preview flows
 - `y`-based focus-status visibility toggle
+- `r`/`e`-based ROI entry modes for rectangle and ellipse
+- first two-click ROI creation baseline for rectangle and ellipse
 - coordinate copy through `c`
 
 This baseline is documented in:
@@ -83,6 +86,13 @@ Use those documents to keep the plan honest:
 - if a capability is already listed as implemented in status, preserve it and avoid reopening it as roadmap work
 - if a capability is listed as planned in roadmap but not yet implemented, it can stay in scope for this branch if it remains UI/display-facing
 - when status and roadmap drift, update the permanent docs rather than expanding this work package into a second source of truth
+
+## Collected Implementation Notes
+
+- The snapshot shortcut is not just another preview keybinding. A clean implementation needs explicit service wiring from the OpenCV app/demo path into an existing snapshot-save path so the UI does not start owning file naming, save-directory policy, or ad-hoc storage behavior.
+- A direct `SnapshotService` call from the running preview path would currently compete with the same camera driver that is already serving the shared live stream, so the eventual snapshot shortcut needs a deliberately chosen acquisition-safe path rather than a naive direct save call.
+- Because of that wiring requirement, snapshot shortcut work should be treated as a small integration slice inside this branch rather than as an isolated one-line key handler patch.
+- ROI entry points can land earlier than full ROI editing as long as the UI layer only owns mode selection and event capture while ROI state and geometry remain aligned with existing model/service boundaries.
 
 ## Execution Plan
 
@@ -108,6 +118,7 @@ Use those documents to keep the plan honest:
    - preview mode / zoom
    - warning-only capability-probe error if present
    - FPS readout
+   - current status: completed for all four items above
 7. Implement UI Slice 2: operator-facing toggles.
    - `x` for crosshair visibility
    - `y` for focus visibility
@@ -117,10 +128,12 @@ Use those documents to keep the plan honest:
 8. Implement UI Slice 3: local operator snapshot shortcut.
    - add `+`-based snapshot entry if the current preview integration can call an existing save path cleanly
    - do not move file naming or storage policy into the UI layer
+   - note: this slice requires additional service wiring in the app/demo path and should not be reduced to a standalone key handler change
 9. Implement UI Slice 4: first ROI entry points.
    - add rectangle entry through `r`
    - add ellipse entry through `e`
    - avoid collapsing ROI ownership into the preview window; prefer existing model/service boundaries
+   - current status: completed for key-based mode entry points plus a first two-click ROI creation baseline that mirrors active ROI state into `RoiStateService`; richer drawing and editing interaction still remains open
 10. If time remains after the above slices, continue with the next roadmap-consistent preview work without crossing module boundaries:
    - mouse-wheel zoom
    - cursor-aware zoom anchoring
@@ -222,10 +235,9 @@ To resume this work:
 
 Then resume from the first incomplete slice in this order:
 
-1. FPS/status-band enrichment
-2. snapshot shortcut
-3. ROI entry points
-4. remaining viewport interaction work that still fits this branch
+1. snapshot shortcut with acquisition-safe service wiring
+2. richer ROI drawing/editing interaction
+3. remaining viewport interaction work that still fits this branch
 
 Before editing code after a resume:
 

@@ -2,8 +2,8 @@
 
 - maturity: active prototype
 - current implementation: smoke/demo flows now live in `src/vision_platform/apps/opencv_prototype`; OpenCV-facing implementation lives under `src/vision_platform/imaging`, while `camera_app.smoke` remains as a compatibility layer
-- working now: simulated preview with optional focus-state composition, save demo, command-flow demo, focus-preview smoke demo, overlay-payload demo, root helper scripts, a first real-hardware preview demo for local live inspection, and a viewport-based preview path with fit-to-window plus zoom controls plus a dedicated bottom status band and operator toggles for crosshair and focus-status visibility
-- partial: pan, cursor-aware zoom anchoring, FPS/status enrichment, ROI drawing tools, snapshot shortcut handling, and an operator-facing menu/control band are still open
+- working now: simulated preview with optional focus-state composition, save demo, command-flow demo, focus-preview smoke demo, overlay-payload demo, root helper scripts, a first real-hardware preview demo for local live inspection, and a viewport-based preview path with fit-to-window plus zoom controls plus a dedicated bottom status band, FPS readout, operator toggles for crosshair and focus-status visibility, ROI entry-mode toggles for rectangle and ellipse, and a first two-click ROI creation baseline wired into the shared ROI state path
+- partial: pan, cursor-aware zoom anchoring, richer ROI drawing/editing interactions, snapshot shortcut handling, and an operator-facing menu/control band are still open
 - known issues: OpenCV path is optional and still needs broader hardware-backed validation beyond the first verified live preview
 - technical debt: demo result typing still comes from the legacy smoke package until a dedicated platform app model is introduced
 - risk: direct script execution outside the editable package setup can still depend on the current `src` path helpers
@@ -17,11 +17,14 @@
   - the hardware-preview path now uses an explicit viewport renderer that preserves aspect ratio, applies black padding for uncovered display regions, and crops overflow areas instead of distorting the image
   - `i`, `o`, and `f` now control the viewport preview path reliably enough for operator testing, while `q`, `Esc`, and the window `X` handle shutdown
   - preview status text now lives in a dedicated bottom status band instead of consuming image pixels inside the viewport
-  - that status band now reports preview mode and zoom factor during operation
+  - that status band now reports preview mode, zoom factor, and a rolling FPS estimate during operation
   - left-click selection now records one image-space point, shows its coordinates in the status band, draws a crosshair, and allows coordinate copy via `c`
   - the hardware-preview path can now also surface a warning in the status band when live capability probing failed and the system fell back to generic validation, while the successful capability path remains silent
   - `x` now toggles crosshair visibility inside the OpenCV preview loop without moving that state into camera or stream services
   - focus-aware preview flows can now surface focus score state in the status band, and `y` now toggles that focus-status visibility in the same UI layer
+  - `r` and `e` now provide ROI-mode entry points for rectangle and ellipse selection in the OpenCV UI layer
+  - rectangle and ellipse ROI creation now support a first two-click baseline and mirror the resulting active ROI into the shared `RoiStateService` used by preview-adjacent consumers
 - remaining risks:
   - broader hardware-backed validation is still needed beyond the first verified live-preview path
   - preview teardown has been improved, but hardware disconnect and camera-handle edge cases should still be watched during longer operator sessions
+  - the planned snapshot shortcut still needs explicit preview-to-snapshot service wiring in the OpenCV app/demo path so UI code does not take over save-directory, file naming, or storage policy concerns
