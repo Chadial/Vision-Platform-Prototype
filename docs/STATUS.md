@@ -270,6 +270,7 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
+0. If the current task is to complete real-hardware validation, resume from `docs/session_workpackages/hardware_validation_phase_9.md` before running or editing hardware-related paths.
 1. Run a real hardware smoke test again when the target camera is available.
 2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
 3. Structure the next operator-facing OpenCV UI block around status bar, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the menu/control band.
