@@ -79,6 +79,31 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
 
         self.assertEqual(pressed_key, 27)
 
+    def test_overlay_text_appends_warning_only_when_provider_returns_text(self) -> None:
+        preview_service = MagicMock()
+        window = OpenCvPreviewWindow(
+            preview_service,
+            status_warning_provider=lambda: "Capability probe unavailable",
+        )
+        window._last_display_scale = 1.25
+
+        overlay_text = window._build_overlay_text()
+
+        self.assertIn("FIT 1.25x", overlay_text)
+        self.assertIn("WARN: Capability probe unavailable", overlay_text)
+
+    def test_overlay_text_stays_clean_when_warning_provider_returns_none(self) -> None:
+        preview_service = MagicMock()
+        window = OpenCvPreviewWindow(
+            preview_service,
+            status_warning_provider=lambda: None,
+        )
+        window._last_display_scale = 1.25
+
+        overlay_text = window._build_overlay_text()
+
+        self.assertEqual(overlay_text, "FIT 1.25x | i=in o=out f=fit q=quit")
+
 
 if __name__ == "__main__":
     unittest.main()

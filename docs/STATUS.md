@@ -63,6 +63,7 @@ The repository currently provides a structured Python prototype for the vision p
 - hardware-backed validation now also covers duration-only recording, target-frame-rate recording, explicit invalid camera id / invalid pixel format / invalid ROI increment failures, and a supported alternate `Mono10` snapshot-save path
 - Vimba X acquisition-frame-rate control now enables `AcquisitionFrameRateEnable` automatically when a rate is configured, while `CameraStatus` also exposes the reported hardware frame-rate value and whether camera-side frame-rate control is enabled
 - camera initialization can now best-effort probe a live capability profile for hardware-backed runtime validation, while capability-probe failures degrade softly to generic validation and are exposed through `CameraStatus` instead of blocking camera use
+- the OpenCV hardware-preview path treats that probe state as a warning-only concern: successful probing stays silent, while capability-probe failures may be surfaced as a status-bar/overlay warning for operators
 - new repository-level module workspaces for apps, integrations, services, and libraries
 - new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork

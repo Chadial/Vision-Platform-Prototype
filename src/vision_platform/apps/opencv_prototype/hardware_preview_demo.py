@@ -7,6 +7,7 @@ from camera_app.logging.log_service import configure_logging
 from camera_app.smoke.demo_result import DemoRunResult
 from vision_platform.imaging.opencv_preview import OpenCvPreviewWindow
 from vision_platform.integrations.camera import VimbaXCameraDriver
+from vision_platform.services.recording_service import CameraService
 from vision_platform.services.stream_service import CameraStreamService
 
 
@@ -16,13 +17,18 @@ def run_hardware_preview_demo(
     frame_limit: int | None = None,
 ) -> DemoRunResult:
     driver = VimbaXCameraDriver()
-    driver.initialize(camera_id=camera_id)
+    camera_service = CameraService(driver)
+    camera_service.initialize(camera_id=camera_id)
     stream_service = CameraStreamService(
         driver,
         preview_poll_interval_seconds=poll_interval_seconds,
         shared_poll_interval_seconds=poll_interval_seconds,
     )
-    preview_window = OpenCvPreviewWindow(stream_service._preview_service, window_name="Hardware Camera Preview")
+    preview_window = OpenCvPreviewWindow(
+        stream_service._preview_service,
+        window_name="Hardware Camera Preview",
+        status_warning_provider=lambda: camera_service.get_status().capability_probe_error,
+    )
 
     rendered_frames = 0
     stream_service.start_preview()
@@ -41,7 +47,7 @@ def run_hardware_preview_demo(
     finally:
         preview_window.close()
         stream_service.stop_preview()
-        driver.shutdown()
+        camera_service.shutdown()
 
     return DemoRunResult(
         success=True,

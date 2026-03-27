@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Callable
+
 from vision_platform.imaging.opencv_adapter import OpenCvFrameAdapter
 from vision_platform.services.stream_service.preview_service import PreviewService
 
@@ -12,6 +14,7 @@ class OpenCvPreviewWindow:
         preview_service: PreviewService,
         window_name: str = "Camera Preview",
         frame_adapter: OpenCvFrameAdapter | None = None,
+        status_warning_provider: Callable[[], str | None] | None = None,
         zoom_step: float = 1.5,
         min_zoom_scale: float = 0.05,
         max_zoom_scale: float = 8.0,
@@ -19,6 +22,7 @@ class OpenCvPreviewWindow:
         self._preview_service = preview_service
         self._window_name = window_name
         self._frame_adapter = frame_adapter or OpenCvFrameAdapter()
+        self._status_warning_provider = status_warning_provider
         self._zoom_step = zoom_step
         self._min_zoom_scale = min_zoom_scale
         self._max_zoom_scale = max_zoom_scale
@@ -104,7 +108,14 @@ class OpenCvPreviewWindow:
 
     def _build_overlay_text(self) -> str:
         mode = "FIT" if self._fit_to_window else "ZOOM"
-        return f"{mode} {self._last_display_scale:.2f}x | i=in o=out f=fit q=quit"
+        base_text = f"{mode} {self._last_display_scale:.2f}x | i=in o=out f=fit q=quit"
+        if self._status_warning_provider is None:
+            return base_text
+
+        warning = self._status_warning_provider()
+        if not warning:
+            return base_text
+        return f"{base_text} | WARN: {warning}"
 
     def _handle_shortcuts(self, pressed_key: int) -> None:
         normalized_key = pressed_key & 0xFF

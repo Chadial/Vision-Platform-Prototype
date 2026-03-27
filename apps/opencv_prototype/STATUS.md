@@ -17,6 +17,7 @@
   - the hardware-preview path now uses an explicit viewport renderer that preserves aspect ratio, applies black padding for uncovered display regions, and crops overflow areas instead of distorting the image
   - `i`, `o`, and `f` now control the viewport preview path reliably enough for operator testing, while `q`, `Esc`, and the window `X` handle shutdown
   - a visible overlay now reports preview mode and zoom factor during operation
+  - the hardware-preview overlay can now also show a warning when live capability probing failed and the system fell back to generic validation, while the successful capability path remains silent
 - remaining risks:
   - broader hardware-backed validation is still needed beyond the first verified live-preview path
   - preview teardown has been improved, but hardware disconnect and camera-handle edge cases should still be watched during longer operator sessions
