@@ -112,6 +112,8 @@ Turn the repository from a camera-centric code package into an explicitly modula
 - global and local focus metrics
 - overlay-ready live display
 - snapshot analysis using the same contracts
+- viewport-aware preview controls such as fit-to-window, zoom, and pan
+- display-stable overlay mapping on top of those viewport transforms
 
 ### Status
 
@@ -163,10 +165,13 @@ Turn the repository from a camera-centric code package into an explicitly modula
 - later desktop frontend
 - later web-capable frontend path
 - later postprocess tooling
+- operator-friendly display behavior for large camera frames on limited screens
+- frontend-owned viewport management instead of core-owned screen sizing
 
 ### Status
 
 - OpenCV prototype path exists
+- first real-hardware OpenCV preview path now exists for local inspection
 - desktop, web, and postprocess fronts are prepared structurally only
 
 ## Recommended Next Platform Steps

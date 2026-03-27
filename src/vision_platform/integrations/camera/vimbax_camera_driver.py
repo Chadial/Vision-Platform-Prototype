@@ -163,6 +163,9 @@ class VimbaXCameraDriver(CameraDriver):
         return captured_frame
 
     def get_latest_frame(self) -> Optional[CapturedFrame]:
+        if self._status.is_acquiring:
+            return self.capture_snapshot()
+
         return self._latest_frame
 
 

@@ -107,6 +107,10 @@ Das Projekt wird bewusst schrittweise aufgebaut. Zunächst stehen funktionale Pr
 ### 5.2 Interaktive Bildanzeige
 
 - Livebild anzeigen
+- Livebild an Fenster- oder Viewportgröße anpassen
+- zwischen Pixel-1:1-Ansicht und fit-to-window wechseln
+- in das Bild hinein- und herauszoomen
+- den sichtbaren Ausschnitt pannen
 - ROI-Masken definieren
 - ROI-Masken ein- und ausblenden
 - Crosshair ein- und ausblenden
@@ -218,6 +222,7 @@ Diese Module greifen auf gemeinsame Kernmodelle und Basiskomponenten zurück.
 
 - Livebild oder Snapshot darstellen
 - Overlays verwalten
+- Anzeige-Viewport und Display-Transformation verwalten
 - interaktive Werkzeuge bereitstellen
 - Benutzerinteraktionen erfassen und an nachgelagerte Module weitergeben
 
@@ -234,6 +239,8 @@ Diese Module greifen auf gemeinsame Kernmodelle und Basiskomponenten zurück.
 ### Besonderheit
 
 Dieses Modul ist eng mit der UI verbunden, darf aber die eigentliche Analyse nicht selbst implementieren. Es soll nur Eingaben und Anzeigen koordinieren.
+
+Anzeigeabhängige Funktionen wie Fenstergröße, Bildschirmauflösung, fit-to-window, Zoom, Pan und Overlay-Skalierung gehören in dieses Anzeige-/Interaktionsmodul oder in eine direkt daran gekoppelte Display-Schicht. Diese Funktionen dürfen nicht in den Kamera- oder Analysekern gezogen werden.
 
 ---
 
@@ -388,6 +395,8 @@ Jede Kernfunktion soll in einem logisch separierbaren Modul liegen. Kamera, Anze
 ### 11.2 Trennung von UI und Kernlogik
 
 Interaktive Werkzeuge, Anzeige und Overlays gehören in die UI-nahe Schicht. Fokus- oder Kantenlogik gehört in eigenständige Analysekomponenten.
+
+Darstellungsspezifische Transformationen wie Viewport-Anpassung, fit-to-window, Zoom, Pan und overlaybezogene Bildschirmtransformationen sind Teil der UI-/Display-Schicht und nicht Teil des Kamera- oder Aufnahme-Kerns.
 
 ### 11.3 Sprachneutrale Kernstruktur
 
@@ -566,6 +575,9 @@ Nach dem MVP sind mehrere Ausbaupfade denkbar:
 - Webstream mit Overlay
 - Tablet-/Mobile-Anzeigen
 - getrennte Operator- und Entwickleransichten
+- viewportbasierte Preview-Darstellung mit fit-to-window
+- interaktive Zoom- und Pan-Steuerung
+- overlaystabile Anzeige trotz Display-Skalierung
 
 ### Ausbaupfad E – Postprocessing und Datenauswertung
 

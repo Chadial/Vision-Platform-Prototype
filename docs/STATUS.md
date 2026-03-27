@@ -11,12 +11,12 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main`
+- `feature/hardware-preview-display-baseline`
 
 ## Roadmap Position
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, and ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes.
-- Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. Tracking/API modules and real-hardware validation remain open. The next mandatory milestone against the global roadmap remains real-hardware evaluation of the current Python baseline.
+- Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, while viewport-oriented display features such as fit-to-window, zoom, pan, and overlay-stable display transforms remain explicitly assigned to the UI/display layer rather than the core. Tracking/API modules and full real-hardware validation remain open. The next mandatory milestone against the global roadmap remains real-hardware evaluation of the current Python baseline.
 
 ## Merge Note
 
@@ -54,6 +54,7 @@ The repository currently provides a structured Python prototype for the camera s
 - a working simulated driver for hardware-free preview, snapshot, and recording flows
 - a shared frame-source path that lets preview and recording consume one acquisition loop together
 - optional OpenCV preview demo on top of the simulated preview service
+- optional OpenCV hardware preview demo for local live inspection with an explicit camera id
 - optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
 - additional service hardening so preview/recording cleanup resets internal state defensively even when acquisition stop fails during recovery
 - new repository-level module workspaces for apps, integrations, services, and libraries
@@ -68,6 +69,7 @@ The repository currently provides a structured Python prototype for the camera s
 - snapshot-side focus analysis can now also consume the same ROI state path while staying separate from snapshot persistence
 - preview- and snapshot-side focus overlays can now be composed together with the active ROI into one shared display payload without introducing a concrete UI dependency
 - the OpenCV prototype app layer now includes a simulator-backed payload demo that exercises this shared display payload through a lightweight console-facing adapter path
+- viewport management concerns such as fit-to-window, zoom, pan, and display-space overlay transforms are now explicitly treated as UI/display-layer responsibilities instead of camera-core responsibilities
 
 ## Completed Work
 
@@ -113,6 +115,7 @@ The repository currently provides a structured Python prototype for the camera s
 - polling-based preview refresh implemented
 - preview frame metadata exposure implemented
 - optional OpenCV preview window adapter implemented above `PreviewService`
+- optional OpenCV hardware preview demo implemented above `PreviewService` and `VimbaXCameraDriver`
 - `PreviewService`, `SharedFrameSource`, and `CameraStreamService` now live in `vision_platform.services.stream_service`
 - `FocusPreviewService` now derives focus state from preview frames without embedding analysis logic into the stream loop or window layer
 - `RoiStateService` now lets preview-adjacent consumers reuse one active ROI selection without making ROI a stream-owned concern
@@ -209,9 +212,11 @@ The repository currently provides a structured Python prototype for the camera s
 - `CameraStreamService` can now also create `IntervalCaptureService` for preview plus timed single-image saving from the same stream
 - `CameraStreamService` can now also create `FocusPreviewService` so focus state can be derived from the same preview path
 - an optional OpenCV preview window now exists above the service layer
+- a first real-hardware preview demo now exists on top of the optional OpenCV layer for local desktop inspection
 - the preview demo can now optionally compose focus state while keeping the window class itself free of focus logic
+- fit-to-window, zoom, pan, and overlay transform behavior are still intentionally left to a future UI/display-facing step
 - no browser preview or non-OpenCV UI layer yet
-- hardware validation is currently blocked because the camera is not available
+- hardware-backed preview inspection is now possible again because a connected camera has been verified locally
 - simulated preview exists through `SimulatedCameraDriver`
 
 ### Simulation vs. Real Hardware
@@ -234,7 +239,9 @@ The repository currently provides a structured Python prototype for the camera s
 - the app-facing OpenCV demos now live in `vision_platform.apps.opencv_prototype`
 - OpenCV remains outside `CameraDriver` and outside the mandatory core dependency set
 - preview display can now run through `cv2.imshow()` on top of `PreviewService`
+- preview display can now also run against a real Vimba X camera through the optional OpenCV prototype path
 - the preview demo can now optionally carry focus state alongside the rendered preview path without moving analysis into the OpenCV window class
+- fit-to-window, zoom, pan, and viewport-aware overlay transforms are planned as frontend/display concerns rather than core-service concerns
 - lossless grayscale save now supports `.png` and `.tiff` through the optional adapter for `Mono8` and unpacked higher-bit grayscale formats such as `Mono16`
 - the standard-library writer remains the default for dependency-free `Mono8`, `Rgb8`, and `Bgr8` PNG output
 - packed grayscale formats are still not decoded automatically and should be transformed explicitly before using the OpenCV save path if required
@@ -242,7 +249,7 @@ The repository currently provides a structured Python prototype for the camera s
 
 ## Known Constraints
 
-- hardware is currently not available for live preview validation
+- real hardware is available again for targeted preview validation, but broader hardware validation is still incomplete
 - the terminal default `python` points to Python 3.6 on this machine
 - project tests should be run with `.\.venv\Scripts\python.exe`
 
@@ -256,6 +263,7 @@ The repository currently provides a structured Python prototype for the camera s
 
 1. Run a real hardware smoke test again when the target camera is available.
 2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-3. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
-4. Define a stricter payload mapping only if the later C# or host integration really needs it.
-5. Keep the Python core stable as the handover baseline for the later C# phase.
+3. Define a first UI/display-side viewport model for fit-to-window, zoom, pan, and overlay transforms without leaking screen concerns into the core.
+4. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
+5. Define a stricter payload mapping only if the later C# or host integration really needs it.
+6. Keep the Python core stable as the handover baseline for the later C# phase.

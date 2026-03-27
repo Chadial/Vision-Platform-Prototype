@@ -162,6 +162,7 @@ Bildanzeige
 Bedienung
 Overlays
 Interaktive Werkzeuge
+Viewport-, Zoom-, Pan- und fit-to-window-Verhalten
 Application / Services
 
 Verantwortlich für:
@@ -185,6 +186,9 @@ Verantwortlich für:
 Kamera-SDK
 Dateisystem
 spätere API-/Netzwerkadapter
+
+Zusatzregel für Preview und Anzeige:
+Bildschirmauflösung, Fenstergröße, Zoomfaktor, Pan-Offset, fit-to-window und displayseitige Overlay-Transformationen gehören nicht in den Kamera- oder Recording-Kern. Solche Darstellungsregeln sollen in der Presentation/UI-Schicht oder in einer eng daran gekoppelten Display-Adapter-Schicht liegen.
 
 Diese Trennung muss nicht sofort in perfekter Lehrbuchform umgesetzt werden, aber die Richtung soll klar erkennbar sein.
 
