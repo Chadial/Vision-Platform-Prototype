@@ -11,6 +11,11 @@
 - add viewport-oriented preview behavior for large hardware frames, starting with fit-to-window
 - add interactive zoom and pan in the prototype preview path
 - keep overlay drawing stable under display scaling and viewport transforms
+- replace the current resize-based zoom attempt with a viewport renderer that preserves aspect ratio and treats zoom as display-space scaling plus cropping
+- pad unused display regions with black instead of stretching or distorting the image
+- keep overflow clipping centered first, then add explicit pan on top of that viewport model
+- add a visible on-screen display mode or zoom-state indicator so shortcut effects are immediately confirmable during operator testing
+- harden preview teardown so closing the window does not leave the shared acquisition path logging avoidable disconnect-style cleanup errors
 
 ## Later
 

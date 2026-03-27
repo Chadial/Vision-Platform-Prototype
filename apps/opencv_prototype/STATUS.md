@@ -8,3 +8,14 @@
 - technical debt: demo result typing still comes from the legacy smoke package until a dedicated platform app model is introduced
 - risk: direct script execution outside the editable package setup can still depend on the current `src` path helpers
 - architecture note: viewport fitting, zoom, pan, and display-space overlay transforms are intentionally treated as UI/display concerns rather than camera-core concerns
+- verified hardware-preview observations:
+  - real-hardware preview starts and renders successfully against `DEV_1AB22C046D81`
+  - `q`, `Esc`, and closing the window through the `X` button now terminate the preview path successfully
+  - key-debug output confirms that `1`, `2`, `3`, `i`, `o`, and `f` all reach the OpenCV preview loop as keyboard events
+  - OpenCV HighGUI modifier combinations such as `Ctrl+1`, `Ctrl+2`, and `Ctrl+3` are not reliable enough to treat as the primary shortcut path on this Windows setup
+- failed or incomplete prototype attempts:
+  - naive resize-based zoom was attempted first, but it does not yet provide a trustworthy operator-visible viewport behavior on large hardware frames
+  - the current zoom path does not yet match the intended image-viewer semantics of proportional scaling, black padding for uncovered display area, and clipping of overflow when zoomed in
+  - preview shutdown originally reopened or re-touched already closed windows during cleanup; that part was improved, but the shared-stream shutdown path can still emit camera-disconnect-style errors during teardown
+- resulting conclusion:
+  - the next preview iteration should replace naive image resizing with an explicit viewport model that preserves aspect ratio, supports fit-to-window, uses black padding for uncovered display regions, and crops overflow areas instead of distorting the image
