@@ -64,6 +64,14 @@ Do not start substantive work on `main`. If the current branch is `main` and the
 
 If `git status --short` is not clean, use `docs/branch_backlog.md` to decide whether the existing worktree changes belong to the current task or must stay isolated.
 
+### Local shell constraints
+
+Assume the local shell environment is Windows PowerShell unless verified otherwise.
+
+- `rg` may not be installed on this machine. If `rg` is unavailable, immediately fall back to PowerShell-native file and text search instead of retrying.
+- PowerShell in this environment does not accept `&&` as a command separator. Run sequential commands as separate tool calls or use PowerShell-compatible structure instead of emitting `&&` and then recovering from the parser error.
+- Prefer avoiding preventable shell retries that only rediscover these environment constraints.
+
 ### Working assumptions for new sessions
 
 - `docs/STATUS.md` is the current implementation truth for what is already verified
