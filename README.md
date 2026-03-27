@@ -1,10 +1,10 @@
-# Camera Subsystem Prototype and Vision Platform Reorganization
+# Vision Platform Prototype
 
-Python prototype for a camera subsystem built around Allied Vision Vimba X and prepared for later handover to a C#/.NET team.
+Python prototype with Allied Vision Vimba X integration.
 
 ## What This Repository Is
 
-This repository is the Python prototype baseline for a modular camera and vision platform.
+This repository is the Python prototype baseline for a modular vision platform.
 
 Its purpose is to:
 
