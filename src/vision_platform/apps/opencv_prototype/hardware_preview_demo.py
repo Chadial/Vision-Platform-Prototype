@@ -7,6 +7,7 @@ from camera_app.logging.log_service import configure_logging
 from camera_app.smoke.demo_result import DemoRunResult
 from vision_platform.imaging.opencv_preview import OpenCvPreviewWindow
 from vision_platform.integrations.camera import VimbaXCameraDriver
+from vision_platform.models import CameraConfiguration
 from vision_platform.services.recording_service import CameraService
 from vision_platform.services.stream_service import CameraStreamService
 
@@ -15,10 +16,13 @@ def run_hardware_preview_demo(
     camera_id: str | None = None,
     poll_interval_seconds: float = 0.03,
     frame_limit: int | None = None,
+    exposure_time_us: float | None = None,
 ) -> DemoRunResult:
     driver = VimbaXCameraDriver()
     camera_service = CameraService(driver)
     camera_service.initialize(camera_id=camera_id)
+    if exposure_time_us is not None:
+        camera_service.apply_configuration(CameraConfiguration(exposure_time_us=exposure_time_us))
     stream_service = CameraStreamService(
         driver,
         preview_poll_interval_seconds=poll_interval_seconds,
@@ -76,6 +80,12 @@ def _build_argument_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional number of rendered frames before the demo exits.",
     )
+    parser.add_argument(
+        "--exposure-time-us",
+        type=float,
+        default=None,
+        help="Optional exposure time in microseconds to apply before preview starts.",
+    )
     return parser
 
 
@@ -92,6 +102,7 @@ def main() -> int:
         camera_id=args.camera_id,
         poll_interval_seconds=args.poll_interval_seconds,
         frame_limit=args.frame_limit,
+        exposure_time_us=args.exposure_time_us,
     )
     print(f"Rendered {result.rendered_frames} frames.")
     if result.preview_frame_info is not None:

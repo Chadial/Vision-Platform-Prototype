@@ -85,6 +85,7 @@ class OpenCvSmokeDemoTests(unittest.TestCase):
             "camera_id": None,
             "poll_interval_seconds": 0.03,
             "frame_limit": None,
+            "exposure_time_us": None,
         })()):
             result = hardware_preview_main()
 
