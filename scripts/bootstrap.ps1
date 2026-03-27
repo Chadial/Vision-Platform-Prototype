@@ -38,15 +38,18 @@ Invoke-Step "Upgrading pip" {
     & $pythonExe -m pip install --upgrade pip
 }
 
-$requirementsFile = "requirements.txt"
+$installSpec = "-e ."
+$installProfile = "core"
 if ($IncludeOpenCv) {
-    $requirementsFile = "requirements-opencv.txt"
+    $installSpec = "-e .[opencv]"
+    $installProfile = "core + OpenCV"
 } elseif ($Dev) {
-    $requirementsFile = "requirements-dev.txt"
+    $installSpec = "-e ."
+    $installProfile = "developer baseline"
 }
 
-Invoke-Step "Installing dependencies from $requirementsFile" {
-    & $pipExe install -r (Join-Path $projectRoot $requirementsFile)
+Invoke-Step "Installing project with $installSpec" {
+    & $pipExe install $installSpec
 }
 
 if ($VmbPyWheel) {
@@ -64,11 +67,11 @@ Write-Host "Bootstrap completed."
 Write-Host "Virtual environment: $venvPath"
 Write-Host "Python executable: $pythonExe"
 if ($IncludeOpenCv) {
-    Write-Host "Installed profile: core + OpenCV"
+    Write-Host "Installed profile: $installProfile"
 } elseif ($Dev) {
-    Write-Host "Installed profile: developer baseline"
+    Write-Host "Installed profile: $installProfile"
 } else {
-    Write-Host "Installed profile: core"
+    Write-Host "Installed profile: $installProfile"
 }
 if ($VmbPyWheel) {
     Write-Host "Installed VmbPy wheel: $VmbPyWheel"

@@ -24,8 +24,8 @@ This inventory reflects the currently still open files after the control/imaging
 | --- | --- | --- |
 | `Agents.md` | `docs/reorg-foundation-sync` | repository working rules |
 | `README.md` | `docs/reorg-foundation-sync` | root orientation and structure references |
-| `GlobalRoadmap.md` | `docs/reorg-foundation-sync` | master roadmap sync |
-| `MODULE_INDEX.md` | `docs/reorg-foundation-sync` | root module index |
+| `docs/GlobalRoadmap.md` | `docs/reorg-foundation-sync` | master roadmap sync |
+| `docs/MODULE_INDEX.md` | `docs/reorg-foundation-sync` | module index |
 | `docs/ROADMAP.md` | `docs/reorg-foundation-sync` | repo roadmap sync |
 | `docs/project_overview.md` | `docs/reorg-foundation-sync` | new root project doc |
 | `docs/target_structure.md` | `docs/reorg-foundation-sync` | target structure doc |
@@ -40,8 +40,8 @@ This inventory reflects the currently still open files after the control/imaging
 | `integrations/**/*` | `docs/reorg-foundation-sync` | module docs only in repo root tree |
 | `libraries/**/*` | `docs/reorg-foundation-sync` | module docs only in repo root tree |
 | `services/**/*` | `docs/reorg-foundation-sync` | module docs only in repo root tree |
-| `ProjectAgents.md` | hold / explicit decision | commit only if intentionally maintained in repo |
-| `ProjectDescription.md` | hold / explicit decision | commit only if intentionally maintained in repo |
+| `docs/ProjectAgents.md` | hold / explicit decision | commit only if intentionally maintained in repo |
+| `docs/ProjectDescription.md` | hold / explicit decision | commit only if intentionally maintained in repo |
 | `docs/archive/StartPrompt.md` | hold / explicit decision | archived reference only; do not mix into normal refactor branches |
 | `src/vision_platform/__init__.py` | `refactor/add-platform-foundation-surface` | namespace foundation |
 | `src/vision_platform/bootstrap.py` | `refactor/add-platform-foundation-surface` | namespace foundation |
@@ -189,14 +189,14 @@ Include:
 
 - `Agents.md`
 - `README.md`
-- `GlobalRoadmap.md`
+- `docs/GlobalRoadmap.md`
 - `docs/ROADMAP.md`
 - `docs/project_overview.md`
 - `docs/target_structure.md`
 - `docs/migration_plan.md`
 - `docs/architecture_principles.md`
 - `docs/git_strategy.md`
-- `MODULE_INDEX.md`
+- `docs/MODULE_INDEX.md`
 - module-doc folders under:
   - `apps/`
   - `integrations/`
@@ -205,8 +205,8 @@ Include:
 
 Review carefully before inclusion:
 
-- `ProjectAgents.md`
-- `ProjectDescription.md`
+- `docs/ProjectAgents.md`
+- `docs/ProjectDescription.md`
 - `docs/archive/StartPrompt.md`
 
 These three files appear in the current worktree but are not normal implementation outputs. They should only be committed if they are intentionally meant to live in the repository as maintained source documents.

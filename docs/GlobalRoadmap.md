@@ -51,7 +51,7 @@ Turn the repository from a camera-centric code package into an explicitly modula
 
 - repository-level module folders for apps, integrations, services, and libraries
 - per-module `README.md`, `STATUS.md`, and `ROADMAP.md`
-- `MODULE_INDEX.md`
+- `docs/MODULE_INDEX.md`
 - reorganization documents in `docs/`
 - `src/vision_platform` namespace mirroring the current stable implementation
 

@@ -2,6 +2,25 @@
 
 Python prototype for a camera subsystem built around Allied Vision Vimba X and prepared for later handover to a C#/.NET team.
 
+## What This Repository Is
+
+This repository is the Python prototype baseline for a modular camera and vision platform.
+
+Its purpose is to:
+
+- validate camera, preview, snapshot, recording, ROI, and focus-related workflows in Python
+- keep the architecture clean enough for later handover to a C#/.NET team
+- preserve a simulator-backed development path when hardware is unavailable
+- prepare a UI-agnostic core that can later support desktop, host-integrated, or web-capable frontends
+
+This is not intended to be a finished end-user product yet. It is the working technical baseline and architecture reference for later phases.
+
+## Where To Read Next
+
+- For the shortest possible project overview, read [`docs/SESSION_START.md`](docs/SESSION_START.md).
+- For the current verified implementation state, read [`docs/STATUS.md`](docs/STATUS.md).
+- For the long-term product and architecture target, read [`docs/ProjectDescription.md`](docs/ProjectDescription.md).
+
 The current goal is not to build a full UI, but to establish a maintainable application core with:
 
 - Allied Vision / Vimba X camera integration
@@ -11,7 +30,7 @@ The current goal is not to build a full UI, but to establish a maintainable appl
 - future compatibility with external host control
 - future portability to desktop UI and web UI
 
-The repository is now also organized as the first step toward a broader modular vision platform. The stable implementation still lives in `src/camera_app`, while the repository structure and the new `src/vision_platform` namespace expose module boundaries for:
+The repository is now also organized as the first step toward a broader modular vision platform. Legacy compatibility remains under `src/camera_app`, while the platform-facing implementation is being moved incrementally into `src/vision_platform` and the repository-level module workspaces for:
 
 - camera integration
 - stream/frame orchestration
@@ -19,6 +38,7 @@ The repository is now also organized as the first step toward a broader modular 
 - OpenCV prototype apps
 - shared common models
 - ROI and focus foundations
+- UI/display-oriented preview experiments
 
 ## Current State
 
@@ -33,13 +53,20 @@ The repository is currently a simulator-validated Python prototype with:
 - `IntervalCaptureService` for timed single-image saving from the shared live stream
 - optional OpenCV-based preview inspection and grayscale-safe export paths
 - a first real-hardware OpenCV preview path with viewport-based `fit-to-window` and zoom controls
+- ROI mask primitives for rectangle and ellipse selections
+- a first manual-focus baseline with ROI-aware evaluation hooks
+- UI-free overlay-payload composition for preview/snapshot-adjacent consumers
 
-Real hardware is available again for targeted preview and smoke validation, but the repository should still not yet be treated as fully hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`GlobalRoadmap.md`](GlobalRoadmap.md).
+Real hardware is available again for targeted preview and smoke validation, but the repository should still not yet be treated as fully hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md).
 
 ## Repository Layout
 
 ```text
 apps/
+camera_app/
+captures/
+configs/
+docs/
 integrations/
 libraries/
 services/
@@ -49,10 +76,19 @@ src/
   camera_app/
   vision_platform/
 tests/
-docs/
+tools/
 ```
 
 Repository-level module workspaces now contain `README.md`, `STATUS.md`, and `ROADMAP.md` files so the platform can be evolved per module. Launcher-style helper scripts and the minimal Vimba SDK smoke test now live under `scripts/launchers/` instead of cluttering the repository root.
+
+The root-level project guidance documents currently in active use are:
+
+- [`docs/SESSION_START.md`](docs/SESSION_START.md)
+- [`Agents.md`](Agents.md)
+- [`docs/ProjectDescription.md`](docs/ProjectDescription.md)
+- [`docs/ProjectAgents.md`](docs/ProjectAgents.md)
+- [`docs/MODULE_INDEX.md`](docs/MODULE_INDEX.md)
+- [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md)
 
 ## Planned Architecture
 
@@ -73,7 +109,26 @@ The new platform-facing namespace mirrors that structure at a higher level:
 - `vision_platform.libraries.roi_core`
 - `vision_platform.libraries.focus_core`
 
+Current preview/display architecture rule:
+
+- camera drivers and core services expose frames plus metadata
+- viewport management such as fit-to-window, zoom, pan, and display-space overlay transforms belongs in the UI/display layer
+- the OpenCV prototype is the current place for validating those operator-facing preview behaviors
+
 ## Setup
+
+There are two different setup paths in this repository:
+
+1. repository-only setup for simulator work
+2. hardware setup with the full Allied Vision Vimba X environment
+
+If you only want to work on simulator-backed flows, OpenCV demos, or documentation, you do not need the Vimba X SDK immediately.
+
+If you want to access a real camera, you need both:
+
+- the project installed into the virtual environment
+- the Vimba X SDK installed on the machine
+- the `vmbpy` wheel from that local Vimba X installation installed into the same virtual environment
 
 1. Create and activate a virtual environment.
 2. Install the camera SDK Python package that matches the target camera environment.
@@ -87,11 +142,10 @@ python -m venv .venv
 pip install -e .
 ```
 
-Quick-install files are also available for users who prefer `pip install -r ...`:
+The repository keeps dependency setup minimal:
 
-- `requirements.txt`: core project install
-- `requirements-opencv.txt`: core install plus optional OpenCV preview/grayscale path
-- `requirements-dev.txt`: current developer baseline
+- `pip install -e .` for the core package
+- `pip install -e .[opencv]` for the optional OpenCV path
 - `.python-version`: preferred local Python version hint for tools such as `pyenv` and IDEs
 
 Typical Windows setup:
@@ -99,7 +153,7 @@ Typical Windows setup:
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+pip install -e .
 ```
 
 One-command Windows bootstrap:
@@ -121,6 +175,32 @@ Optional variants:
 ## Vimba X Setup
 
 This project uses **Allied Vision Vimba X** for camera access.
+
+### What an external developer needs to know first
+
+For real hardware, a plain repository checkout is not enough.
+
+The hardware path depends on two separate things:
+
+1. the Allied Vision Vimba X SDK installed on Windows
+2. the Python binding `vmbpy` installed from the local wheel that comes with that SDK
+
+In practice this means:
+
+- `pip install -e .` installs this repository
+- it does not install the Vimba X SDK
+- it does not install camera drivers or transport layers
+- it does not magically provide `vmbpy`
+
+The usual and intended workflow is therefore:
+
+1. install Vimba X on the machine
+2. create the project virtual environment
+3. install this repository
+4. install `vmbpy` from the local wheel shipped with Vimba X into that same virtual environment
+5. verify camera enumeration
+
+You normally do not "generate" the wheel yourself. In the standard setup, the wheel is already included in the installed Vimba X SDK and only needs to be located and installed.
 
 ### Where to get Vimba X
 
@@ -147,6 +227,12 @@ Vimba X includes:
    - Examples: `C:\Users\Public\Documents\Allied Vision\Vimba X`
    - Documentation: included in the SDK installation and also available online
 
+After installation, locate the `vmbpy` wheel that ships with the SDK. The exact folder can vary by SDK version and installation layout, so do not hardcode a guessed path in the repository docs or scripts. Search inside the Vimba X installation directory for a file matching:
+
+- `vmbpy-*.whl`
+
+Typical places are under SDK-provided Python, API, wheel, or examples directories.
+
 ### Python requirements
 
 - Python **3.10 or higher**
@@ -164,6 +250,15 @@ python -m pip --version
 `VmbPy` is provided as a local `.whl` file inside the Vimba X installation directory.
 
 Use the **local wheel from the Vimba X installation**, not a guessed package name.
+
+Recommended sequence:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -e .
+.\.venv\Scripts\python.exe -m pip install "C:\Path\To\vmbpy-X.Y.Z-py-none-any.whl"
+```
 
 Example:
 
@@ -198,6 +293,20 @@ Installing from PyPI alone does **not** include other essential Vimba X componen
 - transport layers
 - drivers
 
+That is why repository setup and hardware setup are deliberately treated as separate steps in this project.
+
+### Short checklist for external setup
+
+Use this when onboarding a new machine:
+
+1. install Vimba X
+2. verify the camera is visible in the Vimba X Viewer or simulator tooling
+3. create the project `.venv`
+4. install this repository with `pip install -e .`
+5. install `vmbpy` from the local Vimba X wheel into that same `.venv`
+6. run the minimal SDK check
+7. only then run project hardware smoke or preview commands
+
 ### First verification
 
 After installation, verify that `vmbpy` works:
@@ -211,6 +320,14 @@ with VmbSystem.get_instance() as vmb:
 ```
 
 If cameras are listed, the SDK and Python binding are working.
+
+Repository-specific verification command:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\launchers\test_vimba.py
+```
+
+If this command lists cameras, the local SDK installation, Python binding, and project environment are aligned correctly.
 
 ### Notes
 
@@ -228,12 +345,6 @@ Install the optional path only when local preview windows or lossless grayscale 
 pip install -e .[opencv]
 ```
 
-Or, with the convenience file:
-
-```powershell
-pip install -r requirements-opencv.txt
-```
-
 Use it for:
 
 - preview frame conversion for a UI
@@ -247,10 +358,14 @@ The core services still work without OpenCV. The standard writer keeps handling 
 
 For this repository, the intended order is:
 
-1. Read [pyproject.toml](pyproject.toml) for the supported Python version and dependency source of truth.
-2. Use `.python-version` as the preferred interpreter hint.
-3. Pick one of the requirements files for the install path you need.
-4. Use [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1) for fast Windows setup, or this README for the exact manual commands.
+1. Read [`Agents.md`](Agents.md) for startup rules, git discipline, and the required document order.
+2. Read [`docs/SESSION_START.md`](docs/SESSION_START.md) for the compact current baseline and task-based reading map.
+3. Read [`docs/MODULE_INDEX.md`](docs/MODULE_INDEX.md) to locate the relevant module docs quickly.
+4. Read [`docs/STATUS.md`](docs/STATUS.md) for the current verified implementation baseline.
+5. Read [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md) only when planning or architectural context is needed.
+6. Read [pyproject.toml](pyproject.toml) for the supported Python version and dependency source of truth.
+7. Use `.python-version` as the preferred interpreter hint.
+8. Use [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1) for fast Windows setup, or this README for the exact manual commands.
 
 ## Subsystem Bootstrap
 
@@ -282,7 +397,7 @@ For the repository reorganization state and target module layout, see:
 - [`docs/migration_plan.md`](docs/migration_plan.md)
 - [`docs/git_strategy.md`](docs/git_strategy.md)
 - [`docs/branch_backlog.md`](docs/branch_backlog.md)
-- [`MODULE_INDEX.md`](MODULE_INDEX.md)
+- [`docs/MODULE_INDEX.md`](docs/MODULE_INDEX.md)
 
 For host-facing command formulation and request examples, see [`docs/COMMANDS.md`](docs/COMMANDS.md).
 For real-device validation steps, see [`docs/HARDWARE_EVALUATION.md`](docs/HARDWARE_EVALUATION.md).
@@ -378,6 +493,14 @@ Current prototype controls:
 - `f`: fit-to-window
 - `q` / `Esc`: quit
 - window `X`: quit
+
+The next OpenCV prototype UI block is planned around:
+
+- status bar / lower info band
+- crosshair and focus-display toggles
+- ROI tools for rectangle and ellipse masks
+- cursor-aware zoom and later pan
+- an operator-facing menu/control band for sensor geometry, shutter time, storage behavior, frame limits, and focus method selection
 
 ## Simulated Focus Preview Demo
 
