@@ -13,6 +13,8 @@
   - `q`, `Esc`, and closing the window through the `X` button now terminate the preview path successfully
   - key-debug output confirms that `1`, `2`, `3`, `i`, `o`, and `f` all reach the OpenCV preview loop as keyboard events
   - OpenCV HighGUI modifier combinations such as `Ctrl+1`, `Ctrl+2`, and `Ctrl+3` are not reliable enough to treat as the primary shortcut path on this Windows setup
+  - a recent manual run on the attached hardware also confirmed visible output with `--exposure-time-us 1000000` on the current low-light setup
+  - `c` coordinate copy with paste verification, `x` crosshair toggling, rectangle ROI creation through `r`, ellipse ROI creation through `e`, and shutdown via `q`, `Esc`, and window close were all manually verified in that same live run
 - implemented after those findings:
   - the hardware-preview path now uses an explicit viewport renderer that preserves aspect ratio, applies black padding for uncovered display regions, and crops overflow areas instead of distorting the image
   - `i`, `o`, and `f` now control the viewport preview path reliably enough for operator testing, while `q`, `Esc`, and the window `X` handle shutdown

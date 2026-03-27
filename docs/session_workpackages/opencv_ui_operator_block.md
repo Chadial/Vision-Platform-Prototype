@@ -93,6 +93,8 @@ Use those documents to keep the plan honest:
 - A direct `SnapshotService` call from the running preview path would currently compete with the same camera driver that is already serving the shared live stream, so the eventual snapshot shortcut needs a deliberately chosen acquisition-safe path rather than a naive direct save call.
 - Because of that wiring requirement, snapshot shortcut work should be treated as a small integration slice inside this branch rather than as an isolated one-line key handler patch.
 - ROI entry points can land earlier than full ROI editing as long as the UI layer only owns mode selection and event capture while ROI state and geometry remain aligned with existing model/service boundaries.
+- Recent hardware check on the attached camera confirmed that `c` coordinate copy with paste verification, `x`, `r`, `e`, `q`, `Esc`, and window-close shutdown all behaved as expected in the live preview path.
+- The hardware preview demo now also accepts `--exposure-time-us`, which was needed on the current setup because ambient light was insufficient for comfortable manual UI validation.
 
 ## Execution Plan
 
@@ -133,7 +135,8 @@ Use those documents to keep the plan honest:
    - add rectangle entry through `r`
    - add ellipse entry through `e`
    - avoid collapsing ROI ownership into the preview window; prefer existing model/service boundaries
-   - current status: completed for key-based mode entry points plus a first two-click ROI creation baseline that mirrors active ROI state into `RoiStateService`; richer drawing and editing interaction still remains open
+   - current status: completed for key-based mode entry points plus a first two-click ROI creation baseline that mirrors active ROI state into `RoiStateService`
+   - hardware note: rectangle and ellipse entry/creation were manually validated on the attached camera at the current baseline
 10. If time remains after the above slices, continue with the next roadmap-consistent preview work without crossing module boundaries:
    - mouse-wheel zoom
    - cursor-aware zoom anchoring
