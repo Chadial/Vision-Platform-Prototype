@@ -31,7 +31,7 @@ Included:
   - focus visibility toggle
   - ROI drawing entry points for rectangle and ellipse
   - snapshot shortcut
-  - later control/menu band preparation
+  - at most a lightweight in-preview operator strip later if it still proves necessary
 
 Excluded:
 
@@ -39,6 +39,7 @@ Excluded:
 - camera-core or recording-core redesign
 - browser or full desktop UI replacement
 - freehand ROI
+- richer ROI editing such as drag handles, post-creation resize, or ROI move workflows; keep those for a non-MVP follow-up branch
 
 ## Session Goal
 
@@ -63,7 +64,14 @@ Treat the following as already implemented baseline, not as still-open work for 
 - `y`-based focus-status visibility toggle
 - `r`/`e`-based ROI entry modes for rectangle and ellipse
 - first two-click ROI creation baseline for rectangle and ellipse
+- cursor-anchored zoom in the viewport preview path
+- top-left image anchoring with padding only to the right and bottom
+- thin outline around the visible image area when padding is present
 - coordinate copy through `c`
+- preview-frame snapshot save through `+` when an explicit snapshot save directory is configured in the app/demo path
+- mouse-wheel zoom through the same cursor-anchored viewport path as the keyboard zoom controls
+- middle-drag pan for zoomed content in the viewport path
+- concise operator-facing warning/error messages for common unavailable actions and for demo-start failures
 
 This baseline is documented in:
 
@@ -93,8 +101,16 @@ Use those documents to keep the plan honest:
 - A direct `SnapshotService` call from the running preview path would currently compete with the same camera driver that is already serving the shared live stream, so the eventual snapshot shortcut needs a deliberately chosen acquisition-safe path rather than a naive direct save call.
 - Because of that wiring requirement, snapshot shortcut work should be treated as a small integration slice inside this branch rather than as an isolated one-line key handler patch.
 - ROI entry points can land earlier than full ROI editing as long as the UI layer only owns mode selection and event capture while ROI state and geometry remain aligned with existing model/service boundaries.
+- Full ROI editing is intentionally out of MVP scope for this branch. The current branch stops at ROI mode selection, live preview, and first creation so the operator baseline stays small and mergeable.
+- In this OpenCV/HighGUI path, words like `menu` or `menu band` must not be read as a promise of real GUI widgets. At most, this branch may add a lightweight operator strip inside the composed preview/status area.
 - Recent hardware check on the attached camera confirmed that `c` coordinate copy with paste verification, `x`, `r`, `e`, `q`, `Esc`, and window-close shutdown all behaved as expected in the live preview path.
+- Recent hardware check also confirmed the latest viewport refinements: cursor-anchored zoom and the thin visible-image outline behaved as intended on the attached camera.
 - The hardware preview demo now also accepts `--exposure-time-us`, which was needed on the current setup because ambient light was insufficient for comfortable manual UI validation.
+- A later hardware pass on the same setup also confirmed that `+` saved preview snapshots successfully once `--snapshot-save-directory` was configured.
+- In preview paths without a focus provider, `y` now reports `Focus display unavailable` and is omitted from the shortcut hint line so operators are not told to toggle a feature that is not actually wired.
+- Manual hardware validation on March 28, 2026 also showed that the new wheel-based cursor zoom is acceptable for the current MVP, but very small zoom factors can still introduce visible anchor drift from integer viewport rounding; keep that as roadmap hardening, not as a blocker for this branch.
+- The same hardware validation pass also confirmed that middle-drag pan is workable for the current MVP and that the added `view=x,y` status readout is useful when the live scene is too dark to make viewport motion obvious by eye.
+- MVP quality on this branch also includes operator-readable warnings/errors. The branch should prefer short action-oriented messages in the status band or terminal over raw exception dumps whenever common preview/demo failure paths occur.
 
 ## Execution Plan
 
@@ -131,6 +147,7 @@ Use those documents to keep the plan honest:
    - add `+`-based snapshot entry if the current preview integration can call an existing save path cleanly
    - do not move file naming or storage policy into the UI layer
    - note: this slice requires additional service wiring in the app/demo path and should not be reduced to a standalone key handler change
+   - current status: completed through an acquisition-safe preview-frame save path that is enabled only when an explicit snapshot save directory is configured for the app/demo path
 9. Implement UI Slice 4: first ROI entry points.
    - add rectangle entry through `r`
    - add ellipse entry through `e`
@@ -138,9 +155,9 @@ Use those documents to keep the plan honest:
    - current status: completed for key-based mode entry points plus a first two-click ROI creation baseline that mirrors active ROI state into `RoiStateService`
    - hardware note: rectangle and ellipse entry/creation were manually validated on the attached camera at the current baseline
 10. If time remains after the above slices, continue with the next roadmap-consistent preview work without crossing module boundaries:
-   - mouse-wheel zoom
-   - cursor-aware zoom anchoring
-   - pan on top of the current viewport model
+   - operator-facing warning/error coverage for common unavailable actions and startup failures
+   - further zoom hardening for cursor-outside-image edge cases
+   - current status: warning/error coverage baseline, mouse-wheel zoom, and a first middle-drag pan baseline are completed; additional zoom hardening remains open
 11. After each coherent slice, update tests first, then update permanent docs, then reassess whether the next slice still belongs on this branch.
 
 ## Git Handling
@@ -238,9 +255,8 @@ To resume this work:
 
 Then resume from the first incomplete slice in this order:
 
-1. snapshot shortcut with acquisition-safe service wiring
-2. richer ROI drawing/editing interaction
-3. remaining viewport interaction work that still fits this branch
+1. remaining viewport interaction hardening that still fits this branch
+2. lightweight in-preview operator strip work, only if it still belongs on this branch after review
 
 Before editing code after a resume:
 

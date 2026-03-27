@@ -60,8 +60,16 @@ Reason:
    - save directory
    - frame limits or durations where relevant
    - simulator versus hardware selection where needed
-7. Implement the first coherent CLI slice with targeted tests.
-8. Update module and repository docs once the CLI scope is real rather than only planned.
+7. Derive the CLI capability list from the shared operator grouping rather than from ad-hoc script flags.
+   - `Capture`: snapshot, recording start/stop, bounded capture/recording arguments
+   - `Camera`: exposure, gain, pixel format, geometry, camera selection
+   - `Storage`: save directory, append/new-subfolder behavior, naming/format options
+   - `Analysis`: focus-method or similar analysis configuration where already backed by services
+   - `ROI`: explicit set/clear ROI commands where they map cleanly to existing models
+   - exclude `View` from the initial CLI baseline unless a specific host use case requires it, because zoom/pan/fit are usually local preview concerns
+8. Write down that CLI capability list explicitly in the future branch docs before implementing flags, so UI grouping and command grouping stay aligned.
+9. Implement the first coherent CLI slice with targeted tests.
+10. Update module and repository docs once the CLI scope is real rather than only planned.
 
 ## Validation
 

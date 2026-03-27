@@ -86,6 +86,31 @@ class OpenCvFrameAdapter:
     def get_left_button_down_event(self) -> int | None:
         return getattr(self._require_cv2(), "EVENT_LBUTTONDOWN", None)
 
+    def get_mouse_move_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MOUSEMOVE", None)
+
+    def get_mouse_wheel_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MOUSEWHEEL", None)
+
+    def get_middle_button_down_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MBUTTONDOWN", None)
+
+    def get_middle_button_up_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MBUTTONUP", None)
+
+    def get_mouse_wheel_delta(self, flags: int | None) -> int:
+        cv2_module = self._require_cv2()
+        get_delta = getattr(cv2_module, "getMouseWheelDelta", None)
+        if get_delta is not None:
+            try:
+                return int(get_delta(0 if flags is None else flags))
+            except Exception:
+                return 0
+
+        if flags is None:
+            return 0
+        return int(flags)
+
     def get_window_image_size(self, window_name: str) -> tuple[int, int] | None:
         cv2_module = self._require_cv2()
         get_rect = getattr(cv2_module, "getWindowImageRect", None)
@@ -123,6 +148,8 @@ class OpenCvFrameAdapter:
         viewport_width: int,
         viewport_height: int,
         scale: float,
+        source_offset_x: int = 0,
+        source_offset_y: int = 0,
         overlay_text: str | None = None,
     ) -> Any:
         viewport_width = max(1, int(viewport_width))
@@ -132,12 +159,14 @@ class OpenCvFrameAdapter:
         scaled_image = self.resize_image(image, scaled_width, scaled_height)
         canvas = self._create_black_canvas(viewport_height, viewport_width, image)
 
-        src_x = max(0, (scaled_width - viewport_width) // 2)
-        src_y = max(0, (scaled_height - viewport_height) // 2)
-        dst_x = max(0, (viewport_width - scaled_width) // 2)
-        dst_y = max(0, (viewport_height - scaled_height) // 2)
-        copy_width = min(scaled_width, viewport_width)
-        copy_height = min(scaled_height, viewport_height)
+        max_src_x = max(0, scaled_width - viewport_width)
+        max_src_y = max(0, scaled_height - viewport_height)
+        src_x = min(max(0, int(source_offset_x)), max_src_x)
+        src_y = min(max(0, int(source_offset_y)), max_src_y)
+        dst_x = 0
+        dst_y = 0
+        copy_width = min(scaled_width - src_x, viewport_width)
+        copy_height = min(scaled_height - src_y, viewport_height)
 
         canvas[dst_y : dst_y + copy_height, dst_x : dst_x + copy_width] = scaled_image[
             src_y : src_y + copy_height,
@@ -318,6 +347,16 @@ class OpenCvFrameAdapter:
         color = 255 if len(image.shape) == 2 else (255, 255, 255)
         line_type = getattr(cv2_module, "LINE_AA", 16)
         ellipse(image, (center_x, center_y), (radius_x, radius_y), 0, 0, 360, color, 1, line_type)
+
+    def draw_viewport_outline(self, image: Any, left: int, top: int, right: int, bottom: int) -> None:
+        cv2_module = self._require_cv2()
+        rectangle = getattr(cv2_module, "rectangle", None)
+        if rectangle is None:
+            return
+
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        rectangle(image, (left, top), (right, bottom), color, 1, line_type)
 
 
 __all__ = ["OpenCvFrameAdapter"]
