@@ -86,6 +86,31 @@ class OpenCvFrameAdapter:
     def get_left_button_down_event(self) -> int | None:
         return getattr(self._require_cv2(), "EVENT_LBUTTONDOWN", None)
 
+    def get_mouse_move_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MOUSEMOVE", None)
+
+    def get_mouse_wheel_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MOUSEWHEEL", None)
+
+    def get_middle_button_down_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MBUTTONDOWN", None)
+
+    def get_middle_button_up_event(self) -> int | None:
+        return getattr(self._require_cv2(), "EVENT_MBUTTONUP", None)
+
+    def get_mouse_wheel_delta(self, flags: int | None) -> int:
+        cv2_module = self._require_cv2()
+        get_delta = getattr(cv2_module, "getMouseWheelDelta", None)
+        if get_delta is not None:
+            try:
+                return int(get_delta(0 if flags is None else flags))
+            except Exception:
+                return 0
+
+        if flags is None:
+            return 0
+        return int(flags)
+
     def get_window_image_size(self, window_name: str) -> tuple[int, int] | None:
         cv2_module = self._require_cv2()
         get_rect = getattr(cv2_module, "getWindowImageRect", None)
@@ -123,6 +148,8 @@ class OpenCvFrameAdapter:
         viewport_width: int,
         viewport_height: int,
         scale: float,
+        source_offset_x: int = 0,
+        source_offset_y: int = 0,
         overlay_text: str | None = None,
     ) -> Any:
         viewport_width = max(1, int(viewport_width))
@@ -132,12 +159,14 @@ class OpenCvFrameAdapter:
         scaled_image = self.resize_image(image, scaled_width, scaled_height)
         canvas = self._create_black_canvas(viewport_height, viewport_width, image)
 
-        src_x = max(0, (scaled_width - viewport_width) // 2)
-        src_y = max(0, (scaled_height - viewport_height) // 2)
-        dst_x = max(0, (viewport_width - scaled_width) // 2)
-        dst_y = max(0, (viewport_height - scaled_height) // 2)
-        copy_width = min(scaled_width, viewport_width)
-        copy_height = min(scaled_height, viewport_height)
+        max_src_x = max(0, scaled_width - viewport_width)
+        max_src_y = max(0, scaled_height - viewport_height)
+        src_x = min(max(0, int(source_offset_x)), max_src_x)
+        src_y = min(max(0, int(source_offset_y)), max_src_y)
+        dst_x = 0
+        dst_y = 0
+        copy_width = min(scaled_width - src_x, viewport_width)
+        copy_height = min(scaled_height - src_y, viewport_height)
 
         canvas[dst_y : dst_y + copy_height, dst_x : dst_x + copy_width] = scaled_image[
             src_y : src_y + copy_height,
@@ -148,6 +177,28 @@ class OpenCvFrameAdapter:
             self._draw_overlay_text(canvas, overlay_text)
 
         return canvas
+
+    def append_status_band(
+        self,
+        image: Any,
+        status_lines: list[str] | tuple[str, ...],
+        line_height: int = 24,
+        padding: int = 8,
+    ) -> Any:
+        visible_lines = [line for line in status_lines if line]
+        if not visible_lines:
+            return image
+
+        numpy_module = self._require_numpy()
+        band_height = max(1, padding * 2 + line_height * len(visible_lines))
+        if len(image.shape) == 2:
+            band = numpy_module.zeros((band_height, image.shape[1]), dtype=image.dtype)
+        else:
+            band = numpy_module.zeros((band_height, image.shape[1], image.shape[2]), dtype=image.dtype)
+
+        combined = numpy_module.concatenate((image, band), axis=0)
+        self._draw_status_band_text(combined, visible_lines, image.shape[0], line_height=line_height, padding=padding)
+        return combined
 
     def save_lossless_grayscale(
         self,
@@ -243,6 +294,26 @@ class OpenCvFrameAdapter:
         color = 255 if len(image.shape) == 2 else (255, 255, 255)
         put_text(image, overlay_text, (12, 28), font, 0.7, color, 2, line_type)
 
+    def _draw_status_band_text(
+        self,
+        image: Any,
+        status_lines: list[str],
+        image_height: int,
+        line_height: int,
+        padding: int,
+    ) -> None:
+        cv2_module = self._require_cv2()
+        put_text = getattr(cv2_module, "putText", None)
+        if put_text is None:
+            return
+
+        font = getattr(cv2_module, "FONT_HERSHEY_SIMPLEX", 0)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        baseline_y = image_height + padding + line_height - 6
+        for index, line in enumerate(status_lines):
+            put_text(image, line, (12, baseline_y + index * line_height), font, 0.6, color, 1, line_type)
+
     def draw_crosshair(self, image: Any, x: int, y: int, size: int = 12) -> None:
         cv2_module = self._require_cv2()
         line = getattr(cv2_module, "line", None)
@@ -256,6 +327,36 @@ class OpenCvFrameAdapter:
         line(image, (x, y - size), (x, y + size), color, 1, line_type)
         if circle is not None:
             circle(image, (x, y), 3, color, 1, line_type)
+
+    def draw_rectangle_outline(self, image: Any, left: int, top: int, right: int, bottom: int) -> None:
+        cv2_module = self._require_cv2()
+        rectangle = getattr(cv2_module, "rectangle", None)
+        if rectangle is None:
+            return
+
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        rectangle(image, (left, top), (right, bottom), color, 1, line_type)
+
+    def draw_ellipse_outline(self, image: Any, center_x: int, center_y: int, radius_x: int, radius_y: int) -> None:
+        cv2_module = self._require_cv2()
+        ellipse = getattr(cv2_module, "ellipse", None)
+        if ellipse is None:
+            return
+
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        ellipse(image, (center_x, center_y), (radius_x, radius_y), 0, 0, 360, color, 1, line_type)
+
+    def draw_viewport_outline(self, image: Any, left: int, top: int, right: int, bottom: int) -> None:
+        cv2_module = self._require_cv2()
+        rectangle = getattr(cv2_module, "rectangle", None)
+        if rectangle is None:
+            return
+
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        rectangle(image, (left, top), (right, bottom), color, 1, line_type)
 
 
 __all__ = ["OpenCvFrameAdapter"]
