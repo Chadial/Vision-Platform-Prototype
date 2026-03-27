@@ -9,8 +9,8 @@
 - keep overlay drawing stable under display scaling and viewport transforms
 - keep overflow clipping centered until explicit pan is implemented on top of the current viewport model
 - continue hardening preview teardown so longer hardware sessions do not leave avoidable disconnect-style cleanup errors
-- add a toggleable crosshair overlay for live preview inspection
-- add coordinate readout for the current crosshair or cursor position in a dedicated bottom status bar area instead of drawing those values directly into the image content
+- build on the now-implemented point-selection baseline of click-selected crosshair, coordinate readout, and `c`-based coordinate copy
+- move coordinate and warning text into a dedicated bottom status bar area instead of drawing those values directly into the image content
 - keep that bottom status band separate from the image viewport so inspection overlays and status text do not consume image pixels
 - add mouse-wheel zoom for the preview viewport
 - zoom around the cursor position when the cursor is inside the image viewport, and fall back to centered zoom when the cursor is outside the image area or no reliable cursor-to-image mapping is available

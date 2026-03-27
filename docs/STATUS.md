@@ -235,8 +235,9 @@ The repository currently provides a structured Python prototype for the vision p
 - a first real-hardware preview demo now exists on top of the optional OpenCV layer for local desktop inspection
 - the preview demo can now optionally compose focus state while keeping the window class itself free of focus logic
 - fit-to-window and zoom are now implemented in the OpenCV prototype UI layer; pan, cursor-aware zoom anchoring, status bar, and menu-band controls remain for the next UI/display-facing step
+- click-based point selection, crosshair display, coordinate readout, and `c`-based coordinate copy now exist as the first operator-facing point-inspection baseline in that same OpenCV preview path
 - no browser preview or non-OpenCV UI layer yet
-- hardware-backed preview inspection is now possible again because a connected camera has been verified locally
+- the real-hardware preview path is implemented and historically verified, but the physical hardware is currently not attached locally
 - simulated preview exists through `SimulatedCameraDriver`
 
 ### Simulation vs. Real Hardware
@@ -270,7 +271,7 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Known Constraints
 
-- real hardware is available again for targeted preview validation, but broader hardware validation is still incomplete
+- the previously validated camera hardware is currently not attached locally, so current work should assume simulator-first validation unless hardware is reconnected
 - the terminal default `python` may differ from the project interpreter on this machine
 - the project virtual environment currently uses Python 3.14.3 at `.\.venv\Scripts\python.exe`
 - project tests should be run with `.\.venv\Scripts\python.exe`
@@ -284,9 +285,10 @@ The repository currently provides a structured Python prototype for the vision p
 ## Next Recommended Steps
 
 1. Add any still-needed hardware-side timeout or disconnect checks if they are practical to reproduce without destabilizing the setup.
-2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-3. Structure the next operator-facing OpenCV UI block around status bar, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the menu/control band.
+2. Start the next OpenCV UI/operator branch from `docs/session_workpackages/opencv_ui_operator_block.md`.
+3. Structure the next operator-facing OpenCV UI block around a dedicated status band, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the menu/control band.
 4. Extend the viewport path toward pan, cursor-aware zoom anchoring, and overlay-safe viewport transforms without leaking screen concerns into the core.
-5. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
-6. Define a stricter payload mapping only if the later C# or host integration really needs it.
-7. Keep the Python core stable as the handover baseline for the later C# phase.
+5. Revisit optional OpenCV hardware checks only after a camera is connected again, especially for higher-bit grayscale formats delivered by Vimba X.
+6. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
+7. Define a stricter payload mapping only if the later C# or host integration really needs it.
+8. Keep the Python core stable as the handover baseline for the later C# phase.
