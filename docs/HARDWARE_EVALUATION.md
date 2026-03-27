@@ -77,6 +77,13 @@ Or, if the OpenCV path is also required:
 
 Do not treat a plain PyPI install as sufficient for the full hardware path, because the full Vimba X environment also provides drivers and transport-layer components.
 
+Practical note for new machines:
+
+- the wheel is normally shipped with Vimba X already
+- you usually do not build or generate it yourself
+- you must install that local SDK-provided wheel into the same `.venv` that runs this repository
+- if the wheel path is unclear, search the local Vimba X installation directory for `vmbpy-*.whl`
+
 ## First SDK Verification
 
 Before running the checklist below, verify that the SDK can enumerate cameras:

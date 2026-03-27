@@ -110,7 +110,7 @@ Examples:
 - do not bundle broad rename churn without the corresponding tests
 - use `docs/branch_backlog.md` to assign remaining worktree changes to future branches before committing mixed repository states
 - when architecture changes touch module boundaries, update:
-  - `MODULE_INDEX.md`
+  - `docs/MODULE_INDEX.md`
   - relevant module `STATUS.md`
   - relevant module `ROADMAP.md`
   - `docs/STATUS.md` when roadmap position changed

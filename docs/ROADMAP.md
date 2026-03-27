@@ -10,7 +10,7 @@ The codebase progressed iteratively, with snapshot, preview, recording, simulati
 
 ## Phase 0: Repository Reorganization Toward The Vision Platform
 
-- align the repository with `ProjectDescription.md` and `ProjectAgents.md`
+- align the repository with `docs/ProjectDescription.md` and `docs/ProjectAgents.md`
 - create repository-level module workspaces for apps, integrations, services, and libraries
 - add `README.md`, `STATUS.md`, and `ROADMAP.md` per key module
 - introduce `src/vision_platform` as the platform-facing namespace while preserving `src/camera_app`

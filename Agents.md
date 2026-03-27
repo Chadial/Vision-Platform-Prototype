@@ -20,24 +20,28 @@ It should not assume it is the top-level application.
 
 ## Session Bootstrap
 
-At the start of every new session, do not assume prior context. Build working context from the repository documents in this order.
+At the start of every new session, do not assume prior context. Build working context from the repository documents in the smallest useful steps.
 
 ### Mandatory startup read order
 
 1. `Agents.md`
-2. `MODULE_INDEX.md`
-3. `docs/STATUS.md`
-4. `docs/ROADMAP.md`
-5. `GlobalRoadmap.md`
+2. `docs/SESSION_START.md`
+3. `docs/MODULE_INDEX.md`
 
 ### Additional required reads by task type
 
+- For implementation against the current verified baseline:
+  - `docs/STATUS.md`
+- For planning or next-step decisions:
+  - `docs/ROADMAP.md`
 - For architecture, module-boundary, or product-scope questions:
-  - `ProjectDescription.md`
-  - `ProjectAgents.md`
+  - `docs/GlobalRoadmap.md`
+  - `docs/ProjectDescription.md`
+  - `docs/ProjectAgents.md`
 - For any substantive code, refactor, or documentation change:
   - `docs/git_strategy.md`
-  - `docs/branch_backlog.md` when the worktree is mixed or the correct branch scope is unclear
+- When the worktree is mixed or the correct branch scope is unclear:
+  - `docs/branch_backlog.md`
 - For git or branch workflow questions:
   - `docs/git_strategy.md`
   - `docs/branch_backlog.md`
@@ -74,11 +78,12 @@ Assume the local shell environment is Windows PowerShell unless verified otherwi
 
 ### Working assumptions for new sessions
 
+- `docs/SESSION_START.md` is the compact repository-entry document for new sessions
 - `docs/STATUS.md` is the current implementation truth for what is already verified
 - `docs/ROADMAP.md` is the repository delivery sequence
-- `GlobalRoadmap.md` is the platform-wide direction
-- `ProjectDescription.md` is the product and architecture intent reference
-- `ProjectAgents.md` is the repository reorganization and modularization operating guide
+- `docs/GlobalRoadmap.md` is the platform-wide direction
+- `docs/ProjectDescription.md` is the product and architecture intent reference
+- `docs/ProjectAgents.md` is the repository reorganization and modularization operating guide
 
 Do not use `docs/archive/StartPrompt.md` as the primary startup document. It is retained only as historical reference material.
 
@@ -468,10 +473,13 @@ Use the following project documents together and keep their roles distinct:
 - `Agents.md`  
   working rules, architecture constraints, implementation behavior, and repository conventions
 
+- `docs/SESSION_START.md`
+  compact session bootstrap, current baseline, and task-based reading map
+
 - `docs/ROADMAP.md`  
   implementation roadmap for the repository-specific phased delivery plan
 
-- `GlobalRoadmap.md`  
+- `docs/GlobalRoadmap.md`  
   higher-level long-term roadmap from Python prototype to C# handover and later web-capable architecture
 
 - `docs/STATUS.md`  
@@ -489,7 +497,7 @@ Use the following project documents together and keep their roles distinct:
 When updating `docs/STATUS.md`, always relate the current state to both:
 
 - `docs/ROADMAP.md`
-- `GlobalRoadmap.md`
+- `docs/GlobalRoadmap.md`
 
 This means status updates should explicitly state:
 

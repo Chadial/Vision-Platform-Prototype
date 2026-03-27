@@ -5,7 +5,7 @@
 This status document should always be read and updated in relation to:
 
 - `docs/ROADMAP.md` for the repository-specific implementation phases
-- `GlobalRoadmap.md` for the broader Python -> C# -> web-capable target path
+- `docs/GlobalRoadmap.md` for the broader Python -> C# -> web-capable target path
 
 Each status update should state progress and gaps against both roadmaps.
 
@@ -16,7 +16,7 @@ Each status update should state progress and gaps against both roadmaps.
 ## Roadmap Position
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation remains partially completed because simulator-backed coverage is strong but real-hardware validation is still open. Real Hardware Evaluation remains open. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, and ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes.
-- Against `GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls while keeping those concerns explicitly in the UI/display layer. Tracking/API modules and full real-hardware validation remain open. The next mandatory milestones against the global roadmap are broader hardware validation and the next operator-facing preview/UI block.
+- Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls while keeping those concerns explicitly in the UI/display layer. Tracking/API modules and full real-hardware validation remain open. The next mandatory milestones against the global roadmap are broader hardware validation and the next operator-facing preview/UI block.
 
 ## Merge Note
 

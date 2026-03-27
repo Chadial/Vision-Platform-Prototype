@@ -2,9 +2,10 @@
 
 ## Root Guidance
 
-- `ProjectDescription.md`: platform target picture and module responsibilities
-- `ProjectAgents.md`: repository reorganization workflow and modular documentation rules
-- `GlobalRoadmap.md`: platform-wide master roadmap
+- `docs/SESSION_START.md`: compact session bootstrap and reading map
+- `docs/ProjectDescription.md`: platform target picture and module responsibilities
+- `docs/ProjectAgents.md`: repository reorganization workflow and modular documentation rules
+- `docs/GlobalRoadmap.md`: platform-wide master roadmap
 - `docs/ROADMAP.md`: repository-specific implementation flow
 - `docs/STATUS.md`: verified current implementation state
 - `docs/git_strategy.md`: operational branch and commit workflow

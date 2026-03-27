@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is being reorganized from a camera-subsystem prototype into a modular vision platform. The existing Python prototype remains the executable baseline, but the repository structure now reflects broader platform modules defined in `ProjectDescription.md`.
+This repository is being reorganized from a camera-subsystem prototype into a modular vision platform. The existing Python prototype remains the executable baseline, but the repository structure now reflects broader platform modules defined in `docs/ProjectDescription.md`.
 
 ## Active Platform Modules
 

@@ -26,7 +26,7 @@
 
 ## Phase 5: Consolidation
 
-- update `GlobalRoadmap.md` to a platform-wide master roadmap
+- update `docs/GlobalRoadmap.md` to a platform-wide master roadmap
 - update module index and root documentation
 - verify the simulator-backed baseline still runs through the preserved paths
 - assign remaining mixed worktree changes into future branches through `docs/branch_backlog.md`
