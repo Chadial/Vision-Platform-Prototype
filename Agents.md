@@ -18,6 +18,64 @@ It should not assume it is the top-level application.
 
 ---
 
+## Session Bootstrap
+
+At the start of every new session, do not assume prior context. Build working context from the repository documents in this order.
+
+### Mandatory startup read order
+
+1. `Agents.md`
+2. `MODULE_INDEX.md`
+3. `docs/STATUS.md`
+4. `docs/ROADMAP.md`
+5. `GlobalRoadmap.md`
+
+### Additional required reads by task type
+
+- For architecture, module-boundary, or product-scope questions:
+  - `ProjectDescription.md`
+  - `ProjectAgents.md`
+- For any substantive code, refactor, or documentation change:
+  - `docs/git_strategy.md`
+  - `docs/branch_backlog.md` when the worktree is mixed or the correct branch scope is unclear
+- For git or branch workflow questions:
+  - `docs/git_strategy.md`
+  - `docs/branch_backlog.md`
+- For module-specific work:
+  - the target module's `README.md`
+  - the target module's `STATUS.md`
+  - the target module's `ROADMAP.md`
+- For hardware work:
+  - `docs/HARDWARE_EVALUATION.md`
+
+### Mandatory startup checks
+
+Before making substantive changes:
+
+1. check the current branch
+2. inspect `git status --short`
+3. verify whether the task belongs on the current branch or a new branch
+4. identify the relevant module documentation before editing code
+5. re-read `docs/git_strategy.md` for branch, commit, and merge constraints if the task changes repository state
+
+If the current branch scope does not match the requested work, create a new branch before continuing.
+
+Do not start substantive work on `main`. If the current branch is `main` and the task is not a trivial emergency fix, create the correct branch first.
+
+If `git status --short` is not clean, use `docs/branch_backlog.md` to decide whether the existing worktree changes belong to the current task or must stay isolated.
+
+### Working assumptions for new sessions
+
+- `docs/STATUS.md` is the current implementation truth for what is already verified
+- `docs/ROADMAP.md` is the repository delivery sequence
+- `GlobalRoadmap.md` is the platform-wide direction
+- `ProjectDescription.md` is the product and architecture intent reference
+- `ProjectAgents.md` is the repository reorganization and modularization operating guide
+
+Do not use `docs/archive/StartPrompt.md` as the primary startup document. It is retained only as historical reference material.
+
+---
+
 ## High-level priorities
 
 Always optimize for the following, in this order:
@@ -416,6 +474,9 @@ Use the following project documents together and keep their roles distinct:
 
 - `docs/branch_backlog.md`
   assignment of still-open worktree changes to future branches so unfinished work does not leak into `main`
+
+- `docs/archive/StartPrompt.md`
+  archived historical prompt material only; not the primary startup source for new sessions
 
 When updating `docs/STATUS.md`, always relate the current state to both:
 

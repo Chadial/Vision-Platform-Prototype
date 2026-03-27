@@ -42,7 +42,7 @@ This inventory reflects the currently still open files after the control/imaging
 | `services/**/*` | `docs/reorg-foundation-sync` | module docs only in repo root tree |
 | `ProjectAgents.md` | hold / explicit decision | commit only if intentionally maintained in repo |
 | `ProjectDescription.md` | hold / explicit decision | commit only if intentionally maintained in repo |
-| `StartPrompt.md` | hold / explicit decision | do not mix into normal refactor branches |
+| `docs/archive/StartPrompt.md` | hold / explicit decision | archived reference only; do not mix into normal refactor branches |
 | `src/vision_platform/__init__.py` | `refactor/add-platform-foundation-surface` | namespace foundation |
 | `src/vision_platform/bootstrap.py` | `refactor/add-platform-foundation-surface` | namespace foundation |
 | `src/vision_platform/apps/**/*` | `refactor/add-platform-foundation-surface` | app facade surface |
@@ -207,7 +207,7 @@ Review carefully before inclusion:
 
 - `ProjectAgents.md`
 - `ProjectDescription.md`
-- `StartPrompt.md`
+- `docs/archive/StartPrompt.md`
 
 These three files appear in the current worktree but are not normal implementation outputs. They should only be committed if they are intentionally meant to live in the repository as maintained source documents.
 
