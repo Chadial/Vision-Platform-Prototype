@@ -426,6 +426,12 @@ Definition of ready to merge:
 - no unrelated file churn is bundled in the branch
 - the branch leaves the repository in a runnable or at least internally consistent state
 
+Branch cleanup expectation:
+
+- after a branch is merged into `main`, delete the local branch promptly unless there is a specific short-term reason to keep it
+- when a branch has become obsolete because the repository structure or product scope moved on, delete it explicitly instead of keeping it as an unreviewed historical side branch
+- before starting new work, prefer a quick check of merged vs. unmerged local branches so stale topic branches do not accumulate and confuse branch selection
+
 Preferred branch examples:
 
 - `feature/phase-2a-driver-init`

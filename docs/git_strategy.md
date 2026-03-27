@@ -89,6 +89,7 @@ For a normal work package:
 4. update docs if status, structure, or roadmap changed
 5. run local validation
 6. merge only when the branch is internally consistent
+7. delete the local topic branch after merge unless there is a deliberate short-term reason to keep it
 
 ## Required Validation Before Merge
 
@@ -114,6 +115,8 @@ Examples:
   - relevant module `STATUS.md`
   - relevant module `ROADMAP.md`
   - `docs/STATUS.md` when roadmap position changed
+- periodically check which local branches are already merged into `main` and delete them before they become stale context
+- if an old branch is clearly obsolete because the repository has moved on structurally or functionally, delete it explicitly rather than treating it as still-actionable work
 
 ## Recommended Next Branches
 
