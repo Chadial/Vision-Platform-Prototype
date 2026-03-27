@@ -5,6 +5,7 @@ import subprocess
 from typing import Callable
 
 from vision_platform.imaging.opencv_adapter import OpenCvFrameAdapter
+from vision_platform.libraries.common_models import FocusPreviewState
 from vision_platform.services.display_service import CoordinateExportService
 from vision_platform.services.stream_service.preview_service import PreviewService
 
@@ -29,12 +30,16 @@ class _ViewportMapping:
 class OpenCvPreviewWindow:
     """Optional OpenCV-backed preview window on top of PreviewService."""
 
+    _STATUS_LINE_HEIGHT = 24
+    _STATUS_PADDING = 8
+
     def __init__(
         self,
         preview_service: PreviewService,
         window_name: str = "Camera Preview",
         frame_adapter: OpenCvFrameAdapter | None = None,
         status_warning_provider: Callable[[], str | None] | None = None,
+        focus_state_provider: Callable[[], FocusPreviewState | None] | None = None,
         clipboard_copy_callback: Callable[[str], None] | None = None,
         coordinate_export_service: CoordinateExportService | None = None,
         zoom_step: float = 1.5,
@@ -45,6 +50,7 @@ class OpenCvPreviewWindow:
         self._window_name = window_name
         self._frame_adapter = frame_adapter or OpenCvFrameAdapter()
         self._status_warning_provider = status_warning_provider
+        self._focus_state_provider = focus_state_provider
         self._clipboard_copy_callback = clipboard_copy_callback or self._copy_text_to_clipboard
         self._coordinate_export_service = coordinate_export_service or CoordinateExportService()
         self._zoom_step = zoom_step
@@ -56,6 +62,8 @@ class OpenCvPreviewWindow:
         self._last_viewport_mapping: _ViewportMapping | None = None
         self._selected_point: tuple[int, int] | None = None
         self._last_status_message: str | None = None
+        self._crosshair_visible = True
+        self._focus_status_visible = True
         self._window_created = False
 
     def render_latest_frame(self, delay_ms: int = 1) -> bool:
@@ -71,27 +79,35 @@ class OpenCvPreviewWindow:
             return 27
 
         image = self._frame_adapter.to_image(frame)
-        viewport_size = self._frame_adapter.get_window_image_size(self._window_name) or (frame.width, frame.height)
-        display_scale = self._resolve_display_scale(frame.width, frame.height, viewport_size[0], viewport_size[1])
+        window_size = self._frame_adapter.get_window_image_size(self._window_name) or (frame.width, frame.height)
+        status_lines = self._build_status_lines()
+        status_band_height = self._calculate_status_band_height(status_lines)
+        viewport_width = window_size[0]
+        viewport_height = max(1, window_size[1] - status_band_height)
+        display_scale = self._resolve_display_scale(frame.width, frame.height, viewport_width, viewport_height)
         self._last_display_scale = display_scale
         self._last_viewport_mapping = self._build_viewport_mapping(
             frame_width=frame.width,
             frame_height=frame.height,
-            viewport_width=viewport_size[0],
-            viewport_height=viewport_size[1],
+            viewport_width=viewport_width,
+            viewport_height=viewport_height,
             display_scale=display_scale,
         )
-        overlay_text = self._build_overlay_text()
         display_image = self._frame_adapter.render_into_viewport(
             image,
-            viewport_width=viewport_size[0],
-            viewport_height=viewport_size[1],
+            viewport_width=viewport_width,
+            viewport_height=viewport_height,
             scale=display_scale,
-            overlay_text=overlay_text,
         )
         crosshair_position = self._map_source_point_to_viewport(self._selected_point)
-        if crosshair_position is not None:
+        if crosshair_position is not None and self._crosshair_visible:
             self._frame_adapter.draw_crosshair(display_image, crosshair_position[0], crosshair_position[1])
+        display_image = self._frame_adapter.append_status_band(
+            display_image,
+            status_lines,
+            line_height=self._STATUS_LINE_HEIGHT,
+            padding=self._STATUS_PADDING,
+        )
         pressed_key = self._frame_adapter.show_image(self._window_name, display_image, delay_ms=delay_ms)
         self._handle_shortcuts(pressed_key)
         if not self.is_open():
@@ -144,24 +160,41 @@ class OpenCvPreviewWindow:
         assert self._manual_zoom_scale is not None
         return self._manual_zoom_scale
 
-    def _build_overlay_text(self) -> str:
+    def _build_status_lines(self) -> list[str]:
         mode = "FIT" if self._fit_to_window else "ZOOM"
-        base_text = f"{mode} {self._last_display_scale:.2f}x | i=in o=out f=fit c=copy q=quit"
+        primary_parts = [f"{mode} {self._last_display_scale:.2f}x"]
         if self._selected_point is not None:
             coordinate_text = self._coordinate_export_service.format_point(*self._selected_point)
-            base_text = f"{base_text} | {coordinate_text}"
-        if self._status_warning_provider is None:
-            return self._append_status_message(base_text)
+            primary_parts.append(coordinate_text)
+        if self._status_warning_provider is not None:
+            warning = self._status_warning_provider()
+            if warning:
+                primary_parts.append(f"WARN: {warning}")
+        if self._last_status_message:
+            primary_parts.append(self._last_status_message)
+        status_lines = [" | ".join(primary_parts)]
+        focus_line = self._build_focus_status_line()
+        if focus_line:
+            status_lines.append(focus_line)
+        status_lines.append("i=in o=out f=fit x=crosshair y=focus c=copy q=quit")
+        return status_lines
 
-        warning = self._status_warning_provider()
-        if warning:
-            base_text = f"{base_text} | WARN: {warning}"
-        return self._append_status_message(base_text)
+    def _calculate_status_band_height(self, status_lines: list[str]) -> int:
+        visible_lines = [line for line in status_lines if line]
+        if not visible_lines:
+            return 0
+        return self._STATUS_PADDING * 2 + self._STATUS_LINE_HEIGHT * len(visible_lines)
 
-    def _append_status_message(self, base_text: str) -> str:
-        if not self._last_status_message:
-            return base_text
-        return f"{base_text} | {self._last_status_message}"
+    def _build_focus_status_line(self) -> str | None:
+        if not self._focus_status_visible or self._focus_state_provider is None:
+            return None
+
+        focus_state = self._focus_state_provider()
+        if focus_state is None:
+            return "Focus: waiting"
+        if not focus_state.result.is_valid:
+            return f"Focus: invalid ({focus_state.result.metric_name})"
+        return f"Focus: {focus_state.result.metric_name}={focus_state.result.score:.2f}"
 
     def _handle_shortcuts(self, pressed_key: int) -> None:
         normalized_key = pressed_key & 0xFF
@@ -171,6 +204,12 @@ class OpenCvPreviewWindow:
             self.zoom_out()
         elif normalized_key in (ord("f"), ord("F")):
             self.enable_fit_to_window()
+        elif normalized_key in (ord("x"), ord("X")):
+            self._crosshair_visible = not self._crosshair_visible
+            self._last_status_message = "Crosshair shown" if self._crosshair_visible else "Crosshair hidden"
+        elif normalized_key in (ord("y"), ord("Y")):
+            self._focus_status_visible = not self._focus_status_visible
+            self._last_status_message = "Focus shown" if self._focus_status_visible else "Focus hidden"
         elif normalized_key in (ord("c"), ord("C")):
             self._copy_selected_point()
 

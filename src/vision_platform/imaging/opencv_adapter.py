@@ -149,6 +149,28 @@ class OpenCvFrameAdapter:
 
         return canvas
 
+    def append_status_band(
+        self,
+        image: Any,
+        status_lines: list[str] | tuple[str, ...],
+        line_height: int = 24,
+        padding: int = 8,
+    ) -> Any:
+        visible_lines = [line for line in status_lines if line]
+        if not visible_lines:
+            return image
+
+        numpy_module = self._require_numpy()
+        band_height = max(1, padding * 2 + line_height * len(visible_lines))
+        if len(image.shape) == 2:
+            band = numpy_module.zeros((band_height, image.shape[1]), dtype=image.dtype)
+        else:
+            band = numpy_module.zeros((band_height, image.shape[1], image.shape[2]), dtype=image.dtype)
+
+        combined = numpy_module.concatenate((image, band), axis=0)
+        self._draw_status_band_text(combined, visible_lines, image.shape[0], line_height=line_height, padding=padding)
+        return combined
+
     def save_lossless_grayscale(
         self,
         frame: CapturedFrame,
@@ -242,6 +264,26 @@ class OpenCvFrameAdapter:
         line_type = getattr(cv2_module, "LINE_AA", 16)
         color = 255 if len(image.shape) == 2 else (255, 255, 255)
         put_text(image, overlay_text, (12, 28), font, 0.7, color, 2, line_type)
+
+    def _draw_status_band_text(
+        self,
+        image: Any,
+        status_lines: list[str],
+        image_height: int,
+        line_height: int,
+        padding: int,
+    ) -> None:
+        cv2_module = self._require_cv2()
+        put_text = getattr(cv2_module, "putText", None)
+        if put_text is None:
+            return
+
+        font = getattr(cv2_module, "FONT_HERSHEY_SIMPLEX", 0)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        baseline_y = image_height + padding + line_height - 6
+        for index, line in enumerate(status_lines):
+            put_text(image, line, (12, baseline_y + index * line_height), font, 0.6, color, 1, line_type)
 
     def draw_crosshair(self, image: Any, x: int, y: int, size: int = 12) -> None:
         cv2_module = self._require_cv2()

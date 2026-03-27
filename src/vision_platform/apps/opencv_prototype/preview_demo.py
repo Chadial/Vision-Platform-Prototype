@@ -34,6 +34,11 @@ def run_opencv_preview_demo(
     )
     preview_window = OpenCvPreviewWindow(stream_service._preview_service)
     focus_preview_service = stream_service.create_focus_preview_service() if include_focus_state else None
+    if focus_preview_service is not None:
+        preview_window = OpenCvPreviewWindow(
+            stream_service._preview_service,
+            focus_state_provider=focus_preview_service.get_latest_focus_state,
+        )
 
     rendered_frames = 0
     latest_focus_state = None
@@ -90,6 +95,10 @@ def main() -> int:
     configure_logging()
     parser = _build_argument_parser()
     args = parser.parse_args()
+    print(
+        "Preview controls: left click=select point, x=crosshair on/off, y=focus status on/off, "
+        "c=copy coordinates, q/Esc or window close=quit, i=zoom in, o=zoom out, f=fit-to-window"
+    )
 
     result = run_opencv_preview_demo(
         sample_dir=args.sample_dir,
