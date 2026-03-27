@@ -8,14 +8,10 @@
 - validate the new focus-preview smoke path against simulated preview frames
 - carry optional focus-state composition through the preview demo without moving analysis into the window code
 - decide whether the new overlay-payload demo should stay console-oriented or feed a later optional adapter for OpenCV drawing
-- add viewport-oriented preview behavior for large hardware frames, starting with fit-to-window
-- add interactive zoom and pan in the prototype preview path
+- extend the current viewport-oriented preview behavior from fit-to-window and zoom toward cursor-aware zoom and pan
 - keep overlay drawing stable under display scaling and viewport transforms
-- replace the current resize-based zoom attempt with a viewport renderer that preserves aspect ratio and treats zoom as display-space scaling plus cropping
-- pad unused display regions with black instead of stretching or distorting the image
-- keep overflow clipping centered first, then add explicit pan on top of that viewport model
-- add a visible on-screen display mode or zoom-state indicator so shortcut effects are immediately confirmable during operator testing
-- harden preview teardown so closing the window does not leave the shared acquisition path logging avoidable disconnect-style cleanup errors
+- keep overflow clipping centered until explicit pan is implemented on top of the current viewport model
+- continue hardening preview teardown so longer hardware sessions do not leave avoidable disconnect-style cleanup errors
 - add a toggleable crosshair overlay for live preview inspection
 - add coordinate readout for the current crosshair or cursor position in a dedicated bottom status bar area instead of drawing those values directly into the image content
 - keep that bottom status band separate from the image viewport so inspection overlays and status text do not consume image pixels
@@ -36,6 +32,12 @@
 - allow save-directory selection with either append-to-existing-run or create-new-subfolder behavior
 - allow frame-limit configuration for capture and recording workflows, with `0` or empty meaning unlimited
 - allow selection of the focus-calculation method through the same operator-facing control area
+- structure that operator-facing top control band into:
+  - sensor geometry: width, height, offset X, offset Y
+  - acquisition: shutter time in float milliseconds, frame limit, snapshot action
+  - storage: base directory plus append-vs-new-subfolder behavior
+  - analysis: focus-method selection and focus overlay toggle
+  - tools: crosshair toggle plus ROI mode selection for rectangle and ellipse
 
 ## Later
 

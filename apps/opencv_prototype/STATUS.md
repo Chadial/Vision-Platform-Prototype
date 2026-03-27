@@ -2,8 +2,8 @@
 
 - maturity: active prototype
 - current implementation: smoke/demo flows now live in `src/vision_platform/apps/opencv_prototype`; OpenCV-facing implementation lives under `src/vision_platform/imaging`, while `camera_app.smoke` remains as a compatibility layer
-- working now: simulated preview with optional focus-state composition, save demo, command-flow demo, focus-preview smoke demo, overlay-payload demo, root helper scripts, and a first real-hardware preview demo for local live inspection
-- partial: operator-friendly display behavior for large camera frames is still missing; the current hardware preview shows the raw frame without fit-to-window, zoom, or pan
+- working now: simulated preview with optional focus-state composition, save demo, command-flow demo, focus-preview smoke demo, overlay-payload demo, root helper scripts, a first real-hardware preview demo for local live inspection, and a viewport-based preview path with fit-to-window plus zoom controls
+- partial: pan, cursor-aware zoom anchoring, status bar widgets, ROI drawing tools, focus toggles, and an operator-facing menu/control band are still open
 - known issues: OpenCV path is optional and still needs broader hardware-backed validation beyond the first verified live preview
 - technical debt: demo result typing still comes from the legacy smoke package until a dedicated platform app model is introduced
 - risk: direct script execution outside the editable package setup can still depend on the current `src` path helpers
@@ -13,9 +13,10 @@
   - `q`, `Esc`, and closing the window through the `X` button now terminate the preview path successfully
   - key-debug output confirms that `1`, `2`, `3`, `i`, `o`, and `f` all reach the OpenCV preview loop as keyboard events
   - OpenCV HighGUI modifier combinations such as `Ctrl+1`, `Ctrl+2`, and `Ctrl+3` are not reliable enough to treat as the primary shortcut path on this Windows setup
-- failed or incomplete prototype attempts:
-  - naive resize-based zoom was attempted first, but it does not yet provide a trustworthy operator-visible viewport behavior on large hardware frames
-  - the current zoom path does not yet match the intended image-viewer semantics of proportional scaling, black padding for uncovered display area, and clipping of overflow when zoomed in
-  - preview shutdown originally reopened or re-touched already closed windows during cleanup; that part was improved, but the shared-stream shutdown path can still emit camera-disconnect-style errors during teardown
-- resulting conclusion:
-  - the next preview iteration should replace naive image resizing with an explicit viewport model that preserves aspect ratio, supports fit-to-window, uses black padding for uncovered display regions, and crops overflow areas instead of distorting the image
+- implemented after those findings:
+  - the hardware-preview path now uses an explicit viewport renderer that preserves aspect ratio, applies black padding for uncovered display regions, and crops overflow areas instead of distorting the image
+  - `i`, `o`, and `f` now control the viewport preview path reliably enough for operator testing, while `q`, `Esc`, and the window `X` handle shutdown
+  - a visible overlay now reports preview mode and zoom factor during operation
+- remaining risks:
+  - broader hardware-backed validation is still needed beyond the first verified live-preview path
+  - preview teardown has been improved, but hardware disconnect and camera-handle edge cases should still be watched during longer operator sessions

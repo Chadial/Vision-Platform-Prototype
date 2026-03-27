@@ -32,8 +32,9 @@ The repository is currently a simulator-validated Python prototype with:
 - an optional shared-acquisition path so preview and recording can consume the same live frame stream
 - `IntervalCaptureService` for timed single-image saving from the shared live stream
 - optional OpenCV-based preview inspection and grayscale-safe export paths
+- a first real-hardware OpenCV preview path with viewport-based `fit-to-window` and zoom controls
 
-Real hardware is currently not available, so the repository should not yet be treated as hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`GlobalRoadmap.md`](GlobalRoadmap.md).
+Real hardware is available again for targeted preview and smoke validation, but the repository should still not yet be treated as fully hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`GlobalRoadmap.md`](GlobalRoadmap.md).
 
 ## Repository Layout
 
@@ -42,15 +43,16 @@ apps/
 integrations/
 libraries/
 services/
+scripts/
+  launchers/
 src/
   camera_app/
   vision_platform/
 tests/
 docs/
-test_vimba.py
 ```
 
-Repository-level module workspaces now contain `README.md`, `STATUS.md`, and `ROADMAP.md` files so the platform can be evolved per module. `test_vimba.py` is still kept as a minimal SDK smoke test and is not part of the planned application structure.
+Repository-level module workspaces now contain `README.md`, `STATUS.md`, and `ROADMAP.md` files so the platform can be evolved per module. Launcher-style helper scripts and the minimal Vimba SDK smoke test now live under `scripts/launchers/` instead of cluttering the repository root.
 
 ## Planned Architecture
 
@@ -298,7 +300,7 @@ Run the current simulator-/service-focused verification block with:
 Run the minimal end-to-end snapshot smoke test with an explicit camera id and output directory:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\smoke --pixel-format Mono8
+.\.venv\Scripts\python.exe .\scripts\launchers\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\smoke --pixel-format Mono8
 ```
 
 The command prints the saved snapshot path on success.
@@ -308,7 +310,7 @@ The command prints the saved snapshot path on success.
 Run the hardware-free simulation path with generated frames:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_simulated_demo.py --save-directory .\captures\simulated --file-stem demo
+.\.venv\Scripts\python.exe .\scripts\launchers\run_simulated_demo.py --save-directory .\captures\simulated --file-stem demo
 ```
 
 This demo performs snapshot saving, interval-based single-image saving from the shared preview stream, and a short recording in one run.
@@ -316,13 +318,13 @@ This demo performs snapshot saving, interval-based single-image saving from the 
 Example with explicit interval-capture settings:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_simulated_demo.py --save-directory .\captures\simulated --file-stem demo --interval-seconds 0.25 --interval-frame-count 5 --frame-limit 3
+.\.venv\Scripts\python.exe .\scripts\launchers\run_simulated_demo.py --save-directory .\captures\simulated --file-stem demo --interval-seconds 0.25 --interval-frame-count 5 --frame-limit 3
 ```
 
 Optional sample images can be provided from a directory containing `.pgm` or `.ppm` files:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_simulated_demo.py --save-directory .\captures\simulated --sample-dir .\demo_samples
+.\.venv\Scripts\python.exe .\scripts\launchers\run_simulated_demo.py --save-directory .\captures\simulated --sample-dir .\demo_samples
 ```
 
 ## Simulated Command Flow Demo
@@ -330,7 +332,7 @@ Optional sample images can be provided from a directory containing `.pgm` or `.p
 Run a host-style command sequence through the `CommandController` with the simulated driver:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_command_flow_demo.py --base-directory .\captures\commands --run-name run_001 --frame-limit 3 --target-frame-rate 10
+.\.venv\Scripts\python.exe .\scripts\launchers\run_command_flow_demo.py --base-directory .\captures\commands --run-name run_001 --frame-limit 3 --target-frame-rate 10
 ```
 
 This command-flow demo also exercises interval capture from the shared preview stream before starting the recording flow.
@@ -338,7 +340,7 @@ This command-flow demo also exercises interval capture from the shared preview s
 Example with explicit interval-capture settings:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_command_flow_demo.py --base-directory .\captures\commands --run-name run_001 --interval-seconds 0.5 --interval-frame-count 4 --frame-limit 3 --target-frame-rate 10
+.\.venv\Scripts\python.exe .\scripts\launchers\run_command_flow_demo.py --base-directory .\captures\commands --run-name run_001 --interval-seconds 0.5 --interval-frame-count 4 --frame-limit 3 --target-frame-rate 10
 ```
 
 ## Optional OpenCV Preview Demo
@@ -346,27 +348,43 @@ Example with explicit interval-capture settings:
 Run the optional OpenCV-backed preview window on top of the simulated preview service:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --frame-limit 100
+.\.venv\Scripts\python.exe .\scripts\launchers\run_opencv_preview_demo.py --frame-limit 100
 ```
 
 To also compose focus state during preview rendering:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --frame-limit 100 --with-focus
+.\.venv\Scripts\python.exe .\scripts\launchers\run_opencv_preview_demo.py --frame-limit 100 --with-focus
 ```
 
 Optional sample images can be loaded from a directory containing `.pgm` or `.ppm` files:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_opencv_preview_demo.py --sample-dir .\demo_samples
+.\.venv\Scripts\python.exe .\scripts\launchers\run_opencv_preview_demo.py --sample-dir .\demo_samples
 ```
+
+## Optional Hardware Preview Demo
+
+Run the optional OpenCV-backed hardware preview window against a real Vimba X camera:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\launchers\run_hardware_preview_demo.py --camera-id DEV_1AB22C046D81
+```
+
+Current prototype controls:
+
+- `i`: zoom in
+- `o`: zoom out
+- `f`: fit-to-window
+- `q` / `Esc`: quit
+- window `X`: quit
 
 ## Simulated Focus Preview Demo
 
 Run the simulator-backed preview-to-focus smoke path without opening a full preview workflow:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_focus_preview_demo.py
+.\.venv\Scripts\python.exe .\scripts\launchers\run_focus_preview_demo.py
 ```
 
 This path exercises preview acquisition, focus evaluation, and overlay-anchor derivation on the simulator-backed route.
@@ -376,11 +394,11 @@ This path exercises preview acquisition, focus evaluation, and overlay-anchor de
 Save one simulated grayscale frame through the optional OpenCV-backed lossless save path:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_opencv_save_demo.py --save-directory .\captures\opencv_save_demo
+.\.venv\Scripts\python.exe .\scripts\launchers\run_opencv_save_demo.py --save-directory .\captures\opencv_save_demo
 ```
 
 Example with explicit `Mono8` PNG output:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_opencv_save_demo.py --save-directory .\captures\opencv_save_demo --pixel-format Mono8 --file-extension .png
+.\.venv\Scripts\python.exe .\scripts\launchers\run_opencv_save_demo.py --save-directory .\captures\opencv_save_demo --pixel-format Mono8 --file-extension .png
 ```

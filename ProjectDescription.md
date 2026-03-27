@@ -115,11 +115,12 @@ Das Projekt wird bewusst schrittweise aufgebaut. Zunächst stehen funktionale Pr
 - ROI-Masken ein- und ausblenden
 - Crosshair ein- und ausblenden
 - Crosshair bewegen
-- Koordinaten anzeigen
+- Koordinaten in einer dedizierten Statusleiste anzeigen
 - Hilfspunkte definieren
 - Hilfspunkte sichtbar machen
 - Hilfspunkte verfolgen oder erneut finden
 - Overlays je nach Analysemodus aktivieren oder deaktivieren
+- operatornahe Menü- oder Kontrollbänder für Preview-Einstellungen bereitstellen
 
 ### 5.3 Fokusbewertung
 
@@ -223,6 +224,7 @@ Diese Module greifen auf gemeinsame Kernmodelle und Basiskomponenten zurück.
 - Livebild oder Snapshot darstellen
 - Overlays verwalten
 - Anzeige-Viewport und Display-Transformation verwalten
+- Statusleiste und operatornahe Kontrollbereiche verwalten
 - interaktive Werkzeuge bereitstellen
 - Benutzerinteraktionen erfassen und an nachgelagerte Module weitergeben
 
@@ -241,6 +243,8 @@ Diese Module greifen auf gemeinsame Kernmodelle und Basiskomponenten zurück.
 Dieses Modul ist eng mit der UI verbunden, darf aber die eigentliche Analyse nicht selbst implementieren. Es soll nur Eingaben und Anzeigen koordinieren.
 
 Anzeigeabhängige Funktionen wie Fenstergröße, Bildschirmauflösung, fit-to-window, Zoom, Pan und Overlay-Skalierung gehören in dieses Anzeige-/Interaktionsmodul oder in eine direkt daran gekoppelte Display-Schicht. Diese Funktionen dürfen nicht in den Kamera- oder Analysekern gezogen werden.
+
+Dasselbe gilt für menü- oder statusleistennahe Eingabeelemente wie Sensorgröße, Offsets, Belichtungszeit, Fokusmethodenwahl, Snapshot-Befehle oder ROI-Werkzeugumschaltung: Sie sind UI-/Client-Funktionen auf Basis vorhandener Kernschnittstellen, keine Kernlogik.
 
 ---
 
@@ -578,6 +582,8 @@ Nach dem MVP sind mehrere Ausbaupfade denkbar:
 - viewportbasierte Preview-Darstellung mit fit-to-window
 - interaktive Zoom- und Pan-Steuerung
 - overlaystabile Anzeige trotz Display-Skalierung
+- Statusleiste für Koordinaten, FPS und Betriebszustand
+- operatornahes Menü- oder Kontrollband für Kameraparameter, Speicherziel und Fokusmethode
 
 ### Ausbaupfad E – Postprocessing und Datenauswertung
 

@@ -147,7 +147,7 @@ Check:
 Recommended command:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\hardware_smoke
+.\.venv\Scripts\python.exe .\scripts\launchers\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\hardware_smoke
 ```
 
 Expected result:
@@ -197,7 +197,7 @@ Check:
 Recommended command:
 
 ```powershell
-.\.venv\Scripts\python.exe .\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\hardware_smoke --pixel-format Mono8
+.\.venv\Scripts\python.exe .\scripts\launchers\run_snapshot_smoke.py --camera-id example_camera_id --save-directory .\captures\hardware_smoke --pixel-format Mono8
 ```
 
 Expected result:

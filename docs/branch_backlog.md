@@ -42,7 +42,7 @@ This inventory reflects the currently still open files after the control/imaging
 | `services/**/*` | `docs/reorg-foundation-sync` | module docs only in repo root tree |
 | `ProjectAgents.md` | hold / explicit decision | commit only if intentionally maintained in repo |
 | `ProjectDescription.md` | hold / explicit decision | commit only if intentionally maintained in repo |
-| `StartPrompt.md` | hold / explicit decision | do not mix into normal refactor branches |
+| `docs/archive/StartPrompt.md` | hold / explicit decision | archived reference only; do not mix into normal refactor branches |
 | `src/vision_platform/__init__.py` | `refactor/add-platform-foundation-surface` | namespace foundation |
 | `src/vision_platform/bootstrap.py` | `refactor/add-platform-foundation-surface` | namespace foundation |
 | `src/vision_platform/apps/**/*` | `refactor/add-platform-foundation-surface` | app facade surface |
@@ -77,11 +77,11 @@ This inventory reflects the currently still open files after the control/imaging
 | `tests/test_simulated_demo.py` | `refactor/move-service-import-surface` | remaining app import cleanup |
 | `tests/test_snapshot_smoke.py` | `refactor/move-service-import-surface` | remaining app import cleanup |
 | `tests/test_vimbax_camera_driver.py` | `refactor/move-service-import-surface` | integration import cleanup |
-| `run_command_flow_demo.py` | `refactor/move-service-import-surface` | root helper script alignment |
-| `run_opencv_preview_demo.py` | `refactor/move-service-import-surface` | root helper script alignment |
-| `run_opencv_save_demo.py` | `refactor/move-service-import-surface` | root helper script alignment |
-| `run_simulated_demo.py` | `refactor/move-service-import-surface` | root helper script alignment |
-| `run_snapshot_smoke.py` | `refactor/move-service-import-surface` | root helper script alignment |
+| `scripts/launchers/run_command_flow_demo.py` | `refactor/move-service-import-surface` | launcher script alignment |
+| `scripts/launchers/run_opencv_preview_demo.py` | `refactor/move-service-import-surface` | launcher script alignment |
+| `scripts/launchers/run_opencv_save_demo.py` | `refactor/move-service-import-surface` | launcher script alignment |
+| `scripts/launchers/run_simulated_demo.py` | `refactor/move-service-import-surface` | launcher script alignment |
+| `scripts/launchers/run_snapshot_smoke.py` | `refactor/move-service-import-surface` | launcher script alignment |
 
 ## Ignored Artifacts
 
@@ -207,7 +207,7 @@ Review carefully before inclusion:
 
 - `ProjectAgents.md`
 - `ProjectDescription.md`
-- `StartPrompt.md`
+- `docs/archive/StartPrompt.md`
 
 These three files appear in the current worktree but are not normal implementation outputs. They should only be committed if they are intentionally meant to live in the repository as maintained source documents.
 
