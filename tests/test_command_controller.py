@@ -6,8 +6,10 @@ from tests import _path_setup
 from vision_platform.control import CommandController
 from vision_platform.models import (
     ApplyConfigurationRequest,
+    CameraCapabilityProfile,
     CameraConfiguration,
     CameraStatus,
+    FeatureCapability,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
     RecordingRequest,
@@ -205,6 +207,48 @@ class CommandControllerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "roi_width"):
             controller.apply_configuration(ApplyConfigurationRequest(roi_width=0))
 
+    def test_apply_configuration_rejects_capability_profile_increment_mismatch(self) -> None:
+        camera_service = MagicMock()
+        profile = self._build_capability_profile(
+            Width=FeatureCapability(
+                name="Width",
+                feature_type="IntFeature",
+                is_writeable=True,
+                minimum=8,
+                maximum=4024,
+                increment=8,
+            )
+        )
+        controller = CommandController(camera_service, MagicMock(), MagicMock(), capability_profile=profile)
+
+        with self.assertRaisesRegex(ValueError, "increment 8"):
+            controller.apply_configuration(ApplyConfigurationRequest(roi_width=14))
+
+        camera_service.apply_configuration.assert_not_called()
+
+    def test_apply_configuration_allows_acquisition_frame_rate_when_enable_feature_is_writeable(self) -> None:
+        camera_service = MagicMock()
+        profile = self._build_capability_profile(
+            AcquisitionFrameRate=FeatureCapability(
+                name="AcquisitionFrameRate",
+                feature_type="FloatFeature",
+                is_writeable=False,
+                minimum=0.5,
+                maximum=15.0,
+            ),
+            AcquisitionFrameRateEnable=FeatureCapability(
+                name="AcquisitionFrameRateEnable",
+                feature_type="BoolFeature",
+                is_writeable=True,
+            ),
+        )
+        controller = CommandController(camera_service, MagicMock(), MagicMock(), capability_profile=profile)
+
+        controller.apply_configuration(ApplyConfigurationRequest(acquisition_frame_rate=5.0))
+
+        forwarded_config = camera_service.apply_configuration.call_args.args[0]
+        self.assertEqual(forwarded_config.acquisition_frame_rate, 5.0)
+
     def test_start_recording_rejects_path_like_file_stem_before_calling_service(self) -> None:
         recording_service = MagicMock()
         controller = CommandController(MagicMock(), MagicMock(), recording_service)
@@ -311,6 +355,19 @@ class CommandControllerTests(unittest.TestCase):
         controller.stop_interval_capture(StopIntervalCaptureRequest(reason="external_request"))
 
         interval_capture_service.stop_capture.assert_called_once_with()
+
+    @staticmethod
+    def _build_capability_profile(**features: FeatureCapability) -> CameraCapabilityProfile:
+        return CameraCapabilityProfile(
+            probe_utc=None,
+            camera_id="CAM-001",
+            camera_name="TestCam",
+            camera_model="ModelA",
+            camera_serial=None,
+            interface_id=None,
+            feature_count=len(features),
+            features=dict(features),
+        )
 
 
 if __name__ == "__main__":
