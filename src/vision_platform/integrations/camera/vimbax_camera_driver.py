@@ -22,7 +22,7 @@ class VimbaXCameraDriver(CameraDriver):
     def _build_camera_status(self, camera: Camera) -> CameraStatus:
         return CameraStatus(
             is_initialized=True,
-            is_acquiring=False,
+            is_acquiring=self._status.is_acquiring,
             source_kind="hardware",
             driver_name=self.__class__.__name__,
             camera_id=camera.get_id(),
@@ -30,6 +30,8 @@ class VimbaXCameraDriver(CameraDriver):
             camera_model=camera.get_model(),
             camera_serial=camera.get_serial(),
             interface_id=camera.get_interface_id(),
+            reported_acquisition_frame_rate=self._try_read_feature_value("AcquisitionFrameRate"),
+            acquisition_frame_rate_enabled=self._try_read_feature_value("AcquisitionFrameRateEnable"),
         )
 
     def _select_camera(self, camera_id: Optional[str]) -> Camera:
@@ -47,6 +49,13 @@ class VimbaXCameraDriver(CameraDriver):
             raise RuntimeError("Camera driver is not initialized.")
         return self._camera
 
+    def _get_feature(self, feature_name: str):
+        camera = self._require_camera()
+        try:
+            return camera.get_feature_by_name(feature_name)
+        except Exception as exc:
+            raise RuntimeError(f"Camera feature '{feature_name}' is not available.") from exc
+
     @staticmethod
     def _try_read_frame_value(frame, method_name: str, default=None):
         method = getattr(frame, method_name, None)
@@ -55,6 +64,32 @@ class VimbaXCameraDriver(CameraDriver):
 
         try:
             return method()
+        except Exception:
+            return default
+
+    def _try_read_feature_value(self, feature_name: str, default=None):
+        if self._camera is None:
+            return default
+
+        try:
+            feature = self._camera.get_feature_by_name(feature_name)
+        except Exception:
+            return default
+
+        is_readable = getattr(feature, "is_readable", None)
+        if callable(is_readable):
+            try:
+                if not is_readable():
+                    return default
+            except Exception:
+                return default
+
+        getter = getattr(feature, "get", None)
+        if getter is None:
+            return default
+
+        try:
+            return getter()
         except Exception:
             return default
 
@@ -74,12 +109,7 @@ class VimbaXCameraDriver(CameraDriver):
         )
 
     def _set_feature_value(self, feature_name: str, value) -> None:
-        camera = self._require_camera()
-        try:
-            feature = camera.get_feature_by_name(feature_name)
-        except Exception as exc:
-            raise RuntimeError(f"Camera feature '{feature_name}' is not available.") from exc
-
+        feature = self._get_feature(feature_name)
         if not feature.is_writeable():
             raise RuntimeError(f"Camera feature '{feature_name}' is not writeable.")
 
@@ -88,6 +118,31 @@ class VimbaXCameraDriver(CameraDriver):
         except Exception as exc:
             raise RuntimeError(f"Failed to set camera feature '{feature_name}' to '{value}': {exc}") from exc
 
+    def _set_acquisition_frame_rate(self, value: float) -> None:
+        enable_feature = None
+        try:
+            enable_feature = self._get_feature("AcquisitionFrameRateEnable")
+        except RuntimeError:
+            enable_feature = None
+
+        if enable_feature is not None:
+            if not enable_feature.is_writeable():
+                raise RuntimeError("Camera feature 'AcquisitionFrameRateEnable' is not writeable.")
+            try:
+                enable_feature.set(True)
+            except Exception as exc:
+                raise RuntimeError(f"Failed to set camera feature 'AcquisitionFrameRateEnable' to 'True': {exc}") from exc
+
+        self._set_feature_value("AcquisitionFrameRate", value)
+
+    def _refresh_status(self) -> CameraStatus:
+        if self._camera is None:
+            self._status = CameraStatus()
+            return self._status
+
+        self._status = self._build_camera_status(self._camera)
+        return self._status
+
     def initialize(self, camera_id: Optional[str] = None) -> CameraStatus:
         self.shutdown()
         try:
@@ -95,12 +150,14 @@ class VimbaXCameraDriver(CameraDriver):
             self._vmb_system.__enter__()
             self._camera = self._select_camera(camera_id)
             self._camera.__enter__()
-            self._status = self._build_camera_status(self._camera)
-            return self._status
+            return self._refresh_status()
         except Exception as exc:
             self._status = CameraStatus(last_error=str(exc))
             self.shutdown()
             raise RuntimeError(f"Failed to initialize camera driver: {exc}") from exc
+
+    def get_status(self) -> CameraStatus:
+        return self._refresh_status()
 
     def shutdown(self) -> None:
         if self._camera is not None:
@@ -129,7 +186,7 @@ class VimbaXCameraDriver(CameraDriver):
             self._set_feature_value("PixelFormat", config.pixel_format)
 
         if config.acquisition_frame_rate is not None:
-            self._set_feature_value("AcquisitionFrameRate", config.acquisition_frame_rate)
+            self._set_acquisition_frame_rate(config.acquisition_frame_rate)
         if config.roi_offset_x is not None:
             self._set_feature_value("OffsetX", config.roi_offset_x)
         if config.roi_offset_y is not None:
@@ -138,6 +195,8 @@ class VimbaXCameraDriver(CameraDriver):
             self._set_feature_value("Width", config.roi_width)
         if config.roi_height is not None:
             self._set_feature_value("Height", config.roi_height)
+
+        self._refresh_status()
 
     def start_acquisition(self) -> None:
         self._status.is_acquiring = True

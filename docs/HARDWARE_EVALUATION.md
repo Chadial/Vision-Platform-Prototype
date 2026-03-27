@@ -184,7 +184,7 @@ Observed result from the expanded matrix:
 - exposure, gain, and ROI size changes are reflected in the hardware-backed recording metadata
 - this camera exposes `OffsetX` and `OffsetY` only at `0`, so ROI validation on this device is effectively width/height validation at zero offset
 - `Mono10` is supported for hardware snapshot capture when saved as `.raw`
-- `AcquisitionFrameRate` is present on this camera but not writeable in the tested mode, and the driver currently reports that clearly
+- `AcquisitionFrameRate` is read-only by default on this camera, but `AcquisitionFrameRateEnable` is writeable; enabling it makes the frame-rate feature writeable and allows reduced-rate control such as `5.0 -> 4.9991` fps read back from hardware
 
 Documented hardware-side error checks on March 27, 2026:
 
@@ -200,7 +200,7 @@ Current baseline for camera `DEV_1AB22C046D81` on March 27, 2026:
 | --- | --- | --- |
 | Initialization / Shutdown | PASS | Integrated hardware runs completed cleanly after shared-stream cleanup hardening |
 | Explicit Camera Selection | PASS | Hardware runs used explicit camera id `DEV_1AB22C046D81` |
-| Configuration Application | PASS with device constraint | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; `AcquisitionFrameRate` was present but not writeable in the tested mode |
+| Configuration Application | PASS | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; camera-side frame-rate control also works when `AcquisitionFrameRateEnable` is enabled first |
 | Snapshot Save | PASS | `Mono8` and `Mono10` snapshot paths produced plausible files |
 | Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow |
 | Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths all completed on hardware |

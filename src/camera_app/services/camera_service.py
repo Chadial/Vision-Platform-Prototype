@@ -31,4 +31,5 @@ class CameraService:
         return deepcopy(self._last_configuration)
 
     def get_status(self) -> CameraStatus:
+        self._camera_status = self._driver.get_status()
         return deepcopy(self._camera_status)

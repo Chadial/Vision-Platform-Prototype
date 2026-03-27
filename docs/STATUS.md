@@ -61,6 +61,7 @@ The repository currently provides a structured Python prototype for the vision p
 - additional service hardening so preview/recording cleanup resets internal state defensively even when acquisition stop fails during recovery
 - additional shared-stream cleanup hardening so real-hardware preview-backed acquisition can shut down without Vimba X `Invalid Camera` errors after the integrated Phase 9 run
 - hardware-backed validation now also covers duration-only recording, target-frame-rate recording, explicit invalid camera id / invalid pixel format / invalid ROI increment failures, and a supported alternate `Mono10` snapshot-save path
+- Vimba X acquisition-frame-rate control now enables `AcquisitionFrameRateEnable` automatically when a rate is configured, while `CameraStatus` also exposes the reported hardware frame-rate value and whether camera-side frame-rate control is enabled
 - new repository-level module workspaces for apps, integrations, services, and libraries
 - new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork
@@ -216,7 +217,7 @@ The repository currently provides a structured Python prototype for the vision p
 - a first integrated real-hardware command-flow run on March 27, 2026 now verifies snapshot save, preview readiness, interval capture, and frame-limit recording on camera `DEV_1AB22C046D81` (`Allied Vision 1800 U-1240m`)
 - the first two integrated hardware runs exposed cleanup-side Vimba X `Invalid Camera` errors during shared-stream shutdown; the follow-up cleanup ordering and timeout hardening removed those errors on the subsequent `run_003` validation pass
 - additional March 27, 2026 runs now verify duration-only recording, target-frame-rate recording, `Mono10` raw snapshot capture, and explicit hardware-side failures for invalid camera id, unsupported pixel format `Mono16`, and invalid ROI width increment values
-- the tested camera reports `AcquisitionFrameRate` as present but not writeable in the exercised mode; the current driver surfaces that clearly, but broader device-specific handling remains open
+- the tested camera reports `AcquisitionFrameRate` as present and read-only by default, but the driver now enables `AcquisitionFrameRateEnable` automatically before setting a requested rate and exposes the read-back state through `CameraStatus`
 
 ### Preview
 
@@ -277,11 +278,10 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Decide whether non-writeable `AcquisitionFrameRate` should stay as a clear runtime failure or gain a capability/query path in the camera contract.
-2. Add any still-needed hardware-side timeout or disconnect checks if they are practical to reproduce without destabilizing the setup.
-3. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
-4. Structure the next operator-facing OpenCV UI block around status bar, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the menu/control band.
-5. Extend the viewport path toward pan, cursor-aware zoom anchoring, and overlay-safe viewport transforms without leaking screen concerns into the core.
-6. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
-7. Define a stricter payload mapping only if the later C# or host integration really needs it.
-8. Keep the Python core stable as the handover baseline for the later C# phase.
+1. Add any still-needed hardware-side timeout or disconnect checks if they are practical to reproduce without destabilizing the setup.
+2. Validate the optional OpenCV path with real hardware frames, especially any higher-bit grayscale formats delivered by Vimba X.
+3. Structure the next operator-facing OpenCV UI block around status bar, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the menu/control band.
+4. Extend the viewport path toward pan, cursor-aware zoom anchoring, and overlay-safe viewport transforms without leaking screen concerns into the core.
+5. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
+6. Define a stricter payload mapping only if the later C# or host integration really needs it.
+7. Keep the Python core stable as the handover baseline for the later C# phase.
