@@ -22,35 +22,16 @@ It should not assume it is the top-level application.
 
 At the start of every new session, do not assume prior context. Build working context from the repository documents in the smallest useful steps.
 
+Use this file for durable repository rules.
+Use `docs/SESSION_START.md` for the operational startup flow, current baseline, and task-based reading map.
+
 ### Mandatory startup read order
 
 1. `Agents.md`
 2. `docs/SESSION_START.md`
 3. `docs/MODULE_INDEX.md`
 
-### Additional required reads by task type
-
-- For implementation against the current verified baseline:
-  - `docs/STATUS.md`
-- For planning or next-step decisions:
-  - `docs/ROADMAP.md`
-- For architecture, module-boundary, or product-scope questions:
-  - `docs/GlobalRoadmap.md`
-  - `docs/ProjectDescription.md`
-  - `docs/ProjectAgents.md`
-- For any substantive code, refactor, or documentation change:
-  - `docs/git_strategy.md`
-- When the worktree is mixed or the correct branch scope is unclear:
-  - `docs/branch_backlog.md`
-- For git or branch workflow questions:
-  - `docs/git_strategy.md`
-  - `docs/branch_backlog.md`
-- For module-specific work:
-  - the target module's `README.md`
-  - the target module's `STATUS.md`
-  - the target module's `ROADMAP.md`
-- For hardware work:
-  - `docs/HARDWARE_EVALUATION.md`
+Then follow the task-based reads listed in `docs/SESSION_START.md`.
 
 ### Mandatory startup checks
 
@@ -84,6 +65,7 @@ Assume the local shell environment is Windows PowerShell unless verified otherwi
 - `docs/GlobalRoadmap.md` is the platform-wide direction
 - `docs/ProjectDescription.md` is the product and architecture intent reference
 - `docs/ProjectAgents.md` is the repository reorganization and modularization operating guide
+- root module docs under `apps/`, `integrations/`, `services/`, and `libraries/` describe module purpose and status, while implementation usually lives under `src/vision_platform/...` with some compatibility paths still under `src/camera_app/...`
 
 Do not use `docs/archive/StartPrompt.md` as the primary startup document. It is retained only as historical reference material.
 

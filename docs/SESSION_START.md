@@ -6,6 +6,16 @@ This file is the fast bootstrap for a new agent session.
 
 Read this first to get from zero context to a workable repository overview without scanning the full document set.
 
+## Five-Minute Startup Checklist
+
+1. Read `Agents.md`, then this file, then `docs/MODULE_INDEX.md`.
+2. Check the current branch.
+3. Run `git status --short`.
+4. If the task changes repository state, read `docs/git_strategy.md`.
+5. If the worktree is dirty or branch scope is unclear, open `docs/branch_backlog.md` before editing.
+6. If the current branch is `main` and the task is substantive, create the correct branch first.
+7. Read the target module's `README.md`, `STATUS.md`, and `ROADMAP.md` before changing code in that module.
+
 ## Current Baseline
 
 - The repository is a Python-first vision platform prototype with a parallel repository reorganization toward `src/vision_platform`.
@@ -14,6 +24,15 @@ Read this first to get from zero context to a workable repository overview witho
 - The optional OpenCV prototype now includes a first real-hardware preview path with viewport-based `fit-to-window` and zoom controls.
 - ROI mask primitives, a first focus baseline, and UI-free overlay payload composition are implemented.
 - Broad real-hardware validation is still incomplete even though targeted hardware preview and smoke checks are working again.
+
+## Current Truth Map
+
+- preferred implementation surface: `src/vision_platform/...`
+- legacy compatibility surface: `src/camera_app/...`
+- module docs live in the root module folders under `apps/`, `integrations/`, `services/`, and `libraries/`
+- module `README.md`: purpose, boundaries, intended contract surface
+- module `STATUS.md`: current implemented state, gaps, risks, next step
+- module `ROADMAP.md`: intended next work and target-facing surface that may run ahead of implementation when marked clearly
 
 ## Current Architecture Rules
 
@@ -50,6 +69,9 @@ Read these for every new session:
 - For any substantive repository change:
   - `docs/git_strategy.md`
 - For dirty or mixed worktrees:
+  - `docs/branch_backlog.md`
+- For git or branch workflow questions:
+  - `docs/git_strategy.md`
   - `docs/branch_backlog.md`
 - For module-specific work:
   - that module's `README.md`
