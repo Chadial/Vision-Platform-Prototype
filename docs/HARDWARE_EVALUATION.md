@@ -122,6 +122,54 @@ The minimum real-hardware evaluation should cover:
 6. recording behavior
 7. failure behavior and unsupported settings
 
+## Recommended Integrated Run
+
+Before or alongside the individual checks below, prefer one integrated hardware-backed command flow that exercises:
+
+- initialize
+- optional configuration
+- save-directory resolution
+- snapshot save
+- preview start and first-frame readiness
+- interval capture from the shared preview stream
+- recording with explicit stop conditions
+- shutdown
+
+Recommended command:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\launchers\run_hardware_command_flow.py --base-directory .\captures\hardware_smoke --run-name run_001 --camera-id example_camera_id --pixel-format Mono8 --frame-limit 3 --interval-frame-count 3
+```
+
+This integrated run does not replace the checklist below, but it gives one reproducible Phase 9 baseline that can be repeated after code changes.
+
+## Latest Documented Run
+
+Latest integrated run on March 27, 2026:
+
+- machine: current local development machine
+- camera id: `DEV_1AB22C046D81`
+- camera model: `Allied Vision 1800 U-1240m`
+- command path: `.\scripts\launchers\run_hardware_command_flow.py`
+- output directory: `captures/hardware_smoke/run_003`
+- configuration used: `Mono8`, `frame_limit=3`, `interval_frame_count=3`
+
+Observed result:
+
+- snapshot save passed
+- preview readiness passed
+- interval capture from the shared preview stream passed
+- recording with frame-limit stop passed
+- output artifacts were written with plausible file sizes for `4024x3036 Mono8`
+- the earlier cleanup-side Vimba X `Invalid Camera` errors seen during `run_001` and `run_002` no longer occurred after the shared-frame-source shutdown ordering and timeout hardening
+
+Still not closed by this run:
+
+- broader configuration matrix coverage
+- duration-based hardware recording validation
+- target-frame-rate hardware recording validation
+- explicit invalid-setting and boundary-case checks
+
 ## 1. Initialization And Shutdown
 
 Goal:
@@ -278,6 +326,7 @@ Expected result:
 
 Minimum hardware matrix:
 
+- one integrated hardware command-flow run
 - one snapshot with default configuration
 - one snapshot with explicit exposure and pixel format
 - one snapshot with ROI if supported

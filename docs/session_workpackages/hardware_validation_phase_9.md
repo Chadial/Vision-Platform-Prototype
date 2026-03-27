@@ -39,6 +39,19 @@ Reach a documented and reviewable hardware-validation state for:
 6. recording flow
 7. error and boundary behavior
 
+## Current Progress
+
+State as of March 27, 2026:
+
+- session-recovery and archive structure is in place
+- a dedicated integrated hardware runner now exists at `scripts/launchers/run_hardware_command_flow.py`
+- a first hardware-backed baseline run was completed against camera `DEV_1AB22C046D81` (`Allied Vision 1800 U-1240m`)
+- the first two integrated runs exposed cleanup-side Vimba X `Invalid Camera` errors during shared-stream shutdown
+- shared-frame-source cleanup ordering and timeout handling were hardened afterwards
+- the follow-up `run_003` pass completed without those cleanup-side Vimba X errors
+- the validated hardware-backed baseline now covers snapshot save, preview readiness, interval capture from the shared preview stream, and frame-limit recording
+- broader configuration coverage, duration-based recording, target-frame-rate recording, and explicit error-path validation remain open
+
 ## Execution Plan
 
 ### 1. Prepare the run context
@@ -103,6 +116,12 @@ Execute and document:
   - unsupported pixel format
   - unsupported ROI combination
   - additional timeout/disconnect checks only if practical
+
+Recommended integrated run command:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\launchers\run_hardware_command_flow.py --base-directory .\captures\hardware_smoke --run-name run_001 --camera-id example_camera_id --pixel-format Mono8 --frame-limit 3 --interval-frame-count 3
+```
 
 ### 5. Run relevant validation after any code changes
 
