@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass
 import subprocess
+from time import monotonic
 from typing import Callable
 
 from vision_platform.imaging.opencv_adapter import OpenCvFrameAdapter
 from vision_platform.libraries.common_models import FocusPreviewState
+from vision_platform.libraries.common_models import RoiDefinition
+from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.services.display_service import CoordinateExportService
 from vision_platform.services.stream_service.preview_service import PreviewService
+from vision_platform.services.stream_service.roi_state_service import RoiStateService
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,30 +45,38 @@ class OpenCvPreviewWindow:
         frame_adapter: OpenCvFrameAdapter | None = None,
         status_warning_provider: Callable[[], str | None] | None = None,
         focus_state_provider: Callable[[], FocusPreviewState | None] | None = None,
+        roi_state_service: RoiStateService | None = None,
         clipboard_copy_callback: Callable[[str], None] | None = None,
         coordinate_export_service: CoordinateExportService | None = None,
         zoom_step: float = 1.5,
         min_zoom_scale: float = 0.05,
         max_zoom_scale: float = 8.0,
+        time_provider: Callable[[], float] | None = None,
     ) -> None:
         self._preview_service = preview_service
         self._window_name = window_name
         self._frame_adapter = frame_adapter or OpenCvFrameAdapter()
         self._status_warning_provider = status_warning_provider
         self._focus_state_provider = focus_state_provider
+        self._roi_state_service = roi_state_service
         self._clipboard_copy_callback = clipboard_copy_callback or self._copy_text_to_clipboard
         self._coordinate_export_service = coordinate_export_service or CoordinateExportService()
         self._zoom_step = zoom_step
         self._min_zoom_scale = min_zoom_scale
         self._max_zoom_scale = max_zoom_scale
+        self._time_provider = time_provider or monotonic
         self._fit_to_window = True
         self._manual_zoom_scale: float | None = None
         self._last_display_scale = 1.0
         self._last_viewport_mapping: _ViewportMapping | None = None
         self._selected_point: tuple[int, int] | None = None
         self._last_status_message: str | None = None
+        self._frame_render_timestamps: deque[float] = deque(maxlen=30)
         self._crosshair_visible = True
         self._focus_status_visible = True
+        self._roi_mode: str | None = None
+        self._active_roi: RoiDefinition | None = None
+        self._roi_anchor_point: tuple[int, int] | None = None
         self._window_created = False
 
     def render_latest_frame(self, delay_ms: int = 1) -> bool:
@@ -80,6 +93,7 @@ class OpenCvPreviewWindow:
 
         image = self._frame_adapter.to_image(frame)
         window_size = self._frame_adapter.get_window_image_size(self._window_name) or (frame.width, frame.height)
+        self._record_render_timestamp()
         status_lines = self._build_status_lines()
         status_band_height = self._calculate_status_band_height(status_lines)
         viewport_width = window_size[0]
@@ -102,6 +116,7 @@ class OpenCvPreviewWindow:
         crosshair_position = self._map_source_point_to_viewport(self._selected_point)
         if crosshair_position is not None and self._crosshair_visible:
             self._frame_adapter.draw_crosshair(display_image, crosshair_position[0], crosshair_position[1])
+        self._draw_active_roi(display_image)
         display_image = self._frame_adapter.append_status_band(
             display_image,
             status_lines,
@@ -163,6 +178,9 @@ class OpenCvPreviewWindow:
     def _build_status_lines(self) -> list[str]:
         mode = "FIT" if self._fit_to_window else "ZOOM"
         primary_parts = [f"{mode} {self._last_display_scale:.2f}x"]
+        fps_text = self._build_fps_text()
+        if fps_text:
+            primary_parts.append(fps_text)
         if self._selected_point is not None:
             coordinate_text = self._coordinate_export_service.format_point(*self._selected_point)
             primary_parts.append(coordinate_text)
@@ -173,10 +191,13 @@ class OpenCvPreviewWindow:
         if self._last_status_message:
             primary_parts.append(self._last_status_message)
         status_lines = [" | ".join(primary_parts)]
+        roi_line = self._build_roi_status_line()
+        if roi_line:
+            status_lines.append(roi_line)
         focus_line = self._build_focus_status_line()
         if focus_line:
             status_lines.append(focus_line)
-        status_lines.append("i=in o=out f=fit x=crosshair y=focus c=copy q=quit")
+        status_lines.append("i=in o=out f=fit x=crosshair y=focus r=rect e=ellipse c=copy q=quit")
         return status_lines
 
     def _calculate_status_band_height(self, status_lines: list[str]) -> int:
@@ -184,6 +205,20 @@ class OpenCvPreviewWindow:
         if not visible_lines:
             return 0
         return self._STATUS_PADDING * 2 + self._STATUS_LINE_HEIGHT * len(visible_lines)
+
+    def _record_render_timestamp(self) -> None:
+        self._frame_render_timestamps.append(self._time_provider())
+
+    def _build_fps_text(self) -> str | None:
+        if len(self._frame_render_timestamps) < 2:
+            return None
+
+        elapsed = self._frame_render_timestamps[-1] - self._frame_render_timestamps[0]
+        if elapsed <= 0:
+            return None
+
+        fps = (len(self._frame_render_timestamps) - 1) / elapsed
+        return f"FPS {fps:.1f}"
 
     def _build_focus_status_line(self) -> str | None:
         if not self._focus_status_visible or self._focus_state_provider is None:
@@ -195,6 +230,19 @@ class OpenCvPreviewWindow:
         if not focus_state.result.is_valid:
             return f"Focus: invalid ({focus_state.result.metric_name})"
         return f"Focus: {focus_state.result.metric_name}={focus_state.result.score:.2f}"
+
+    def _build_roi_status_line(self) -> str | None:
+        if self._roi_anchor_point is not None and self._roi_mode is not None:
+            return f"ROI mode: {self._roi_mode} anchor={self._coordinate_export_service.format_point(*self._roi_anchor_point)}"
+        if self._active_roi is not None:
+            return f"ROI active: {self._active_roi.shape}"
+        if self._roi_mode is None:
+            return None
+        if self._roi_mode == "rectangle":
+            return "ROI mode: rectangle (entry point active)"
+        if self._roi_mode == "ellipse":
+            return "ROI mode: ellipse (entry point active)"
+        return f"ROI mode: {self._roi_mode}"
 
     def _handle_shortcuts(self, pressed_key: int) -> None:
         normalized_key = pressed_key & 0xFF
@@ -210,8 +258,22 @@ class OpenCvPreviewWindow:
         elif normalized_key in (ord("y"), ord("Y")):
             self._focus_status_visible = not self._focus_status_visible
             self._last_status_message = "Focus shown" if self._focus_status_visible else "Focus hidden"
+        elif normalized_key in (ord("r"), ord("R")):
+            self._toggle_roi_mode("rectangle")
+        elif normalized_key in (ord("e"), ord("E")):
+            self._toggle_roi_mode("ellipse")
         elif normalized_key in (ord("c"), ord("C")):
             self._copy_selected_point()
+
+    def _toggle_roi_mode(self, roi_mode: str) -> None:
+        if self._roi_mode == roi_mode:
+            self._roi_mode = None
+            self._roi_anchor_point = None
+            self._last_status_message = "ROI mode cleared"
+            return
+        self._roi_mode = roi_mode
+        self._roi_anchor_point = None
+        self._last_status_message = f"ROI mode set to {roi_mode}"
 
     def _handle_mouse_event(self, event: int, x: int, y: int, flags: int | None = None, param=None) -> None:
         left_button_down = self._frame_adapter.get_left_button_down_event()
@@ -222,8 +284,70 @@ class OpenCvPreviewWindow:
         if selected_point is None:
             return
 
+        if self._roi_mode is not None:
+            self._handle_roi_click(selected_point)
+            return
+
         self._selected_point = selected_point
         self._last_status_message = f"Selected {self._coordinate_export_service.format_point(*selected_point)}"
+
+    def _handle_roi_click(self, selected_point: tuple[int, int]) -> None:
+        if self._roi_anchor_point is None:
+            self._roi_anchor_point = selected_point
+            self._last_status_message = f"ROI anchor set to {self._coordinate_export_service.format_point(*selected_point)}"
+            return
+
+        roi = self._build_roi_definition(self._roi_mode, self._roi_anchor_point, selected_point)
+        self._active_roi = roi
+        self._roi_anchor_point = None
+        if self._roi_state_service is not None:
+            self._roi_state_service.set_active_roi(roi)
+        self._last_status_message = f"ROI saved as {roi.shape}"
+
+    def _build_roi_definition(
+        self,
+        roi_mode: str | None,
+        anchor_point: tuple[int, int],
+        selected_point: tuple[int, int],
+    ) -> RoiDefinition:
+        if roi_mode == "ellipse":
+            radius_x = abs(selected_point[0] - anchor_point[0])
+            radius_y = abs(selected_point[1] - anchor_point[1])
+            points = (
+                (anchor_point[0] - radius_x, anchor_point[1] - radius_y),
+                (anchor_point[0] + radius_x, anchor_point[1] + radius_y),
+            )
+            return RoiDefinition(roi_id="preview-roi", shape="ellipse", points=points)
+
+        points = (anchor_point, selected_point)
+        return RoiDefinition(roi_id="preview-roi", shape="rectangle", points=points)
+
+    def _draw_active_roi(self, display_image) -> None:
+        if self._active_roi is None:
+            return
+
+        bounds = roi_bounds(self._active_roi)
+        if bounds is None:
+            return
+
+        top_left = self._map_source_point_to_viewport((int(round(bounds[0])), int(round(bounds[1]))))
+        bottom_right = self._map_source_point_to_viewport((int(round(bounds[2])), int(round(bounds[3]))))
+        if top_left is None or bottom_right is None:
+            return
+
+        left = min(top_left[0], bottom_right[0])
+        top = min(top_left[1], bottom_right[1])
+        right = max(top_left[0], bottom_right[0])
+        bottom = max(top_left[1], bottom_right[1])
+        if self._active_roi.shape == "ellipse":
+            center_x = left + (right - left) // 2
+            center_y = top + (bottom - top) // 2
+            radius_x = max(1, (right - left) // 2)
+            radius_y = max(1, (bottom - top) // 2)
+            self._frame_adapter.draw_ellipse_outline(display_image, center_x, center_y, radius_x, radius_y)
+            return
+
+        self._frame_adapter.draw_rectangle_outline(display_image, left, top, right, bottom)
 
     def _copy_selected_point(self) -> None:
         if self._selected_point is None:

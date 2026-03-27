@@ -28,6 +28,7 @@ def run_hardware_preview_demo(
         stream_service._preview_service,
         window_name="Hardware Camera Preview",
         status_warning_provider=lambda: camera_service.get_status().capability_probe_error,
+        roi_state_service=stream_service.get_roi_state_service(),
     )
 
     rendered_frames = 0

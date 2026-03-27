@@ -299,5 +299,25 @@ class OpenCvFrameAdapter:
         if circle is not None:
             circle(image, (x, y), 3, color, 1, line_type)
 
+    def draw_rectangle_outline(self, image: Any, left: int, top: int, right: int, bottom: int) -> None:
+        cv2_module = self._require_cv2()
+        rectangle = getattr(cv2_module, "rectangle", None)
+        if rectangle is None:
+            return
+
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        rectangle(image, (left, top), (right, bottom), color, 1, line_type)
+
+    def draw_ellipse_outline(self, image: Any, center_x: int, center_y: int, radius_x: int, radius_y: int) -> None:
+        cv2_module = self._require_cv2()
+        ellipse = getattr(cv2_module, "ellipse", None)
+        if ellipse is None:
+            return
+
+        color = 255 if len(image.shape) == 2 else (255, 255, 255)
+        line_type = getattr(cv2_module, "LINE_AA", 16)
+        ellipse(image, (center_x, center_y), (radius_x, radius_y), 0, 0, 360, color, 1, line_type)
+
 
 __all__ = ["OpenCvFrameAdapter"]

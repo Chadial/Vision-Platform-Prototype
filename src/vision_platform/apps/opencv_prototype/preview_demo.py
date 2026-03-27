@@ -32,12 +32,16 @@ def run_opencv_preview_demo(
         preview_poll_interval_seconds=poll_interval_seconds,
         shared_poll_interval_seconds=poll_interval_seconds,
     )
-    preview_window = OpenCvPreviewWindow(stream_service._preview_service)
+    preview_window = OpenCvPreviewWindow(
+        stream_service._preview_service,
+        roi_state_service=stream_service.get_roi_state_service(),
+    )
     focus_preview_service = stream_service.create_focus_preview_service() if include_focus_state else None
     if focus_preview_service is not None:
         preview_window = OpenCvPreviewWindow(
             stream_service._preview_service,
             focus_state_provider=focus_preview_service.get_latest_focus_state,
+            roi_state_service=stream_service.get_roi_state_service(),
         )
 
     rendered_frames = 0

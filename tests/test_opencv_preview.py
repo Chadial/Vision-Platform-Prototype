@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from tests import _path_setup
 from vision_platform.imaging import OpenCvPreviewWindow
+from vision_platform.services.stream_service.roi_state_service import RoiStateService
 
 
 class OpenCvPreviewWindowTests(unittest.TestCase):
@@ -96,7 +97,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         self.assertEqual(len(status_lines), 2)
         self.assertIn("FIT 1.25x", status_lines[0])
         self.assertIn("WARN: Capability probe unavailable", status_lines[0])
-        self.assertEqual(status_lines[1], "i=in o=out f=fit x=crosshair y=focus c=copy q=quit")
+        self.assertEqual(status_lines[1], "i=in o=out f=fit x=crosshair y=focus r=rect e=ellipse c=copy q=quit")
 
     def test_status_lines_stay_clean_when_warning_provider_returns_none(self) -> None:
         preview_service = MagicMock()
@@ -108,7 +109,24 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
 
         status_lines = window._build_status_lines()
 
-        self.assertEqual(status_lines, ["FIT 1.25x", "i=in o=out f=fit x=crosshair y=focus c=copy q=quit"])
+        self.assertEqual(status_lines, ["FIT 1.25x", "i=in o=out f=fit x=crosshair y=focus r=rect e=ellipse c=copy q=quit"])
+
+    def test_status_lines_include_fps_when_multiple_renders_were_recorded(self) -> None:
+        preview_service = MagicMock()
+        time_values = iter([10.0, 10.1, 10.2])
+        window = OpenCvPreviewWindow(
+            preview_service,
+            time_provider=lambda: next(time_values),
+        )
+        window._last_display_scale = 1.0
+
+        window._record_render_timestamp()
+        window._record_render_timestamp()
+        window._record_render_timestamp()
+        status_lines = window._build_status_lines()
+
+        self.assertIn("FIT 1.00x", status_lines[0])
+        self.assertIn("FPS 10.0", status_lines[0])
 
     def test_render_uses_window_height_minus_status_band_for_image_viewport(self) -> None:
         preview_service = MagicMock()
@@ -165,7 +183,70 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         hidden_lines = window._build_status_lines()
 
         self.assertIn("Focus: laplace=12.34", visible_lines)
-        self.assertEqual(hidden_lines, ["FIT 1.00x | Focus hidden", "i=in o=out f=fit x=crosshair y=focus c=copy q=quit"])
+        self.assertEqual(hidden_lines, ["FIT 1.00x | Focus hidden", "i=in o=out f=fit x=crosshair y=focus r=rect e=ellipse c=copy q=quit"])
+
+    def test_r_and_e_shortcuts_toggle_roi_entry_modes(self) -> None:
+        preview_service = MagicMock()
+        window = OpenCvPreviewWindow(preview_service)
+        window._last_display_scale = 1.0
+
+        window._handle_shortcuts(ord("r"))
+        rectangle_lines = window._build_status_lines()
+        window._handle_shortcuts(ord("e"))
+        ellipse_lines = window._build_status_lines()
+        window._handle_shortcuts(ord("e"))
+        cleared_lines = window._build_status_lines()
+
+        self.assertIn("ROI mode set to rectangle", rectangle_lines[0])
+        self.assertIn("ROI mode: rectangle", rectangle_lines[1])
+        self.assertIn("ROI mode set to ellipse", ellipse_lines[0])
+        self.assertIn("ROI mode: ellipse", ellipse_lines[1])
+        self.assertEqual(cleared_lines, ["FIT 1.00x | ROI mode cleared", "i=in o=out f=fit x=crosshair y=focus r=rect e=ellipse c=copy q=quit"])
+
+    def test_rectangle_roi_is_created_on_second_click_and_pushed_to_roi_state_service(self) -> None:
+        preview_service = MagicMock()
+        adapter = MagicMock()
+        adapter.get_left_button_down_event.return_value = 1
+        roi_state_service = RoiStateService()
+        window = OpenCvPreviewWindow(
+            preview_service,
+            frame_adapter=adapter,
+            roi_state_service=roi_state_service,
+        )
+        window._roi_mode = "rectangle"
+        window._last_viewport_mapping = window._build_viewport_mapping(
+            frame_width=100,
+            frame_height=100,
+            viewport_width=100,
+            viewport_height=100,
+            display_scale=1.0,
+        )
+
+        window._handle_mouse_event(event=1, x=10, y=20)
+        window._handle_mouse_event(event=1, x=40, y=60)
+
+        active_roi = roi_state_service.get_active_roi()
+        self.assertIsNotNone(active_roi)
+        self.assertEqual(active_roi.shape, "rectangle")
+        self.assertEqual(active_roi.points, ((10, 20), (40, 60)))
+        self.assertEqual(window._last_status_message, "ROI saved as rectangle")
+
+    def test_active_rectangle_roi_is_drawn_in_viewport(self) -> None:
+        preview_service = MagicMock()
+        adapter = MagicMock()
+        window = OpenCvPreviewWindow(preview_service, frame_adapter=adapter)
+        window._active_roi = type("Roi", (), {"shape": "rectangle", "points": ((10, 20), (40, 60))})()
+        window._last_viewport_mapping = window._build_viewport_mapping(
+            frame_width=100,
+            frame_height=100,
+            viewport_width=100,
+            viewport_height=100,
+            display_scale=1.0,
+        )
+
+        window._draw_active_roi("viewport-image")
+
+        adapter.draw_rectangle_outline.assert_called_once_with("viewport-image", 10, 20, 40, 60)
 
     def test_mouse_click_selects_source_point_and_copy_uses_formatted_coordinates(self) -> None:
         preview_service = MagicMock()
