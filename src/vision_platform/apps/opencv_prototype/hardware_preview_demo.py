@@ -76,6 +76,7 @@ def main() -> int:
     configure_logging()
     parser = _build_argument_parser()
     args = parser.parse_args()
+    print("Preview controls: q/Esc or window close=quit, i=zoom in, o=zoom out, f=fit-to-window")
 
     result = run_hardware_preview_demo(
         camera_id=args.camera_id,
