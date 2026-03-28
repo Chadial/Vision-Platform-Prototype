@@ -5,6 +5,7 @@ from vision_platform.models.camera_capability_profile import CameraCapabilityPro
 from vision_platform.models.camera_configuration import CameraConfiguration
 from vision_platform.models.camera_status import CameraStatus
 from vision_platform.models.captured_frame import CapturedFrame
+from vision_platform.models.interval_capture_command_result import IntervalCaptureCommandResult
 from vision_platform.models.interval_capture_request import IntervalCaptureRequest
 from vision_platform.models.interval_capture_status import IntervalCaptureStatus
 from vision_platform.models.preview_frame_info import PreviewFrameInfo
@@ -28,6 +29,7 @@ __all__ = [
     "CameraConfiguration",
     "CameraStatus",
     "CapturedFrame",
+    "IntervalCaptureCommandResult",
     "FeatureCapability",
     "IntervalCaptureRequest",
     "IntervalCaptureStatus",

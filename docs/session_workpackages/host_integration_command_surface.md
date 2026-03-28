@@ -65,6 +65,8 @@ Current implemented slice:
 - the result keeps the saved-path outcome explicit at the host-facing control layer instead of leaking a raw service return value upward
 - `CommandController.start_recording(...)` and `stop_recording(...)` now also return a typed `RecordingCommandResult`
 - the result keeps recording control outcomes explicit for host callers while reusing the existing `RecordingStatus` payload as the nested status contract
+- `CommandController.start_interval_capture(...)` and `stop_interval_capture(...)` now also return a typed `IntervalCaptureCommandResult`
+- the result keeps interval-capture control outcomes explicit for host callers while reusing the existing `IntervalCaptureStatus` payload as the nested status contract
 
 ## Execution Plan
 

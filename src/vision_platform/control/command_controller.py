@@ -17,6 +17,7 @@ from vision_platform.models import (
     ApplyConfigurationRequest,
     CameraCapabilityProfile,
     CameraConfiguration,
+    IntervalCaptureCommandResult,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
     RecordingCommandResult,
@@ -91,19 +92,26 @@ class CommandController:
     def stop_recording(self, request: StopRecordingRequest | None = None) -> RecordingCommandResult:
         return RecordingCommandResult(status=self._recording_service.stop_recording())
 
-    def start_interval_capture(self, request: IntervalCaptureRequest | StartIntervalCaptureRequest):
+    def start_interval_capture(
+        self,
+        request: IntervalCaptureRequest | StartIntervalCaptureRequest,
+    ) -> IntervalCaptureCommandResult:
         if self._interval_capture_service is None:
             raise RuntimeError("Interval capture service is not configured.")
         if isinstance(request, StartIntervalCaptureRequest):
             request = request.to_interval_capture_request()
         self._require_initialized_camera("start interval capture")
         validate_interval_capture_request(request)
-        return self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
+        status = self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
+        return IntervalCaptureCommandResult(status=status)
 
-    def stop_interval_capture(self, request: StopIntervalCaptureRequest | None = None):
+    def stop_interval_capture(
+        self,
+        request: StopIntervalCaptureRequest | None = None,
+    ) -> IntervalCaptureCommandResult:
         if self._interval_capture_service is None:
             raise RuntimeError("Interval capture service is not configured.")
-        return self._interval_capture_service.stop_capture()
+        return IntervalCaptureCommandResult(status=self._interval_capture_service.stop_capture())
 
     def get_status(self) -> SubsystemStatus:
         camera_status = self._camera_service.get_status()

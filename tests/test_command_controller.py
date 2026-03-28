@@ -10,6 +10,7 @@ from vision_platform.models import (
     CameraConfiguration,
     CameraStatus,
     FeatureCapability,
+    IntervalCaptureCommandResult,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
     RecordingRequest,
@@ -353,10 +354,11 @@ class CommandControllerTests(unittest.TestCase):
 
     def test_start_interval_capture_request_maps_to_interval_capture_request(self) -> None:
         interval_capture_service = MagicMock()
+        interval_capture_service.start_capture.return_value = IntervalCaptureStatus(is_capturing=True, frames_written=0)
         controller = CommandController(MagicMock(), MagicMock(), MagicMock(), interval_capture_service)
         controller.set_save_directory(Path("captures/default"))
 
-        controller.start_interval_capture(
+        result = controller.start_interval_capture(
             StartIntervalCaptureRequest(
                 file_stem="interval",
                 interval_seconds=1.0,
@@ -366,6 +368,8 @@ class CommandControllerTests(unittest.TestCase):
         )
 
         resolved_request = interval_capture_service.start_capture.call_args.args[0]
+        self.assertIsInstance(result, IntervalCaptureCommandResult)
+        self.assertTrue(result.status.is_capturing)
         self.assertEqual(resolved_request.save_directory, Path("captures/default"))
         self.assertEqual(resolved_request.file_stem, "interval")
         self.assertEqual(resolved_request.interval_seconds, 1.0)
@@ -393,11 +397,15 @@ class CommandControllerTests(unittest.TestCase):
 
     def test_stop_interval_capture_calls_service(self) -> None:
         interval_capture_service = MagicMock()
+        interval_capture_service.stop_capture.return_value = IntervalCaptureStatus(is_capturing=False, frames_written=2)
         controller = CommandController(MagicMock(), MagicMock(), MagicMock(), interval_capture_service)
 
-        controller.stop_interval_capture(StopIntervalCaptureRequest(reason="external_request"))
+        result = controller.stop_interval_capture(StopIntervalCaptureRequest(reason="external_request"))
 
         interval_capture_service.stop_capture.assert_called_once_with()
+        self.assertIsInstance(result, IntervalCaptureCommandResult)
+        self.assertFalse(result.status.is_capturing)
+        self.assertEqual(result.status.frames_written, 2)
 
     @staticmethod
     def _build_capability_profile(**features: FeatureCapability) -> CameraCapabilityProfile:
