@@ -79,6 +79,32 @@ Examples:
 - `test: migrate command controller coverage to platform namespace`
 - `docs: record repository git workflow`
 
+## Git Execution Discipline
+
+When git commands change repository state, execute them serially.
+
+Do not run these in parallel:
+
+- `git checkout` / `git switch`
+- `git merge`
+- `git rebase`
+- `git commit`
+- `git add`
+- `git rm`
+- branch deletion or rename commands
+
+Reason:
+
+- concurrent git mutations can create transient `index.lock` conflicts
+- concurrent branch-changing and merge commands can produce misleading results such as a merge effectively running on the wrong checked-out branch
+- this repository is used from Windows PowerShell where those race conditions are easy to trigger accidentally during automated sessions
+
+Safe pattern:
+
+1. run one state-changing git command
+2. inspect the result with `git status --short`, `git branch --show-current`, or `git log --oneline -1` as needed
+3. only then run the next state-changing git command
+
 ## Expected Branch Flow
 
 For a normal work package:
