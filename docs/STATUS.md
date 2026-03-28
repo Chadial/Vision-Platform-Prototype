@@ -194,6 +194,7 @@ The repository currently provides a structured Python prototype for the vision p
 - subsystem status now also includes interval-capture status together with start/stop readiness flags
 - camera status now exposes whether the active source is `hardware` or `simulation` together with the driver name
 - external request types now exist for `ApplyConfigurationRequest`, `SetSaveDirectoryRequest`, `SaveSnapshotRequest`, `StartRecordingRequest`, `StopRecordingRequest`, `StartIntervalCaptureRequest`, and `StopIntervalCaptureRequest`
+- save-directory commands now also expose a typed `SetSaveDirectoryResult` so embedded hosts can observe the selected directory or an explicit clear operation through the shared control layer
 - save-directory requests now support append-to-directory or create-new-subdirectory behavior
 - host-style command flow now covers interval capture from the shared stream in addition to snapshot and recording
 - deeper host-specific payload shaping is still open
@@ -294,7 +295,7 @@ The repository currently provides a structured Python prototype for the vision p
 4. Decide whether a lightweight in-preview operator strip still belongs on the current branch or should become its own follow-up package.
 5. Decide whether any current OpenCV warning/error paths should also surface through richer host-visible status shapes beyond the current status-band and terminal coverage.
 6. Keep richer ROI drawing/editing interaction explicitly out of MVP scope and schedule it only as a non-MVP follow-up.
-7. After the CLI baseline is stable, define the next host-integration work package that hardens the shared controller path before any API/feed adapter work starts.
+7. Continue the host-integration work package from `docs/session_workpackages/host_integration_command_surface.md`, with the next likely slice being typed host-visible results for snapshot, recording, or interval-capture operations.
 8. Re-run hardware-explicit CLI validation only after a camera is connected again, so the current simulator-first baseline can be narrowed with real-device notes instead of speculative feature growth.
 9. Decide later whether ROI and analysis commands should enter the CLI at all, and only do so when they map cleanly onto the shared host-neutral control layer.
 10. Revisit optional OpenCV hardware checks only after a camera is connected again, especially for higher-bit grayscale formats delivered by Vimba X.

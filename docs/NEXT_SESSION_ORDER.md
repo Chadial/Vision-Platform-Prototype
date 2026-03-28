@@ -63,5 +63,5 @@ When a new session begins and the user asks generally what to do next:
 If no stronger user direction is given, the next recommended path is:
 
 1. treat the CLI baseline as intentionally narrow and stable unless a clear defect appears
-2. then define and execute the next dedicated host-integration work package
+2. use `docs/session_workpackages/host_integration_command_surface.md` to execute the next dedicated host-integration work package
 3. only then move toward API/feed adapter work

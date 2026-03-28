@@ -12,6 +12,7 @@ from vision_platform.models.recording_request import RecordingRequest
 from vision_platform.models.recording_status import RecordingStatus
 from vision_platform.models.save_snapshot_request import SaveSnapshotRequest
 from vision_platform.models.set_save_directory_request import SetSaveDirectoryRequest
+from vision_platform.models.set_save_directory_result import SetSaveDirectoryResult
 from vision_platform.models.snapshot_request import SnapshotRequest
 from vision_platform.models.start_interval_capture_request import StartIntervalCaptureRequest
 from vision_platform.models.start_recording_request import StartRecordingRequest
@@ -33,6 +34,7 @@ __all__ = [
     "RecordingStatus",
     "SaveSnapshotRequest",
     "SetSaveDirectoryRequest",
+    "SetSaveDirectoryResult",
     "SnapshotRequest",
     "StartIntervalCaptureRequest",
     "StartRecordingRequest",

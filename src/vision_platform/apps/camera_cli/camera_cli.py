@@ -250,8 +250,7 @@ def _set_default_save_directory(parser: argparse.ArgumentParser, controller, arg
         mode=args.save_mode,
         subdirectory_name=args.run_name,
     )
-    controller.set_save_directory(request)
-    return request.resolve_directory()
+    return controller.set_save_directory(request).selected_directory
 
 
 def _wait_for_recording_completion(controller) -> None:

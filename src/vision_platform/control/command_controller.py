@@ -23,6 +23,7 @@ from vision_platform.models import (
     RecordingStatus,
     SaveSnapshotRequest,
     SetSaveDirectoryRequest,
+    SetSaveDirectoryResult,
     SnapshotRequest,
     StartIntervalCaptureRequest,
     StartRecordingRequest,
@@ -62,11 +63,12 @@ class CommandController:
     def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
         self._capability_profile = capability_profile
 
-    def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> None:
+    def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> SetSaveDirectoryResult:
         if isinstance(path, SetSaveDirectoryRequest):
             validate_save_directory_request(path)
             path = path.resolve_directory()
         self._default_save_directory = path
+        return SetSaveDirectoryResult(selected_directory=path, was_cleared=path is None)
 
     def save_snapshot(self, request: SnapshotRequest | SaveSnapshotRequest):
         if isinstance(request, SaveSnapshotRequest):

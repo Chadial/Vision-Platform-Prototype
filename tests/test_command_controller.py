@@ -16,6 +16,7 @@ from vision_platform.models import (
     RecordingStatus,
     SaveSnapshotRequest,
     SetSaveDirectoryRequest,
+    SetSaveDirectoryResult,
     SnapshotRequest,
     StartIntervalCaptureRequest,
     StartRecordingRequest,
@@ -56,7 +57,7 @@ class CommandControllerTests(unittest.TestCase):
     def test_set_save_directory_request_can_resolve_new_subdirectory(self) -> None:
         controller = CommandController(MagicMock(), MagicMock(), MagicMock())
 
-        controller.set_save_directory(
+        result = controller.set_save_directory(
             SetSaveDirectoryRequest(
                 base_directory=Path("captures"),
                 mode="new_subdirectory",
@@ -66,6 +67,9 @@ class CommandControllerTests(unittest.TestCase):
 
         status = controller.get_status()
 
+        self.assertIsInstance(result, SetSaveDirectoryResult)
+        self.assertEqual(result.selected_directory, Path("captures/run_001"))
+        self.assertFalse(result.was_cleared)
         self.assertEqual(status.default_save_directory, Path("captures/run_001"))
 
     def test_apply_configuration_request_maps_roi_and_exposure(self) -> None:
@@ -188,7 +192,7 @@ class CommandControllerTests(unittest.TestCase):
         recording_service = MagicMock()
         controller = CommandController(camera_service, snapshot_service, recording_service)
         controller.set_save_directory(Path("captures/default"))
-        controller.set_save_directory(None)
+        result = controller.set_save_directory(None)
 
         camera_service.get_status.return_value = CameraStatus(is_initialized=True)
         camera_service.get_last_configuration.return_value = None
@@ -196,6 +200,9 @@ class CommandControllerTests(unittest.TestCase):
 
         status = controller.get_status()
 
+        self.assertIsInstance(result, SetSaveDirectoryResult)
+        self.assertIsNone(result.selected_directory)
+        self.assertTrue(result.was_cleared)
         self.assertIsNone(status.default_save_directory)
         self.assertFalse(status.can_save_snapshot)
         self.assertFalse(status.can_start_recording)
