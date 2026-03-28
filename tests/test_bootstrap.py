@@ -44,10 +44,10 @@ class BootstrapTests(unittest.TestCase):
                     )
                 )
 
-                snapshot_path = subsystem.command_controller.save_snapshot(
+                snapshot_result = subsystem.command_controller.save_snapshot(
                     SaveSnapshotRequest(file_stem="snapshot")
                 )
-                self.assertTrue(snapshot_path.exists())
+                self.assertTrue(snapshot_result.saved_path.exists())
 
                 subsystem.stream_service.start_preview()
                 try:

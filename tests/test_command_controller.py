@@ -15,6 +15,7 @@ from vision_platform.models import (
     RecordingRequest,
     RecordingStatus,
     SaveSnapshotRequest,
+    SaveSnapshotResult,
     SetSaveDirectoryRequest,
     SetSaveDirectoryResult,
     SnapshotRequest,
@@ -95,12 +96,15 @@ class CommandControllerTests(unittest.TestCase):
 
     def test_save_snapshot_request_maps_to_snapshot_request(self) -> None:
         snapshot_service = MagicMock()
+        snapshot_service.save_snapshot.return_value = Path("captures/default/image_001.png")
         controller = CommandController(MagicMock(), snapshot_service, MagicMock())
         controller.set_save_directory(Path("captures/default"))
 
-        controller.save_snapshot(SaveSnapshotRequest(file_stem="image_001"))
+        result = controller.save_snapshot(SaveSnapshotRequest(file_stem="image_001"))
 
         resolved_request = snapshot_service.save_snapshot.call_args.args[0]
+        self.assertIsInstance(result, SaveSnapshotResult)
+        self.assertEqual(result.saved_path, Path("captures/default/image_001.png"))
         self.assertEqual(resolved_request.save_directory, Path("captures/default"))
         self.assertEqual(resolved_request.file_stem, "image_001")
 
