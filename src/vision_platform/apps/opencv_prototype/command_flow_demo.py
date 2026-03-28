@@ -53,7 +53,7 @@ def run_simulated_command_flow(
             )
         )
 
-        snapshot_path = controller.save_snapshot(
+        snapshot_result = controller.save_snapshot(
             SaveSnapshotRequest(
                 file_stem=snapshot_stem,
                 file_extension=".png",
@@ -62,7 +62,7 @@ def run_simulated_command_flow(
 
         subsystem.stream_service.start_preview()
         try:
-            initial_interval_capture_status = controller.start_interval_capture(
+            initial_interval_capture_result = controller.start_interval_capture(
                 StartIntervalCaptureRequest(
                     file_stem=interval_stem,
                     file_extension=".raw",
@@ -75,11 +75,11 @@ def run_simulated_command_flow(
                 sleep(0.01)
 
             interval_capture_status = controller.get_status().interval_capture
-            stop_interval_capture_status = controller.stop_interval_capture(StopIntervalCaptureRequest())
+            stop_interval_capture_result = controller.stop_interval_capture(StopIntervalCaptureRequest())
         finally:
             subsystem.stream_service.stop_preview()
 
-        initial_recording_status = controller.start_recording(
+        initial_recording_result = controller.start_recording(
             StartRecordingRequest(
                 file_stem=recording_stem,
                 file_extension=".raw",
@@ -92,17 +92,17 @@ def run_simulated_command_flow(
             sleep(0.01)
 
         final_status = controller.get_status()
-        stop_status = controller.stop_recording(StopRecordingRequest())
+        stop_recording_result = controller.stop_recording(StopRecordingRequest())
         return DemoRunResult(
             success=True,
-            snapshot_path=snapshot_path,
-            initial_interval_capture_status=initial_interval_capture_status,
+            snapshot_path=snapshot_result.saved_path,
+            initial_interval_capture_status=initial_interval_capture_result.status,
             interval_capture_status=interval_capture_status,
-            initial_recording_status=initial_recording_status,
+            initial_recording_status=initial_recording_result.status,
             final_status=final_status,
             stop_status={
-                "recording": stop_status,
-                "interval_capture": stop_interval_capture_status,
+                "recording": stop_recording_result.status,
+                "interval_capture": stop_interval_capture_result.status,
             },
         )
     finally:
