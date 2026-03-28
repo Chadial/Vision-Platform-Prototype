@@ -8,8 +8,8 @@ It exists early so the next branch can start from a named scope instead of impro
 
 ## Branch
 
-- intended future branch: `feature/camera-cli`
-- activation state: planned only, not active while `feature/opencv-ui-operator-block` remains the current work package
+- active preparation branch: `feature/camera-cli`
+- activation state: active for CLI workpackage preparation and scope definition; implementation can now continue on this branch because the OpenCV operator MVP baseline has been merged to `main`
 
 ## Scope
 
@@ -30,52 +30,193 @@ Excluded:
 
 ## Session Goal
 
-Create a focused CLI work package that can become the next coherent branch after the OpenCV operator block reaches a stable stopping point.
+Turn the already reserved CLI idea into a concrete, execution-ready work package with one clear command surface, one capability list, and one documented MVP slice for the next implementation steps.
 
-The first completed slice on that future branch should establish one clear entry command and argument structure for the most important camera operations instead of leaving behavior scattered across multiple prototype scripts.
+The first completed implementation slice on this branch should establish one clear entry command and argument structure for the most important camera operations instead of leaving behavior scattered across multiple prototype scripts.
 
 ## Precondition
 
-Do not activate this work package until the current OpenCV UI block has reached a deliberate stop point.
+This precondition is now satisfied.
 
 Reason:
 
 - the user explicitly wants one active focus at a time
-- the current branch still has unfinished OpenCV preview work
-- repository context stays clearer when CLI work starts as a fresh branch with a clean handoff
+- the OpenCV operator MVP baseline has now been merged and documented
+- repository context stays clearer when CLI work starts from that documented baseline instead of overlapping with unfinished preview work
+
+## CLI Role
+
+The CLI is not meant to reproduce local preview-only controls.
+
+It should expose camera-facing, storage-facing, capture-facing, ROI-facing, and analysis-facing actions that already make sense as service/controller capabilities.
+
+It should not treat viewport-only concerns such as zoom, pan, or fit-to-window as first-class CLI responsibilities unless a later host use case requires that explicitly.
+
+## Recommended Command Shape
+
+Prefer one coherent root command over many unrelated demo scripts.
+
+Recommended direction:
+
+- one root command for the camera prototype surface
+- a small set of explicit subcommands grouped by capability
+
+Example shape:
+
+```text
+camera-cli capture snapshot
+camera-cli capture start-recording
+camera-cli capture stop-recording
+camera-cli camera apply
+camera-cli storage set-directory
+camera-cli roi set-rectangle
+camera-cli roi set-ellipse
+camera-cli roi clear
+camera-cli analysis set-focus-method
+camera-cli status show
+```
+
+The exact executable/module name can still be chosen later, but the work package should keep the subcommand grouping stable even if the final launch wrapper changes.
+
+## Shared Capability Groups
+
+The CLI capability list should align with the operator grouping already documented in `docs/ui/operator_surface_template.md`.
+
+Initial shared groups:
+
+- `Capture`
+- `Camera`
+- `Storage`
+- `ROI`
+- `Analysis`
+
+Explicitly exclude from the initial CLI MVP:
+
+- `View`
+  - zoom
+  - pan
+  - fit-to-window
+  - crosshair display position
+  - other viewport-local concerns
+
+Reason:
+
+- those are local preview-surface behaviors, not host-control fundamentals
+
+## Initial CLI MVP
+
+The first CLI MVP should stay deliberately small.
+
+Recommended initial commands:
+
+- `capture snapshot`
+  - explicit save directory
+  - file stem / extension where already supported
+- `capture start-recording`
+  - frame limit and/or duration
+- `capture stop-recording`
+- `camera apply`
+  - camera id
+  - exposure
+  - gain if already meaningful on the selected path
+  - pixel format
+  - ROI geometry fields if they already map cleanly
+- `storage set-directory`
+  - base directory
+  - append vs. new subfolder behavior
+- `roi set-rectangle`
+- `roi set-ellipse`
+- `roi clear`
+- `status show`
+
+Good MVP rule:
+
+- if a capability already exists through service/controller requests, it is a good CLI candidate
+- if a capability is only a local OpenCV window behavior, it is not part of the initial CLI MVP
+
+## Command/Service Mapping
+
+The branch should make the mapping explicit before implementing flags.
+
+Target examples:
+
+- `camera apply`
+  - maps to configuration models / controller configuration path
+- `storage set-directory`
+  - maps to save-directory request path
+- `capture snapshot`
+  - maps to snapshot request path
+- `capture start-recording`
+  - maps to start-recording request path
+- `capture stop-recording`
+  - maps to stop-recording request path
+- `roi set-*`
+  - maps to ROI model/state path
+- `status show`
+  - maps to status/controller summary path
+
+## Simulator vs. Hardware
+
+The CLI should make the execution context explicit.
+
+Recommended baseline:
+
+- simulator-safe by default where practical
+- hardware path enabled explicitly through camera selection or a source-mode argument
+
+Document clearly for each subcommand:
+
+- simulator-supported
+- hardware-supported
+- hardware-only
 
 ## Execution Plan
 
-1. Re-check `docs/STATUS.md`, `docs/ROADMAP.md`, and `docs/GlobalRoadmap.md` before activating this package.
-2. Re-read `docs/git_strategy.md` and confirm the current branch should change before starting CLI work.
-3. Create `feature/camera-cli` from the correct stable base once the OpenCV branch is paused or merged.
-4. Inventory the current prototype commands under `src/vision_platform/apps/opencv_prototype` and identify overlap, gaps, and inconsistent arguments.
-5. Decide whether the CLI should wrap:
+1. Re-check `docs/STATUS.md`, `docs/ROADMAP.md`, and `docs/GlobalRoadmap.md` before implementation starts on this branch.
+2. Re-read `docs/git_strategy.md` and keep CLI scope separate from unrelated UI work.
+3. Inventory the current prototype commands under `src/vision_platform/apps/opencv_prototype` and identify overlap, gaps, and inconsistent arguments.
+4. Decide whether the CLI should wrap:
    - existing demo entry points directly
    - the command-controller path
    - or a thin new app-layer command surface above the existing services
-6. Define one consistent argument model for:
+5. Define one consistent argument model for:
    - camera id
    - exposure/gain/pixel format
    - save directory
    - frame limits or durations where relevant
    - simulator versus hardware selection where needed
-7. Derive the CLI capability list from the shared operator grouping rather than from ad-hoc script flags.
+6. Derive the CLI capability list from the shared operator grouping rather than from ad-hoc script flags.
    - `Capture`: snapshot, recording start/stop, bounded capture/recording arguments
    - `Camera`: exposure, gain, pixel format, geometry, camera selection
    - `Storage`: save directory, append/new-subfolder behavior, naming/format options
    - `Analysis`: focus-method or similar analysis configuration where already backed by services
    - `ROI`: explicit set/clear ROI commands where they map cleanly to existing models
    - exclude `View` from the initial CLI baseline unless a specific host use case requires it, because zoom/pan/fit are usually local preview concerns
-8. Write down that CLI capability list explicitly in the future branch docs before implementing flags, so UI grouping and command grouping stay aligned.
-9. Implement the first coherent CLI slice with targeted tests.
-10. Update module and repository docs once the CLI scope is real rather than only planned.
+7. Freeze one recommended command shape and subcommand tree before implementing flags.
+8. Implement the first coherent CLI slice with targeted tests.
+9. Update module and repository docs once the CLI scope is real rather than only planned.
+
+## Initial Deliverables
+
+The branch should leave behind at least:
+
+- one documented root command shape
+- one explicit capability matrix
+- one small implemented CLI baseline or, if implementation is deferred, one implementation-ready argument contract
+- targeted tests for the implemented command slice
+- updated docs that explain what the CLI is for and what it still does not cover
 
 ## Validation
 
 - use targeted CLI and bootstrap tests for the touched entry points
 - prefer simulator-backed validation first
 - only add hardware-backed CLI checks once the hardware path being exercised is explicit and reproducible
+
+Suggested first validation block once implementation starts:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_command_controller tests.test_bootstrap
+```
 
 ## Documentation Updates
 

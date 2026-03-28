@@ -291,7 +291,8 @@ The repository currently provides a structured Python prototype for the vision p
 4. Decide whether a lightweight in-preview operator strip still belongs on the current branch or should become its own follow-up package.
 5. Decide whether any current OpenCV warning/error paths should also surface through richer host-visible status shapes beyond the current status-band and terminal coverage.
 6. Keep richer ROI drawing/editing interaction explicitly out of MVP scope and schedule it only as a non-MVP follow-up.
-7. Revisit optional OpenCV hardware checks only after a camera is connected again, especially for higher-bit grayscale formats delivered by Vimba X.
-8. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
-9. Define a stricter payload mapping only if the later C# or host integration really needs it.
-10. Keep the Python core stable as the handover baseline for the later C# phase.
+7. Use `docs/session_workpackages/camera_cli.md` and branch `feature/camera-cli` as the prepared next path for a coherent command-surface baseline once CLI implementation starts.
+8. Revisit optional OpenCV hardware checks only after a camera is connected again, especially for higher-bit grayscale formats delivered by Vimba X.
+9. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
+10. Define a stricter payload mapping only if the later C# or host integration really needs it.
+11. Keep the Python core stable as the handover baseline for the later C# phase.
