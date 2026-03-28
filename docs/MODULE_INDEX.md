@@ -3,6 +3,7 @@
 ## Root Guidance
 
 - `docs/SESSION_START.md`: compact session bootstrap and reading map
+- primary command-surface rule: keep one host-neutral control layer; CLI is a local adapter and future API/feed work should reuse that same layer
 - `docs/ProjectDescription.md`: platform target picture and module responsibilities
 - `docs/ProjectAgents.md`: repository reorganization workflow and modular documentation rules
 - `docs/GlobalRoadmap.md`: platform-wide master roadmap
@@ -15,6 +16,7 @@
 
 | Module | Status | Notes |
 | --- | --- | --- |
+| `apps/camera_cli` | active baseline | unified camera-oriented CLI for status, snapshot, recording, and interval capture |
 | `integrations/camera` | active core | drivers implemented, hardware validation still open |
 | `services/stream_service` | active core | preview/shared acquisition implemented |
 | `services/recording_service` | active core | snapshot, interval capture, recording implemented |
@@ -35,6 +37,6 @@ For each active module:
 | Module | Status | Notes |
 | --- | --- | --- |
 | `libraries/tracking_core` | prepared only | reserved for edge/tracking/drift work |
-| `services/api_service` | prepared only | reserved for external feed/API work |
+| `services/api_service` | prepared only | reserved for external feed/API work above the shared host-neutral control layer |
 | `apps/postprocess_tool` | prepared only | reserved for offline evaluation tooling |
 | `apps/desktop_app` | prepared only | reserved for later desktop frontend work |

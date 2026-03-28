@@ -206,6 +206,14 @@ The branch should leave behind at least:
 - targeted tests for the implemented command slice
 - updated docs that explain what the CLI is for and what it still does not cover
 
+Current implemented slice on this branch:
+
+- one root command under `vision_platform.apps.camera_cli`
+- subcommands: `status`, `snapshot`, `recording`, `interval-capture`
+- shared arguments for source selection, camera id, camera configuration, and save-directory behavior
+- simulator-first validation coverage for the implemented slice
+- deliberate MVP boundary: the current baseline covers `Capture`, `Camera`, and `Storage`; ROI and `Analysis` remain explicitly deferred until they map more cleanly onto the shared host-facing workflow
+
 ## Validation
 
 - use targeted CLI and bootstrap tests for the touched entry points

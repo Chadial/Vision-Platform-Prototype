@@ -22,12 +22,12 @@ It should not assume it is the top-level application.
 
 At the start of every new session, do not assume prior context. Build working context from the repository documents in the smallest useful steps.
 
-Use this file for durable repository rules.
+Use this file for durable repository rules.  
 Use `docs/SESSION_START.md` for the operational startup flow, current baseline, and task-based reading map.
 
 ### Mandatory startup read order
 
-1. `Agents.md`
+1. `AGENTS.md`
 2. `docs/SESSION_START.md`
 3. `docs/MODULE_INDEX.md`
 
@@ -68,6 +68,47 @@ Assume the local shell environment is Windows PowerShell unless verified otherwi
 - root module docs under `apps/`, `integrations/`, `services/`, and `libraries/` describe module purpose and status, while implementation usually lives under `src/vision_platform/...` with some compatibility paths still under `src/camera_app/...`
 
 Do not use `docs/archive/StartPrompt.md` as the primary startup document. It is retained only as historical reference material.
+
+---
+
+## Work package derivation rule
+
+Do not derive implementation work directly from broad architectural prose alone.
+
+When a user request is not already a narrowly scoped coding task, derive the next work package in this order:
+
+1. Read `docs/SESSION_START.md`
+2. Read `docs/STATUS.md`
+3. Read `docs/ROADMAP.md`
+4. Read `docs/GlobalRoadmap.md`
+5. Identify the next highest-value unfinished work package that is:
+   - consistent with current repository status
+   - small enough to implement in one coherent pass
+   - testable or at least locally verifiable
+   - within the current branch scope, or suitable for a new branch if needed
+6. Restate that work package in concrete implementation terms before editing code
+7. Implement the work package
+8. Update `docs/STATUS.md` to reflect what was completed and what remains next
+
+When roadmap items are too large, split them into the smallest meaningful end-to-end slice before implementation.
+
+Do not stop just because a roadmap item is broad.  
+Convert broad roadmap intent into a concrete repository-scoped task and proceed unless an escalation condition applies.
+
+---
+
+## Work package selection rule
+
+If multiple unfinished roadmap items are possible, prefer the item that best satisfies this order:
+
+1. unblocks later work
+2. is closest to current implementation reality
+3. is verifiable locally
+4. stays within existing module boundaries
+5. minimizes architectural churn
+
+Prefer the smallest end-to-end slice over broad partial rewrites.  
+Prefer completing one coherent slice over starting multiple incomplete slices.
 
 ---
 
@@ -182,6 +223,13 @@ Design code so these commands can later be called:
 - from a local desktop UI
 - or from a future web/API layer
 
+Architectural intent for command surfaces:
+
+- keep one host-neutral command/application surface as the primary control layer
+- treat CLI as a thin local adapter for development, smoke tests, and operator/developer shell usage
+- treat API/feed exposure as a separate external adapter that should reuse the same command/application surface
+- do not duplicate business logic across CLI, API, desktop UI, or web-facing layers
+
 ---
 
 ## Preview and recording rules
@@ -206,7 +254,7 @@ Prefer patterns such as:
 
 Do not assume that preview frame rate and recording frame rate are the same.
 
-When hardware is unavailable, prefer a **simulated camera driver** over bypassing the architecture.
+When hardware is unavailable, prefer a **simulated camera driver** over bypassing the architecture.  
 For demo scenarios, simulated drivers may use deterministic generated frames or real sample image sequences, as long as that behavior remains explicit and separate from SDK code.
 
 ---
@@ -332,19 +380,69 @@ If a larger rewrite seems justified, propose it first in a short plan.
 
 ---
 
+## Default execution behavior
+
+Within the approved repository scope, execute the next complete and reasonable implementation step without stopping for confirmation.
+
+Default behavior:
+- do the work, not only the analysis
+- prefer one coherent implementation pass over many tiny confirmation cycles
+- complete closely related sub-steps in one run when they are clearly part of the same task
+- after implementation, provide a concise summary of:
+  - files changed
+  - checks/tests run
+  - assumptions made
+  - any remaining open issues
+
+Do not ask for confirmation for:
+- small or medium refactors inside the active module scope
+- local naming cleanups that follow existing repository conventions
+- adding internal helper functions or classes
+- updating tests that directly belong to the changed code
+- updating nearby documentation that reflects the implemented change
+- creating small supporting files already implied by the task
+- choosing between obvious local implementation details when repository conventions already suggest the better option
+
+Ask for confirmation only if one of these is true:
+- public API or externally consumed contract must change
+- a new dependency is needed
+- the task requires edits outside the agreed or obvious scope
+- build, packaging, CI, installer, or repository structure must change materially
+- destructive or hard-to-revert actions would be taken
+- multiple architecture options are plausible and the choice would affect future work significantly
+
+If the task is reasonably clear, implement first and summarize after.  
+Do not stop merely to restate the plan unless the task is genuinely ambiguous.
+
+---
+
 ## Planning behavior
 
 For small tasks:
 - implement directly
 
 For medium or large tasks:
-- first propose a short plan
-- then implement in small, reviewable steps
+- give a short plan only when it improves clarity
+- then proceed directly with implementation in reviewable chunks
+- do not pause after planning unless an actual escalation condition is met
 
 For uncertain requirements:
 - make the smallest reasonable assumption
 - state the assumption clearly
-- avoid blocking progress with unnecessary questions
+- continue unless the assumption would change public behavior, architecture, or scope materially
+
+---
+
+## Task completion rule
+
+When implementing a task, aim to finish the smallest meaningful end-to-end slice, not just a fragment.
+
+A task slice is preferred when it includes, where applicable:
+- code change
+- directly related test adjustment or validation
+- minimal documentation/status update if affected
+
+Do not stop after only partial code edits if the directly related validation or nearby cleanup can be completed within the same scope.
 
 ---
 
@@ -376,6 +474,10 @@ Operational rules from now on:
 - before merge, run the relevant local validation for the touched scope
 - merge to `main` only when the branch is in a stable, documented, test-backed state
 - for mixed or partially completed repository states, use `docs/branch_backlog.md` as the required file-to-branch assignment before staging or committing
+
+Branch choice should not block progress unnecessarily.  
+If the requested work clearly fits the current non-main branch scope, continue directly.  
+Only stop to branch-switch or create a new branch when the mismatch is substantive.
 
 Preferred commit structure:
 
@@ -458,10 +560,10 @@ Comment intent, constraints, and edge cases — not trivial syntax.
 
 Use the following project documents together and keep their roles distinct:
 
-- `Agents.md`  
+- `AGENTS.md`  
   working rules, architecture constraints, implementation behavior, and repository conventions
 
-- `docs/SESSION_START.md`
+- `docs/SESSION_START.md`  
   compact session bootstrap, current baseline, and task-based reading map
 
 - `docs/ROADMAP.md`  
@@ -473,13 +575,13 @@ Use the following project documents together and keep their roles distinct:
 - `docs/STATUS.md`  
   current implementation status, known gaps, verified progress, and next recommended steps
 
-- `docs/git_strategy.md`
+- `docs/git_strategy.md`  
   operational git workflow, branch structure, commit discipline, and merge rules
 
-- `docs/branch_backlog.md`
+- `docs/branch_backlog.md`  
   assignment of still-open worktree changes to future branches so unfinished work does not leak into `main`
 
-- `docs/archive/StartPrompt.md`
+- `docs/archive/StartPrompt.md`  
   archived historical prompt material only; not the primary startup source for new sessions
 
 When updating `docs/STATUS.md`, always relate the current state to both:

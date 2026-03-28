@@ -9,12 +9,13 @@ Read this first to get from zero context to a workable repository overview witho
 ## Five-Minute Startup Checklist
 
 1. Read `Agents.md`, then this file, then `docs/MODULE_INDEX.md`.
-2. Check the current branch.
-3. Run `git status --short`.
-4. If the task changes repository state, read `docs/git_strategy.md`.
-5. If the worktree is dirty or branch scope is unclear, open `docs/branch_backlog.md` before editing.
-6. If the current branch is `main` and the task is substantive, create the correct branch first.
-7. Read the target module's `README.md`, `STATUS.md`, and `ROADMAP.md` before changing code in that module.
+2. Read `docs/NEXT_SESSION_ORDER.md` when the next task is not already explicit.
+3. Check the current branch.
+4. Run `git status --short`.
+5. If the task changes repository state, read `docs/git_strategy.md`.
+6. If the worktree is dirty or branch scope is unclear, open `docs/branch_backlog.md` before editing.
+7. If the current branch is `main` and the task is substantive, create the correct branch first.
+8. Read the target module's `README.md`, `STATUS.md`, and `ROADMAP.md` before changing code in that module.
 
 ## Current Baseline
 
@@ -23,6 +24,7 @@ Read this first to get from zero context to a workable repository overview witho
 - The core baseline is implemented for snapshot, preview, recording, interval capture, simulated drivers, and host-style command flow.
 - The optional OpenCV prototype now includes a first real-hardware preview path with viewport-based `fit-to-window` and zoom controls.
 - The OpenCV prototype also now includes a first operator-facing point-selection baseline with crosshair display, coordinate readout, and `c`-based coordinate copy.
+- A first camera-oriented CLI baseline now exists under `src/vision_platform/apps/camera_cli` for status, snapshot, bounded recording, and bounded interval capture without the OpenCV preview path.
 - ROI mask primitives, a first focus baseline, and UI-free overlay payload composition are implemented.
 - Phase 9 hardware validation has been completed for the previously connected camera path, but the physical hardware is currently not attached locally.
 
@@ -41,6 +43,7 @@ Read this first to get from zero context to a workable repository overview witho
 - Keep camera drivers, application services, storage, control, and UI/display concerns separate.
 - Real hardware and simulated sources must stay behind the same driver abstraction.
 - Screen-dependent behavior such as fit-to-window, zoom, pan, status bars, and display-space overlay transforms belongs in the UI/display layer, not the camera core.
+- Treat the host-neutral controller/application command surface as the primary control layer; CLI and any future API/feed surface are adapters over that layer, not competing cores.
 - The OpenCV prototype is the current place for local operator-facing preview experiments.
 
 ## Current Priority
@@ -57,6 +60,7 @@ Read these for every new session:
 1. `Agents.md`
 2. `docs/SESSION_START.md`
 3. `docs/MODULE_INDEX.md`
+4. `docs/NEXT_SESSION_ORDER.md` when the next task is not explicitly assigned
 
 ## Task-Based Reads
 
@@ -64,6 +68,7 @@ Read these for every new session:
   - `docs/STATUS.md`
 - For planning or next-step decisions:
   - `docs/ROADMAP.md`
+  - `docs/NEXT_SESSION_ORDER.md`
 - For long-range architecture or migration questions:
   - `docs/GlobalRoadmap.md`
   - `docs/ProjectDescription.md`
@@ -85,6 +90,8 @@ Read these for every new session:
   - `docs/archive/session_workpackages/hardware_validation_phase_9.md`
 - For the next OpenCV UI/operator work:
   - `docs/session_workpackages/opencv_ui_operator_block.md`
+- For camera-oriented command-surface work:
+  - `docs/session_workpackages/camera_cli.md`
 
 ## Working Defaults
 
