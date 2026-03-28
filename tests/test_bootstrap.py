@@ -44,14 +44,14 @@ class BootstrapTests(unittest.TestCase):
                     )
                 )
 
-                snapshot_path = subsystem.command_controller.save_snapshot(
+                snapshot_result = subsystem.command_controller.save_snapshot(
                     SaveSnapshotRequest(file_stem="snapshot")
                 )
-                self.assertTrue(snapshot_path.exists())
+                self.assertTrue(snapshot_result.saved_path.exists())
 
                 subsystem.stream_service.start_preview()
                 try:
-                    interval_status = subsystem.command_controller.start_interval_capture(
+                    interval_result = subsystem.command_controller.start_interval_capture(
                         StartIntervalCaptureRequest(
                             file_stem="interval",
                             interval_seconds=0.02,
@@ -59,7 +59,7 @@ class BootstrapTests(unittest.TestCase):
                             file_extension=".raw",
                         )
                     )
-                    self.assertTrue(interval_status.is_capturing)
+                    self.assertTrue(interval_result.status.is_capturing)
 
                     for _ in range(200):
                         status = subsystem.command_controller.get_status()

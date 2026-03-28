@@ -10,11 +10,15 @@ from vision_platform.models import (
     CameraConfiguration,
     CameraStatus,
     FeatureCapability,
+    IntervalCaptureCommandResult,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
     RecordingRequest,
+    RecordingCommandResult,
     RecordingStatus,
+    SaveDirectoryCommandResult,
     SaveSnapshotRequest,
+    SnapshotCommandResult,
     SetSaveDirectoryRequest,
     SnapshotRequest,
     StartIntervalCaptureRequest,
@@ -56,7 +60,7 @@ class CommandControllerTests(unittest.TestCase):
     def test_set_save_directory_request_can_resolve_new_subdirectory(self) -> None:
         controller = CommandController(MagicMock(), MagicMock(), MagicMock())
 
-        controller.set_save_directory(
+        result = controller.set_save_directory(
             SetSaveDirectoryRequest(
                 base_directory=Path("captures"),
                 mode="new_subdirectory",
@@ -66,6 +70,9 @@ class CommandControllerTests(unittest.TestCase):
 
         status = controller.get_status()
 
+        self.assertIsInstance(result, SaveDirectoryCommandResult)
+        self.assertEqual(result.selected_directory, Path("captures/run_001"))
+        self.assertFalse(result.was_cleared)
         self.assertEqual(status.default_save_directory, Path("captures/run_001"))
 
     def test_apply_configuration_request_maps_roi_and_exposure(self) -> None:
@@ -91,21 +98,25 @@ class CommandControllerTests(unittest.TestCase):
 
     def test_save_snapshot_request_maps_to_snapshot_request(self) -> None:
         snapshot_service = MagicMock()
+        snapshot_service.save_snapshot.return_value = Path("captures/default/image_001.png")
         controller = CommandController(MagicMock(), snapshot_service, MagicMock())
         controller.set_save_directory(Path("captures/default"))
 
-        controller.save_snapshot(SaveSnapshotRequest(file_stem="image_001"))
+        result = controller.save_snapshot(SaveSnapshotRequest(file_stem="image_001"))
 
         resolved_request = snapshot_service.save_snapshot.call_args.args[0]
+        self.assertIsInstance(result, SnapshotCommandResult)
+        self.assertEqual(result.saved_path, Path("captures/default/image_001.png"))
         self.assertEqual(resolved_request.save_directory, Path("captures/default"))
         self.assertEqual(resolved_request.file_stem, "image_001")
 
     def test_start_recording_request_maps_target_frame_rate(self) -> None:
         recording_service = MagicMock()
+        recording_service.start_recording.return_value = RecordingStatus(is_recording=True, frames_written=0)
         controller = CommandController(MagicMock(), MagicMock(), recording_service)
         controller.set_save_directory(Path("captures/default"))
 
-        controller.start_recording(
+        result = controller.start_recording(
             StartRecordingRequest(
                 file_stem="series",
                 max_frame_count=5,
@@ -115,10 +126,23 @@ class CommandControllerTests(unittest.TestCase):
         )
 
         resolved_request = recording_service.start_recording.call_args.args[0]
+        self.assertIsInstance(result, RecordingCommandResult)
+        self.assertTrue(result.status.is_recording)
         self.assertEqual(resolved_request.save_directory, Path("captures/default"))
         self.assertEqual(resolved_request.frame_limit, 5)
         self.assertEqual(resolved_request.duration_seconds, 2.0)
         self.assertEqual(resolved_request.target_frame_rate, 12.5)
+
+    def test_stop_recording_returns_typed_result(self) -> None:
+        recording_service = MagicMock()
+        recording_service.stop_recording.return_value = RecordingStatus(is_recording=False, frames_written=3)
+        controller = CommandController(MagicMock(), MagicMock(), recording_service)
+
+        result = controller.stop_recording()
+
+        self.assertIsInstance(result, RecordingCommandResult)
+        self.assertFalse(result.status.is_recording)
+        self.assertEqual(result.status.frames_written, 3)
 
     def test_save_snapshot_raises_when_no_request_or_default_save_directory_exists(self) -> None:
         controller = CommandController(MagicMock(), MagicMock(), MagicMock())
@@ -188,7 +212,7 @@ class CommandControllerTests(unittest.TestCase):
         recording_service = MagicMock()
         controller = CommandController(camera_service, snapshot_service, recording_service)
         controller.set_save_directory(Path("captures/default"))
-        controller.set_save_directory(None)
+        result = controller.set_save_directory(None)
 
         camera_service.get_status.return_value = CameraStatus(is_initialized=True)
         camera_service.get_last_configuration.return_value = None
@@ -196,6 +220,9 @@ class CommandControllerTests(unittest.TestCase):
 
         status = controller.get_status()
 
+        self.assertIsInstance(result, SaveDirectoryCommandResult)
+        self.assertIsNone(result.selected_directory)
+        self.assertTrue(result.was_cleared)
         self.assertIsNone(status.default_save_directory)
         self.assertFalse(status.can_save_snapshot)
         self.assertFalse(status.can_start_recording)
@@ -327,10 +354,11 @@ class CommandControllerTests(unittest.TestCase):
 
     def test_start_interval_capture_request_maps_to_interval_capture_request(self) -> None:
         interval_capture_service = MagicMock()
+        interval_capture_service.start_capture.return_value = IntervalCaptureStatus(is_capturing=True, frames_written=0)
         controller = CommandController(MagicMock(), MagicMock(), MagicMock(), interval_capture_service)
         controller.set_save_directory(Path("captures/default"))
 
-        controller.start_interval_capture(
+        result = controller.start_interval_capture(
             StartIntervalCaptureRequest(
                 file_stem="interval",
                 interval_seconds=1.0,
@@ -340,6 +368,8 @@ class CommandControllerTests(unittest.TestCase):
         )
 
         resolved_request = interval_capture_service.start_capture.call_args.args[0]
+        self.assertIsInstance(result, IntervalCaptureCommandResult)
+        self.assertTrue(result.status.is_capturing)
         self.assertEqual(resolved_request.save_directory, Path("captures/default"))
         self.assertEqual(resolved_request.file_stem, "interval")
         self.assertEqual(resolved_request.interval_seconds, 1.0)
@@ -367,11 +397,15 @@ class CommandControllerTests(unittest.TestCase):
 
     def test_stop_interval_capture_calls_service(self) -> None:
         interval_capture_service = MagicMock()
+        interval_capture_service.stop_capture.return_value = IntervalCaptureStatus(is_capturing=False, frames_written=2)
         controller = CommandController(MagicMock(), MagicMock(), MagicMock(), interval_capture_service)
 
-        controller.stop_interval_capture(StopIntervalCaptureRequest(reason="external_request"))
+        result = controller.stop_interval_capture(StopIntervalCaptureRequest(reason="external_request"))
 
         interval_capture_service.stop_capture.assert_called_once_with()
+        self.assertIsInstance(result, IntervalCaptureCommandResult)
+        self.assertFalse(result.status.is_capturing)
+        self.assertEqual(result.status.frames_written, 2)
 
     @staticmethod
     def _build_capability_profile(**features: FeatureCapability) -> CameraCapabilityProfile:

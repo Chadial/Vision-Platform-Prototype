@@ -92,6 +92,8 @@ Read these for every new session:
   - `docs/session_workpackages/opencv_ui_operator_block.md`
 - For camera-oriented command-surface work:
   - `docs/session_workpackages/camera_cli.md`
+- For host-neutral command-surface follow-up work:
+  - `docs/session_workpackages/host_integration_command_surface.md`
 
 ## Working Defaults
 

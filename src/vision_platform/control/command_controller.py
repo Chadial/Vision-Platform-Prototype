@@ -17,11 +17,15 @@ from vision_platform.models import (
     ApplyConfigurationRequest,
     CameraCapabilityProfile,
     CameraConfiguration,
+    IntervalCaptureCommandResult,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
+    RecordingCommandResult,
     RecordingRequest,
     RecordingStatus,
+    SaveDirectoryCommandResult,
     SaveSnapshotRequest,
+    SnapshotCommandResult,
     SetSaveDirectoryRequest,
     SnapshotRequest,
     StartIntervalCaptureRequest,
@@ -62,42 +66,52 @@ class CommandController:
     def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
         self._capability_profile = capability_profile
 
-    def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> None:
+    def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> SaveDirectoryCommandResult:
         if isinstance(path, SetSaveDirectoryRequest):
             validate_save_directory_request(path)
             path = path.resolve_directory()
         self._default_save_directory = path
+        return SaveDirectoryCommandResult(selected_directory=path, was_cleared=path is None)
 
-    def save_snapshot(self, request: SnapshotRequest | SaveSnapshotRequest):
+    def save_snapshot(self, request: SnapshotRequest | SaveSnapshotRequest) -> SnapshotCommandResult:
         if isinstance(request, SaveSnapshotRequest):
             request = request.to_snapshot_request()
         self._require_initialized_camera("save a snapshot")
         validate_snapshot_request(request)
-        return self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
+        saved_path = self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
+        return SnapshotCommandResult(saved_path=saved_path)
 
-    def start_recording(self, request: RecordingRequest | StartRecordingRequest):
+    def start_recording(self, request: RecordingRequest | StartRecordingRequest) -> RecordingCommandResult:
         if isinstance(request, StartRecordingRequest):
             request = request.to_recording_request()
         self._require_initialized_camera("start recording")
         validate_recording_request(request)
-        return self._recording_service.start_recording(self._resolve_recording_request(request))
+        status = self._recording_service.start_recording(self._resolve_recording_request(request))
+        return RecordingCommandResult(status=status)
 
-    def stop_recording(self, request: StopRecordingRequest | None = None):
-        return self._recording_service.stop_recording()
+    def stop_recording(self, request: StopRecordingRequest | None = None) -> RecordingCommandResult:
+        return RecordingCommandResult(status=self._recording_service.stop_recording())
 
-    def start_interval_capture(self, request: IntervalCaptureRequest | StartIntervalCaptureRequest):
+    def start_interval_capture(
+        self,
+        request: IntervalCaptureRequest | StartIntervalCaptureRequest,
+    ) -> IntervalCaptureCommandResult:
         if self._interval_capture_service is None:
             raise RuntimeError("Interval capture service is not configured.")
         if isinstance(request, StartIntervalCaptureRequest):
             request = request.to_interval_capture_request()
         self._require_initialized_camera("start interval capture")
         validate_interval_capture_request(request)
-        return self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
+        status = self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
+        return IntervalCaptureCommandResult(status=status)
 
-    def stop_interval_capture(self, request: StopIntervalCaptureRequest | None = None):
+    def stop_interval_capture(
+        self,
+        request: StopIntervalCaptureRequest | None = None,
+    ) -> IntervalCaptureCommandResult:
         if self._interval_capture_service is None:
             raise RuntimeError("Interval capture service is not configured.")
-        return self._interval_capture_service.stop_capture()
+        return IntervalCaptureCommandResult(status=self._interval_capture_service.stop_capture())
 
     def get_status(self) -> SubsystemStatus:
         camera_status = self._camera_service.get_status()

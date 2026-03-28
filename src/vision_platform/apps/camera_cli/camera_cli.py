@@ -121,7 +121,7 @@ def _handle_snapshot_command(
 ) -> CameraCliResult:
     controller = subsystem.command_controller
     selected_save_directory = _set_default_save_directory(parser, controller, args)
-    snapshot_path = controller.save_snapshot(
+    snapshot_result = controller.save_snapshot(
         SaveSnapshotRequest(
             file_stem=args.file_stem,
             file_extension=args.file_extension,
@@ -131,7 +131,7 @@ def _handle_snapshot_command(
         operation="snapshot",
         source=args.source,
         status=controller.get_status(),
-        snapshot_path=snapshot_path,
+        snapshot_path=snapshot_result.saved_path,
         selected_save_directory=selected_save_directory,
     )
 
@@ -250,8 +250,7 @@ def _set_default_save_directory(parser: argparse.ArgumentParser, controller, arg
         mode=args.save_mode,
         subdirectory_name=args.run_name,
     )
-    controller.set_save_directory(request)
-    return request.resolve_directory()
+    return controller.set_save_directory(request).selected_directory
 
 
 def _wait_for_recording_completion(controller) -> None:
