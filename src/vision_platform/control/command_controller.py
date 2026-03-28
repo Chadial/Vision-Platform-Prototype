@@ -19,6 +19,7 @@ from vision_platform.models import (
     CameraConfiguration,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
+    RecordingCommandResult,
     RecordingRequest,
     RecordingStatus,
     SaveSnapshotRequest,
@@ -79,15 +80,16 @@ class CommandController:
         saved_path = self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
         return SaveSnapshotResult(saved_path=saved_path)
 
-    def start_recording(self, request: RecordingRequest | StartRecordingRequest):
+    def start_recording(self, request: RecordingRequest | StartRecordingRequest) -> RecordingCommandResult:
         if isinstance(request, StartRecordingRequest):
             request = request.to_recording_request()
         self._require_initialized_camera("start recording")
         validate_recording_request(request)
-        return self._recording_service.start_recording(self._resolve_recording_request(request))
+        status = self._recording_service.start_recording(self._resolve_recording_request(request))
+        return RecordingCommandResult(status=status)
 
-    def stop_recording(self, request: StopRecordingRequest | None = None):
-        return self._recording_service.stop_recording()
+    def stop_recording(self, request: StopRecordingRequest | None = None) -> RecordingCommandResult:
+        return RecordingCommandResult(status=self._recording_service.stop_recording())
 
     def start_interval_capture(self, request: IntervalCaptureRequest | StartIntervalCaptureRequest):
         if self._interval_capture_service is None:

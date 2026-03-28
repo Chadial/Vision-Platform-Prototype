@@ -8,6 +8,7 @@ from vision_platform.models.captured_frame import CapturedFrame
 from vision_platform.models.interval_capture_request import IntervalCaptureRequest
 from vision_platform.models.interval_capture_status import IntervalCaptureStatus
 from vision_platform.models.preview_frame_info import PreviewFrameInfo
+from vision_platform.models.recording_command_result import RecordingCommandResult
 from vision_platform.models.recording_request import RecordingRequest
 from vision_platform.models.recording_status import RecordingStatus
 from vision_platform.models.save_snapshot_request import SaveSnapshotRequest
@@ -31,6 +32,7 @@ __all__ = [
     "IntervalCaptureRequest",
     "IntervalCaptureStatus",
     "PreviewFrameInfo",
+    "RecordingCommandResult",
     "RecordingRequest",
     "RecordingStatus",
     "SaveSnapshotRequest",

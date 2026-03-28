@@ -13,6 +13,7 @@ from vision_platform.models import (
     IntervalCaptureRequest,
     IntervalCaptureStatus,
     RecordingRequest,
+    RecordingCommandResult,
     RecordingStatus,
     SaveSnapshotRequest,
     SaveSnapshotResult,
@@ -110,10 +111,11 @@ class CommandControllerTests(unittest.TestCase):
 
     def test_start_recording_request_maps_target_frame_rate(self) -> None:
         recording_service = MagicMock()
+        recording_service.start_recording.return_value = RecordingStatus(is_recording=True, frames_written=0)
         controller = CommandController(MagicMock(), MagicMock(), recording_service)
         controller.set_save_directory(Path("captures/default"))
 
-        controller.start_recording(
+        result = controller.start_recording(
             StartRecordingRequest(
                 file_stem="series",
                 max_frame_count=5,
@@ -123,10 +125,23 @@ class CommandControllerTests(unittest.TestCase):
         )
 
         resolved_request = recording_service.start_recording.call_args.args[0]
+        self.assertIsInstance(result, RecordingCommandResult)
+        self.assertTrue(result.status.is_recording)
         self.assertEqual(resolved_request.save_directory, Path("captures/default"))
         self.assertEqual(resolved_request.frame_limit, 5)
         self.assertEqual(resolved_request.duration_seconds, 2.0)
         self.assertEqual(resolved_request.target_frame_rate, 12.5)
+
+    def test_stop_recording_returns_typed_result(self) -> None:
+        recording_service = MagicMock()
+        recording_service.stop_recording.return_value = RecordingStatus(is_recording=False, frames_written=3)
+        controller = CommandController(MagicMock(), MagicMock(), recording_service)
+
+        result = controller.stop_recording()
+
+        self.assertIsInstance(result, RecordingCommandResult)
+        self.assertFalse(result.status.is_recording)
+        self.assertEqual(result.status.frames_written, 3)
 
     def test_save_snapshot_raises_when_no_request_or_default_save_directory_exists(self) -> None:
         controller = CommandController(MagicMock(), MagicMock(), MagicMock())
