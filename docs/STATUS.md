@@ -194,8 +194,8 @@ The repository currently provides a structured Python prototype for the vision p
 - subsystem status now also includes interval-capture status together with start/stop readiness flags
 - camera status now exposes whether the active source is `hardware` or `simulation` together with the driver name
 - external request types now exist for `ApplyConfigurationRequest`, `SetSaveDirectoryRequest`, `SaveSnapshotRequest`, `StartRecordingRequest`, `StopRecordingRequest`, `StartIntervalCaptureRequest`, and `StopIntervalCaptureRequest`
-- save-directory commands now also expose a typed `SetSaveDirectoryResult` so embedded hosts can observe the selected directory or an explicit clear operation through the shared control layer
-- snapshot commands now also expose a typed `SaveSnapshotResult` so host-facing callers can consume an explicit saved-path outcome without depending on service-native return shapes
+- save-directory commands now also expose a typed `SaveDirectoryCommandResult`, with `SetSaveDirectoryResult` retained as a compatibility alias while the host-facing naming is normalized
+- snapshot commands now also expose a typed `SnapshotCommandResult`, with `SaveSnapshotResult` retained as a compatibility alias while the host-facing naming is normalized
 - recording start/stop commands now also expose a typed `RecordingCommandResult` so host-facing callers receive an explicit control result instead of a bare service status payload
 - interval-capture start/stop commands now also expose a typed `IntervalCaptureCommandResult` so host-facing callers receive an explicit control result instead of a bare service status payload
 - save-directory requests now support append-to-directory or create-new-subdirectory behavior

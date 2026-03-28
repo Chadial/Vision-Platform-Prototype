@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-from pathlib import Path
+from camera_app.models.snapshot_command_result import SnapshotCommandResult as SaveSnapshotResult
 
-
-@dataclass(slots=True)
-class SaveSnapshotResult:
-    saved_path: Path
+__all__ = ["SaveSnapshotResult"]

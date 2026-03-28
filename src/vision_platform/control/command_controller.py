@@ -23,10 +23,10 @@ from vision_platform.models import (
     RecordingCommandResult,
     RecordingRequest,
     RecordingStatus,
+    SaveDirectoryCommandResult,
     SaveSnapshotRequest,
-    SaveSnapshotResult,
+    SnapshotCommandResult,
     SetSaveDirectoryRequest,
-    SetSaveDirectoryResult,
     SnapshotRequest,
     StartIntervalCaptureRequest,
     StartRecordingRequest,
@@ -66,20 +66,20 @@ class CommandController:
     def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
         self._capability_profile = capability_profile
 
-    def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> SetSaveDirectoryResult:
+    def set_save_directory(self, path: Optional[Path] | SetSaveDirectoryRequest) -> SaveDirectoryCommandResult:
         if isinstance(path, SetSaveDirectoryRequest):
             validate_save_directory_request(path)
             path = path.resolve_directory()
         self._default_save_directory = path
-        return SetSaveDirectoryResult(selected_directory=path, was_cleared=path is None)
+        return SaveDirectoryCommandResult(selected_directory=path, was_cleared=path is None)
 
-    def save_snapshot(self, request: SnapshotRequest | SaveSnapshotRequest) -> SaveSnapshotResult:
+    def save_snapshot(self, request: SnapshotRequest | SaveSnapshotRequest) -> SnapshotCommandResult:
         if isinstance(request, SaveSnapshotRequest):
             request = request.to_snapshot_request()
         self._require_initialized_camera("save a snapshot")
         validate_snapshot_request(request)
         saved_path = self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
-        return SaveSnapshotResult(saved_path=saved_path)
+        return SnapshotCommandResult(saved_path=saved_path)
 
     def start_recording(self, request: RecordingRequest | StartRecordingRequest) -> RecordingCommandResult:
         if isinstance(request, StartRecordingRequest):

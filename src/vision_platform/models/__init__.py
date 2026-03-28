@@ -12,8 +12,10 @@ from vision_platform.models.preview_frame_info import PreviewFrameInfo
 from vision_platform.models.recording_command_result import RecordingCommandResult
 from vision_platform.models.recording_request import RecordingRequest
 from vision_platform.models.recording_status import RecordingStatus
+from vision_platform.models.save_directory_command_result import SaveDirectoryCommandResult
 from vision_platform.models.save_snapshot_request import SaveSnapshotRequest
 from vision_platform.models.save_snapshot_result import SaveSnapshotResult
+from vision_platform.models.snapshot_command_result import SnapshotCommandResult
 from vision_platform.models.set_save_directory_request import SetSaveDirectoryRequest
 from vision_platform.models.set_save_directory_result import SetSaveDirectoryResult
 from vision_platform.models.snapshot_request import SnapshotRequest
@@ -37,8 +39,10 @@ __all__ = [
     "RecordingCommandResult",
     "RecordingRequest",
     "RecordingStatus",
+    "SaveDirectoryCommandResult",
     "SaveSnapshotRequest",
     "SaveSnapshotResult",
+    "SnapshotCommandResult",
     "SetSaveDirectoryRequest",
     "SetSaveDirectoryResult",
     "SnapshotRequest",

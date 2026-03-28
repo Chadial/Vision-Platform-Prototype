@@ -16,10 +16,10 @@ from vision_platform.models import (
     RecordingRequest,
     RecordingCommandResult,
     RecordingStatus,
+    SaveDirectoryCommandResult,
     SaveSnapshotRequest,
-    SaveSnapshotResult,
+    SnapshotCommandResult,
     SetSaveDirectoryRequest,
-    SetSaveDirectoryResult,
     SnapshotRequest,
     StartIntervalCaptureRequest,
     StartRecordingRequest,
@@ -70,7 +70,7 @@ class CommandControllerTests(unittest.TestCase):
 
         status = controller.get_status()
 
-        self.assertIsInstance(result, SetSaveDirectoryResult)
+        self.assertIsInstance(result, SaveDirectoryCommandResult)
         self.assertEqual(result.selected_directory, Path("captures/run_001"))
         self.assertFalse(result.was_cleared)
         self.assertEqual(status.default_save_directory, Path("captures/run_001"))
@@ -105,7 +105,7 @@ class CommandControllerTests(unittest.TestCase):
         result = controller.save_snapshot(SaveSnapshotRequest(file_stem="image_001"))
 
         resolved_request = snapshot_service.save_snapshot.call_args.args[0]
-        self.assertIsInstance(result, SaveSnapshotResult)
+        self.assertIsInstance(result, SnapshotCommandResult)
         self.assertEqual(result.saved_path, Path("captures/default/image_001.png"))
         self.assertEqual(resolved_request.save_directory, Path("captures/default"))
         self.assertEqual(resolved_request.file_stem, "image_001")
@@ -220,7 +220,7 @@ class CommandControllerTests(unittest.TestCase):
 
         status = controller.get_status()
 
-        self.assertIsInstance(result, SetSaveDirectoryResult)
+        self.assertIsInstance(result, SaveDirectoryCommandResult)
         self.assertIsNone(result.selected_directory)
         self.assertTrue(result.was_cleared)
         self.assertIsNone(status.default_save_directory)

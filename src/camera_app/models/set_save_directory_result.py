@@ -1,9 +1,3 @@
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
+from camera_app.models.save_directory_command_result import SaveDirectoryCommandResult as SetSaveDirectoryResult
 
-
-@dataclass(slots=True)
-class SetSaveDirectoryResult:
-    selected_directory: Optional[Path]
-    was_cleared: bool = False
+__all__ = ["SetSaveDirectoryResult"]

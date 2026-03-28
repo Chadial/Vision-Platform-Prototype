@@ -58,11 +58,13 @@ Selection rule:
 
 Current implemented slice:
 
-- `CommandController.set_save_directory(...)` now returns a typed `SetSaveDirectoryResult`
+- `CommandController.set_save_directory(...)` now returns a typed `SaveDirectoryCommandResult`
 - the result makes the selected directory versus an explicit clear operation visible without requiring hosts to infer state changes indirectly
+- the older `SetSaveDirectoryResult` name remains available as a compatibility alias while the command-surface naming is normalized
 - the CLI continues to consume the same shared controller path and now uses that typed result instead of re-resolving the path on its own
-- `CommandController.save_snapshot(...)` now also returns a typed `SaveSnapshotResult`
+- `CommandController.save_snapshot(...)` now also returns a typed `SnapshotCommandResult`
 - the result keeps the saved-path outcome explicit at the host-facing control layer instead of leaking a raw service return value upward
+- the older `SaveSnapshotResult` name remains available as a compatibility alias while the command-surface naming is normalized
 - `CommandController.start_recording(...)` and `stop_recording(...)` now also return a typed `RecordingCommandResult`
 - the result keeps recording control outcomes explicit for host callers while reusing the existing `RecordingStatus` payload as the nested status contract
 - `CommandController.start_interval_capture(...)` and `stop_interval_capture(...)` now also return a typed `IntervalCaptureCommandResult`
