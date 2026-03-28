@@ -56,6 +56,7 @@ Assume the local shell environment is Windows PowerShell unless verified otherwi
 - `rg` may not be installed on this machine. If `rg` is unavailable, immediately fall back to PowerShell-native file and text search instead of retrying.
 - PowerShell in this environment does not accept `&&` as a command separator. Run sequential commands as separate tool calls or use PowerShell-compatible structure instead of emitting `&&` and then recovering from the parser error.
 - Prefer avoiding preventable shell retries that only rediscover these environment constraints.
+- Treat state-changing git commands as strictly serial in this repository. Do not run commands such as `git checkout`, `git switch`, `git merge`, `git rebase`, `git commit`, `git add`, `git rm`, or branch deletion in parallel tool calls, because concurrent git operations can create misleading outcomes or transient index-lock failures on this Windows setup.
 
 ### Working assumptions for new sessions
 
@@ -376,6 +377,7 @@ Operational rules from now on:
 - before merge, run the relevant local validation for the touched scope
 - merge to `main` only when the branch is in a stable, documented, test-backed state
 - for mixed or partially completed repository states, use `docs/branch_backlog.md` as the required file-to-branch assignment before staging or committing
+- when git commands change repository state, run them one after another and re-check the resulting branch/worktree state before the next git mutation
 
 Preferred commit structure:
 
