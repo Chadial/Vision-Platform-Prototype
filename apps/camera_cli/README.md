@@ -23,7 +23,16 @@ Provides a camera-oriented command-line app surface for exercising the existing 
 ## Inputs / Outputs
 
 - inputs: CLI arguments for camera source, camera id, configuration, save-directory behavior, and bounded capture options
-- outputs: saved image or recording artifacts plus JSON command summaries on stdout
+- outputs: machine-readable JSON command envelopes on stdout for successful commands and on stderr for failures, with stable `success`, `command`, `result`, `status`, and `error` ownership
+- outputs: the `status` portion of that envelope now reuses the transport-neutral API-service status payload family instead of exposing raw core models directly
+
+## Host-Oriented Baseline
+
+- `status` is the explicit polling-oriented command for host-readable runtime state
+- `snapshot` returns a short-running command result with saved-path confirmation
+- `recording` currently means bounded in-process recording that starts and completes within one invocation and then returns a final structured result
+- the first host-oriented error shape is intentionally minimal: `code`, `message`, `details`
+- command results now also include a small confirmed-settings subset for experiment traceability, such as camera id, pixel format, exposure, save target/path, and recording bounds where relevant
 
 ## Dependencies
 

@@ -41,6 +41,18 @@ Why this slice:
 - `snapshot` proves a short-running save command with artifact confirmation
 - `recording` proves a long-running bounded command that ends with a host-readable final state
 
+Recording semantics for this first slice:
+
+- `recording` is explicitly treated as a bounded recording command
+- it starts and completes within the invoked process
+- it returns one final structured result after bounded completion
+
+Deferred for later slices:
+
+- detached recording sessions spanning multiple host invocations
+- background recording lifecycle ownership across calls
+- richer stop/resume orchestration beyond the current bounded path
+
 Excluded:
 
 - new GUI or OpenCV operator work
@@ -92,6 +104,34 @@ Where relevant:
 
 Exact field names can still be adjusted during implementation, but the envelope must stay stable across the selected command slice once chosen.
 
+Preferred minimal error shape for this first slice:
+
+- `code`
+- `message`
+- `details`
+
+Meaning:
+
+- `code`: short stable machine-readable identifier
+- `message`: short human-readable explanation
+- `details`: optional extra structured or textual context
+
+Avoid in this slice:
+
+- raw Python exception dumping as the only host-facing error form
+- an overdesigned full error taxonomy
+
+Applied-settings confirmation expectation for this first slice:
+
+- host-facing results or their accompanying status should expose enough confirmed context for experiment traceability
+- at minimum, where relevant:
+  - active camera id
+  - pixel format
+  - exposure value
+  - save target or saved path
+  - recording bounds for bounded recording
+- this slice should not try to mirror every possible camera feature
+
 ## Learned Constraints
 
 - the CLI must remain a thin adapter above the shared command/application layer
@@ -129,6 +169,7 @@ Exact field names can still be adjusted during implementation, but the envelope 
    - successful commands return exit code `0`
    - command failures return a non-zero exit code
    - stdout/stderr behavior remains predictable enough for host invocation
+   - bounded `recording` remains an in-process start-to-completion command for this slice
 8. Extend or update tests so the selected command slice is locked to the new machine-readable contract.
 9. Update the touched module docs and repository status notes once the host-facing adapter shape is real.
 
