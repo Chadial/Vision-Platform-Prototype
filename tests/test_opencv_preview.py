@@ -332,7 +332,44 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         preview_service = MagicMock()
         adapter = MagicMock()
         window = OpenCvPreviewWindow(preview_service, frame_adapter=adapter)
-        window._active_roi = type("Roi", (), {"shape": "rectangle", "points": ((10, 20), (40, 60))})()
+        window._fallback_active_roi = type("Roi", (), {"shape": "rectangle", "points": ((10, 20), (40, 60))})()
+        window._last_viewport_mapping = window._build_viewport_mapping(
+            frame_width=100,
+            frame_height=100,
+            viewport_width=100,
+            viewport_height=100,
+            display_scale=1.0,
+        )
+
+        window._draw_roi("viewport-image")
+
+        adapter.draw_rectangle_outline.assert_called_once_with("viewport-image", 10, 20, 40, 60)
+
+    def test_status_lines_reflect_committed_roi_from_state_service(self) -> None:
+        preview_service = MagicMock()
+        roi_state_service = RoiStateService()
+        roi_state_service.set_active_roi(
+            type("Roi", (), {"shape": "ellipse", "points": ((10, 20), (40, 60))})()
+        )
+        window = OpenCvPreviewWindow(preview_service, roi_state_service=roi_state_service)
+        window._last_display_scale = 1.0
+
+        status_lines = window._build_status_lines()
+
+        self.assertEqual(status_lines[1], "ROI active: ellipse")
+
+    def test_active_roi_from_state_service_is_drawn_in_viewport(self) -> None:
+        preview_service = MagicMock()
+        adapter = MagicMock()
+        roi_state_service = RoiStateService()
+        roi_state_service.set_active_roi(
+            type("Roi", (), {"shape": "rectangle", "points": ((10, 20), (40, 60))})()
+        )
+        window = OpenCvPreviewWindow(
+            preview_service,
+            frame_adapter=adapter,
+            roi_state_service=roi_state_service,
+        )
         window._last_viewport_mapping = window._build_viewport_mapping(
             frame_width=100,
             frame_height=100,

@@ -28,17 +28,17 @@ class OverlayCompositionService:
         if resolved_snapshot_focus_state is None and snapshot_focus_capture is not None:
             resolved_snapshot_focus_state = snapshot_focus_capture.focus_state
 
-        resolved_active_roi = active_roi if active_roi is not None else self._get_active_roi()
+        resolved_active_roi = self._resolve_active_roi(active_roi)
         return DisplayOverlayPayload(
             active_roi=_build_active_roi_overlay(resolved_active_roi),
             preview_focus=preview_focus_state.overlay if preview_focus_state is not None else None,
             snapshot_focus=resolved_snapshot_focus_state.overlay if resolved_snapshot_focus_state is not None else None,
         )
 
-    def _get_active_roi(self) -> RoiDefinition | None:
+    def _resolve_active_roi(self, explicit_roi: RoiDefinition | None) -> RoiDefinition | None:
         if self._roi_state_service is None:
-            return None
-        return self._roi_state_service.get_active_roi()
+            return explicit_roi
+        return self._roi_state_service.resolve_active_roi(explicit_roi)
 
 
 def _build_active_roi_overlay(roi: RoiDefinition | None) -> RoiOverlayData | None:

@@ -32,7 +32,7 @@ class SnapshotFocusService:
 
     def capture_focus_state(self, roi: RoiDefinition | None = None) -> SnapshotFocusCapture:
         frame = self._driver.capture_snapshot()
-        active_roi = roi if roi is not None else self._get_active_roi()
+        active_roi = self._resolve_active_roi(roi)
         request = FocusRequest(method="laplace", roi=active_roi)
         result = self._focus_evaluator.evaluate(frame, request=request)
         overlay = build_focus_overlay_data(result, frame=frame, roi=active_roi)
@@ -41,7 +41,7 @@ class SnapshotFocusService:
             focus_state=FocusPreviewState(result=result, overlay=overlay),
         )
 
-    def _get_active_roi(self) -> RoiDefinition | None:
+    def _resolve_active_roi(self, explicit_roi: RoiDefinition | None) -> RoiDefinition | None:
         if self._roi_state_service is None:
-            return None
-        return self._roi_state_service.get_active_roi()
+            return explicit_roi
+        return self._roi_state_service.resolve_active_roi(explicit_roi)
