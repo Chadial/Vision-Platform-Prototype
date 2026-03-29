@@ -115,15 +115,110 @@ The strongest currently documented sequencing signals are:
 Combined interpretation:
 
 1. keep the CLI baseline narrow and stable
-2. next harden the host-neutral command surface
-3. keep OpenCV UI work separate and bounded
-4. use hardware work as selective revalidation, not as the main planning lane
-5. after current control/UI stabilization, define the next ROI/focus-closing packages
-6. only then move toward tracking, API, handover hardening, postprocess, and further frontends
+2. treat the current Python camera baseline as already broad enough to justify a closure phase instead of immediate breadth expansion
+3. keep OpenCV UI work separate and bounded instead of letting UI expansion define the next phase
+4. treat hardware work as evidence-driven closure work, not as a permanently separate stream
+5. prioritize host control, runtime reliability, data/logging, and offline experiment usability over new frontend breadth
+6. keep tracking, broad API expansion, C# handover widening, and further frontends visible as later lanes rather than the next default step
+
+## Extended MVP Lens
+
+The next project phase should not be planned as breadth expansion.
+
+It should be planned as:
+
+**Extended MVP = host-steerable, hardware-relevant Python camera working prototype**
+
+This tactical lens narrows the broad platform roadmap into a product-near closure phase aimed at replacing the previous third-party camera executable in the AMB context with a controlled Python subsystem.
+
+Primary users for this phase:
+
+1. the developer
+2. the AMB control software as the host/master system
+
+This means the next PM default should optimize for:
+
+1. host-callable commands with structured results
+2. stable runtime status polling during active experiments
+3. experiment-safe recording, failure handling, and reproducibility
+4. usable saved image and metadata structures for later analysis
+5. offline focus and measurement usefulness of stored data
+
+This phase does **not** treat the following as default next-step priorities:
+
+- additional large frontend shells
+- broad web-capable work
+- speculative transport expansion
+- broad tracking expansion
+- C#-parallel work beyond what is directly justified by the current Python control surface
+
+## Closure Axes
+
+The current PM should derive the next work from four tactical closure axes rather than from broad roadmap breadth alone.
+
+### 1. Host Control Closure
+
+Question:
+
+- is it practically proven that an external host can configure, trigger, stop, and query the Python camera subsystem reliably through a structured command/response path plus status polling?
+
+Focus:
+
+- host-callable commands
+- structured command results
+- confirmation of applied settings
+- stable host-readable status payloads
+- failure and readiness reporting
+
+### 2. Experiment Reliability Closure
+
+Question:
+
+- is it practically proven that the system survives realistic experiment runs with acceptable reliability on the relevant hardware path?
+
+Focus:
+
+- start/stop robustness
+- recording robustness
+- hardware-backed revalidation
+- recovery behavior
+- bounded and reproducible validation slices
+
+### 3. Data And Logging Closure
+
+Question:
+
+- is it practically proven that saved images, naming, settings, timestamps, and folder structure are experiment-usable and traceable?
+
+Focus:
+
+- explicit save-target behavior
+- deterministic series structure
+- image-plus-metadata linkage
+- camera and system timestamps
+- settings traceability
+- practical visible formats such as TIFF, PNG, and BMP where appropriate
+
+### 4. Offline And Measurement Closure
+
+Question:
+
+- is it practically proven that stored snapshots and series are useful for offline focus checks, measurement-oriented inspection, and experiment follow-up analysis?
+
+Focus:
+
+- stored-image reuse
+- offline focus/report utility
+- measurement-oriented format choices
+- data suitability for later experiment evaluation
 
 ## WP Overview
 
 This is the current PM overview of work packages to activate or defer.
+
+The existing archived packages remain part of the repository history.
+
+The newly added Extended MVP packages define the next tactical planning lane without erasing that earlier sequence.
 
 | PM Order | Work Package | Purpose | Activation State | Priority | Detailed File |
 | --- | --- | --- | --- | --- | --- |
@@ -137,13 +232,26 @@ This is the current PM overview of work packages to activate or defer.
 | 8 | API Surface Preparation | prepare the first external adapter above the host-neutral control layer | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp08_api_surface_preparation.md` |
 | 9 | C# Handover Hardening | identify and tighten contracts that are most likely to survive direct C# porting | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md` |
 | 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp10_postprocess_baseline.md` |
-| 11 | Additional Frontends | prepare desktop and later web-capable paths | current next | only if another frontend shell is actually needed | `docs/session_workpackages/wp11_additional_frontends.md` |
+| 11 | Additional Frontends | prepare desktop and later web-capable paths | dormant | keep for later continuity; not part of the default Extended MVP lane | `docs/session_workpackages/wp11_additional_frontends.md` |
+| 12 | Host Control Closure | prove and tighten the host-steerable command/response and status-polling baseline | current next | first Extended MVP closure lane; first narrow slice is active through `WP12` | `docs/session_workpackages/wp12_host_control_closure.md` |
+| 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | active lane | second Extended MVP closure lane | to be created on activation |
+| 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | active lane | third Extended MVP closure lane | to be created on activation |
+| 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | queued | fourth Extended MVP closure lane | to be created on activation |
 
 ## Immediate PM Backlog
 
 These are the work packages PM should treat as the current actionable backlog:
 
-1. `Additional Frontends`
+1. `Host Control Closure`
+2. `Experiment Reliability Closure`
+3. `Data And Logging Closure`
+4. `Offline And Measurement Closure`
+
+Current explicitly activated detailed package:
+
+- `docs/session_workpackages/wp12_host_control_closure.md`
+  - first narrow `Host Control Closure` slice
+  - centers host-process command/result/status hardening for `status`, `snapshot`, and `recording`
 
 These are important but should not be treated as the main always-on stream:
 
@@ -151,73 +259,90 @@ These are important but should not be treated as the main always-on stream:
 2. `Camera CLI Baseline Narrowing`
 3. `Host Integration Command Surface`
 4. `OpenCV UI Operator Follow-Up`
+5. `Additional Frontends`
 
 These should remain queued behind the above:
 
-None right now beyond the current next package.
+1. `Tracking Core Baseline`
+2. `API Surface Preparation`
+3. `C# Handover Hardening`
+4. `Postprocess Baseline`
 
 ## Rough PM Sequence
 
 The PM should currently plan in these layers.
 
-### Layer 1: Stabilize And Narrow The Current Baseline
+### Layer 1: Historical Baseline Stabilization And Narrowing
 
 Goal:
 
-- keep the current Python platform stable
-- avoid mixing too many new directions at once
-- reduce ambiguity around the preferred command and UI paths
+- preserve continuity with the work already completed
+- keep the earlier command, UI, ROI, focus, and API-baseline packages visible as already-landed groundwork
+- avoid reopening old baseline packages unless a concrete defect appears
 
 Detailed work-package files:
 
 - `docs/archive/session_workpackages/wp01_camera_cli.md`
-- `docs/session_workpackages/wp02_host_integration_command_surface.md`
-- `docs/session_workpackages/wp03_opencv_ui_operator_block.md`
+- `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
+- `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
 
-### Layer 2: Complete The Analysis MVP Boundary
+### Layer 2: Historical Analysis MVP Boundary
 
 Goal:
 
-- turn the current ROI/focus groundwork into a deliberate MVP boundary
-- make clear which parts are foundation, which parts are already operator-usable, and which parts remain deferred
+- retain the ROI/focus/tracking/postprocess history as completed groundwork
+- keep those packages available as dependency context for the next closure-focused planning phase
 
 Detailed work-package files:
 
 - `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md`
 - `docs/archive/session_workpackages/wp06_focus_method_expansion.md`
-
-### Layer 3: Prepare The Next Analysis Expansion
-
-Goal:
-
-- move from focus/ROI baseline toward tracking or edge-oriented groundwork without overcommitting too early
-
-Detailed work-package file:
-
 - `docs/archive/session_workpackages/wp07_tracking_core_baseline.md`
-
-### Layer 4: External Interfaces And Handover Preparation
-
-Goal:
-
-- harden the platform so later C# embedding, API exposure, and external automation reuse the same core contracts
 
 Detailed work-package files:
 
 - `docs/archive/session_workpackages/wp08_api_surface_preparation.md`
 - `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md`
+- `docs/archive/session_workpackages/wp10_postprocess_baseline.md`
 
-### Layer 5: Additional Frontends And Offline Paths
+### Layer 3: Extended MVP Closure
 
 Goal:
 
-- expand beyond the OpenCV prototype only after the core paths above are sufficiently stable
+- reinterpret the next project phase as closure, not breadth expansion
+- prove that the Python camera subsystem is host-steerable, hardware-relevant, experiment-safe, and data-usable
+- derive the next execution-ready branches from the four closure axes instead of from speculative future breadth
+
+Current closure lanes:
+
+1. `Host Control Closure`
+2. `Experiment Reliability Closure`
+3. `Data And Logging Closure`
+4. `Offline And Measurement Closure`
+
+Existing detailed support files:
+
+- `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
+- `docs/session_workpackages/wp12_host_control_closure.md`
+
+Current activation note:
+
+- `Host Control Closure` is no longer only a planning lane.
+- the first execution-ready slice is now explicitly defined in `docs/session_workpackages/wp12_host_control_closure.md`
+- that slice is intentionally narrow and centers the host-process command/result/status path for `status`, `snapshot`, and `recording`
+- the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
+
+### Layer 4: Later Breadth Expansion
+
+Goal:
+
+- keep later breadth visible without letting it outrun the closure phase
+- only reopen broader frontend, transport, tracking, or handover expansion after the Extended MVP lane is sufficiently closed
 
 Detailed work-package files:
 
-- `docs/archive/session_workpackages/wp10_postprocess_baseline.md`
 - `docs/session_workpackages/wp11_additional_frontends.md`
 
 ## Current Recommended Order
@@ -226,22 +351,26 @@ The current coarse PM order should be:
 
 1. treat the CLI baseline as intentionally narrow unless a concrete defect appears
 2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
-3. use hardware validation as a revalidation package when hardware is attached, not as the main always-active stream
-4. treat the ROI workflow package as completed baseline-clarification work
-5. treat the focus expansion package as completed baseline-hardening work
-6. then open the next C# handover-hardening package
+3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
+4. open `Host Control Closure` as the default Extended MVP package
+5. keep `Experiment Reliability Closure` and `Data And Logging Closure` as the next active lanes directly behind it
+6. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
+7. open `Offline And Measurement Closure` after the command, runtime, and data/logging baseline is clearer
+8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp11_additional_frontends.md`
+- `docs/session_workpackages/wp12_host_control_closure.md`
 
 Reason:
 
-- the ROI/focus/tracking MVP boundary, first API DTO preparation slice, first handover-oriented request/result hardening, and first offline postprocess baseline are now explicitly implemented and documented
-- the next open package is `Additional Frontends`, but only when another frontend shell is actually needed
-- until that condition is real, the more valuable default is to keep the current Python baseline stable rather than opening a speculative frontend lane
+- the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
+- the next tactical need is to close the gap between that baseline and a host-usable working subsystem in the AMB context
+- the currently activated first slice is the CLI-envelope/status-polling hardening path for `status`, `snapshot`, and `recording`
+- `WORKPACKAGES.md` should now point fresh agents directly to that slice instead of leaving `Host Control Closure` at lane-only level
+- broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule
 
@@ -252,11 +381,12 @@ When a fresh agent is not explicitly assigned a package:
 3. read `docs/MODULE_INDEX.md`
 4. read `docs/WORKPACKAGES.md`
 5. choose the package marked `current next`, unless the user or current branch scope clearly overrides it
-6. open that package's detailed `docs/session_workpackages/wpXX_*.md` file before implementation
+6. if that package does not yet have a detailed session file, derive the narrowest execution-ready session work-package file from the selected closure lane before implementation
+7. otherwise open that package's detailed `docs/session_workpackages/wpXX_*.md` file before implementation
 
 ## Detailed Package Inventory
 
-The repository now has explicit detailed session work-package files for all currently identified packages:
+The repository currently has explicit detailed session work-package files for the historical baseline packages and the still-valid later frontend/hardware placeholders:
 
 - `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
@@ -269,16 +399,28 @@ The repository now has explicit detailed session work-package files for all curr
 - `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md`
 - `docs/archive/session_workpackages/wp10_postprocess_baseline.md`
 - `docs/session_workpackages/wp11_additional_frontends.md`
+- `docs/session_workpackages/wp12_host_control_closure.md`
+
+The new Extended MVP closure lanes are intentionally introduced first at the PM level.
+
+Their detailed execution-ready files should be created only when a concrete closure slice is activated, so PM does not invent detailed branch work prematurely.
+
+Current explicit activation:
+
+- `Host Control Closure` now has its first detailed file at `docs/session_workpackages/wp12_host_control_closure.md`
+- that file is the active next implementation-oriented package for the current PM phase
+- the remaining closure lanes still intentionally wait for later activation
 
 ## PM Refinement Rule
 
 When PM activates one package from this file:
 
 1. choose one item from the current recommended order
-2. use the detailed file under `docs/session_workpackages/` as the execution source
-3. refine progress, sub-work-packages, and discoveries inside that detailed file
-4. keep branch scope coherent and narrow
-5. update this file only at the level of order, activation, and dependency changes
+2. if a detailed file already exists, use it as the execution source
+3. if the selected package is one of the Extended MVP closure lanes, first create one narrow execution-ready session work-package file for that lane
+4. refine progress, sub-work-packages, and discoveries inside that detailed file
+5. keep branch scope coherent and narrow
+6. update this file only at the level of order, activation, and dependency changes
 
 ## Archive Rule
 
