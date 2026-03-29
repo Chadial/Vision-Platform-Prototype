@@ -128,6 +128,17 @@ At the end of the slice:
 - state assumptions
 - name the next recommended work package
 
+If the slice completed a coherent topic branch and the merge gate is already satisfied:
+
+- continue into the git completion flow instead of stopping at a "ready to merge" summary
+- switch to the intended integration branch
+- re-check clean state
+- merge serially
+- re-check after each merge
+- delete merged local topic branches when they are no longer needed
+
+Only stop before merge if the integration target is unclear, validation failed, a conflict appears, or an explicit review/hold requirement exists.
+
 ## Work-Package Quality Bar
 
 A work package is well formed when it includes:
