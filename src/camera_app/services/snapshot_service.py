@@ -8,7 +8,7 @@ from camera_app.models.snapshot_request import SnapshotRequest
 from camera_app.storage.file_naming import build_snapshot_path
 from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_snapshot_request
-from vision_platform.services.recording_service.traceability import write_snapshot_trace_sidecar
+from vision_platform.services.recording_service.traceability import record_snapshot_trace
 
 
 class SnapshotService:
@@ -36,7 +36,7 @@ class SnapshotService:
                 create_directories=request.create_directories,
             )
             configuration = self._configuration_provider() if self._configuration_provider is not None else None
-            write_snapshot_trace_sidecar(saved_path, request, frame, configuration)
+            record_snapshot_trace(saved_path, request, frame, configuration)
         except Exception:
             self._logger.exception("Snapshot save failed for '%s'.", target_path)
             raise
