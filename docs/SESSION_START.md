@@ -51,7 +51,7 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Priority
 
 1. Keep the Python core stable and understandable.
-2. Next harden the most likely C# handover contracts above the now-explicit ROI/focus/tracking/API-preparation boundary.
+2. Next define the first bounded postprocess path above the now-explicit ROI/focus/tracking/API-preparation/handover boundary.
 3. Keep any further OpenCV work separate and only in the UI/display-facing layer.
 4. Continue documenting verified state and next steps as features land.
 5. Broaden real-hardware validation when practical.
@@ -98,8 +98,8 @@ Read these for every new session:
   - `docs/session_workpackages/wp01_camera_cli.md`
 - For host-neutral command-surface follow-up work:
   - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
-- For the next regular handover-boundary work:
-  - `docs/session_workpackages/wp09_csharp_handover_hardening.md`
+- For the next regular offline/postprocess work:
+  - `docs/session_workpackages/wp10_postprocess_baseline.md`
 
 ## Working Defaults
 
