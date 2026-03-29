@@ -169,6 +169,21 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertEqual(data_rows[1][2], "1000")
             self.assertTrue(data_rows[1][3])
             self.assertEqual(data_rows[3][0], "series_000002.raw")
+            trace_lines = (Path(temp_dir) / "bounded_recording_traceability.csv").read_text(encoding="utf-8").splitlines()
+            self.assertIn(f"# context.save_directory: {temp_dir}", trace_lines)
+            self.assertIn("# context.record_kind: bounded_recording_folder_log", trace_lines)
+            self.assertIn("# context.pixel_format: Mono8", trace_lines)
+            self.assertIn("# context.exposure_time_us: 2500.0", trace_lines)
+            self.assertIn("# context.gain: 1.5", trace_lines)
+            self.assertIn("# run.start", trace_lines)
+            self.assertIn("# run.file_stem: series", trace_lines)
+            self.assertIn("# run.frame_limit: 3", trace_lines)
+            self.assertIn("# run.end", trace_lines)
+            self.assertIn("# run.end_state: completed", trace_lines)
+            trace_rows = list(csv.reader(line for line in trace_lines if line and not line.startswith("# ")))
+            self.assertEqual(trace_rows[0], ["run_id", "image_name", "frame_id", "camera_timestamp", "system_timestamp_utc"])
+            self.assertEqual(trace_rows[1][1], "series_000000.raw")
+            self.assertEqual(trace_rows[3][1], "series_000002.raw")
 
     def test_stop_recording_stops_active_recording(self) -> None:
         frames = [
@@ -542,6 +557,10 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("Recording write failed", failed_status.last_error or "")
             self.assertIsNone(failed_status.save_directory)
             self.assertIsNone(failed_status.active_file_stem)
+            trace_lines = (Path(temp_dir) / "bounded_recording_traceability.csv").read_text(encoding="utf-8").splitlines()
+            self.assertIn("# run.file_stem: broken", trace_lines)
+            self.assertIn("# run.end_state: failed", trace_lines)
+            self.assertTrue(any("Recording write failed" in line for line in trace_lines))
 
             recovery_request = RecordingRequest(
                 save_directory=Path(temp_dir),
@@ -562,6 +581,110 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertEqual(recovered_status.frames_written, 2)
             self.assertIsNone(recovered_status.last_error)
             self.assertTrue((Path(temp_dir) / "recovered_000000.raw").exists())
+
+    def test_recording_traceability_reuses_log_when_context_matches(self) -> None:
+        driver = _StreamingRecordingDriver()
+        service = RecordingService(
+            driver,
+            poll_interval_seconds=0.001,
+            configuration_provider=lambda: CameraConfiguration(
+                exposure_time_us=2500.0,
+                gain=1.5,
+                pixel_format="Mono8",
+            ),
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            first_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="first",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+            second_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="second",
+                file_extension=".raw",
+                frame_limit=3,
+                queue_size=4,
+                duration_seconds=0.05,
+            )
+
+            for request in (first_request, second_request):
+                service.start_recording(request)
+                for _ in range(200):
+                    status = service.get_status()
+                    if not status.is_recording:
+                        break
+                    sleep(0.01)
+
+            trace_path = Path(temp_dir) / "bounded_recording_traceability.csv"
+            self.assertTrue(trace_path.exists())
+            self.assertFalse((Path(temp_dir) / "bounded_recording_traceability_001.csv").exists())
+            trace_lines = trace_path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(trace_lines.count("# run.start"), 2)
+            self.assertIn("# run.file_stem: first", trace_lines)
+            self.assertIn("# run.file_stem: second", trace_lines)
+            self.assertIn("# run.frame_limit: 2", trace_lines)
+            self.assertIn("# run.frame_limit: 3", trace_lines)
+            self.assertIn("# run.duration_seconds: 0.05", trace_lines)
+
+    def test_recording_traceability_creates_new_log_when_context_changes(self) -> None:
+        driver = _StreamingRecordingDriver()
+        current_configuration = CameraConfiguration(
+            exposure_time_us=2500.0,
+            gain=1.5,
+            pixel_format="Mono8",
+        )
+        service = RecordingService(
+            driver,
+            poll_interval_seconds=0.001,
+            configuration_provider=lambda: current_configuration,
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            first_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="first",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+            second_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="second",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+
+            service.start_recording(first_request)
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording:
+                    break
+                sleep(0.01)
+
+            current_configuration = CameraConfiguration(
+                exposure_time_us=3000.0,
+                gain=1.5,
+                pixel_format="Mono8",
+            )
+
+            service.start_recording(second_request)
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording:
+                    break
+                sleep(0.01)
+
+            first_trace = Path(temp_dir) / "bounded_recording_traceability.csv"
+            second_trace = Path(temp_dir) / "bounded_recording_traceability_001.csv"
+            self.assertTrue(first_trace.exists())
+            self.assertTrue(second_trace.exists())
+            self.assertIn("# context.exposure_time_us: 2500.0", first_trace.read_text(encoding="utf-8").splitlines())
+            self.assertIn("# context.exposure_time_us: 3000.0", second_trace.read_text(encoding="utf-8").splitlines())
 
 
 if __name__ == "__main__":

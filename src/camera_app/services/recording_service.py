@@ -17,6 +17,13 @@ from camera_app.services.shared_frame_source import SharedFrameSource
 from camera_app.storage.file_naming import build_recording_frame_path, build_recording_log_path
 from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_recording_request
+from vision_platform.services.recording_service.traceability import (
+    append_recording_trace_image_row,
+    append_recording_trace_run_end,
+    append_recording_trace_run_start,
+    open_recording_trace_log,
+    resolve_recording_trace_log_path,
+)
 
 
 class RecordingService:
@@ -48,6 +55,10 @@ class RecordingService:
         self._next_frame_due_at: float | None = None
         self._recording_log_handle: TextIO | None = None
         self._recording_log_writer: csv.writer | None = None
+        self._recording_session_started_utc: str | None = None
+        self._trace_log_handle: TextIO | None = None
+        self._trace_log_writer: csv.writer | None = None
+        self._trace_run_id: str | None = None
 
     def start_recording(self, request: RecordingRequest) -> RecordingStatus:
         self._validate_request(request)
@@ -64,11 +75,13 @@ class RecordingService:
             self._frame_queue = Queue(maxsize=request.queue_size)
             self._stop_event.clear()
             self._acquisition_stopped = False
+            self._recording_session_started_utc = self._current_system_time_utc()
             self._recording_deadline = (
                 monotonic() + request.duration_seconds if request.duration_seconds is not None else None
             )
             self._next_frame_due_at = monotonic()
             self._open_recording_log(request)
+            self._open_traceability_log(request)
             if self._shared_frame_source is not None:
                 self._shared_frame_source.acquire()
             else:
@@ -80,7 +93,8 @@ class RecordingService:
             self._producer_thread.start()
             self._writer_thread.start()
             return self.get_status()
-        except Exception:
+        except Exception as exc:
+            self._record_error(f"Recording startup failed: {exc}")
             self._stop_event.set()
             self._finalize_recording(suppress_errors=True)
             raise
@@ -192,6 +206,7 @@ class RecordingService:
                     create_directories=self._active_request.create_directories,
                 )
                 self._write_recording_log_entry(target_path.name, frame)
+                self._write_traceability_entry(target_path.name, frame)
                 with self._status_lock:
                     self._status.frames_written += 1
                     if (
@@ -232,13 +247,29 @@ class RecordingService:
         )
         self._recording_log_handle.flush()
 
+    def _open_traceability_log(self, request: RecordingRequest) -> None:
+        configuration = self._configuration_provider() if self._configuration_provider is not None else None
+        log_path, reused_existing_log, _stable_context = resolve_recording_trace_log_path(request, configuration)
+        self._trace_log_handle, self._trace_log_writer = open_recording_trace_log(
+            log_path,
+            _stable_context,
+            reused_existing_log=reused_existing_log,
+        )
+        self._trace_run_id = f"{request.file_stem}@{self._recording_session_started_utc or self._current_system_time_utc()}"
+        append_recording_trace_run_start(
+            self._trace_log_handle,
+            self._trace_run_id,
+            request,
+            self._recording_session_started_utc,
+        )
+
     def _build_recording_log_metadata(
         self,
         request: RecordingRequest,
         configuration: CameraConfiguration | None,
     ) -> list[tuple[str, str]]:
         return [
-            ("recording_start_signal_utc", self._current_system_time_utc()),
+            ("recording_start_signal_utc", self._recording_session_started_utc or self._current_system_time_utc()),
             ("save_directory", str(request.save_directory)),
             ("file_stem", request.file_stem),
             ("file_extension", request.file_extension),
@@ -294,6 +325,18 @@ class RecordingService:
         )
         self._recording_log_handle.flush()
 
+    def _write_traceability_entry(self, image_name: str, frame: CapturedFrame) -> None:
+        if self._trace_log_writer is None or self._trace_log_handle is None or self._trace_run_id is None:
+            raise RuntimeError("Recording traceability log is not initialized.")
+
+        append_recording_trace_image_row(
+            self._trace_log_writer,
+            self._trace_log_handle,
+            self._trace_run_id,
+            image_name,
+            frame,
+        )
+
     @staticmethod
     def _current_system_time_utc() -> str:
         return datetime.now(timezone.utc).isoformat()
@@ -301,6 +344,7 @@ class RecordingService:
     def _finalize_recording(self, suppress_errors: bool = False) -> None:
         with self._cleanup_lock:
             stop_error: Exception | None = None
+            traceability_error: Exception | None = None
             has_active_recording = (
                 self._active_request is not None
                 or self._producer_thread is not None
@@ -320,10 +364,29 @@ class RecordingService:
                 finally:
                     self._acquisition_stopped = True
 
+            active_request = self._active_request
+            final_status = self.get_status()
+            session_started_utc = self._recording_session_started_utc
+            session_end_utc = self._current_system_time_utc() if active_request is not None else None
+            end_state = "failed" if final_status.last_error else "completed"
+            if active_request is not None and self._trace_log_handle is not None and self._trace_run_id is not None:
+                try:
+                    append_recording_trace_run_end(
+                        self._trace_log_handle,
+                        self._trace_run_id,
+                        final_status,
+                        session_end_utc,
+                        end_state,
+                    )
+                except Exception as exc:
+                    traceability_error = exc
+                    self._record_error(f"Recording traceability log failed: {exc}")
+
             self._producer_thread = None
             self._writer_thread = None
             self._frame_queue = None
             self._active_request = None
+            self._recording_session_started_utc = None
             self._recording_deadline = None
             self._next_frame_due_at = None
             self._acquisition_started = False
@@ -331,6 +394,11 @@ class RecordingService:
                 self._recording_log_handle.close()
                 self._recording_log_handle = None
                 self._recording_log_writer = None
+            if self._trace_log_handle is not None:
+                self._trace_log_handle.close()
+                self._trace_log_handle = None
+                self._trace_log_writer = None
+                self._trace_run_id = None
             with self._status_lock:
                 self._status.is_recording = False
                 self._status.save_directory = None
@@ -338,3 +406,5 @@ class RecordingService:
 
             if stop_error is not None and not suppress_errors:
                 raise stop_error
+            if traceability_error is not None and not suppress_errors:
+                raise traceability_error

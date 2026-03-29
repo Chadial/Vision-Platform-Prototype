@@ -31,6 +31,12 @@ Visible output note:
 - optional OpenCV-backed lossless grayscale output remains the path for higher-bit `.png` and `.tiff`
 - raw acquisition-oriented export remains available through `.raw` and `.bin`
 
+Traceability note:
+
+- snapshot saving now also writes one sidecar trace record beside the saved artifact
+- bounded recording now also writes one folder-local appendable traceability log with stable context header, run/session blocks, and per-image rows
+- the existing per-recording CSV path remains in place; the traceability log is an additional narrow baseline for host- and offline-readable experiment context
+
 ## Dependencies
 
 - `services/stream_service`

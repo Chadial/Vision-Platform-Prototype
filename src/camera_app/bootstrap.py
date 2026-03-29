@@ -33,7 +33,7 @@ def build_camera_subsystem(
     interval_capture_poll_interval_seconds: float = 0.01,
 ) -> CameraSubsystem:
     camera_service = CameraService(driver)
-    snapshot_service = SnapshotService(driver)
+    snapshot_service = SnapshotService(driver, configuration_provider=camera_service.get_last_configuration)
     stream_service = CameraStreamService(
         driver,
         preview_poll_interval_seconds=preview_poll_interval_seconds,

@@ -4,9 +4,9 @@
 
 This work package defines the next execution-ready extension slice after the first narrow `WP14` visible-format baseline.
 
-Its purpose is to move `Data And Logging Closure` from "saved artifacts exist in practical formats" toward "saved artifacts are experiment-usable and traceable."
+Its purpose is to move `Data And Logging Closure` from "saved artifacts exist in practical formats" toward "saved artifacts are experiment-usable, append-friendly, and traceable."
 
-The narrow goal is to add one stable, deterministic traceability baseline for saved snapshot and bounded recording artifacts without reopening the broader storage architecture.
+The narrow goal is to add one stable, deterministic traceability baseline for saved snapshot and bounded recording artifacts without reopening the broader storage architecture or forcing a brand-new log file for every bounded run.
 
 ## Branch
 
@@ -17,7 +17,7 @@ The narrow goal is to add one stable, deterministic traceability baseline for sa
 
 Included:
 
-- define one narrow metadata record shape for snapshot artifacts and one narrow session-level metadata record for bounded recording
+- define one narrow metadata record shape for snapshot artifacts and one narrow folder-local traceability log structure for bounded recording
 - cover the current practical artifact paths first:
   - snapshot save
   - bounded recording save
@@ -37,23 +37,32 @@ Selected slice for this package:
   - exposure/shutter where available
   - gain where available
   - marker that the record belongs to a snapshot artifact
-- bounded-recording session-level manifest with at least:
-  - session output directory or session identity
-  - system start timestamp
-  - system end timestamp where available
+- bounded-recording folder-local traceability log with:
+  - one stable context header for log reuse decisions
+  - one or more run/session blocks inside the same log
+  - one per-image row for each saved artifact
+- bounded-recording run/session block fields with at least:
+  - run start timestamp
+  - run end timestamp where available
   - bounded-recording end state marker indicating regular or failed completion
+  - run/session id or equivalent deterministic run marker
+  - recording bounds used such as frame limit and duration when present
+  - target frame rate where present
+- bounded-recording stable context fields with at least:
+  - save directory
   - camera id where available
   - pixel format
   - exposure/shutter where available
   - gain where available
-  - recording bounds used such as frame limit and duration when present
-  - marker that the record belongs to a bounded recording session
+  - ROI / offsets where present and treated as experiment-relevant
+  - marker that this log belongs to bounded recording traceability
 
 Why this slice:
 
 - it closes the most important remaining product-near gap after `WP14`
 - it directly supports host-side logging and later offline reporting
 - it keeps snapshot and recording treatment intentionally asymmetric, which is the narrower practical choice for the current repository shape
+- it supports repeated appended runs in one folder without treating every run-level change as a mandatory new-log event
 
 Excluded:
 
@@ -70,7 +79,7 @@ Leave the repository with one explicit, stable metadata-traceability baseline fo
 
 The first completed slice should answer one concrete question:
 
-- can a saved snapshot or bounded recording run be paired with a concise, deterministic local metadata record that a host or offline tool can consume later?
+- can a saved snapshot or appended bounded recording run be paired with a concise, deterministic local traceability record that a host or offline tool can consume later?
 
 ## Current Context
 
@@ -82,16 +91,19 @@ The repository already has:
 
 The immediate remaining gap is:
 
-- image artifacts and experiment context are still not linked in one narrow, stable traceability path
+- image artifacts and experiment context are still not linked in one narrow, stable traceability path that also behaves sensibly when repeated runs are appended in the same folder
 
 ## Narrow Decisions
 
 - this slice targets artifact traceability, not broad logging redesign
 - snapshot artifacts use direct sidecar metadata because they are naturally one-file outputs
-- bounded recording uses one minimal session-level manifest because per-frame sidecars would broaden the package too early
+- bounded recording uses one deterministic folder-local log rather than per-run or per-frame sidecars because append-style experiment use is the narrower practical fit
+- bounded-recording log reuse is based on stable context match, not on run start time alone
+- changes in run/session fields such as start time, end time, duration, frame limit, or target frame rate should create a new run block inside the existing log, not necessarily a new log file
+- a new bounded-recording log file is only required when the stable context no longer matches cleanly
 - prefer one deterministic local metadata path per save mode over multiple competing outputs
 - this package does not replace the existing CSV path; it adds one narrower host-/experiment-readable traceability baseline beside it
-- bounded-recording traceability should make start, end, and regular-vs-failed completion understandable without turning this slice into a broad lifecycle redesign
+- bounded-recording traceability should make stable context, run/session values, per-image rows, and regular-vs-failed completion understandable without turning this slice into a broad lifecycle redesign
 - metadata fields may be omitted when unavailable, but the record shape itself should stay stable
 - the result must stay usable by later offline/reporting slices without requiring a transport layer
 
@@ -106,16 +118,23 @@ The immediate remaining gap is:
    - `apps/postprocess_tool/STATUS.md`
 2. Inspect the current snapshot and bounded recording save paths for the narrowest insertion points for:
    - snapshot sidecar output
-   - bounded-recording session manifest output
-3. Define one stable snapshot sidecar shape and one stable bounded-recording session manifest shape.
+   - bounded-recording folder-local traceability log output
+3. Define one stable snapshot sidecar shape and one bounded-recording log structure with:
+   - stable context header
+   - run/session block fields
+   - per-image rows
 4. Implement snapshot traceability as direct artifact-level sidecar output.
-5. Implement bounded-recording traceability as one minimal session-level manifest.
-6. Keep field population explicit and deterministic, with clear handling for unavailable values.
-7. Add targeted tests for:
+5. Decide and freeze the stable bounded-recording context field set used for log reuse.
+6. Decide and freeze the bounded-recording run/session field set that may vary inside one reused log.
+7. Implement bounded-recording traceability with append/reuse behavior based on stable context match.
+8. Keep field population explicit and deterministic, with clear handling for unavailable values.
+9. Add targeted tests for:
    - snapshot sidecar creation and key fields
-   - bounded-recording manifest creation and key fields
+   - bounded-recording log reuse when stable context still matches
+   - creation of a new run/session block when only run/session fields differ
+   - creation of a new log only when stable context changes
    - deterministic markers distinguishing snapshot vs. bounded recording records
-8. Update docs once the traceability path is real.
+10. Update docs once the traceability path is real.
 
 ## Validation
 
@@ -134,8 +153,12 @@ Recommended focused validation if a shared metadata helper is added:
 Manual review points:
 
 - snapshot artifacts receive one direct sidecar record
-- bounded recording runs receive one minimal session-level manifest rather than per-frame metadata output
-- bounded recording start, end, and regular-vs-failed completion are understandable from the manifest
+- bounded recording uses one folder-local appendable log rather than per-run sidecars
+- stable context and run/session information are clearly separated in the bounded-recording path
+- a repeated run in the same folder reuses the existing log when stable context still matches
+- a repeated run creates a new run/session block when only run fields differ
+- a new bounded-recording log file is only created when the stable context no longer matches
+- bounded recording start, end, and regular-vs-failed completion are understandable from the log structure
 - key fields are understandable from an experiment and host-logging perspective
 - missing camera-side fields degrade clearly instead of silently inventing values
 
@@ -159,9 +182,10 @@ Before this work package is considered complete, update:
 
 - the slice remains narrow and centered on artifact traceability
 - snapshot and bounded recording are not forced into the same metadata granularity
+- bounded recording remains append-friendly for repeated experiment use in one folder
 - targeted tests pass locally
 - no unrelated transport, UI, or broad storage redesign is bundled
-- docs clearly state that this is a traceability baseline extension inside `Data And Logging Closure`, not closure of the whole lane
+- docs clearly state that this is a narrow append-friendly traceability baseline inside `Data And Logging Closure`, not closure of the whole lane
 
 ## Recovery Note
 
