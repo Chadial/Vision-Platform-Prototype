@@ -236,7 +236,7 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 12 | Host Control Closure | prove and tighten the host-steerable command/response and status-polling baseline | active lane | first Extended MVP closure lane; first narrow slice landed through `WP12` | `docs/session_workpackages/wp12_host_control_closure.md` |
 | 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | active lane | second Extended MVP closure lane; first narrow slice landed through `WP13` | `docs/session_workpackages/wp13_experiment_reliability_closure.md` |
 | 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | active lane | third Extended MVP closure lane; first narrow slice landed through `WP14` | `docs/session_workpackages/wp14_data_logging_closure.md` |
-| 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | current next | fourth Extended MVP closure lane | to be created on activation |
+| 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | current next | fourth Extended MVP closure lane; first narrow slice is active through `WP15` | `docs/session_workpackages/wp15_offline_measurement_closure.md` |
 
 ## Immediate PM Backlog
 
@@ -253,10 +253,12 @@ Most recently landed detailed package:
   - first narrow `Data And Logging Closure` slice
   - landed `BMP` support for the dependency-free frame-writing path on `Mono8`, `Rgb8`, and `Bgr8`
 
-Current next package preparation note:
+Current explicitly activated detailed package:
 
 - `Offline And Measurement Closure` is now the default next lane
-- its first detailed file should be created as `WP15` on activation
+- `docs/session_workpackages/wp15_offline_measurement_closure.md`
+  - first narrow `Offline And Measurement Closure` slice
+  - centers offline focus-report reuse of saved `BMP` artifacts from the current writer path
 
 These are important but should not be treated as the main always-on stream:
 
@@ -333,6 +335,7 @@ Existing detailed support files:
 - `docs/session_workpackages/wp12_host_control_closure.md`
 - `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 - `docs/session_workpackages/wp14_data_logging_closure.md`
+- `docs/session_workpackages/wp15_offline_measurement_closure.md`
 
 Current activation note:
 
@@ -340,7 +343,8 @@ Current activation note:
 - `Experiment Reliability Closure` now has its first landed slice in `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 - `Data And Logging Closure` now has its first landed slice in `docs/session_workpackages/wp14_data_logging_closure.md`
 - that slice intentionally stayed narrow and centered `BMP` as an additional practical visible output format
-- `Offline And Measurement Closure` is now the next queued activation target once a concrete detailed slice is derived
+- `Offline And Measurement Closure` is now the active next lane through `docs/session_workpackages/wp15_offline_measurement_closure.md`
+- that slice intentionally stays narrow and centers offline focus-report reuse of saved `BMP` artifacts
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -420,7 +424,7 @@ Current explicit activation:
 - `Host Control Closure` now has its first landed slice at `docs/session_workpackages/wp12_host_control_closure.md`
 - `Experiment Reliability Closure` now has its first landed slice at `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 - `Data And Logging Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp14_data_logging_closure.md`
-- `Offline And Measurement Closure` is the next closure lane awaiting a detailed execution-ready package on activation
+- `Offline And Measurement Closure` now has the active next implementation-oriented package at `docs/session_workpackages/wp15_offline_measurement_closure.md`
 
 ## PM Refinement Rule
 

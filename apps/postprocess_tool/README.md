@@ -9,10 +9,11 @@ It should not become a second analytics core separate from the shared libraries 
 ## Current Baseline
 
 - stored-image focus report over `.pgm` / `.ppm` sample directories
-- reuse of the simulator-backed sample-image ingestion path plus `focus_core`
+- stored-image focus report over saved `.bmp` artifacts produced by the dependency-free writer baseline
+- reuse of the simulator-backed sample-image ingestion path plus a narrow saved-`BMP` loader above `focus_core`
 
 ## Not This Module Yet
 
 - broad offline workstation behavior
-- arbitrary file-format loading
+- arbitrary file-format loading beyond the current narrow `.pgm` / `.ppm` / `.bmp` baseline
 - export pipelines beyond compact text reporting

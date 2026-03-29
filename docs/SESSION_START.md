@@ -52,7 +52,7 @@ Read this first to get from zero context to a workable repository overview witho
 
 1. Keep the Python core stable and understandable.
 2. Treat `Host Control Closure`, `Experiment Reliability Closure`, and the first `Data And Logging Closure` slice as landed baseline hardening.
-3. Use `Offline And Measurement Closure` as the current default planning lane; derive its first detailed session package on activation.
+3. Use `Offline And Measurement Closure` as the current default planning lane, with `docs/session_workpackages/wp15_offline_measurement_closure.md` as the active detailed slice.
 4. Open an additional frontend package only when another shell beyond the current OpenCV prototype is actually needed.
 5. Keep any further OpenCV work separate and only in the UI/display-facing layer.
 6. Continue documenting verified state and next steps as features land.
