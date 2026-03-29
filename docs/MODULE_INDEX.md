@@ -48,7 +48,7 @@ Root category usage:
 | Module | Status | Notes |
 | --- | --- | --- |
 | `libraries/tracking_core` | active baseline | profile-based edge baseline implemented; drift/tracking expansion remains open |
-| `services/api_service` | prepared only | reserved for external feed/API work above the shared host-neutral control layer |
+| `services/api_service` | active baseline | first adapter-facing status payload family implemented above the shared host-neutral control layer |
 | `apps/postprocess_tool` | prepared only | reserved for offline evaluation tooling |
 | `apps/desktop_app` | prepared only | reserved for later desktop frontend work |
 

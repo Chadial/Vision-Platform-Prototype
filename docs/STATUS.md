@@ -12,14 +12,14 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `feature/camera-cli` for the active CLI work package branch
 - `main` as the latest integrated baseline
+- short-lived topic branches are created per active work package and merged back after local validation
 
 ## Roadmap Position
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation is no longer only simulator-backed: the March 27, 2026 hardware passes now cover an integrated command-flow baseline for snapshot save, preview readiness, interval capture from the shared preview stream, frame-limit recording, duration-only recording, target-frame-rate recording, supported alternate pixel format capture (`Mono10` as `.raw`), and explicit hardware-side failures for invalid camera id, unsupported pixel format, and invalid ROI increment choices on the Allied Vision `1800 U-1240m`. Phase 9 can therefore be treated as prototype-level hardware-validated for the current camera baseline, with remaining work limited to edge-case expansion rather than baseline viability. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes, and this branch now adds a first unified camera-oriented CLI baseline on top of the existing controller and service layer.
 - Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls, mouse-wheel zoom, middle-drag pan, cursor-anchored zoom, top-left image anchoring, a dedicated bottom status band, FPS readout, operator toggles for crosshair and focus-status visibility, a first two-click ROI creation baseline for rectangle and ellipse with live preview, a preview-frame snapshot shortcut driven by an explicit save directory, and a first layer of concise operator-facing warning/error feedback while keeping those concerns explicitly in the UI/display layer. The shared contract layer under `libraries/common_models` now also intentionally exposes some target-facing surface ahead of full implementation, with feature readiness expected to be marked in module-local status docs. Tracking/API modules remain open, but the Python camera baseline can now be regarded as architecturally, simulator-, and prototype-level hardware-validated for the tested camera path, while this branch also introduces a UI-independent CLI surface for the already implemented capture and status operations. The next mandatory milestones against the global roadmap are to validate and narrow that CLI surface deliberately, continue the remaining operator-facing UI controls on top of the preview baseline, and follow up on remaining hardware edge cases.
-- Against `docs/WORKPACKAGES.md`: project-level prioritization is now intended to run through a centralized work-package queue instead of relying on many distributed module roadmaps. The current documentation baseline now supports a more autonomous agent workflow with one central execution flow and one central next-work queue, while the previously active command-surface and bounded OpenCV UI follow-up packages can now be treated as completed baseline-hardening work. The next regular package is therefore ROI workflow consolidation, with hardware revalidation still remaining conditional rather than the default stream.
+- Against `docs/WORKPACKAGES.md`: project-level prioritization is now intended to run through a centralized work-package queue instead of relying on many distributed module roadmaps. The current documentation baseline now supports a more autonomous agent workflow with one central execution flow and one central next-work queue, while the previously active command-surface, bounded OpenCV UI, ROI, focus, tracking, and first API-preparation packages can now be treated as completed baseline-hardening work. The next regular package is therefore C# handover hardening, with hardware revalidation still remaining conditional rather than the default stream.
 
 ## Merge Note
 
@@ -86,6 +86,7 @@ The repository currently provides a structured Python prototype for the vision p
 - focus core now also implements a Tenengrad-based second metric with explicit method dispatch through `FocusRequest.method`, while Laplace remains the default path
 - preview- and snapshot-side focus consumers now also expose a small service-level focus-method selection path, so multi-method support no longer requires custom evaluator injection for every consumer
 - tracking core now also contains a first library-only edge/profile baseline that derives a dominant horizontal or vertical edge transition from full-frame or ROI-bounded image data through transport-neutral request/result contracts
+- api-service preparation now also contains a first transport-neutral adapter payload family for `SubsystemStatus`, so future external adapters do not need to serialize the shared core status model directly
 - ROI core now also provides frame-clamped pixel bounds and rectangle/ellipse mask derivation so analysis consumers can apply ROI selection without reimplementing ROI math
 - freehand ROI remains a target contract direction only and is not yet implemented through ROI-core mask derivation or downstream analysis consumers
 - stream services now expose a small ROI state path so active ROI selection can be shared with preview-adjacent analysis without moving ROI ownership into UI or stream internals
@@ -175,6 +176,7 @@ The repository currently provides a structured Python prototype for the vision p
 - live preview-adjacent consumers now derive focus state from preview frames, while richer metric selection and operator-facing overlay controls remain open
 - `WP06` is now completed: the focus-method surface no longer only names multiple methods ahead of implementation, because `tenengrad` is now a real second evaluator path, `evaluate_focus(...)` dispatches explicitly by requested method, and preview-/snapshot-adjacent focus consumers plus the stream-service preview factory can select `laplace` or `tenengrad` explicitly without widening the UI or host-facing surface
 - `WP07` is now completed: `tracking_core` no longer only reserves future tracking space, because a first profile-based edge kernel now exists as a reusable analysis baseline under the existing ROI/frame model boundaries
+- `WP08` is now completed: `api_service` no longer only reserves future API space, because a first adapter-facing status DTO family and mapper now exist above the shared command/controller layer
 
 ## Partially Implemented
 
@@ -312,8 +314,8 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Execute `WP-008` from `docs/WORKPACKAGES.md` to open the first API-surface preparation slice above the shared command/controller baseline.
-2. Keep later ROI-related follow-up bounded to richer editing, additional ROI producers, or host-surface attachment instead of reopening the baseline workflow package.
-3. Keep any later OpenCV follow-up bounded to UI/display concerns instead of reopening the baseline operator package.
-4. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.
-5. Keep the Python core stable as the handover baseline for the later C# phase.
+1. Continue with `WP-009` from `docs/WORKPACKAGES.md` to harden the contracts that are most likely to survive direct C# porting.
+2. Keep later API follow-up bounded to real adapter activation work instead of reopening the first transport-neutral DTO preparation package.
+3. Keep later ROI-related follow-up bounded to richer editing, additional ROI producers, or host-surface attachment instead of reopening the baseline workflow package.
+4. Keep any later OpenCV follow-up bounded to UI/display concerns instead of reopening the baseline operator package.
+5. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.

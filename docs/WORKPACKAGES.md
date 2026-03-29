@@ -134,8 +134,8 @@ This is the current PM overview of work packages to activate or defer.
 | 5 | ROI Workflow Consolidation | define ownership and reuse of ROI state across preview, snapshot, and analysis | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md` |
 | 6 | Focus Method Expansion | add a stronger focus-method slice beyond the current baseline | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp06_focus_method_expansion.md` |
 | 7 | Tracking Core Baseline | establish the first edge/tracking foundation slice | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp07_tracking_core_baseline.md` |
-| 8 | API Surface Preparation | prepare the first external adapter above the host-neutral control layer | current next | next package after ROI/focus/tracking MVP boundary is clearer | `docs/session_workpackages/wp08_api_surface_preparation.md` |
-| 9 | C# Handover Hardening | identify and tighten contracts that are most likely to survive direct C# porting | queued | medium-term, after control and analysis contracts settle | `docs/session_workpackages/wp09_csharp_handover_hardening.md` |
+| 8 | API Surface Preparation | prepare the first external adapter above the host-neutral control layer | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp08_api_surface_preparation.md` |
+| 9 | C# Handover Hardening | identify and tighten contracts that are most likely to survive direct C# porting | current next | next package after API DTO preparation | `docs/session_workpackages/wp09_csharp_handover_hardening.md` |
 | 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | queued | later, after storage and analysis contracts stabilize | `docs/session_workpackages/wp10_postprocess_baseline.md` |
 | 11 | Additional Frontends | prepare desktop and later web-capable paths | queued | low current priority | `docs/session_workpackages/wp11_additional_frontends.md` |
 
@@ -143,9 +143,9 @@ This is the current PM overview of work packages to activate or defer.
 
 These are the work packages PM should treat as the current actionable backlog:
 
-1. `API Surface Preparation`
-2. `C# Handover Hardening`
-3. `Postprocess Baseline`
+1. `C# Handover Hardening`
+2. `Postprocess Baseline`
+3. `Additional Frontends`
 
 These are important but should not be treated as the main always-on stream:
 
@@ -156,9 +156,8 @@ These are important but should not be treated as the main always-on stream:
 
 These should remain queued behind the above:
 
-1. `C# Handover Hardening`
-2. `Postprocess Baseline`
-3. `Additional Frontends`
+1. `Postprocess Baseline`
+2. `Additional Frontends`
 
 ## Rough PM Sequence
 
@@ -210,7 +209,7 @@ Goal:
 
 Detailed work-package files:
 
-- `docs/session_workpackages/wp08_api_surface_preparation.md`
+- `docs/archive/session_workpackages/wp08_api_surface_preparation.md`
 - `docs/session_workpackages/wp09_csharp_handover_hardening.md`
 
 ### Layer 5: Additional Frontends And Offline Paths
@@ -233,19 +232,19 @@ The current coarse PM order should be:
 3. use hardware validation as a revalidation package when hardware is attached, not as the main always-active stream
 4. treat the ROI workflow package as completed baseline-clarification work
 5. treat the focus expansion package as completed baseline-hardening work
-6. then open the next API preparation package
+6. then open the next C# handover-hardening package
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp08_api_surface_preparation.md`
+- `docs/session_workpackages/wp09_csharp_handover_hardening.md`
 
 Reason:
 
-- the ROI/focus/tracking MVP boundary is now explicitly implemented and documented
-- the next open package is API surface preparation above the shared command/controller layer
-- that next package can now build on the clearer core analysis baseline without reopening ROI/focus/tracking kernel questions
+- the ROI/focus/tracking MVP boundary and first API DTO preparation slice are now explicitly implemented and documented
+- the next open package is C# handover hardening
+- that next package can now build on clearer command, analysis, and adapter-boundary contracts without reopening ROI/focus/tracking or first API DTO questions
 
 ## Fresh Agent Decision Rule
 
@@ -269,7 +268,7 @@ The repository now has explicit detailed session work-package files for all curr
 - `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md`
 - `docs/archive/session_workpackages/wp06_focus_method_expansion.md`
 - `docs/archive/session_workpackages/wp07_tracking_core_baseline.md`
-- `docs/session_workpackages/wp08_api_surface_preparation.md`
+- `docs/archive/session_workpackages/wp08_api_surface_preparation.md`
 - `docs/session_workpackages/wp09_csharp_handover_hardening.md`
 - `docs/session_workpackages/wp10_postprocess_baseline.md`
 - `docs/session_workpackages/wp11_additional_frontends.md`
