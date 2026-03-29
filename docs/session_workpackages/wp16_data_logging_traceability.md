@@ -6,7 +6,7 @@ This work package defines the next execution-ready extension slice after the fir
 
 Its purpose is to move `Data And Logging Closure` from "saved artifacts exist in practical formats" toward "saved artifacts are experiment-usable and traceable."
 
-The narrow goal is to add one stable, host- and experiment-readable metadata record for saved snapshot and bounded recording artifacts without reopening the broader storage architecture.
+The narrow goal is to add one stable, deterministic traceability baseline for saved snapshot and bounded recording artifacts without reopening the broader storage architecture.
 
 ## Branch
 
@@ -17,7 +17,7 @@ The narrow goal is to add one stable, host- and experiment-readable metadata rec
 
 Included:
 
-- define one narrow metadata record shape for saved image artifacts
+- define one narrow metadata record shape for snapshot artifacts and one narrow session-level metadata record for bounded recording
 - cover the current practical artifact paths first:
   - snapshot save
   - bounded recording save
@@ -28,21 +28,32 @@ Included:
 
 Selected slice for this package:
 
-- artifact-level metadata manifest or sidecar support with at least:
+- snapshot-side direct sidecar metadata record with at least:
   - saved file path or file name
   - system timestamp
   - camera timestamp where available
-  - active camera id where available
+  - camera id where available
   - pixel format
-  - exposure/shutter value where available
+  - exposure/shutter where available
   - gain where available
-  - recording bounds or snapshot marker where relevant
+  - marker that the record belongs to a snapshot artifact
+- bounded-recording session-level manifest with at least:
+  - session output directory or session identity
+  - system start timestamp
+  - system end timestamp where available
+  - bounded-recording end state marker indicating regular or failed completion
+  - camera id where available
+  - pixel format
+  - exposure/shutter where available
+  - gain where available
+  - recording bounds used such as frame limit and duration when present
+  - marker that the record belongs to a bounded recording session
 
 Why this slice:
 
 - it closes the most important remaining product-near gap after `WP14`
 - it directly supports host-side logging and later offline reporting
-- it stays narrow enough to implement without redesigning the full recording/logging stack
+- it keeps snapshot and recording treatment intentionally asymmetric, which is the narrower practical choice for the current repository shape
 
 Excluded:
 
@@ -59,7 +70,7 @@ Leave the repository with one explicit, stable metadata-traceability baseline fo
 
 The first completed slice should answer one concrete question:
 
-- can a saved snapshot or bounded recording artifact be paired with a concise, deterministic metadata record that a host or offline tool can consume later?
+- can a saved snapshot or bounded recording run be paired with a concise, deterministic local metadata record that a host or offline tool can consume later?
 
 ## Current Context
 
@@ -71,12 +82,16 @@ The repository already has:
 
 The immediate remaining gap is:
 
-- image artifacts and experiment context are still not linked in one narrow, stable artifact-level traceability path
+- image artifacts and experiment context are still not linked in one narrow, stable traceability path
 
 ## Narrow Decisions
 
 - this slice targets artifact traceability, not broad logging redesign
-- prefer one deterministic local record shape over multiple competing outputs
+- snapshot artifacts use direct sidecar metadata because they are naturally one-file outputs
+- bounded recording uses one minimal session-level manifest because per-frame sidecars would broaden the package too early
+- prefer one deterministic local metadata path per save mode over multiple competing outputs
+- this package does not replace the existing CSV path; it adds one narrower host-/experiment-readable traceability baseline beside it
+- bounded-recording traceability should make start, end, and regular-vs-failed completion understandable without turning this slice into a broad lifecycle redesign
 - metadata fields may be omitted when unavailable, but the record shape itself should stay stable
 - the result must stay usable by later offline/reporting slices without requiring a transport layer
 
@@ -89,14 +104,18 @@ The immediate remaining gap is:
    - `services/recording_service/STATUS.md`
    - `apps/postprocess_tool/README.md`
    - `apps/postprocess_tool/STATUS.md`
-2. Inspect the current snapshot and bounded recording save paths for the narrowest insertion point for artifact-level metadata output.
-3. Define one stable metadata record shape for saved artifacts.
-4. Implement the metadata record for:
-   - snapshot save
-   - bounded recording output
-5. Keep field population explicit and deterministic, with clear handling for unavailable values.
-6. Add targeted tests for record creation and key metadata fields.
-7. Update docs once the traceability path is real.
+2. Inspect the current snapshot and bounded recording save paths for the narrowest insertion points for:
+   - snapshot sidecar output
+   - bounded-recording session manifest output
+3. Define one stable snapshot sidecar shape and one stable bounded-recording session manifest shape.
+4. Implement snapshot traceability as direct artifact-level sidecar output.
+5. Implement bounded-recording traceability as one minimal session-level manifest.
+6. Keep field population explicit and deterministic, with clear handling for unavailable values.
+7. Add targeted tests for:
+   - snapshot sidecar creation and key fields
+   - bounded-recording manifest creation and key fields
+   - deterministic markers distinguishing snapshot vs. bounded recording records
+8. Update docs once the traceability path is real.
 
 ## Validation
 
@@ -114,7 +133,9 @@ Recommended focused validation if a shared metadata helper is added:
 
 Manual review points:
 
-- saved artifacts can be paired with one deterministic metadata record
+- snapshot artifacts receive one direct sidecar record
+- bounded recording runs receive one minimal session-level manifest rather than per-frame metadata output
+- bounded recording start, end, and regular-vs-failed completion are understandable from the manifest
 - key fields are understandable from an experiment and host-logging perspective
 - missing camera-side fields degrade clearly instead of silently inventing values
 
@@ -123,9 +144,9 @@ Manual review points:
 Before this work package is considered complete, update:
 
 - `docs/STATUS.md`
-- `docs/WORKPACKAGES.md`
 - `services/recording_service/STATUS.md`
 - `services/recording_service/README.md`
+- `docs/WORKPACKAGES.md` only if the implementation changes the PM interpretation or next-step ordering
 - this file if a follow-up offline metadata-consumption slice becomes the natural next step
 
 ## Expected Commit Shape
@@ -137,9 +158,10 @@ Before this work package is considered complete, update:
 ## Merge Gate
 
 - the slice remains narrow and centered on artifact traceability
+- snapshot and bounded recording are not forced into the same metadata granularity
 - targeted tests pass locally
 - no unrelated transport, UI, or broad storage redesign is bundled
-- docs clearly state that this is the next extension inside `Data And Logging Closure`, not closure of the whole lane
+- docs clearly state that this is a traceability baseline extension inside `Data And Logging Closure`, not closure of the whole lane
 
 ## Recovery Note
 
