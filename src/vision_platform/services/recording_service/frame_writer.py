@@ -30,6 +30,10 @@ class FrameWriter:
             self._write_png(frame, target_path)
             return target_path
 
+        if extension == ".bmp":
+            self._write_bmp(frame, target_path)
+            return target_path
+
         if extension in {".tif", ".tiff"}:
             return self._write_lossless_grayscale(frame, target_path, create_directories)
 
@@ -88,6 +92,72 @@ class FrameWriter:
         )
         target_path.write_bytes(png_bytes)
 
+    def _write_bmp(self, frame: CapturedFrame, target_path: Path) -> None:
+        if frame.width <= 0 or frame.height <= 0:
+            raise RuntimeError("Frame dimensions must be positive to save a BMP image.")
+
+        raw_buffer = frame.get_buffer_bytes()
+        normalized_format = (frame.pixel_format or "").strip().lower()
+
+        if normalized_format == "mono8":
+            bytes_per_pixel = 1
+            pixel_bytes = raw_buffer
+            color_table = self._build_grayscale_palette()
+        elif normalized_format == "rgb8":
+            bytes_per_pixel = 3
+            pixel_bytes = self._convert_rgb_to_bgr(raw_buffer)
+            color_table = b""
+        elif normalized_format == "bgr8":
+            bytes_per_pixel = 3
+            pixel_bytes = raw_buffer
+            color_table = b""
+        else:
+            raise RuntimeError(f"Unsupported pixel format '{frame.pixel_format}' for BMP output.")
+
+        expected_size = frame.width * frame.height * bytes_per_pixel
+        if len(pixel_bytes) < expected_size:
+            raise RuntimeError(
+                f"Frame buffer is too small for {frame.width}x{frame.height} {frame.pixel_format} image data."
+            )
+
+        row_stride = frame.width * bytes_per_pixel
+        padded_row_stride = (row_stride + 3) & ~3
+        row_padding = padded_row_stride - row_stride
+        image_size = padded_row_stride * frame.height
+        pixel_offset = 14 + 40 + len(color_table)
+        file_size = pixel_offset + image_size
+        bits_per_pixel = 8 if bytes_per_pixel == 1 else 24
+
+        bmp = bytearray()
+        bmp.extend(b"BM")
+        bmp.extend(struct.pack("<IHHI", file_size, 0, 0, pixel_offset))
+        bmp.extend(
+            struct.pack(
+                "<IIIHHIIIIII",
+                40,
+                frame.width,
+                frame.height,
+                1,
+                bits_per_pixel,
+                0,
+                image_size,
+                2835,
+                2835,
+                256 if bytes_per_pixel == 1 else 0,
+                0,
+            )
+        )
+        bmp.extend(color_table)
+
+        pixel_bytes = pixel_bytes[:expected_size]
+        for row_index in range(frame.height - 1, -1, -1):
+            row_start = row_index * row_stride
+            bmp.extend(pixel_bytes[row_start : row_start + row_stride])
+            if row_padding:
+                bmp.extend(b"\x00" * row_padding)
+
+        target_path.write_bytes(bytes(bmp))
+
     def _write_lossless_grayscale(
         self,
         frame: CapturedFrame,
@@ -119,6 +189,24 @@ class FrameWriter:
             blue, green, red = buffer[index : index + 3]
             converted[index : index + 3] = bytes((red, green, blue))
         return bytes(converted)
+
+    @staticmethod
+    def _convert_rgb_to_bgr(buffer: bytes) -> bytes:
+        if len(buffer) % 3 != 0:
+            raise RuntimeError("RGB frame buffer size is not divisible by 3.")
+
+        converted = bytearray(len(buffer))
+        for index in range(0, len(buffer), 3):
+            red, green, blue = buffer[index : index + 3]
+            converted[index : index + 3] = bytes((blue, green, red))
+        return bytes(converted)
+
+    @staticmethod
+    def _build_grayscale_palette() -> bytes:
+        palette = bytearray()
+        for value in range(256):
+            palette.extend(bytes((value, value, value, 0)))
+        return bytes(palette)
 
     @staticmethod
     def _build_chunk(chunk_type: bytes, data: bytes) -> bytes:

@@ -10,6 +10,13 @@ def validate_frame_output_combination(pixel_format: str | None, file_extension: 
     if normalized_extension in {".raw", ".bin"}:
         return normalized_extension
 
+    if normalized_extension == ".bmp":
+        if normalized_format in {"mono8", "rgb8", "bgr8"}:
+            return normalized_extension
+        raise RuntimeError(
+            f"Pixel format '{pixel_format}' is not supported for BMP output."
+        )
+
     if normalized_extension == ".png":
         if normalized_format in {"mono8", "rgb8", "bgr8", "mono10", "mono12", "mono14", "mono16"}:
             return normalized_extension
