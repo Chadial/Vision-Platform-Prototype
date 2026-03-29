@@ -19,6 +19,7 @@ from vision_platform.libraries.focus_core import (
     focus_score_available,
 )
 from vision_platform.libraries.roi_core import roi_bounds, roi_centroid, roi_mask, roi_pixel_bounds
+from vision_platform.libraries.tracking_core import EdgeProfileRequest, analyze_edge_profile
 from vision_platform.services.display_service import OverlayCompositionService
 from vision_platform.services.recording_service import SnapshotFocusService, SnapshotService
 from vision_platform.services.stream_service import CameraStreamService, FocusPreviewService, RoiStateService
@@ -77,6 +78,15 @@ class VisionPlatformNamespaceTests(unittest.TestCase):
         )
         self.assertIsInstance(DisplayOverlayPayload(active_roi=None), DisplayOverlayPayload)
         self.assertIsInstance(RoiOverlayData(roi_id="roi", anchor_x=1.0, anchor_y=2.0), RoiOverlayData)
+        self.assertTrue(
+            analyze_edge_profile(
+                FrameData(
+                    data=b"\x00\x00\xff\xff\x00\x00\xff\xff",
+                    metadata=FrameMetadata(width=4, height=2, pixel_format="Mono8"),
+                ),
+                request=EdgeProfileRequest(orientation="vertical"),
+            ).is_valid
+        )
         self.assertTrue(callable(run_focus_preview_demo))
         self.assertTrue(callable(run_overlay_payload_demo))
         self.assertTrue(callable(summarize_overlay_payload))
