@@ -234,9 +234,9 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp10_postprocess_baseline.md` |
 | 11 | Additional Frontends | prepare desktop and later web-capable paths | dormant | keep for later continuity; not part of the default Extended MVP lane | `docs/session_workpackages/wp11_additional_frontends.md` |
 | 12 | Host Control Closure | prove and tighten the host-steerable command/response and status-polling baseline | active lane | first Extended MVP closure lane; first narrow slice landed through `WP12` | `docs/session_workpackages/wp12_host_control_closure.md` |
-| 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | current next | second Extended MVP closure lane; first narrow slice is active through `WP13` | `docs/session_workpackages/wp13_experiment_reliability_closure.md` |
-| 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | active lane | third Extended MVP closure lane | to be created on activation |
-| 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | queued | fourth Extended MVP closure lane | to be created on activation |
+| 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | active lane | second Extended MVP closure lane; first narrow slice landed through `WP13` | `docs/session_workpackages/wp13_experiment_reliability_closure.md` |
+| 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | active lane | third Extended MVP closure lane; first narrow slice landed through `WP14` | `docs/session_workpackages/wp14_data_logging_closure.md` |
+| 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | current next | fourth Extended MVP closure lane | to be created on activation |
 
 ## Immediate PM Backlog
 
@@ -247,11 +247,16 @@ These are the work packages PM should treat as the current actionable backlog:
 3. `Data And Logging Closure`
 4. `Offline And Measurement Closure`
 
-Current explicitly activated detailed package:
+Most recently landed detailed package:
 
-- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
-  - first narrow `Experiment Reliability Closure` slice
-  - centers bounded recording lifecycle restart and recovery after selected failures
+- `docs/session_workpackages/wp14_data_logging_closure.md`
+  - first narrow `Data And Logging Closure` slice
+  - landed `BMP` support for the dependency-free frame-writing path on `Mono8`, `Rgb8`, and `Bgr8`
+
+Current next package preparation note:
+
+- `Offline And Measurement Closure` is now the default next lane
+- its first detailed file should be created as `WP15` on activation
 
 These are important but should not be treated as the main always-on stream:
 
@@ -327,12 +332,15 @@ Existing detailed support files:
 - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `docs/session_workpackages/wp12_host_control_closure.md`
 - `docs/session_workpackages/wp13_experiment_reliability_closure.md`
+- `docs/session_workpackages/wp14_data_logging_closure.md`
 
 Current activation note:
 
 - `Host Control Closure` is no longer only a planning lane and now has its first landed slice in `docs/session_workpackages/wp12_host_control_closure.md`
-- `Experiment Reliability Closure` is now the active next lane through `docs/session_workpackages/wp13_experiment_reliability_closure.md`
-- that slice is intentionally narrow and centers bounded recording lifecycle restart and recovery after selected failures
+- `Experiment Reliability Closure` now has its first landed slice in `docs/session_workpackages/wp13_experiment_reliability_closure.md`
+- `Data And Logging Closure` now has its first landed slice in `docs/session_workpackages/wp14_data_logging_closure.md`
+- that slice intentionally stayed narrow and centered `BMP` as an additional practical visible output format
+- `Offline And Measurement Closure` is now the next queued activation target once a concrete detailed slice is derived
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -353,23 +361,23 @@ The current coarse PM order should be:
 1. treat the CLI baseline as intentionally narrow unless a concrete defect appears
 2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
 3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
-4. treat the first `Host Control Closure` slice as landed baseline hardening and move to `Experiment Reliability Closure` as the default next package
-5. keep `Data And Logging Closure` as the next active lane directly behind it
+4. treat the first `Host Control Closure`, `Experiment Reliability Closure`, and `Data And Logging Closure` slices as landed baseline hardening
+5. keep `Offline And Measurement Closure` as the default next active lane
 6. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
-7. open `Offline And Measurement Closure` after the command, runtime, and data/logging baseline is clearer
+7. open `Offline And Measurement Closure` after the current visible-format baseline is landed and the next concrete offline-usefulness slice is defined
 8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
+- derive `WP15` for `Offline And Measurement Closure`
 
 Reason:
 
 - the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
-- the first host-control slice is already landed, so the next tactical need is to prove bounded recording lifecycle robustness and recovery
-- the currently activated next slice is the reliability hardening path for repeated bounded recording and selected failure recovery
+- the first host-control, reliability, and visible-format data/logging slices are already landed
+- the next tactical need is to prove that saved data is useful for offline focus and measurement-oriented follow-up
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule
@@ -401,6 +409,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp11_additional_frontends.md`
 - `docs/session_workpackages/wp12_host_control_closure.md`
 - `docs/session_workpackages/wp13_experiment_reliability_closure.md`
+- `docs/session_workpackages/wp14_data_logging_closure.md`
 
 The new Extended MVP closure lanes are intentionally introduced first at the PM level.
 
@@ -409,8 +418,9 @@ Their detailed execution-ready files should be created only when a concrete clos
 Current explicit activation:
 
 - `Host Control Closure` now has its first landed slice at `docs/session_workpackages/wp12_host_control_closure.md`
-- `Experiment Reliability Closure` now has the active next implementation-oriented package at `docs/session_workpackages/wp13_experiment_reliability_closure.md`
-- the remaining closure lanes still intentionally wait for later activation
+- `Experiment Reliability Closure` now has its first landed slice at `docs/session_workpackages/wp13_experiment_reliability_closure.md`
+- `Data And Logging Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp14_data_logging_closure.md`
+- `Offline And Measurement Closure` is the next closure lane awaiting a detailed execution-ready package on activation
 
 ## PM Refinement Rule
 
