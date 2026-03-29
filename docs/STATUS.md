@@ -194,12 +194,15 @@ The repository currently provides a structured Python prototype for the vision p
 - controller now exposes a typed `SubsystemStatus` model instead of an untyped dictionary
 - subsystem status now includes command readiness flags for configuration, snapshot, recording start, and recording stop
 - subsystem status now also includes interval-capture status together with start/stop readiness flags
+- subsystem status now also exposes whether a save directory is currently configured and whether interval-capture support is present in the active subsystem wiring, so host callers do not have to infer those facts indirectly from readiness booleans alone
 - camera status now exposes whether the active source is `hardware` or `simulation` together with the driver name
 - external request types now exist for `ApplyConfigurationRequest`, `SetSaveDirectoryRequest`, `SaveSnapshotRequest`, `StartRecordingRequest`, `StopRecordingRequest`, `StartIntervalCaptureRequest`, and `StopIntervalCaptureRequest`
+- apply-configuration commands now also expose a typed `ApplyConfigurationCommandResult`, so host-facing callers no longer need to treat successful configuration changes as a `None`-return side effect
 - save-directory commands now also expose a typed `SaveDirectoryCommandResult`, with `SetSaveDirectoryResult` retained as a compatibility alias while the host-facing naming is normalized
 - snapshot commands now also expose a typed `SnapshotCommandResult`, with `SaveSnapshotResult` retained as a compatibility alias while the host-facing naming is normalized
 - recording start/stop commands now also expose a typed `RecordingCommandResult` so host-facing callers receive an explicit control result instead of a bare service status payload
 - interval-capture start/stop commands now also expose a typed `IntervalCaptureCommandResult` so host-facing callers receive an explicit control result instead of a bare service status payload
+- recording and interval-capture stop-command results now also preserve the requested stop reason, so host callers do not lose that control intent once the command crosses the controller boundary
 - save-directory requests now support append-to-directory or create-new-subdirectory behavior
 - host-style command flow now covers interval capture from the shared stream in addition to snapshot and recording
 - deeper host-specific payload shaping is still open
@@ -210,6 +213,9 @@ The repository currently provides a structured Python prototype for the vision p
 
 - unit coverage exists for naming, preview, recording, driver integration, and command-controller behavior
 - dedicated tests now cover the external request model mappings and save-directory resolution rules
+- dedicated tests now also cover the typed apply-configuration controller result so configuration commands are aligned with the other host-facing command outcomes
+- dedicated tests now also cover the new subsystem-status availability/configuration flags, and CLI-facing JSON serialization remained valid after the host-status contract expansion
+- dedicated tests now also cover stop-command reason preservation for recording and interval capture, keeping those typed control outcomes aligned with the stop requests that hosts already send
 - a simulated command-flow demo now validates a host-style `configure -> set save directory -> snapshot -> interval capture -> recording -> status` sequence
 - the direct simulated demo now also validates interval-based single-image saving from the shared stream before recording
 - runnable demo entry points exist for both the direct simulated service flow and the command-controller flow

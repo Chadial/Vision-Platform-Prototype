@@ -15,6 +15,8 @@ class SubsystemStatus:
     interval_capture: IntervalCaptureStatus
     configuration: Optional[CameraConfiguration] = None
     default_save_directory: Optional[Path] = None
+    is_save_directory_configured: bool = False
+    has_interval_capture_service: bool = False
     can_apply_configuration: bool = False
     can_save_snapshot: bool = False
     can_start_recording: bool = False

@@ -14,6 +14,7 @@ from camera_app.validation.request_validation import (
     validate_snapshot_request,
 )
 from vision_platform.models import (
+    ApplyConfigurationCommandResult,
     ApplyConfigurationRequest,
     CameraCapabilityProfile,
     CameraConfiguration,
@@ -55,13 +56,17 @@ class CommandController:
         self._capability_profile = capability_profile
         self._configuration_validation_service = configuration_validation_service or CameraConfigurationValidationService()
 
-    def apply_configuration(self, config: CameraConfiguration | ApplyConfigurationRequest) -> None:
+    def apply_configuration(
+        self,
+        config: CameraConfiguration | ApplyConfigurationRequest,
+    ) -> ApplyConfigurationCommandResult:
         if isinstance(config, ApplyConfigurationRequest):
             config = config.to_camera_configuration()
         self._require_initialized_camera("apply configuration")
         validate_camera_configuration(config)
         self._configuration_validation_service.validate(config, self._get_effective_capability_profile())
         self._camera_service.apply_configuration(config)
+        return ApplyConfigurationCommandResult(applied_configuration=config)
 
     def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
         self._capability_profile = capability_profile
@@ -90,7 +95,11 @@ class CommandController:
         return RecordingCommandResult(status=status)
 
     def stop_recording(self, request: StopRecordingRequest | None = None) -> RecordingCommandResult:
-        return RecordingCommandResult(status=self._recording_service.stop_recording())
+        stop_request = request or StopRecordingRequest()
+        return RecordingCommandResult(
+            status=self._recording_service.stop_recording(),
+            stop_reason=stop_request.reason,
+        )
 
     def start_interval_capture(
         self,
@@ -111,18 +120,24 @@ class CommandController:
     ) -> IntervalCaptureCommandResult:
         if self._interval_capture_service is None:
             raise RuntimeError("Interval capture service is not configured.")
-        return IntervalCaptureCommandResult(status=self._interval_capture_service.stop_capture())
+        stop_request = request or StopIntervalCaptureRequest()
+        return IntervalCaptureCommandResult(
+            status=self._interval_capture_service.stop_capture(),
+            stop_reason=stop_request.reason,
+        )
 
     def get_status(self) -> SubsystemStatus:
         camera_status = self._camera_service.get_status()
         configuration = self._camera_service.get_last_configuration()
         recording_status = self._recording_service.get_status()
+        has_interval_capture_service = self._interval_capture_service is not None
         interval_capture_status = (
             self._interval_capture_service.get_status()
-            if self._interval_capture_service is not None
+            if has_interval_capture_service
             else IntervalCaptureStatus()
         )
-        can_save_to_disk = camera_status.is_initialized and self._default_save_directory is not None
+        is_save_directory_configured = self._default_save_directory is not None
+        can_save_to_disk = camera_status.is_initialized and is_save_directory_configured
 
         return SubsystemStatus(
             camera=camera_status,
@@ -130,13 +145,15 @@ class CommandController:
             recording=recording_status,
             interval_capture=interval_capture_status,
             default_save_directory=self._default_save_directory,
+            is_save_directory_configured=is_save_directory_configured,
+            has_interval_capture_service=has_interval_capture_service,
             can_apply_configuration=camera_status.is_initialized,
             can_save_snapshot=can_save_to_disk,
             can_start_recording=can_save_to_disk and not recording_status.is_recording,
             can_stop_recording=recording_status.is_recording,
             can_start_interval_capture=(
                 can_save_to_disk
-                and self._interval_capture_service is not None
+                and has_interval_capture_service
                 and not interval_capture_status.is_capturing
             ),
             can_stop_interval_capture=interval_capture_status.is_capturing,

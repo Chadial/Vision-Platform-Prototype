@@ -1,5 +1,6 @@
 """Compatibility model facade for the platform namespace."""
 
+from vision_platform.models.apply_configuration_command_result import ApplyConfigurationCommandResult
 from vision_platform.models.apply_configuration_request import ApplyConfigurationRequest
 from vision_platform.models.camera_capability_profile import CameraCapabilityProfile, FeatureCapability
 from vision_platform.models.camera_configuration import CameraConfiguration
@@ -26,6 +27,7 @@ from vision_platform.models.stop_recording_request import StopRecordingRequest
 from vision_platform.models.subsystem_status import SubsystemStatus
 
 __all__ = [
+    "ApplyConfigurationCommandResult",
     "ApplyConfigurationRequest",
     "CameraCapabilityProfile",
     "CameraConfiguration",

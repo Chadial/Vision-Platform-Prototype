@@ -41,47 +41,90 @@ Leave the repository with one clearer host-integration-ready command slice that 
 
 ## Status
 
-- current state: current next package; partially implemented result typing exists, but the next contract-hardening slice still needs to be selected and executed deliberately
+- current state: implementation slices completed; package ready for close-out or archival once PM wants it moved
+- contract baseline: typed command results now exist for save-directory, apply-configuration, snapshot, recording start/stop, and interval-capture start/stop
+- status baseline: `SubsystemStatus` now exposes explicit save-directory-configuration and interval-capture-availability flags so hosts do not need to infer those facts indirectly from readiness booleans alone
+- outcome baseline: stop-command results now preserve the stop request reason so host callers do not lose that control intent at the command boundary
+
+## Execution Readiness Assessment
+
+- executable for a fresh agent: yes, after narrowing the package into ordered sub-packages
+- missing before refinement: the original file named the general theme, but it did not give a fresh agent a clear first slice, completion boundary, or explicit dependency order between result typing, status shaping, and adapter alignment
+- refinement outcome: the package now carries a small ordered sub-package ladder with local validation and exit criteria so the next slice can be selected directly without reopening broad architecture planning
 
 ## Sub-Packages
 
-1. review current request/result/status contract consistency
-2. choose the next smallest host-facing ambiguity
-3. implement one contract-hardening slice
-4. align CLI consumption if affected
-5. update docs and leave a clear next follow-up
+### SP1. Apply-Configuration Result Typing
+
+- goal: remove the remaining `None` return from the primary configuration command so host callers get an explicit outcome model
+- scope: add a typed `ApplyConfigurationCommandResult`, return it from `CommandController.apply_configuration(...)`, and cover the behavior in controller/bootstrap tests
+- non-scope: transport envelopes, richer configuration diffing, hardware-specific confirmation semantics, or CLI-only payload changes
+- validation: `.\.venv\Scripts\python.exe -m unittest tests.test_command_controller tests.test_bootstrap`
+- dependencies: existing `ApplyConfigurationRequest` / `CameraConfiguration` mapping and current controller validation path
+- exit criterion: hosts can call `apply_configuration(...)` and receive a typed result containing the applied normalized configuration without inspecting side effects
+- status: completed in this session
+
+### SP2. Consolidated Host Status Tightening
+
+- goal: sharpen `SubsystemStatus` so host consumers can tell more directly which command path is currently actionable and why
+- scope: one small improvement to the shared status/readiness contract in `CommandController.get_status()` and its tests
+- non-scope: transport/API DTOs, CLI presentation changes beyond adapter alignment, or broad service refactors
+- validation: `.\.venv\Scripts\python.exe -m unittest tests.test_command_controller tests.test_bootstrap` and `tests.test_camera_cli` if CLI summaries change indirectly
+- dependencies: SP1 complete; current typed command result baseline stable
+- exit criterion: one concrete host-facing readiness ambiguity is removed and the status contract is clearer than before without adding transport concerns
+- status: completed in this session
+
+### SP3. Command Outcome Consistency For Host Callers
+
+- goal: align one remaining controller outcome or failure edge so hosts do not have to infer behavior from mixed service-native exceptions or implicit state
+- scope: one controller-local outcome consistency slice plus targeted tests
+- non-scope: global exception framework, HTTP/API error mapping, or broad cross-module validation redesign
+- validation: `.\.venv\Scripts\python.exe -m unittest tests.test_command_controller`
+- dependencies: SP2 completed so this is now the next preferred implementation slice
+- exit criterion: the selected controller path exposes a clearer and more uniform host-facing behavior than the current baseline
+- status: completed in this session
+
+### SP4. Adapter Alignment And Host-Path Documentation
+
+- goal: confirm that CLI and later API preparation are documented as consumers of the same host-neutral command surface
+- scope: update the active work package, affected status docs, and narrow CLI usage notes if a prior sub-package changed consumption details
+- non-scope: new CLI features, API service implementation, or broader PM reprioritization
+- validation: doc consistency check plus `tests.test_camera_cli` only if adapter behavior changed
+- dependencies: complete the immediately preceding command-surface slice first
+- exit criterion: the next agent can see both the implemented contract state and the next bounded follow-up directly from docs
+- status: completed in this session through the current WP and status-doc updates
+
+## Selected First Sub-Package
+
+- chosen slice: `SP1. Apply-Configuration Result Typing`
+- selection reason: it was the smallest remaining host-facing gap inside the existing command surface because `apply_configuration(...)` still returned `None` while the other primary control commands already exposed typed command results
+- local verifiability: controller and bootstrap tests cover the full slice without needing hardware or transport work
 
 ## Open Questions
 
-- should the next slice continue result typing or move toward a small consolidated host-facing status/result contract?
-- which remaining command outcome is still most ambiguous for later host consumers?
-- how much payload shaping should stay out of scope until API preparation begins?
+- should SP2 focus on adding more explicit readiness reasons, or is one additional status field enough for the next bounded slice?
+- which controller path still has the highest host-facing ambiguity after configuration result typing: consolidated status semantics or failure/outcome consistency?
+- how long should host-visible error normalization stay out of scope before API preparation begins?
+
+Resolved in this session:
+
+- SP2 was kept intentionally narrow: explicit availability/configuration signals were added instead of introducing a broader readiness-reason taxonomy too early
+- SP3 was also kept narrow: stop request intent is now preserved in typed stop-command results instead of being silently dropped at the controller boundary
 
 ## Learned Constraints
 
 - CLI must remain a consumer of the shared control path, not a second business-logic path
 - no transport or API envelope should be introduced prematurely
 - simulator-verifiable slices are preferred over hardware-dependent contract work
+- the safest next slices are controller-local contract clarifications that do not force changes into preview/UI modules or hardware-specific logic
+- narrow host-facing status flags are a good fit when they remove multi-field inference without committing the project to a full error-envelope design
+- small outcome enrichments on typed command results are a better fit than broad exception-framework work at the current repository phase
 
 ## Candidate Slice
 
-Preferred first slice:
-
-- make one explicit typed command result path for host-facing command outcomes where the controller currently returns `None` or service-native values directly
-
-Good targets:
-
-- save-directory application result
-- snapshot command result
-- recording start/stop result
-- interval-capture start/stop result
-
-Selection rule:
-
-- choose the smallest slice that improves host clarity without forcing a transport/API envelope too early
-
-Current implemented slice:
-
+- completed slice this session:
+- `CommandController.apply_configuration(...)` now returns a typed `ApplyConfigurationCommandResult`
+- the result keeps the normalized applied configuration explicit at the host-facing control layer instead of returning `None`
 - `CommandController.set_save_directory(...)` now returns a typed `SaveDirectoryCommandResult`
 - the result makes the selected directory versus an explicit clear operation visible without requiring hosts to infer state changes indirectly
 - the older `SetSaveDirectoryResult` name remains available as a compatibility alias while the command-surface naming is normalized
@@ -94,16 +137,37 @@ Current implemented slice:
 - `CommandController.start_interval_capture(...)` and `stop_interval_capture(...)` now also return a typed `IntervalCaptureCommandResult`
 - the result keeps interval-capture control outcomes explicit for host callers while reusing the existing `IntervalCaptureStatus` payload as the nested status contract
 
+Preferred next slice:
+
+- no additional slice is selected inside this work package; the currently defined sub-packages are complete and any follow-up should be derived from the central queue rather than extending this file ad hoc
+
+Completed status-tightening slice this session:
+
+- `SubsystemStatus` now exposes `is_save_directory_configured` so hosts can distinguish "not actionable because no save path is configured" from other readiness failures without comparing `default_save_directory` and command booleans manually
+- `SubsystemStatus` now also exposes `has_interval_capture_service` so hosts can distinguish "interval capture unavailable in this subsystem wiring" from "interval capture currently idle"
+- targeted controller tests and CLI-facing serialization coverage passed locally after the contract change
+
+Completed outcome-consistency slice this session:
+
+- `RecordingCommandResult` now preserves `stop_reason` when `CommandController.stop_recording(...)` is called
+- `IntervalCaptureCommandResult` now also preserves `stop_reason` when `CommandController.stop_interval_capture(...)` is called
+- the default stop path still reports `external_request` for recording, while interval-capture keeps the optional request reason shape
+- targeted controller tests passed locally after the contract change
+
 ## Execution Plan
 
-1. Re-read `docs/STATUS.md`, `docs/ROADMAP.md`, `docs/GlobalRoadmap.md`, and `docs/NEXT_SESSION_ORDER.md`.
-2. Re-read `docs/git_strategy.md` before changing repository state.
-3. Inspect `src/vision_platform/control/command_controller.py` and its tests to identify the narrowest host-facing ambiguity.
-4. Choose one explicit contract improvement that stays below API/transport scope.
-5. Implement the change in the shared control/application layer, not in the CLI adapter.
-6. Update or extend targeted tests first around controller-visible behavior.
-7. Confirm the CLI still remains a thin adapter over that shared path.
-8. Update permanent docs after the behavior is real.
+1. Keep `src/vision_platform/control/command_controller.py` and `tests/test_command_controller.py` as the primary execution surface.
+2. Select exactly one pending sub-package from this file.
+3. Implement the change in the shared control/application layer, not in the CLI adapter.
+4. Run the narrowest relevant local validation for that sub-package.
+5. Update this work-package file with status, learned constraints, and the next bounded slice.
+6. Update `docs/STATUS.md` only if the implemented contract surface changed in reality.
+
+## Close-Out Note
+
+- the refined sub-packages defined in this file are complete
+- this work package should not be expanded further inside the session-workpackage layer without a new central selection signal
+- the next implementation package should now come from `docs/WORKPACKAGES.md`
 
 ## Validation
 
@@ -124,9 +188,8 @@ If CLI-visible behavior changes indirectly:
 Before this work package is considered complete, update:
 
 - `docs/STATUS.md`
-- `docs/NEXT_SESSION_ORDER.md`
-- any affected module `STATUS.md` / `ROADMAP.md`
-- `services/api_service/STATUS.md` or `services/api_service/ROADMAP.md` if the API module's dependency on the host-neutral control layer becomes clearer
+- any directly affected module `STATUS.md` / `ROADMAP.md`
+- only update `docs/NEXT_SESSION_ORDER.md` or `services/api_service/...` if a later slice materially changes their dependency notes
 
 ## Expected Commit Shape
 
@@ -149,8 +212,8 @@ To resume this work:
 1. Read `AGENTS.md`
 2. Read `docs/SESSION_START.md`
 3. Read `docs/MODULE_INDEX.md`
-4. Read `docs/NEXT_SESSION_ORDER.md`
-5. Read `docs/STATUS.md`
-6. Read this file
-7. Inspect `src/vision_platform/control/command_controller.py`
-8. Inspect `tests/test_command_controller.py`
+4. Read `docs/STATUS.md`
+5. Read this file
+6. Inspect `src/vision_platform/control/command_controller.py`
+7. Inspect `tests/test_command_controller.py`
+8. Pick the first pending sub-package whose validation can run locally without expanding scope

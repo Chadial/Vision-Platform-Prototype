@@ -6,6 +6,7 @@ from tests import _path_setup
 from vision_platform import build_camera_subsystem, build_simulated_camera_subsystem
 from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.models import (
+    ApplyConfigurationCommandResult,
     ApplyConfigurationRequest,
     SaveSnapshotRequest,
     SetSaveDirectoryRequest,
@@ -33,9 +34,11 @@ class BootstrapTests(unittest.TestCase):
         with TemporaryDirectory() as temp_dir:
             subsystem.camera_service.initialize(camera_id="sim-bootstrap")
             try:
-                subsystem.command_controller.apply_configuration(
+                configuration_result = subsystem.command_controller.apply_configuration(
                     ApplyConfigurationRequest(pixel_format="Mono8")
                 )
+                self.assertIsInstance(configuration_result, ApplyConfigurationCommandResult)
+                self.assertEqual(configuration_result.applied_configuration.pixel_format, "Mono8")
                 subsystem.command_controller.set_save_directory(
                     SetSaveDirectoryRequest(
                         base_directory=Path(temp_dir),
