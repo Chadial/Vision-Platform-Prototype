@@ -1,17 +1,26 @@
 import logging
 from pathlib import Path
+from typing import Callable
 
 from camera_app.drivers.camera_driver import CameraDriver
+from camera_app.models.camera_configuration import CameraConfiguration
 from camera_app.models.snapshot_request import SnapshotRequest
 from camera_app.storage.file_naming import build_snapshot_path
 from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_snapshot_request
+from vision_platform.services.recording_service.traceability import write_snapshot_trace_sidecar
 
 
 class SnapshotService:
-    def __init__(self, driver: CameraDriver, frame_writer: FrameWriter | None = None) -> None:
+    def __init__(
+        self,
+        driver: CameraDriver,
+        frame_writer: FrameWriter | None = None,
+        configuration_provider: Callable[[], CameraConfiguration | None] | None = None,
+    ) -> None:
         self._driver = driver
         self._frame_writer = frame_writer or FrameWriter()
+        self._configuration_provider = configuration_provider
         self._logger = logging.getLogger(__name__)
 
     def save_snapshot(self, request: SnapshotRequest) -> Path:
@@ -26,6 +35,8 @@ class SnapshotService:
                 target_path,
                 create_directories=request.create_directories,
             )
+            configuration = self._configuration_provider() if self._configuration_provider is not None else None
+            write_snapshot_trace_sidecar(saved_path, request, frame, configuration)
         except Exception:
             self._logger.exception("Snapshot save failed for '%s'.", target_path)
             raise
