@@ -95,7 +95,7 @@ Read these for every new session:
 - For the next OpenCV UI/operator work:
   - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - For camera-oriented command-surface work:
-  - `docs/session_workpackages/wp01_camera_cli.md`
+  - `docs/archive/session_workpackages/wp01_camera_cli.md`
 - For host-neutral command-surface follow-up work:
   - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
 - For the next optional frontend-expansion work:

@@ -36,7 +36,7 @@ The first completed implementation slice on this branch should establish one cle
 
 ## Status
 
-- current state: baseline implemented; keep dormant unless a concrete CLI defect, narrowing task, or command-surface alignment need appears
+- current state: completed; archive after queue/status sync
 
 ## Sub-Packages
 
@@ -237,6 +237,13 @@ Current implemented slice on this branch:
 - simulator-first validation coverage for the implemented slice
 - deliberate MVP boundary: the current baseline covers `Capture`, `Camera`, and `Storage`; ROI and `Analysis` remain explicitly deferred until they map more cleanly onto the shared host-facing workflow
 
+Package outcome:
+
+- the CLI baseline is now real and bounded instead of only planned
+- one unified camera-oriented CLI entry point exists above the shared command/controller path
+- the capability boundary remains intentionally narrow at `Capture`, `Camera`, and `Storage`
+- ROI, analysis, and preview/view concerns remain explicitly deferred so the CLI does not become a second UI or business-logic lane
+
 ## Validation
 
 - use targeted CLI and bootstrap tests for the touched entry points
@@ -247,6 +254,12 @@ Suggested first validation block once implementation starts:
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest tests.test_command_controller tests.test_bootstrap
+```
+
+Verified baseline validation:
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest tests.test_camera_cli tests.test_command_controller tests.test_bootstrap
 ```
 
 ## Documentation Updates

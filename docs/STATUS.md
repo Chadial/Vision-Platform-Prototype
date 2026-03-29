@@ -179,6 +179,7 @@ The repository currently provides a structured Python prototype for the vision p
 - `WP08` is now completed: `api_service` no longer only reserves future API space, because a first adapter-facing status DTO family and mapper now exist above the shared command/controller layer
 - `WP09` is now completed: adapter-facing command request DTOs now expose explicit `from_*` mapping methods in addition to their existing `to_*` methods, while typed command results now also expose named constructors for their common result shapes and the controller uses those factories instead of assembling result fields inline
 - `WP10` is now completed: `postprocess_tool` no longer only reserves future offline tooling space, because a first stored-image focus-report baseline now exists above the current sample-image ingestion and focus-core contracts
+- `WP01` is now also formally completed and archived: the camera CLI baseline already exists as a thin unified command surface above the shared command/controller path, and no further CLI widening is justified by default
 
 ## Partially Implemented
 
