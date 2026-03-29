@@ -8,14 +8,16 @@ Read this first to get from zero context to a workable repository overview witho
 
 ## Five-Minute Startup Checklist
 
-1. Read `Agents.md`, then this file, then `docs/MODULE_INDEX.md`.
-2. Read `docs/NEXT_SESSION_ORDER.md` when the next task is not already explicit.
+1. Read `AGENTS.md`, then this file, then `docs/MODULE_INDEX.md`.
+2. Read `docs/WORKPACKAGES.md` when the next task is not already explicit.
 3. Check the current branch.
 4. Run `git status --short`.
 5. If the task changes repository state, read `docs/git_strategy.md`.
 6. If the worktree is dirty or branch scope is unclear, open `docs/branch_backlog.md` before editing.
 7. If the current branch is `main` and the task is substantive, create the correct branch first.
-8. Read the target module's `README.md`, `STATUS.md`, and `ROADMAP.md` before changing code in that module.
+8. Read the target module's `README.md` and `STATUS.md` before changing code in that module; read that module's `ROADMAP.md` only when the local module plan is directly needed.
+9. If the target module is `prepared only`, read its `ROADMAP.md` before first activation work in that module.
+10. If the task may create a new module or move logic across `apps/`, `integrations/`, `services/`, or `libraries/`, read `docs/root_category_audit.md` first.
 
 ## Current Baseline
 
@@ -35,7 +37,7 @@ Read this first to get from zero context to a workable repository overview witho
 - module docs live in the root module folders under `apps/`, `integrations/`, `services/`, and `libraries/`
 - module `README.md`: purpose, boundaries, intended contract surface
 - module `STATUS.md`: current implemented state, gaps, risks, next step
-- module `ROADMAP.md`: intended next work and target-facing surface that may run ahead of implementation when marked clearly
+- module `ROADMAP.md`: optional local future intent only when genuinely useful; central project planning now lives in `docs/WORKPACKAGES.md`
 - session work-package handoff notes live under `docs/session_workpackages/`, with completed ones moved to `docs/archive/session_workpackages/`
 
 ## Current Architecture Rules
@@ -49,26 +51,28 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Priority
 
 1. Keep the Python core stable and understandable.
-2. Extend the OpenCV prototype only in the UI/display-facing layer.
-3. Continue documenting verified state and next steps as features land.
-4. Broaden real-hardware validation when practical.
+2. Next harden the host-neutral command surface unless the user explicitly redirects the session.
+3. Keep OpenCV prototype work separate and only in the UI/display-facing layer.
+4. Continue documenting verified state and next steps as features land.
+5. Broaden real-hardware validation when practical.
 
 ## Mandatory Reads
 
 Read these for every new session:
 
-1. `Agents.md`
+1. `AGENTS.md`
 2. `docs/SESSION_START.md`
 3. `docs/MODULE_INDEX.md`
-4. `docs/NEXT_SESSION_ORDER.md` when the next task is not explicitly assigned
+4. `docs/WORKPACKAGES.md` when the next task is not explicitly assigned
 
 ## Task-Based Reads
 
 - For implementation against the current baseline:
   - `docs/STATUS.md`
+- For active prioritization or next-step selection:
+  - `docs/WORKPACKAGES.md`
 - For planning or next-step decisions:
   - `docs/ROADMAP.md`
-  - `docs/NEXT_SESSION_ORDER.md`
 - For long-range architecture or migration questions:
   - `docs/GlobalRoadmap.md`
   - `docs/ProjectDescription.md`
@@ -83,21 +87,24 @@ Read these for every new session:
 - For module-specific work:
   - that module's `README.md`
   - that module's `STATUS.md`
-  - that module's `ROADMAP.md`
+  - that module's `ROADMAP.md` only when the module is prepared-only or the selected work package explicitly expands that module's local future path
 - For hardware-specific work:
   - `docs/HARDWARE_EVALUATION.md`
   - `docs/HARDWARE_CAPABILITIES.md`
-  - `docs/archive/session_workpackages/hardware_validation_phase_9.md`
+  - `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
 - For the next OpenCV UI/operator work:
-  - `docs/session_workpackages/opencv_ui_operator_block.md`
+  - `docs/session_workpackages/wp03_opencv_ui_operator_block.md`
 - For camera-oriented command-surface work:
-  - `docs/session_workpackages/camera_cli.md`
+  - `docs/session_workpackages/wp01_camera_cli.md`
 - For host-neutral command-surface follow-up work:
-  - `docs/session_workpackages/host_integration_command_surface.md`
+  - `docs/session_workpackages/wp02_host_integration_command_surface.md`
 
 ## Working Defaults
 
 - `docs/STATUS.md` is the current implementation truth.
+- `docs/WORKPACKAGES.md` is the central queue for the next concrete work slice.
+- `docs/module_doc_audit.md` is the current reference for how module-local docs should be used and trimmed.
+- `docs/root_category_audit.md` is the current reference for how `apps/`, `integrations/`, `services/`, and `libraries/` are meant to be used.
 - `docs/ROADMAP.md` is the repository delivery sequence.
 - `docs/GlobalRoadmap.md` is the long-term platform direction.
 - `docs/archive/StartPrompt.md` is historical reference only.

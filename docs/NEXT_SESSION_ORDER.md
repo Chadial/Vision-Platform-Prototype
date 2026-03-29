@@ -2,25 +2,21 @@
 
 ## Purpose
 
-This document is the short decision guide for what agents should normally work on next.
+This document is retained as a legacy quick-reference.
 
-Use it when a new session starts and the next task is not already explicitly assigned by the user.
+Use `docs/WORKPACKAGES.md` as the primary current source for what agents should work on next.
 
-It is intentionally narrower than `docs/ROADMAP.md` and more directive than `docs/STATUS.md`.
+This file should only remain as a lightweight compatibility pointer until any remaining references are removed.
 
-## Core Rule
+## Current Rule
 
-Prefer the next unfinished item in this order unless the user explicitly redirects the session.
+When the next task is not already explicit:
 
-Do not skip ahead to later adapter or frontend work just because it is interesting.
-
-## Default Work Order
-
-1. Finish and narrow the active `feature/camera-cli` work to a small, stable CLI baseline.
-2. After the CLI baseline is stable, define and implement one host-integration work package that hardens the shared host-neutral command surface.
-3. Only after that, prepare `services/api_service` as an external adapter over the same host-neutral control layer.
-4. Keep the OpenCV prototype work separate as UI/display work; do not let it become the main control architecture.
-5. Revisit broader hardware validation when the camera is available again.
+1. read `AGENTS.md`
+2. read `docs/SESSION_START.md`
+3. read `docs/MODULE_INDEX.md`
+4. read `docs/WORKPACKAGES.md`
+5. use `docs/STATUS.md` if implementation reality needs to be confirmed
 
 ## Interpretation Rules
 
@@ -48,20 +44,11 @@ Do not skip ahead to later adapter or frontend work just because it is interesti
 - viewport behavior, operator controls, overlays, and preview ergonomics stay there
 - do not use OpenCV work to define the platform's primary command architecture
 
-## Session Startup Instruction
-
-When a new session begins and the user asks generally what to do next:
-
-1. read `AGENTS.md`
-2. read `docs/SESSION_START.md`
-3. read `docs/MODULE_INDEX.md`
-4. read this file
-5. propose the highest-priority unfinished item from this order before asking broad open-ended planning questions
-
 ## Current Default Recommendation
 
 If no stronger user direction is given, the next recommended path is:
 
-1. treat the CLI baseline as intentionally narrow and stable unless a clear defect appears
-2. use `docs/session_workpackages/host_integration_command_surface.md` to execute the next dedicated host-integration work package
-3. only then move toward API/feed adapter work
+1. execute the package marked `current next` in `docs/WORKPACKAGES.md`
+2. then open that package's detailed `docs/session_workpackages/wpXX_*.md` file for actual execution and progress tracking
+3. use session work-package files as the detailed execution layer, not as the primary prioritization surface
+4. only consult `docs/ROADMAP.md` or `docs/GlobalRoadmap.md` when higher-level sequencing needs clarification

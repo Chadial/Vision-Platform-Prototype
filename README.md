@@ -18,6 +18,7 @@ This is not intended to be a finished end-user product yet. It is the working te
 ## Where To Read Next
 
 - For the shortest possible project overview, read [`docs/SESSION_START.md`](docs/SESSION_START.md).
+- For the current execution flow and work selection model, read [`docs/WORKFLOW.md`](docs/WORKFLOW.md) and [`docs/WORKPACKAGES.md`](docs/WORKPACKAGES.md).
 - For the current verified implementation state, read [`docs/STATUS.md`](docs/STATUS.md).
 - For the long-term product and architecture target, read [`docs/ProjectDescription.md`](docs/ProjectDescription.md).
 
@@ -79,12 +80,12 @@ tests/
 tools/
 ```
 
-Repository-level module workspaces now contain `README.md`, `STATUS.md`, and `ROADMAP.md` files so the platform can be evolved per module. Launcher-style helper scripts and the minimal Vimba SDK smoke test now live under `scripts/launchers/` instead of cluttering the repository root.
+Repository-level module workspaces still contain `README.md`, `STATUS.md`, and in some cases `ROADMAP.md` files for local context, but project planning and prioritization are now intended to stay centralized in `docs/WORKPACKAGES.md` and `docs/STATUS.md`. Launcher-style helper scripts and the minimal Vimba SDK smoke test now live under `scripts/launchers/` instead of cluttering the repository root.
 
 The root-level project guidance documents currently in active use are:
 
 - [`docs/SESSION_START.md`](docs/SESSION_START.md)
-- [`Agents.md`](Agents.md)
+- [`AGENTS.md`](AGENTS.md)
 - [`docs/ProjectDescription.md`](docs/ProjectDescription.md)
 - [`docs/ProjectAgents.md`](docs/ProjectAgents.md)
 - [`docs/MODULE_INDEX.md`](docs/MODULE_INDEX.md)
@@ -358,14 +359,15 @@ The core services still work without OpenCV. The standard writer keeps handling 
 
 For this repository, the intended order is:
 
-1. Read [`Agents.md`](Agents.md) for startup rules, git discipline, and the required document order.
+1. Read [`AGENTS.md`](AGENTS.md) for startup rules, git discipline, and the required document order.
 2. Read [`docs/SESSION_START.md`](docs/SESSION_START.md) for the compact current baseline and task-based reading map.
 3. Read [`docs/MODULE_INDEX.md`](docs/MODULE_INDEX.md) to locate the relevant module docs quickly.
-4. Read [`docs/STATUS.md`](docs/STATUS.md) for the current verified implementation baseline.
-5. Read [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md) only when planning or architectural context is needed.
-6. Read [pyproject.toml](pyproject.toml) for the supported Python version and dependency source of truth.
-7. Use `.python-version` as the preferred interpreter hint.
-8. Use [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1) for fast Windows setup, or this README for the exact manual commands.
+4. Read [`docs/WORKPACKAGES.md`](docs/WORKPACKAGES.md) for the central next-work queue.
+5. Read [`docs/STATUS.md`](docs/STATUS.md) for the current verified implementation baseline.
+6. Read [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md) only when planning or architectural context is needed.
+7. Read [pyproject.toml](pyproject.toml) for the supported Python version and dependency source of truth.
+8. Use `.python-version` as the preferred interpreter hint.
+9. Use [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1) for fast Windows setup, or this README for the exact manual commands.
 
 ## Subsystem Bootstrap
 

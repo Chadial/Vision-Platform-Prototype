@@ -8,6 +8,10 @@ It is intentionally different from the original idealized phase order.
 
 The codebase progressed iteratively, with snapshot, preview, recording, simulation, host control, validation, and repository reorganization overlapping in practice.
 
+Project-level prioritization is now handled primarily through `docs/WORKPACKAGES.md`.
+
+Use this file for phase and sequencing context, not as the day-to-day active queue.
+
 ## Phase 0: Repository Reorganization Toward The Vision Platform
 
 - align the repository with `docs/ProjectDescription.md` and `docs/ProjectAgents.md`

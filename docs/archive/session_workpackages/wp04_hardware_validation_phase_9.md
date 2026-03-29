@@ -169,7 +169,7 @@ Do not treat this work package as complete unless:
 
 If a later session resumes this work, start with:
 
-1. `Agents.md`
+1. `AGENTS.md`
 2. `docs/SESSION_START.md`
 3. this file
 4. `docs/HARDWARE_EVALUATION.md`

@@ -4,6 +4,7 @@
 
 This status document should always be read and updated in relation to:
 
+- `docs/WORKPACKAGES.md` for the active project-level work queue
 - `docs/ROADMAP.md` for the repository-specific implementation phases
 - `docs/GlobalRoadmap.md` for the broader Python -> C# -> web-capable target path
 
@@ -18,6 +19,7 @@ Each status update should state progress and gaps against both roadmaps.
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation is no longer only simulator-backed: the March 27, 2026 hardware passes now cover an integrated command-flow baseline for snapshot save, preview readiness, interval capture from the shared preview stream, frame-limit recording, duration-only recording, target-frame-rate recording, supported alternate pixel format capture (`Mono10` as `.raw`), and explicit hardware-side failures for invalid camera id, unsupported pixel format, and invalid ROI increment choices on the Allied Vision `1800 U-1240m`. Phase 9 can therefore be treated as prototype-level hardware-validated for the current camera baseline, with remaining work limited to edge-case expansion rather than baseline viability. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes, and this branch now adds a first unified camera-oriented CLI baseline on top of the existing controller and service layer.
 - Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls, mouse-wheel zoom, middle-drag pan, cursor-anchored zoom, top-left image anchoring, a dedicated bottom status band, FPS readout, operator toggles for crosshair and focus-status visibility, a first two-click ROI creation baseline for rectangle and ellipse with live preview, a preview-frame snapshot shortcut driven by an explicit save directory, and a first layer of concise operator-facing warning/error feedback while keeping those concerns explicitly in the UI/display layer. The shared contract layer under `libraries/common_models` now also intentionally exposes some target-facing surface ahead of full implementation, with feature readiness expected to be marked in module-local status docs. Tracking/API modules remain open, but the Python camera baseline can now be regarded as architecturally, simulator-, and prototype-level hardware-validated for the tested camera path, while this branch also introduces a UI-independent CLI surface for the already implemented capture and status operations. The next mandatory milestones against the global roadmap are to validate and narrow that CLI surface deliberately, continue the remaining operator-facing UI controls on top of the preview baseline, and follow up on remaining hardware edge cases.
+- Against `docs/WORKPACKAGES.md`: project-level prioritization is now intended to run through a centralized work-package queue instead of relying on many distributed module roadmaps. The current documentation baseline now supports a more autonomous agent workflow with one central execution flow and one central next-work queue, while implementation priorities remain focused on command-surface hardening, narrow OpenCV UI follow-up, and selective hardware revalidation.
 
 ## Merge Note
 
@@ -192,12 +194,15 @@ The repository currently provides a structured Python prototype for the vision p
 - controller now exposes a typed `SubsystemStatus` model instead of an untyped dictionary
 - subsystem status now includes command readiness flags for configuration, snapshot, recording start, and recording stop
 - subsystem status now also includes interval-capture status together with start/stop readiness flags
+- subsystem status now also exposes whether a save directory is currently configured and whether interval-capture support is present in the active subsystem wiring, so host callers do not have to infer those facts indirectly from readiness booleans alone
 - camera status now exposes whether the active source is `hardware` or `simulation` together with the driver name
 - external request types now exist for `ApplyConfigurationRequest`, `SetSaveDirectoryRequest`, `SaveSnapshotRequest`, `StartRecordingRequest`, `StopRecordingRequest`, `StartIntervalCaptureRequest`, and `StopIntervalCaptureRequest`
+- apply-configuration commands now also expose a typed `ApplyConfigurationCommandResult`, so host-facing callers no longer need to treat successful configuration changes as a `None`-return side effect
 - save-directory commands now also expose a typed `SaveDirectoryCommandResult`, with `SetSaveDirectoryResult` retained as a compatibility alias while the host-facing naming is normalized
 - snapshot commands now also expose a typed `SnapshotCommandResult`, with `SaveSnapshotResult` retained as a compatibility alias while the host-facing naming is normalized
 - recording start/stop commands now also expose a typed `RecordingCommandResult` so host-facing callers receive an explicit control result instead of a bare service status payload
 - interval-capture start/stop commands now also expose a typed `IntervalCaptureCommandResult` so host-facing callers receive an explicit control result instead of a bare service status payload
+- recording and interval-capture stop-command results now also preserve the requested stop reason, so host callers do not lose that control intent once the command crosses the controller boundary
 - save-directory requests now support append-to-directory or create-new-subdirectory behavior
 - host-style command flow now covers interval capture from the shared stream in addition to snapshot and recording
 - deeper host-specific payload shaping is still open
@@ -208,6 +213,9 @@ The repository currently provides a structured Python prototype for the vision p
 
 - unit coverage exists for naming, preview, recording, driver integration, and command-controller behavior
 - dedicated tests now cover the external request model mappings and save-directory resolution rules
+- dedicated tests now also cover the typed apply-configuration controller result so configuration commands are aligned with the other host-facing command outcomes
+- dedicated tests now also cover the new subsystem-status availability/configuration flags, and CLI-facing JSON serialization remained valid after the host-status contract expansion
+- dedicated tests now also cover stop-command reason preservation for recording and interval capture, keeping those typed control outcomes aligned with the stop requests that hosts already send
 - a simulated command-flow demo now validates a host-style `configure -> set save directory -> snapshot -> interval capture -> recording -> status` sequence
 - the direct simulated demo now also validates interval-based single-image saving from the shared stream before recording
 - runnable demo entry points exist for both the direct simulated service flow and the command-controller flow
@@ -292,16 +300,8 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Add any still-needed hardware-side timeout or disconnect checks if they are practical to reproduce without destabilizing the setup.
-2. Continue the active OpenCV UI/operator branch from `docs/session_workpackages/opencv_ui_operator_block.md`.
-3. Extend the viewport path further without leaking screen concerns into the core, especially for remaining cursor-outside-image zoom edge cases and any pan-state hardening.
-4. Decide whether a lightweight in-preview operator strip still belongs on the current branch or should become its own follow-up package.
-5. Decide whether any current OpenCV warning/error paths should also surface through richer host-visible status shapes beyond the current status-band and terminal coverage.
-6. Keep richer ROI drawing/editing interaction explicitly out of MVP scope and schedule it only as a non-MVP follow-up.
-7. Decide whether the next host-integration slice should continue result typing for remaining commands or shift toward a small consolidated host-facing result/status contract.
-8. Re-run hardware-explicit CLI validation only after a camera is connected again, so the current simulator-first baseline can be narrowed with real-device notes instead of speculative feature growth.
-9. Decide later whether ROI and analysis commands should enter the CLI at all, and only do so when they map cleanly onto the shared host-neutral control layer.
-10. Revisit optional OpenCV hardware checks only after a camera is connected again, especially for higher-bit grayscale formats delivered by Vimba X.
-11. Decide whether future overlay composition should stay on fixed preview/snapshot fields or move to a more generic layer model when tracking overlays arrive.
-12. Define a stricter payload mapping only if the later C# or host integration really needs it.
-13. Keep the Python core stable as the handover baseline for the later C# phase.
+1. Execute `WP-002` from `docs/WORKPACKAGES.md` to reduce duplicated planning text and tighten central documentation roles.
+2. Execute `WP-003` from `docs/WORKPACKAGES.md` to harden one additional host-neutral command-surface slice without adding CLI-only logic.
+3. Keep OpenCV follow-up work aligned to `WP-004` so viewport and operator behavior stay explicitly in the UI/display lane.
+4. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.
+5. Keep the Python core stable as the handover baseline for the later C# phase.

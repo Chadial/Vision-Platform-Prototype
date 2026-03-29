@@ -368,6 +368,6 @@ If a later agent or developer resumes UI work:
 1. read this template together with:
    - `apps/opencv_prototype/STATUS.md`
    - `apps/opencv_prototype/ROADMAP.md`
-   - `docs/session_workpackages/opencv_ui_operator_block.md`
+- `docs/session_workpackages/wp03_opencv_ui_operator_block.md`
 2. confirm which parts are MVP baseline vs. non-MVP follow-up
 3. decide whether the next step still belongs in OpenCV or should wait for a real UI frontend

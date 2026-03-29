@@ -3,6 +3,9 @@
 ## Root Guidance
 
 - `docs/SESSION_START.md`: compact session bootstrap and reading map
+- `docs/WORKFLOW.md`: operational execution flow for agents
+- `docs/WORKPACKAGES.md`: central work-package queue and next-step prioritization
+- `docs/root_category_audit.md`: meaning and decision rules for `apps/`, `integrations/`, `services/`, and `libraries/`
 - primary command-surface rule: keep one host-neutral control layer; CLI is a local adapter and future API/feed work should reuse that same layer
 - `docs/ProjectDescription.md`: platform target picture and module responsibilities
 - `docs/ProjectAgents.md`: repository reorganization workflow and modular documentation rules
@@ -28,9 +31,17 @@
 
 For each active module:
 
-- `README.md`: purpose and interfaces
-- `STATUS.md`: current maturity and risks
-- `ROADMAP.md`: next steps
+- read before edits:
+  - `README.md`
+  - `STATUS.md`
+- `ROADMAP.md`: local future intent only when it adds module-specific value beyond the central work-package queue
+
+Root category usage:
+
+- `apps/`: runnable or operator/developer-facing shells
+- `integrations/`: external adapters
+- `services/`: workflow orchestration
+- `libraries/`: reusable core building blocks
 
 ## Prepared Later Modules
 
@@ -40,3 +51,14 @@ For each active module:
 | `services/api_service` | prepared only | reserved for external feed/API work above the shared host-neutral control layer |
 | `apps/postprocess_tool` | prepared only | reserved for offline evaluation tooling |
 | `apps/desktop_app` | prepared only | reserved for later desktop frontend work |
+
+For each prepared-only module:
+
+- read before first activation work:
+  - `README.md`
+  - `STATUS.md`
+  - `ROADMAP.md`
+
+Governance note:
+
+- `docs/module_doc_audit.md` records the current keep/shrink guidance for module-local docs

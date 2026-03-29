@@ -4,7 +4,7 @@
 
 This document is the platform-wide master roadmap for evolving the current Python camera prototype into a modular vision platform that can later be handed over to a C#/.NET team and eventually support multiple frontends and external interfaces.
 
-Detailed implementation planning should increasingly move into the module-local `ROADMAP.md` files. This document stays at the master-roadmap level.
+Detailed implementation planning should primarily move into the centralized `docs/WORKPACKAGES.md` queue, with module-local `ROADMAP.md` files kept only where genuinely useful. This document stays at the master-roadmap level.
 
 ## Platform Modules
 

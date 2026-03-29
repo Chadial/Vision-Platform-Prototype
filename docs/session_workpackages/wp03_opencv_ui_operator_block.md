@@ -47,6 +47,29 @@ Continue the existing UI-focused branch from the already implemented preview bas
 
 The first completed slice on this branch should make the preview feel more operator-facing by separating image content from status text and by formalizing the newly added point-selection workflow.
 
+## Status
+
+- current state: active lane; major MVP preview/operator slices are already implemented, with remaining work limited to bounded UI-facing follow-up
+
+## Sub-Packages
+
+1. preserve completed viewport and operator baseline
+2. finish any remaining bounded viewport hardening
+3. decide whether a lightweight in-preview operator strip still belongs on this branch
+4. keep richer ROI editing explicitly out of MVP
+
+## Open Questions
+
+- does any remaining operator-strip work still belong on this branch or in a later package?
+- which remaining zoom or pan edge cases are worth fixing before calling the branch stable enough?
+- should any operator-facing warning paths also surface through richer host-visible status later?
+
+## Learned Constraints
+
+- UI work must remain in the OpenCV/display lane
+- snapshot shortcuts require acquisition-safe wiring, not ad-hoc direct saves
+- richer ROI editing remains intentionally outside MVP scope
+
 ## Current Baseline To Preserve
 
 Treat the following as already implemented baseline, not as still-open work for this package:
@@ -242,7 +265,7 @@ Documentation intent for this package:
 
 To resume this work:
 
-1. Read `Agents.md`
+1. Read `AGENTS.md`
 2. Read `docs/SESSION_START.md`
 3. Read `docs/MODULE_INDEX.md`
 4. Read `apps/opencv_prototype/README.md`
