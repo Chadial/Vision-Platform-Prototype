@@ -32,6 +32,30 @@ Excluded:
 
 Provide one small, reviewable hardware-backed follow-up slice that narrows uncertainty in the current baseline without turning hardware work into a permanent parallel branch.
 
+## Status
+
+- current state: conditional; do not activate until suitable hardware is attached or a specific hardware regression needs confirmation
+
+## Sub-Packages
+
+1. choose one hardware-backed revalidation target
+2. prepare the smallest reproducible run path
+3. collect hardware evidence
+4. harden only what is needed for reproducibility
+5. document results and remaining hardware gaps
+
+## Open Questions
+
+- which later changes most justify a real-device rerun first?
+- are timeout or disconnect edge cases reproducible enough to justify a dedicated slice?
+- should the next hardware pass focus on CLI, OpenCV preview, or configuration validation?
+
+## Learned Constraints
+
+- hardware work should answer one narrow question at a time
+- simulator-backed evidence should remain the default when hardware is not attached
+- documentation must be updated from evidence, not expectation
+
 ## Current Progress
 
 The archived Phase 9 package already established a prototype-level hardware baseline for the previously attached camera path.

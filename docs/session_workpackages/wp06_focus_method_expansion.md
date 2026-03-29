@@ -31,6 +31,30 @@ Excluded:
 
 Add one reviewable focus-method slice that improves the current baseline while keeping the focus module portable and easy to hand over later.
 
+## Status
+
+- current state: queued; depends on clearer ROI workflow ownership before choosing the next method slice
+
+## Sub-Packages
+
+1. review current focus baseline and consumer expectations
+2. choose one next method or method-selection improvement
+3. implement the smallest useful focus expansion
+4. compare behavior against the current baseline
+5. document what is baseline versus optional
+
+## Open Questions
+
+- is the next useful slice a new metric or a method-selection contract?
+- which focus method best supports both preview and offline reuse?
+- how much consumer-facing configurability is needed before API or richer host integration work?
+
+## Learned Constraints
+
+- avoid broad metric experiments in one branch
+- keep focus-core changes portable and reusable across live, snapshot, and later offline flows
+- tracking work must not be smuggled into focus work
+
 ## Current Progress
 
 The repository already has:

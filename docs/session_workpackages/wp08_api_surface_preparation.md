@@ -31,6 +31,29 @@ Excluded:
 
 Leave the repository with one explicit first API-preparation slice that makes future adapter work easier without forcing premature transport commitments into the core.
 
+## Status
+
+- current state: queued; should activate only after the host-neutral command surface is judged stable enough
+
+## Sub-Packages
+
+1. identify the first adapter-facing payload family
+2. choose a minimal preparation slice
+3. keep mapping above the shared control path
+4. document prepared versus not-yet-exposed API scope
+
+## Open Questions
+
+- should the first API-preparation slice be code-backed or documentation-first?
+- what belongs in adapter DTOs versus shared host-neutral contracts?
+- is local API, IPC, or embedded host integration the most likely first adapter target?
+
+## Learned Constraints
+
+- do not create a second business-logic stack
+- keep transport concerns out of the core until the shared control path is clearer
+- API preparation should follow host-contract hardening, not precede it
+
 ## Current Progress
 
 The repository already has:

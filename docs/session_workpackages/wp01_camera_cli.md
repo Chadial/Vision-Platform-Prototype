@@ -34,6 +34,29 @@ Turn the already reserved CLI idea into a concrete, execution-ready work package
 
 The first completed implementation slice on this branch should establish one clear entry command and argument structure for the most important camera operations instead of leaving behavior scattered across multiple prototype scripts.
 
+## Status
+
+- current state: baseline implemented; keep dormant unless a concrete CLI defect, narrowing task, or command-surface alignment need appears
+
+## Sub-Packages
+
+1. baseline command-surface stabilization
+2. CLI capability-boundary review
+3. hardware-explicit CLI validation when camera hardware is attached again
+4. possible later ROI or analysis command entry only if shared host-neutral contracts justify it
+
+## Open Questions
+
+- should ROI commands enter the CLI at all, or remain outside the CLI until host-facing ROI contracts are clearer?
+- should analysis-method selection appear in the CLI before a clearer shared analysis command surface exists?
+- does the CLI need any richer output contract beyond the current JSON summaries?
+
+## Learned Constraints
+
+- the CLI must stay thin over the shared control/application layer
+- viewport-only concerns do not belong in the CLI MVP
+- simulator-first validation is the default until camera hardware is attached again
+
 ## Precondition
 
 This precondition is now satisfied.

@@ -33,12 +33,16 @@ Use this structure unless there is a clear reason to keep the note smaller:
 2. `Branch`
 3. `Scope`
 4. `Session Goal`
-5. `Execution Plan`
-6. `Validation`
-7. `Documentation Updates`
-8. `Expected Commit Shape`
-9. `Merge Gate`
-10. `Recovery Note`
+5. `Status`
+6. `Sub-Packages`
+7. `Open Questions`
+8. `Learned Constraints`
+9. `Execution Plan`
+10. `Validation`
+11. `Documentation Updates`
+12. `Expected Commit Shape`
+13. `Merge Gate`
+14. `Recovery Note`
 
 Practical guidance for each section:
 
@@ -46,6 +50,10 @@ Practical guidance for each section:
 - `Branch`: the intended branch name for the work
 - `Scope`: explicit included and excluded concerns
 - `Session Goal`: the concrete done-state for the current work package
+- `Status`: one short current-state line such as planned, active, blocked, or partially completed
+- `Sub-Packages`: the current internal slices or milestones inside the work package
+- `Open Questions`: unresolved decisions that may change the next slice
+- `Learned Constraints`: important discoveries, including negative findings, that later sessions should not rediscover
 - `Execution Plan`: ordered steps to carry the work
 - `Validation`: tests, smoke runs, or manual checks that must be performed
 - `Documentation Updates`: permanent docs that must be updated before the work is considered complete

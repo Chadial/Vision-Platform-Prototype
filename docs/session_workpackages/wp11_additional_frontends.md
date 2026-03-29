@@ -30,6 +30,29 @@ Excluded:
 
 Leave the repository with one explicit later-frontend preparation slice or one implementation-ready plan for the next frontend-facing branch.
 
+## Status
+
+- current state: queued; later package that should not outrun command, display, and analysis contract stabilization
+
+## Sub-Packages
+
+1. choose the next non-OpenCV frontend preparation target
+2. identify the minimum reusable frontend-facing contract slice
+3. avoid premature framework lock-in
+4. document prepared versus implemented frontend scope
+
+## Open Questions
+
+- is desktop the next real frontend, or should later browser-capable preparation come first conceptually?
+- which display or command contracts still need to settle before another frontend is worth starting?
+- should the next slice be docs-first or code-backed?
+
+## Learned Constraints
+
+- frontend work must remain downstream of stable core contracts
+- do not force a framework choice too early
+- OpenCV remains the active prototype path until a stronger successor is justified
+
 ## Current Progress
 
 The repository already has:

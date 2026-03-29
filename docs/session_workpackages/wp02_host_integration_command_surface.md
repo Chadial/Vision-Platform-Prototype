@@ -39,6 +39,30 @@ Leave the repository with one clearer host-integration-ready command slice that 
 - covered by targeted tests
 - documented as the preferred control path for later adapters
 
+## Status
+
+- current state: current next package; partially implemented result typing exists, but the next contract-hardening slice still needs to be selected and executed deliberately
+
+## Sub-Packages
+
+1. review current request/result/status contract consistency
+2. choose the next smallest host-facing ambiguity
+3. implement one contract-hardening slice
+4. align CLI consumption if affected
+5. update docs and leave a clear next follow-up
+
+## Open Questions
+
+- should the next slice continue result typing or move toward a small consolidated host-facing status/result contract?
+- which remaining command outcome is still most ambiguous for later host consumers?
+- how much payload shaping should stay out of scope until API preparation begins?
+
+## Learned Constraints
+
+- CLI must remain a consumer of the shared control path, not a second business-logic path
+- no transport or API envelope should be introduced prematurely
+- simulator-verifiable slices are preferred over hardware-dependent contract work
+
 ## Candidate Slice
 
 Preferred first slice:

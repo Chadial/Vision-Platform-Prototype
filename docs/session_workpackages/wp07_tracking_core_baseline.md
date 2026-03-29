@@ -31,6 +31,30 @@ Excluded:
 
 Leave the repository with one explicit first tracking-core capability or at least one implementation-ready contract baseline that future preview, postprocess, or API consumers can build on.
 
+## Status
+
+- current state: queued; prepared conceptually, but should wait until ROI and focus MVP boundaries are clearer
+
+## Sub-Packages
+
+1. choose the first narrow tracking or edge kernel
+2. define input and result contracts
+3. implement one baseline slice
+4. add focused tests
+5. document implemented versus aspirational tracking scope
+
+## Open Questions
+
+- should tracking start from edge extraction, drift indication, or feature-anchor tracking?
+- should the first slice be library-only or preview-adjacent?
+- what is the smallest tracking result shape that survives later API and overlay use?
+
+## Learned Constraints
+
+- avoid committing to full crack-tip workflows too early
+- prefer library-owned kernels over UI-driven experiments for the first slice
+- keep contracts aligned with existing ROI and focus boundaries
+
 ## Current Progress
 
 The repository already has:

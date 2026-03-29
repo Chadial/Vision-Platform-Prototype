@@ -31,6 +31,29 @@ Excluded:
 
 Leave the repository with one clearer handover-oriented slice that makes future C# ownership easier to reason about.
 
+## Status
+
+- current state: queued; medium-term package that should follow clearer stabilization of core contracts
+
+## Sub-Packages
+
+1. identify the best handover candidate surface
+2. choose one narrow explicitness/portability improvement
+3. harden the selected contract or service surface
+4. record what became more portable and what remains prototype-specific
+
+## Open Questions
+
+- which modules are the strongest current handover candidates?
+- where are the most expensive remaining implicit Python behaviors?
+- should a small handover-readiness checklist be added for selected modules?
+
+## Learned Constraints
+
+- this is not a C# implementation branch
+- prefer contract clarity over broad rewrites
+- only touch slices with clear later handover value
+
 ## Current Progress
 
 The repository already has:

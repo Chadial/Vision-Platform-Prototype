@@ -30,6 +30,30 @@ Excluded:
 
 Leave the repository with one explicit postprocess baseline or one implementation-ready contract slice for offline evaluation.
 
+## Status
+
+- current state: queued; should activate only after storage and core analysis contracts are stable enough for offline reuse
+
+## Sub-Packages
+
+1. choose the first offline use case
+2. identify reusable shared logic
+3. add a thin entry point only if necessary
+4. validate the offline path
+5. document the postprocess baseline
+
+## Open Questions
+
+- should the first offline slice focus on saved-image loading, focus evaluation, or metadata reuse?
+- what stored metadata is required before offline analysis becomes genuinely useful?
+- should the first slice be tool-backed or library-first?
+
+## Learned Constraints
+
+- do not build a second analytics core
+- reuse current storage, ROI, and focus contracts where possible
+- keep the first postprocess slice intentionally narrow
+
 ## Current Progress
 
 The repository already has:

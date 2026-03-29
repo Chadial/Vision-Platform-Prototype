@@ -37,6 +37,30 @@ Leave the repository with one explicit and documented ROI workflow that makes th
 - how snapshot or analysis consumers reuse it
 - which parts are still deferred
 
+## Status
+
+- current state: queued; ready to activate after current host-control and active OpenCV UI stabilization work
+
+## Sub-Packages
+
+1. document current ROI data flow
+2. choose the first ambiguity to resolve
+3. harden one ROI handoff path
+4. define explicit deferred ROI behavior
+5. update docs to make ROI ownership obvious
+
+## Open Questions
+
+- where should active ROI ownership live long term?
+- should snapshot-side consumers default from active ROI state or require explicit ROI input?
+- do host-facing ROI commands belong in the command surface at all?
+
+## Learned Constraints
+
+- UI interaction and ROI analysis ownership must stay separate
+- rectangle and ellipse are the current supported baseline; freehand remains deferred
+- avoid turning ROI state into a UI-only concept or a stream-owned concept
+
 ## Current Progress
 
 The repository already has:
