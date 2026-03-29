@@ -52,8 +52,8 @@ Read this first to get from zero context to a workable repository overview witho
 
 1. Keep the Python core stable and understandable.
 2. Treat `Host Control Closure`, `Experiment Reliability Closure`, and the first `Data And Logging Closure` slice as landed baseline hardening.
-3. Treat `WP14` and `WP15` as landed narrow slices inside still-open closure lanes.
-4. Use `docs/session_workpackages/wp16_data_logging_traceability.md` as the current default planning package.
+3. Treat `WP14`, `WP15`, and `WP16` as landed narrow slices inside still-open closure lanes.
+4. Use the next offline metadata-consumption slice as the current default planning direction; derive its detailed package on activation.
 5. Open an additional frontend package only when another shell beyond the current OpenCV prototype is actually needed.
 6. Keep any further OpenCV work separate and only in the UI/display-facing layer.
 7. Continue documenting verified state and next steps as features land.

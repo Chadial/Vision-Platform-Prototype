@@ -237,8 +237,8 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | active lane | second Extended MVP closure lane; first narrow slice landed through `WP13` | `docs/session_workpackages/wp13_experiment_reliability_closure.md` |
 | 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | active lane | third Extended MVP closure lane; first narrow slice landed through `WP14`, lane still open for traceability extensions | `docs/session_workpackages/wp14_data_logging_closure.md` |
 | 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | active lane | fourth Extended MVP closure lane; first narrow slice landed through `WP15`, lane still open for metadata-aware offline reuse | `docs/session_workpackages/wp15_offline_measurement_closure.md` |
-| 16 | Data And Logging Traceability Extension | add one stable artifact-level metadata traceability path for saved snapshot and bounded recording outputs | current next | first post-`WP14` extension slice; activates the next practical traceability gap inside `Data And Logging Closure` | `docs/session_workpackages/wp16_data_logging_traceability.md` |
-| 17 | Offline And Measurement Metadata Extension | reuse saved artifact metadata in the offline report path so artifact context and focus results stay linked | queued | likely follow-up after `WP16`; keep queued until the traceability shape is real | to be created on activation |
+| 16 | Data And Logging Traceability Extension | add one stable artifact-level metadata traceability path for saved snapshot and bounded recording outputs | active lane | first post-`WP14` extension slice; landed through `WP16` with snapshot sidecars plus one folder-local appendable bounded-recording trace log | `docs/session_workpackages/wp16_data_logging_traceability.md` |
+| 17 | Offline And Measurement Metadata Extension | reuse saved artifact metadata in the offline report path so artifact context and focus results stay linked | current next | likely follow-up after `WP16`; derive a narrow metadata-aware offline slice on activation | to be created on activation |
 
 ## Immediate PM Backlog
 
@@ -251,15 +251,14 @@ These are the work packages PM should treat as the current actionable backlog:
 
 Most recently landed detailed package:
 
-- `docs/session_workpackages/wp15_offline_measurement_closure.md`
-  - first narrow `Offline And Measurement Closure` slice
-  - landed offline focus-report reuse of saved `BMP` artifacts from the current writer path
+- `docs/session_workpackages/wp16_data_logging_traceability.md`
+  - first post-`WP14` extension slice inside `Data And Logging Closure`
+  - landed snapshot sidecars plus one folder-local appendable bounded-recording traceability log
 
 Current explicitly activated detailed package:
 
-- `docs/session_workpackages/wp16_data_logging_traceability.md`
-  - first extension package after the narrow `WP14` and `WP15` slices
-  - centers artifact-level metadata traceability for snapshot and bounded recording outputs
+- `Offline And Measurement Metadata Extension` is now the default next lane
+- first detailed file should be derived on activation as `WP17`
 
 These are important but should not be treated as the main always-on stream:
 
@@ -346,7 +345,8 @@ Current activation note:
 - that slice intentionally stayed narrow and centered `BMP` as an additional practical visible output format
 - `Offline And Measurement Closure` now has its first landed slice in `docs/session_workpackages/wp15_offline_measurement_closure.md`
 - that slice intentionally stayed narrow and centered offline focus-report reuse of saved `BMP` artifacts
-- `WP16` is now the active next extension package and reopens `Data And Logging Closure` at the traceability level rather than falsely treating `WP14` as lane closure
+- `WP16` is now landed and extends `Data And Logging Closure` at the traceability level with snapshot sidecars plus one folder-local appendable bounded-recording traceability log
+- `WP17` is now the active next extension concept and should consume that new traceability baseline from the offline/reporting side
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -368,22 +368,22 @@ The current coarse PM order should be:
 2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
 3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
 4. treat the first `Host Control Closure`, `Experiment Reliability Closure`, `WP14`, and `WP15` slices as landed baseline hardening rather than full lane closure
-5. keep `WP16` as the default next extension package inside `Data And Logging Closure`
+5. keep `WP17` as the default next extension package inside `Offline And Measurement Closure`
 6. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
-7. follow `WP16` with a metadata-aware offline extension rather than reopening broad frontend or architecture work
+7. follow the landed `WP16` traceability baseline with a metadata-aware offline extension rather than reopening broad frontend or architecture work
 8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp16_data_logging_traceability.md`
+- derive `WP17` for `Offline And Measurement Metadata Extension`
 
 Reason:
 
 - the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
-- the first host-control, reliability, visible-format, and offline-artifact-reuse slices are already landed
-- the next tactical need is to make saved artifacts traceable enough for host logging and later offline reuse
+- the first host-control, reliability, visible-format, offline-artifact-reuse, and traceability slices are already landed
+- the next tactical need is to consume that new traceability data in one narrow offline/reporting follow-up
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule
@@ -429,7 +429,8 @@ Current explicit activation:
 - `Experiment Reliability Closure` now has its first landed slice at `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 - `Data And Logging Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp14_data_logging_closure.md`
 - `Offline And Measurement Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp15_offline_measurement_closure.md`
-- `Data And Logging Traceability Extension` now has the active next implementation-oriented package at `docs/session_workpackages/wp16_data_logging_traceability.md`
+- `Data And Logging Traceability Extension` now has its first landed implementation-oriented package at `docs/session_workpackages/wp16_data_logging_traceability.md`
+- `Offline And Measurement Metadata Extension` is now the next implementation concept awaiting a narrow detailed package on activation
 
 ## PM Refinement Rule
 
