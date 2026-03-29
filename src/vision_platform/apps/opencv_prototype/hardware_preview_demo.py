@@ -133,9 +133,13 @@ def main() -> int:
     configure_logging()
     parser = _build_argument_parser()
     args = parser.parse_args()
+    shortcut_hint = OpenCvPreviewWindow.build_shortcut_hint(
+        has_snapshot_shortcut=args.snapshot_save_directory is not None,
+        has_focus_toggle=False,
+    )
     print(
-        "Preview controls: left click=select point, +=save preview frame, x=crosshair on/off, y=focus status on/off, "
-        "wheel=zoom, middle-drag=pan, c=copy coordinates, q/Esc or window close=quit, i=zoom in, o=zoom out, f=fit-to-window"
+        "Preview controls: left click=select point, "
+        f"{shortcut_hint}, q/Esc or window close=quit"
     )
 
     try:

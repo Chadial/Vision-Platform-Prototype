@@ -17,18 +17,8 @@
 - keep the `+` snapshot shortcut on the current preview-frame save path and extend it only where clearer operator feedback or host-driven path control is still needed
 - decide whether any remaining operator-facing error feedback should also be mirrored into structured logs or host-visible status objects beyond the current terminal/status-band coverage
 - decide whether hardware preview flows should eventually expose a real focus-state provider so `y` can become meaningful there instead of remaining explicitly unavailable
-- decide whether the OpenCV prototype should get only a lightweight operator info/control strip inside the preview composition rather than any "real" menu UI
-- if that strip is added, allow sensor-array configuration through that lightweight operator area, including width, height, and X/Y offsets
-- if that strip is added, allow shutter time configuration in floating-point milliseconds through that lightweight operator area
-- allow save-directory selection with either append-to-existing-run or create-new-subfolder behavior
-- allow frame-limit configuration for capture and recording workflows, with `0` or empty meaning unlimited
-- allow selection of the focus-calculation method through the same lightweight operator area if it is still justified in OpenCV
-- structure that lightweight operator area, if added at all, into:
-  - sensor geometry: width, height, offset X, offset Y
-  - acquisition: shutter time in float milliseconds, frame limit, snapshot action
-  - storage: base directory plus append-vs-new-subfolder behavior
-  - analysis: focus-method selection and focus overlay toggle
-  - tools: crosshair toggle plus ROI mode selection for rectangle and ellipse
+- defer any lightweight operator info/control strip unless a later dedicated OpenCV slice shows that the remaining operator need cannot be met by the current status-band and shortcut model
+- if such a strip is ever reopened later, keep it explicitly lightweight and treat it as a UI-only convenience layer rather than a baseline requirement for the prototype
 
 ## Later
 
