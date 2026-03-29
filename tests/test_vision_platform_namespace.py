@@ -25,6 +25,7 @@ from vision_platform.services.recording_service import SnapshotFocusService, Sna
 from vision_platform.services.stream_service import CameraStreamService, FocusPreviewService, RoiStateService
 from vision_platform.apps.opencv_prototype.focus_preview_demo import run_focus_preview_demo
 from vision_platform.apps.opencv_prototype.overlay_payload_demo import run_overlay_payload_demo, summarize_overlay_payload
+from vision_platform.apps.postprocess_tool import format_focus_report, run_focus_report
 
 
 class VisionPlatformNamespaceTests(unittest.TestCase):
@@ -90,6 +91,8 @@ class VisionPlatformNamespaceTests(unittest.TestCase):
         self.assertTrue(callable(run_focus_preview_demo))
         self.assertTrue(callable(run_overlay_payload_demo))
         self.assertTrue(callable(summarize_overlay_payload))
+        self.assertTrue(callable(run_focus_report))
+        self.assertTrue(callable(format_focus_report))
 
 
 if __name__ == "__main__":

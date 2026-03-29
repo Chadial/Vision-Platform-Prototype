@@ -49,7 +49,7 @@ Root category usage:
 | --- | --- | --- |
 | `libraries/tracking_core` | active baseline | profile-based edge baseline implemented; drift/tracking expansion remains open |
 | `services/api_service` | active baseline | first adapter-facing status payload family implemented above the shared host-neutral control layer |
-| `apps/postprocess_tool` | prepared only | reserved for offline evaluation tooling |
+| `apps/postprocess_tool` | active baseline | thin stored-image focus-report baseline implemented above shared sample-image and focus contracts |
 | `apps/desktop_app` | prepared only | reserved for later desktop frontend work |
 
 For each prepared-only module:
