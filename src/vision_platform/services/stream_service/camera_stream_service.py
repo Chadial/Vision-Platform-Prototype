@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable
 
 from vision_platform.integrations.camera import CameraDriver
+from vision_platform.libraries.common_models import FocusMethod
 from vision_platform.models import CameraConfiguration, CapturedFrame, PreviewFrameInfo
 from vision_platform.services.recording_service import (
     IntervalCaptureService,
@@ -84,9 +85,14 @@ class CameraStreamService:
     def get_roi_state_service(self) -> RoiStateService:
         return self._roi_state_service
 
-    def create_focus_preview_service(self, roi_state_service: RoiStateService | None = None) -> FocusPreviewService:
+    def create_focus_preview_service(
+        self,
+        roi_state_service: RoiStateService | None = None,
+        focus_method: FocusMethod | None = None,
+    ) -> FocusPreviewService:
         return FocusPreviewService(
             self._preview_service,
+            focus_method=focus_method,
             roi_state_service=roi_state_service or self._roi_state_service,
         )
 

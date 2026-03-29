@@ -84,6 +84,7 @@ The repository currently provides a structured Python prototype for the vision p
 - physical migration of stream-service internals, camera drivers, and prototype demo entry points into `src/vision_platform`, with legacy `camera_app` modules retained as compatibility shims
 - first implemented focus baseline with Laplace scoring, ROI-aware overlay anchors, and preview-consumer integration
 - focus core now also implements a Tenengrad-based second metric with explicit method dispatch through `FocusRequest.method`, while Laplace remains the default path
+- preview- and snapshot-side focus consumers now also expose a small service-level focus-method selection path, so multi-method support no longer requires custom evaluator injection for every consumer
 - ROI core now also provides frame-clamped pixel bounds and rectangle/ellipse mask derivation so analysis consumers can apply ROI selection without reimplementing ROI math
 - freehand ROI remains a target contract direction only and is not yet implemented through ROI-core mask derivation or downstream analysis consumers
 - stream services now expose a small ROI state path so active ROI selection can be shared with preview-adjacent analysis without moving ROI ownership into UI or stream internals
@@ -171,7 +172,7 @@ The repository currently provides a structured Python prototype for the vision p
 - overlay composition is now a separate service-layer concern that can merge active ROI plus preview/snapshot focus states into one UI-free payload
 - the first `WP05` slice now aligns the OpenCV preview path with that same shared ROI ownership rule for committed ROI state, while leaving in-progress ROI drafting local to the window
 - live preview-adjacent consumers now derive focus state from preview frames, while richer metric selection and operator-facing overlay controls remain open
-- `WP06` is now active and its first slice is implemented: the focus-method surface no longer only names multiple methods ahead of implementation, because `tenengrad` is now a real second evaluator path and `evaluate_focus(...)` dispatches explicitly by requested method
+- `WP06` is now completed: the focus-method surface no longer only names multiple methods ahead of implementation, because `tenengrad` is now a real second evaluator path, `evaluate_focus(...)` dispatches explicitly by requested method, and preview-/snapshot-adjacent focus consumers plus the stream-service preview factory can select `laplace` or `tenengrad` explicitly without widening the UI or host-facing surface
 
 ## Partially Implemented
 
@@ -309,7 +310,7 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Continue `WP-006` from `docs/WORKPACKAGES.md` by deciding whether multi-method focus support in preview/snapshot consumers should stay evaluator-injected or gain a small explicit method-selection path.
+1. Execute `WP-007` from `docs/WORKPACKAGES.md` to open the first tracking-core baseline on top of the now-explicit ROI/focus MVP boundary.
 2. Keep later ROI-related follow-up bounded to richer editing, additional ROI producers, or host-surface attachment instead of reopening the baseline workflow package.
 3. Keep any later OpenCV follow-up bounded to UI/display concerns instead of reopening the baseline operator package.
 4. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.

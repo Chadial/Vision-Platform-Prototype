@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
+from vision_platform.libraries.focus_core import TenengradFocusEvaluator
 from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.models import CapturedFrame
 from vision_platform.services.recording_service import SnapshotFocusCapture, SnapshotFocusService
@@ -123,6 +124,57 @@ class SnapshotFocusServiceTests(unittest.TestCase):
         self.assertEqual(capture.focus_state.result.roi_id, "explicit-roi")
         self.assertEqual(capture.focus_state.overlay.roi_id, "explicit-roi")
         self.assertEqual(capture.focus_state.overlay.region_bounds, (3.0, 1.0, 6.0, 6.0))
+
+    def test_capture_focus_state_can_select_tenengrad_by_focus_method(self) -> None:
+        driver = MagicMock()
+        driver.capture_snapshot.return_value = CapturedFrame(
+            raw_frame=_mono8_frame_bytes(
+                [
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                ]
+            ),
+            width=5,
+            height=5,
+            frame_id=24,
+            pixel_format="Mono8",
+            timestamp_utc=datetime.now(timezone.utc),
+        )
+
+        capture = SnapshotFocusService(driver, focus_method="tenengrad").capture_focus_state()
+
+        self.assertEqual(capture.focus_state.result.method, "tenengrad")
+        self.assertEqual(capture.focus_state.result.metric_name, "tenengrad_mean_gradient_energy")
+        self.assertGreater(capture.focus_state.result.score, 0.0)
+
+    def test_capture_focus_state_infers_tenengrad_method_from_injected_evaluator(self) -> None:
+        driver = MagicMock()
+        driver.capture_snapshot.return_value = CapturedFrame(
+            raw_frame=_mono8_frame_bytes(
+                [
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                ]
+            ),
+            width=5,
+            height=5,
+            frame_id=25,
+            pixel_format="Mono8",
+            timestamp_utc=datetime.now(timezone.utc),
+        )
+
+        capture = SnapshotFocusService(
+            driver,
+            focus_evaluator=TenengradFocusEvaluator(),
+        ).capture_focus_state()
+
+        self.assertEqual(capture.focus_state.result.method, "tenengrad")
 
 
 if __name__ == "__main__":
