@@ -1,10 +1,13 @@
 from datetime import datetime, timezone
 import unittest
 
+from tests import _path_setup
 from vision_platform.libraries.common_models import FocusRequest, FrameData, FrameMetadata, FocusResult, RoiDefinition
 from vision_platform.libraries.focus_core import (
     LaplaceFocusEvaluator,
+    TenengradFocusEvaluator,
     build_focus_overlay_data,
+    create_focus_evaluator,
     evaluate_focus,
     focus_score_available,
 )
@@ -67,6 +70,60 @@ class FocusCoreTests(unittest.TestCase):
         self.assertEqual(result.metric_name, "laplace_variance")
         self.assertGreater(result.score, 0.0)
 
+    def test_create_focus_evaluator_returns_tenengrad_evaluator(self) -> None:
+        evaluator = create_focus_evaluator("tenengrad")
+
+        self.assertIsInstance(evaluator, TenengradFocusEvaluator)
+
+    def test_tenengrad_score_prefers_structured_image_over_flat_image(self) -> None:
+        evaluator = TenengradFocusEvaluator()
+        flat_frame = FrameData(
+            data=_mono8_frame_bytes([[32] * 5 for _ in range(5)]),
+            metadata=FrameMetadata(width=5, height=5, pixel_format="Mono8", frame_id=11),
+        )
+        structured_frame = FrameData(
+            data=_mono8_frame_bytes(
+                [
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                ]
+            ),
+            metadata=FrameMetadata(width=5, height=5, pixel_format="Mono8", frame_id=12),
+        )
+
+        flat_result = evaluator.evaluate(flat_frame)
+        structured_result = evaluator.evaluate(structured_frame)
+
+        self.assertTrue(flat_result.is_valid)
+        self.assertTrue(structured_result.is_valid)
+        self.assertEqual(structured_result.method, "tenengrad")
+        self.assertEqual(structured_result.metric_name, "tenengrad_mean_gradient_energy")
+        self.assertLess(flat_result.score, structured_result.score)
+
+    def test_evaluate_focus_dispatches_to_tenengrad(self) -> None:
+        frame = FrameData(
+            data=_mono8_frame_bytes(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 255, 255, 255, 0],
+                    [0, 255, 0, 255, 0],
+                    [0, 255, 255, 255, 0],
+                    [0, 0, 0, 0, 0],
+                ]
+            ),
+            metadata=FrameMetadata(width=5, height=5, pixel_format="Mono8", frame_id=13),
+        )
+
+        result = evaluate_focus(frame, request=FocusRequest(method="tenengrad"))
+
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.method, "tenengrad")
+        self.assertEqual(result.metric_name, "tenengrad_mean_gradient_energy")
+        self.assertGreater(result.score, 0.0)
+
     def test_roi_can_focus_on_a_structured_subregion(self) -> None:
         evaluator = LaplaceFocusEvaluator()
         frame = FrameData(
@@ -127,6 +184,41 @@ class FocusCoreTests(unittest.TestCase):
         self.assertTrue(result.is_valid)
         self.assertEqual(result.roi_id, "ellipse-zone")
         self.assertGreater(result.score, 0.0)
+
+    def test_tenengrad_roi_can_focus_on_a_structured_subregion(self) -> None:
+        evaluator = TenengradFocusEvaluator()
+        frame = FrameData(
+            data=_mono8_frame_bytes(
+                [
+                    [16, 16, 16, 16, 16, 16],
+                    [16, 16, 16, 0, 0, 255],
+                    [16, 16, 16, 0, 0, 255],
+                    [16, 16, 16, 0, 0, 255],
+                    [16, 16, 16, 0, 0, 255],
+                    [16, 16, 16, 16, 16, 16],
+                ]
+            ),
+            metadata=FrameMetadata(width=6, height=6, pixel_format="Mono8", frame_id=14),
+        )
+        request = FocusRequest(
+            method="tenengrad",
+            roi=RoiDefinition(
+                roi_id="focus-zone",
+                shape="rectangle",
+                points=((3.0, 1.0), (6.0, 6.0)),
+            ),
+        )
+
+        result = evaluator.evaluate(frame, request=request)
+
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.method, "tenengrad")
+        self.assertEqual(result.roi_id, "focus-zone")
+        self.assertGreater(result.score, 0.0)
+
+    def test_create_focus_evaluator_rejects_unknown_method(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Unsupported focus method"):
+            create_focus_evaluator("scharr")
 
     def test_too_small_frames_are_reported_as_invalid(self) -> None:
         frame = FrameData(

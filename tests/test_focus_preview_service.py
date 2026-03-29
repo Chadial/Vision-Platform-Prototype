@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 import unittest
 from unittest.mock import MagicMock
 
+from tests import _path_setup
+from vision_platform.libraries.focus_core import TenengradFocusEvaluator
 from vision_platform.models import CapturedFrame
 from vision_platform.services.stream_service import FocusPreviewService, RoiStateService
 from vision_platform.libraries.common_models import RoiDefinition
@@ -187,6 +189,35 @@ class FocusPreviewServiceTests(unittest.TestCase):
         self.assertEqual(focus_state.result.roi_id, "explicit-roi")
         self.assertEqual(focus_state.overlay.roi_id, "explicit-roi")
         self.assertEqual(focus_state.overlay.region_bounds, (3.0, 1.0, 6.0, 6.0))
+
+    def test_refresh_once_can_use_tenengrad_evaluator(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_mono8_frame_bytes(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 255, 255, 255, 0],
+                    [0, 255, 0, 255, 0],
+                    [0, 255, 255, 255, 0],
+                    [0, 0, 0, 0, 0],
+                ]
+            ),
+            width=5,
+            height=5,
+            frame_id=17,
+            pixel_format="Mono8",
+            timestamp_utc=datetime.now(timezone.utc),
+        )
+        preview_service = MagicMock()
+        preview_service.get_latest_frame.return_value = frame
+
+        service = FocusPreviewService(preview_service, focus_evaluator=TenengradFocusEvaluator())
+
+        focus_state = service.refresh_once()
+
+        self.assertIsNotNone(focus_state)
+        self.assertEqual(focus_state.result.method, "tenengrad")
+        self.assertEqual(focus_state.result.metric_name, "tenengrad_mean_gradient_energy")
+        self.assertGreater(focus_state.result.score, 0.0)
 
 
 if __name__ == "__main__":
