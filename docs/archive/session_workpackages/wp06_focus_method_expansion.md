@@ -43,7 +43,7 @@ The package is now refined so the next bounded slice can be chosen directly with
 
 ## Status
 
-- current state: active; `SP1` completed, `SP2` next
+- current state: completed; archive after queue/status sync
 
 ## Sub-Packages
 
@@ -152,10 +152,23 @@ Implemented progress:
 - `evaluate_focus(...)` now dispatches explicitly through `FocusRequest.method` instead of silently treating all requests as Laplace
 - `laplace` remains the default method path when no explicit request is supplied
 - preview-facing consumers remain compatible through the existing evaluator-injection boundary, and focused tests now exercise a Tenengrad-backed preview consumer path
+- `SP2` completed
+- `FocusPreviewService` and `SnapshotFocusService` now accept a small explicit `focus_method` selection path without requiring custom evaluator injection
+- existing evaluator injection remains compatible, and the services infer `tenengrad` correctly when that evaluator is injected directly
+- `CameraStreamService.create_focus_preview_service(...)` now exposes the same small method-selection path for preview-adjacent focus consumers
 
 Remaining package focus:
 
-- `SP2` should decide whether multi-method usage in preview/snapshot consumers should stay evaluator-injected only or expose a small explicit method-selection path without widening the UI or host contract
+- `SP3` completed through permanent focus-core and central status updates that distinguish Laplace default behavior, Tenengrad support, and deferred future metric families
+- `SP4` completed by explicitly deferring broader metric families, comparison tooling, and UI/host method switching instead of stretching this package into a broader focus experimentation lane
+
+Package outcome:
+
+- `laplace` remains the default portable focus baseline
+- `tenengrad` is now a real second implemented metric rather than a placeholder method name
+- `evaluate_focus(...)` dispatches explicitly by requested method
+- preview-/snapshot-adjacent consumers now have a small service-level method-selection path while preserving evaluator injection for local composition
+- broader metric families, comparison tooling, and operator-/host-facing method controls remain deferred
 
 ## Execution Plan
 
@@ -179,6 +192,10 @@ Remaining package focus:
 Completed validation for `SP1`:
 
 - `.\.venv\Scripts\python.exe -m unittest tests.test_focus_core tests.test_focus_preview_service tests.test_snapshot_focus_service tests.test_vision_platform_namespace`
+
+Completed validation for `SP2`:
+
+- `.\.venv\Scripts\python.exe -m unittest tests.test_focus_preview_service tests.test_snapshot_focus_service tests.test_camera_stream_service tests.test_focus_core`
 
 ## Documentation Updates
 

@@ -132,8 +132,8 @@ This is the current PM overview of work packages to activate or defer.
 | 3 | OpenCV UI Operator Follow-Up | continue bounded UI/operator work without leaking screen concerns into core services | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md` |
 | 4 | Hardware Revalidation Follow-Up | re-run selected hardware checks and capture new evidence when hardware is attached again | conditional | conditional / deferred until hardware is attached | `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md` |
 | 5 | ROI Workflow Consolidation | define ownership and reuse of ROI state across preview, snapshot, and analysis | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md` |
-| 6 | Focus Method Expansion | add a stronger focus-method slice beyond the current baseline | current next | next package after ROI workflow consolidation | `docs/session_workpackages/wp06_focus_method_expansion.md` |
-| 7 | Tracking Core Baseline | establish the first edge/tracking foundation slice | queued | after ROI/focus MVP boundary is clearer | `docs/session_workpackages/wp07_tracking_core_baseline.md` |
+| 6 | Focus Method Expansion | add a stronger focus-method slice beyond the current baseline | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp06_focus_method_expansion.md` |
+| 7 | Tracking Core Baseline | establish the first edge/tracking foundation slice | current next | next package after ROI/focus MVP boundary is clearer | `docs/session_workpackages/wp07_tracking_core_baseline.md` |
 | 8 | API Surface Preparation | prepare the first external adapter above the host-neutral control layer | queued | after host-neutral command contracts are stable enough | `docs/session_workpackages/wp08_api_surface_preparation.md` |
 | 9 | C# Handover Hardening | identify and tighten contracts that are most likely to survive direct C# porting | queued | medium-term, after control and analysis contracts settle | `docs/session_workpackages/wp09_csharp_handover_hardening.md` |
 | 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | queued | later, after storage and analysis contracts stabilize | `docs/session_workpackages/wp10_postprocess_baseline.md` |
@@ -143,9 +143,9 @@ This is the current PM overview of work packages to activate or defer.
 
 These are the work packages PM should treat as the current actionable backlog:
 
-1. `Focus Method Expansion`
-2. `Tracking Core Baseline`
-3. `API Surface Preparation`
+1. `Tracking Core Baseline`
+2. `API Surface Preparation`
+3. `C# Handover Hardening`
 
 These are important but should not be treated as the main always-on stream:
 
@@ -156,11 +156,10 @@ These are important but should not be treated as the main always-on stream:
 
 These should remain queued behind the above:
 
-1. `Tracking Core Baseline`
-2. `API Surface Preparation`
-3. `C# Handover Hardening`
-4. `Postprocess Baseline`
-5. `Additional Frontends`
+1. `API Surface Preparation`
+2. `C# Handover Hardening`
+3. `Postprocess Baseline`
+4. `Additional Frontends`
 
 ## Rough PM Sequence
 
@@ -192,7 +191,7 @@ Goal:
 Detailed work-package files:
 
 - `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md`
-- `docs/session_workpackages/wp06_focus_method_expansion.md`
+- `docs/archive/session_workpackages/wp06_focus_method_expansion.md`
 
 ### Layer 3: Prepare The Next Analysis Expansion
 
@@ -234,20 +233,20 @@ The current coarse PM order should be:
 2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
 3. use hardware validation as a revalidation package when hardware is attached, not as the main always-active stream
 4. treat the ROI workflow package as completed baseline-clarification work
-5. activate the focus expansion package as the next regular package
-6. only then open the next tracking or API preparation package
+5. treat the focus expansion package as completed baseline-hardening work
+6. then open the next tracking or API preparation package
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp06_focus_method_expansion.md`
+- `docs/session_workpackages/wp07_tracking_core_baseline.md`
 
 Reason:
 
-- the ROI workflow ownership and precedence boundary is now explicitly implemented and documented
-- the next open analysis package is focus method expansion
-- that next package builds directly on the now-clarified ROI baseline without reopening command-surface or OpenCV-boundary questions
+- the ROI workflow boundary and next focus-method slice are now explicitly implemented and documented
+- the next open analysis package is tracking-core baseline preparation
+- that next package can now build on an explicit ROI/focus MVP boundary without reopening command-surface or OpenCV-boundary questions
 
 ## Fresh Agent Decision Rule
 
@@ -269,7 +268,7 @@ The repository now has explicit detailed session work-package files for all curr
 - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md`
-- `docs/session_workpackages/wp06_focus_method_expansion.md`
+- `docs/archive/session_workpackages/wp06_focus_method_expansion.md`
 - `docs/session_workpackages/wp07_tracking_core_baseline.md`
 - `docs/session_workpackages/wp08_api_surface_preparation.md`
 - `docs/session_workpackages/wp09_csharp_handover_hardening.md`

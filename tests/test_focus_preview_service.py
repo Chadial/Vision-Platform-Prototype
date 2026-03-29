@@ -219,6 +219,35 @@ class FocusPreviewServiceTests(unittest.TestCase):
         self.assertEqual(focus_state.result.metric_name, "tenengrad_mean_gradient_energy")
         self.assertGreater(focus_state.result.score, 0.0)
 
+    def test_refresh_once_can_select_tenengrad_by_focus_method(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_mono8_frame_bytes(
+                [
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                    [0, 0, 255, 255, 255],
+                ]
+            ),
+            width=5,
+            height=5,
+            frame_id=18,
+            pixel_format="Mono8",
+            timestamp_utc=datetime.now(timezone.utc),
+        )
+        preview_service = MagicMock()
+        preview_service.get_latest_frame.return_value = frame
+
+        service = FocusPreviewService(preview_service, focus_method="tenengrad")
+
+        focus_state = service.refresh_once()
+
+        self.assertIsNotNone(focus_state)
+        self.assertEqual(focus_state.result.method, "tenengrad")
+        self.assertEqual(focus_state.result.metric_name, "tenengrad_mean_gradient_energy")
+        self.assertGreater(focus_state.result.score, 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
