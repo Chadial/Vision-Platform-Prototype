@@ -7,6 +7,7 @@ import unittest
 
 from tests import _path_setup
 from vision_platform.models import CameraConfiguration, CapturedFrame, RecordingRequest
+from vision_platform.services.recording_service import FrameWriter
 from vision_platform.services.recording_service import RecordingService
 
 
@@ -78,6 +79,24 @@ class _IdleFailingStopDriver(_FailingStopDriver):
 
     def get_latest_frame(self) -> CapturedFrame | None:
         return None
+
+
+class _FailingFrameWriter:
+    def write_frame(self, frame: CapturedFrame, target_path: Path, create_directories: bool = True) -> None:
+        del frame, target_path, create_directories
+        raise RuntimeError("frame write failed")
+
+
+class _FailingOnceFrameWriter:
+    def __init__(self) -> None:
+        self._has_failed = False
+
+    def write_frame(self, frame: CapturedFrame, target_path: Path, create_directories: bool = True) -> None:
+        if not self._has_failed:
+            self._has_failed = True
+            raise RuntimeError("frame write failed")
+
+        FrameWriter().write_frame(frame, target_path, create_directories=create_directories)
 
 
 class RecordingServiceTests(unittest.TestCase):
@@ -451,6 +470,98 @@ class RecordingServiceTests(unittest.TestCase):
         self.assertIsNone(status.active_file_stem)
         self.assertTrue(any("Recording acquisition stop failed during cleanup." in message for message in logs.output))
         self.assertEqual(driver.stop_calls, 1)
+
+    def test_bounded_recording_can_be_started_again_after_successful_completion(self) -> None:
+        driver = _StreamingRecordingDriver()
+        service = RecordingService(driver, poll_interval_seconds=0.001)
+
+        with TemporaryDirectory() as temp_dir:
+            first_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="first",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+            second_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="second",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+
+            service.start_recording(first_request)
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording and status.frames_written == 2:
+                    break
+                sleep(0.01)
+
+            first_status = service.get_status()
+            self.assertFalse(first_status.is_recording)
+            self.assertEqual(first_status.frames_written, 2)
+
+            service.start_recording(second_request)
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording and status.frames_written == 2:
+                    break
+                sleep(0.01)
+
+            second_status = service.get_status()
+            self.assertFalse(second_status.is_recording)
+            self.assertEqual(second_status.frames_written, 2)
+            self.assertGreaterEqual(driver.start_calls, 2)
+            self.assertGreaterEqual(driver.stop_calls, 2)
+            self.assertTrue((Path(temp_dir) / "first_000000.raw").exists())
+            self.assertTrue((Path(temp_dir) / "second_000000.raw").exists())
+
+    def test_recording_can_be_started_again_on_same_service_after_write_failure(self) -> None:
+        driver = _StreamingRecordingDriver()
+        service = RecordingService(driver, frame_writer=_FailingOnceFrameWriter(), poll_interval_seconds=0.001)
+
+        with TemporaryDirectory() as temp_dir:
+            failing_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="broken",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+
+            service.start_recording(failing_request)
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording and status.last_error is not None:
+                    break
+                sleep(0.01)
+
+            failed_status = service.get_status()
+            self.assertFalse(failed_status.is_recording)
+            self.assertIn("Recording write failed", failed_status.last_error or "")
+            self.assertIsNone(failed_status.save_directory)
+            self.assertIsNone(failed_status.active_file_stem)
+
+            recovery_request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="recovered",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+            service.start_recording(recovery_request)
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording and status.frames_written == 2:
+                    break
+                sleep(0.01)
+
+            recovered_status = service.get_status()
+            self.assertFalse(recovered_status.is_recording)
+            self.assertEqual(recovered_status.frames_written, 2)
+            self.assertIsNone(recovered_status.last_error)
+            self.assertTrue((Path(temp_dir) / "recovered_000000.raw").exists())
 
 
 if __name__ == "__main__":

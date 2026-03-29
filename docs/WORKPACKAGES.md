@@ -233,8 +233,8 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 9 | C# Handover Hardening | identify and tighten contracts that are most likely to survive direct C# porting | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md` |
 | 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp10_postprocess_baseline.md` |
 | 11 | Additional Frontends | prepare desktop and later web-capable paths | dormant | keep for later continuity; not part of the default Extended MVP lane | `docs/session_workpackages/wp11_additional_frontends.md` |
-| 12 | Host Control Closure | prove and tighten the host-steerable command/response and status-polling baseline | current next | first Extended MVP closure lane; first narrow slice is active through `WP12` | `docs/session_workpackages/wp12_host_control_closure.md` |
-| 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | active lane | second Extended MVP closure lane | to be created on activation |
+| 12 | Host Control Closure | prove and tighten the host-steerable command/response and status-polling baseline | active lane | first Extended MVP closure lane; first narrow slice landed through `WP12` | `docs/session_workpackages/wp12_host_control_closure.md` |
+| 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | current next | second Extended MVP closure lane; first narrow slice is active through `WP13` | `docs/session_workpackages/wp13_experiment_reliability_closure.md` |
 | 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | active lane | third Extended MVP closure lane | to be created on activation |
 | 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | queued | fourth Extended MVP closure lane | to be created on activation |
 
@@ -249,9 +249,9 @@ These are the work packages PM should treat as the current actionable backlog:
 
 Current explicitly activated detailed package:
 
-- `docs/session_workpackages/wp12_host_control_closure.md`
-  - first narrow `Host Control Closure` slice
-  - centers host-process command/result/status hardening for `status`, `snapshot`, and `recording`
+- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
+  - first narrow `Experiment Reliability Closure` slice
+  - centers bounded recording lifecycle restart and recovery after selected failures
 
 These are important but should not be treated as the main always-on stream:
 
@@ -326,12 +326,13 @@ Existing detailed support files:
 
 - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `docs/session_workpackages/wp12_host_control_closure.md`
+- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 
 Current activation note:
 
-- `Host Control Closure` is no longer only a planning lane.
-- the first execution-ready slice is now explicitly defined in `docs/session_workpackages/wp12_host_control_closure.md`
-- that slice is intentionally narrow and centers the host-process command/result/status path for `status`, `snapshot`, and `recording`
+- `Host Control Closure` is no longer only a planning lane and now has its first landed slice in `docs/session_workpackages/wp12_host_control_closure.md`
+- `Experiment Reliability Closure` is now the active next lane through `docs/session_workpackages/wp13_experiment_reliability_closure.md`
+- that slice is intentionally narrow and centers bounded recording lifecycle restart and recovery after selected failures
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -352,8 +353,8 @@ The current coarse PM order should be:
 1. treat the CLI baseline as intentionally narrow unless a concrete defect appears
 2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
 3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
-4. open `Host Control Closure` as the default Extended MVP package
-5. keep `Experiment Reliability Closure` and `Data And Logging Closure` as the next active lanes directly behind it
+4. treat the first `Host Control Closure` slice as landed baseline hardening and move to `Experiment Reliability Closure` as the default next package
+5. keep `Data And Logging Closure` as the next active lane directly behind it
 6. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
 7. open `Offline And Measurement Closure` after the command, runtime, and data/logging baseline is clearer
 8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
@@ -362,14 +363,13 @@ The current coarse PM order should be:
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp12_host_control_closure.md`
+- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 
 Reason:
 
 - the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
-- the next tactical need is to close the gap between that baseline and a host-usable working subsystem in the AMB context
-- the currently activated first slice is the CLI-envelope/status-polling hardening path for `status`, `snapshot`, and `recording`
-- `WORKPACKAGES.md` should now point fresh agents directly to that slice instead of leaving `Host Control Closure` at lane-only level
+- the first host-control slice is already landed, so the next tactical need is to prove bounded recording lifecycle robustness and recovery
+- the currently activated next slice is the reliability hardening path for repeated bounded recording and selected failure recovery
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule
@@ -400,6 +400,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/archive/session_workpackages/wp10_postprocess_baseline.md`
 - `docs/session_workpackages/wp11_additional_frontends.md`
 - `docs/session_workpackages/wp12_host_control_closure.md`
+- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 
 The new Extended MVP closure lanes are intentionally introduced first at the PM level.
 
@@ -407,8 +408,8 @@ Their detailed execution-ready files should be created only when a concrete clos
 
 Current explicit activation:
 
-- `Host Control Closure` now has its first detailed file at `docs/session_workpackages/wp12_host_control_closure.md`
-- that file is the active next implementation-oriented package for the current PM phase
+- `Host Control Closure` now has its first landed slice at `docs/session_workpackages/wp12_host_control_closure.md`
+- `Experiment Reliability Closure` now has the active next implementation-oriented package at `docs/session_workpackages/wp13_experiment_reliability_closure.md`
 - the remaining closure lanes still intentionally wait for later activation
 
 ## PM Refinement Rule

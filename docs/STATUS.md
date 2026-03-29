@@ -159,6 +159,7 @@ The repository currently provides a structured Python prototype for the vision p
 - duration-based stop condition implemented
 - target-frame-rate pacing implemented for recording requests
 - recording state and error tracking implemented
+- repeated bounded recording invocation and reuse after a selected writer-side failure are now explicitly covered by simulator-backed reliability tests on the same service path
 
 ### Focus And ROI Foundations
 
@@ -319,7 +320,7 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Use `docs/session_workpackages/wp12_host_control_closure.md` as the current default next implementation package and keep its scope narrow around the host-process command/result/status path for `status`, `snapshot`, and `recording`.
-2. Keep `Experiment Reliability Closure` and `Data And Logging Closure` as the next active lanes behind `WP12` instead of opening new frontend breadth by default.
+1. Use `docs/session_workpackages/wp13_experiment_reliability_closure.md` as the current default next implementation package until the repository-level queue is advanced to the next closure slice.
+2. Treat the first bounded-recording restart/recovery reliability slice as simulator-backed baseline evidence, then move toward `Data And Logging Closure` or a later hardware-backed reliability follow-up instead of reopening frontend breadth.
 3. Keep later postprocess, API, and handover follow-up bounded to explicit later closure slices rather than reopening those earlier baseline packages opportunistically.
 4. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.
