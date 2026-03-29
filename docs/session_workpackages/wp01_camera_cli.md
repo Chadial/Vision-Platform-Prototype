@@ -252,7 +252,7 @@ Before this work package is considered complete, update:
 
 To activate this planned work later:
 
-1. Read `Agents.md`
+1. Read `AGENTS.md`
 2. Read `docs/SESSION_START.md`
 3. Read `docs/MODULE_INDEX.md`
 4. Read `docs/STATUS.md`

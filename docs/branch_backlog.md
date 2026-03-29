@@ -22,7 +22,7 @@ This inventory reflects the currently still open files after the control/imaging
 
 | File Or Group | Target Branch | Notes |
 | --- | --- | --- |
-| `Agents.md` | `docs/reorg-foundation-sync` | repository working rules |
+| `AGENTS.md` | `docs/reorg-foundation-sync` | repository working rules |
 | `README.md` | `docs/reorg-foundation-sync` | root orientation and structure references |
 | `docs/GlobalRoadmap.md` | `docs/reorg-foundation-sync` | master roadmap sync |
 | `docs/MODULE_INDEX.md` | `docs/reorg-foundation-sync` | module index |
@@ -187,7 +187,7 @@ Goal:
 
 Include:
 
-- `Agents.md`
+- `AGENTS.md`
 - `README.md`
 - `docs/GlobalRoadmap.md`
 - `docs/ROADMAP.md`

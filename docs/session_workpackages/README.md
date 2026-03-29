@@ -10,6 +10,8 @@ Use this folder for:
 - temporary execution plans tied to one branch or one validation effort
 - short recovery references linked from `docs/SESSION_START.md` or `docs/STATUS.md`
 
+Do not use this folder as the primary source for project prioritization. Central project-level work selection belongs in `docs/WORKPACKAGES.md`.
+
 ## Lifecycle
 
 - keep active or in-progress work packages in this folder
@@ -20,8 +22,8 @@ Use this folder for:
 
 Prefer descriptive lowercase filenames, for example:
 
-- `hardware_validation_phase_9.md`
-- `opencv_ui_block_phase_10.md`
+- `wp04_hardware_validation_phase_9.md`
+- `wp03_opencv_ui_operator_block.md`
 
 ## Recommended Structure
 

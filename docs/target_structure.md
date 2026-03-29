@@ -36,6 +36,8 @@ tools/
 - `src/camera_app/`: stable legacy implementation during migration
 - `src/vision_platform/`: new platform-facing namespace and migration surface
 
+For the stricter category decision rules and current fit guidance, use `docs/root_category_audit.md`.
+
 ## Migration Rule
 
 During this round, implementation stability has priority over physical code relocation. The platform shape is made explicit first through module ownership, documentation, and new import surfaces. Future rounds can move implementation files behind those stable module boundaries with lower risk.
