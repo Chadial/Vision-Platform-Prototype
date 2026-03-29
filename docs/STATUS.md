@@ -49,6 +49,7 @@ The repository currently provides a structured Python prototype for the vision p
 - `OverlayCompositionService` as a UI-free display composition layer that can merge active ROI plus preview/snapshot focus overlays into one shared payload
 - simulator-backed overlay-payload demo that consumes the shared payload and prints a simple console summary without committing to a concrete renderer
 - first unified camera CLI app entry point with `status`, `snapshot`, `recording`, and `interval-capture` subcommands above the existing command-controller path
+- first host-oriented CLI command envelope baseline for `status`, `snapshot`, and bounded `recording`, with stable success/failure ownership, machine-readable error payloads, and adapter-facing status serialization
 - explicit `SubsystemStatus` model with host-facing command readiness flags
 - camera status metadata that identifies hardware vs. simulation source kind and active driver name
 - external request models for configuration, save-directory changes, snapshot save, and recording start/stop
@@ -225,6 +226,7 @@ The repository currently provides a structured Python prototype for the vision p
 - deeper host-specific payload shaping is still open
 - runtime capability-aware configuration validation is now available without any UI dependency, and it automatically falls back to generic request validation when live probing is unavailable
 - a first UI-independent camera CLI baseline now exists in `vision_platform.apps.camera_cli` for explicit command-line access to status, snapshot, bounded recording, and bounded interval capture, with the first capability slice intentionally kept to `Capture`, `Camera`, and `Storage`
+- the first Host Control Closure implementation slice now also hardens that CLI path for external process use by emitting a stable command envelope for `status`, `snapshot`, and bounded `recording`, reusing the API-service status payload mapper for the polling-oriented status portion, and exposing a minimal `code` / `message` / `details` error shape plus small confirmed-settings subsets for experiment traceability
 
 ### Validation
 

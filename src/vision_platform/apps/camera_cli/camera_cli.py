@@ -4,6 +4,7 @@ import argparse
 import json
 from dataclasses import asdict, dataclass, is_dataclass
 from pathlib import Path
+import sys
 from time import sleep
 from typing import Any, Sequence
 
@@ -19,6 +20,7 @@ from vision_platform.models import (
     StopRecordingRequest,
     SubsystemStatus,
 )
+from vision_platform.services.api_service import map_subsystem_status_to_api_payload
 
 
 @dataclass(slots=True)
@@ -26,12 +28,33 @@ class CameraCliResult:
     operation: str
     source: str
     status: SubsystemStatus
+    result: Any = None
     snapshot_path: Path | None = None
     selected_save_directory: Path | None = None
 
 
+@dataclass(slots=True)
+class CameraCliError(Exception):
+    error_type: str
+    message: str
+    exit_code: int = 1
+    details: dict[str, Any] | None = None
+
+    def __str__(self) -> str:
+        return self.message
+
+
+class CameraCliArgumentParser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise CameraCliError(
+            error_type="argument_error",
+            message=message,
+            exit_code=2,
+        )
+
+
 def build_argument_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = CameraCliArgumentParser(
         description="Run camera-oriented platform commands from one consistent CLI surface.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -95,8 +118,25 @@ def run_cli(argv: Sequence[str] | None = None) -> CameraCliResult:
 
 def main(argv: Sequence[str] | None = None) -> int:
     configure_logging()
-    result = run_cli(argv)
-    print(json.dumps(_to_serializable(result), indent=2, sort_keys=True))
+    try:
+        result = run_cli(argv)
+    except CameraCliError as exc:
+        _emit_envelope(_build_error_envelope(exc), stream=sys.stderr)
+        return exc.exit_code
+    except Exception as exc:
+        _emit_envelope(
+            _build_error_envelope(
+                CameraCliError(
+                    error_type="command_error",
+                    message=str(exc),
+                    exit_code=1,
+                )
+            ),
+            stream=sys.stderr,
+        )
+        return 1
+
+    _emit_envelope(_build_success_envelope(result), stream=sys.stdout)
     return 0
 
 
@@ -111,6 +151,10 @@ def _handle_status_command(
         operation="status",
         source=args.source,
         status=status,
+        result={
+            "status_source": "poll",
+            "confirmed_settings": _build_confirmed_settings(status),
+        },
     )
 
 
@@ -127,10 +171,16 @@ def _handle_snapshot_command(
             file_extension=args.file_extension,
         )
     )
+    status = controller.get_status()
     return CameraCliResult(
         operation="snapshot",
         source=args.source,
-        status=controller.get_status(),
+        status=status,
+        result={
+            "saved_path": snapshot_result.saved_path,
+            "selected_save_directory": selected_save_directory,
+            "confirmed_settings": _build_confirmed_settings(status),
+        },
         snapshot_path=snapshot_result.saved_path,
         selected_save_directory=selected_save_directory,
     )
@@ -180,11 +230,23 @@ def _handle_recording_command(
         )
     )
     _wait_for_recording_completion(controller)
-    controller.stop_recording(StopRecordingRequest())
+    recording_result = controller.stop_recording(StopRecordingRequest(reason="bounded_completion"))
+    status = controller.get_status()
     return CameraCliResult(
         operation="recording",
         source=args.source,
-        status=controller.get_status(),
+        status=status,
+        result={
+            "selected_save_directory": selected_save_directory,
+            "frames_written": status.recording.frames_written,
+            "stop_reason": recording_result.stop_reason,
+            "recording_bounds": {
+                "frame_limit": args.frame_limit,
+                "duration_seconds": args.duration_seconds,
+                "target_frame_rate": args.target_frame_rate,
+            },
+            "confirmed_settings": _build_confirmed_settings(status),
+        },
         selected_save_directory=selected_save_directory,
     )
 
@@ -276,6 +338,45 @@ def _validate_argument_combinations(parser: argparse.ArgumentParser, args: argpa
     if getattr(args, "command", None) == "recording":
         if args.frame_limit is None and args.duration_seconds is None:
             parser.error("recording requires --frame-limit or --duration-seconds.")
+
+
+def _build_success_envelope(result: CameraCliResult) -> dict[str, Any]:
+    return {
+        "success": True,
+        "command": result.operation,
+        "source": result.source,
+        "result": _to_serializable(result.result),
+        "status": _to_serializable(map_subsystem_status_to_api_payload(result.status)),
+        "error": None,
+    }
+
+
+def _build_error_envelope(error: CameraCliError) -> dict[str, Any]:
+    return {
+        "success": False,
+        "command": None,
+        "source": None,
+        "result": None,
+        "status": None,
+        "error": {
+            "code": error.error_type,
+            "message": error.message,
+            "details": _to_serializable(error.details),
+        },
+    }
+
+
+def _emit_envelope(payload: dict[str, Any], stream) -> None:
+    print(json.dumps(_to_serializable(payload), indent=2, sort_keys=True), file=stream)
+
+
+def _build_confirmed_settings(status: SubsystemStatus) -> dict[str, Any]:
+    configuration = status.configuration
+    return {
+        "camera_id": status.camera.camera_id,
+        "pixel_format": configuration.pixel_format if configuration is not None else None,
+        "exposure_time_us": configuration.exposure_time_us if configuration is not None else None,
+    }
 
 
 def _add_common_camera_arguments(parser: argparse.ArgumentParser) -> None:
