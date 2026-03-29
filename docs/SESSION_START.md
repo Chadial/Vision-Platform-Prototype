@@ -51,7 +51,7 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Priority
 
 1. Keep the Python core stable and understandable.
-2. Next establish the first tracking-core baseline now that the ROI/focus MVP boundary is explicit.
+2. Next prepare the first API surface above the now-explicit ROI/focus/tracking MVP boundary.
 3. Keep any further OpenCV work separate and only in the UI/display-facing layer.
 4. Continue documenting verified state and next steps as features land.
 5. Broaden real-hardware validation when practical.
@@ -99,7 +99,7 @@ Read these for every new session:
 - For host-neutral command-surface follow-up work:
   - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
 - For the next regular analysis-boundary work:
-  - `docs/session_workpackages/wp07_tracking_core_baseline.md`
+  - `docs/session_workpackages/wp08_api_surface_preparation.md`
 
 ## Working Defaults
 
