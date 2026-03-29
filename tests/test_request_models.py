@@ -4,8 +4,11 @@ import unittest
 from tests import _path_setup
 from vision_platform.models import (
     ApplyConfigurationRequest,
+    CameraConfiguration,
     IntervalCaptureRequest,
+    RecordingRequest,
     SaveSnapshotRequest,
+    SnapshotRequest,
     SetSaveDirectoryRequest,
     StartIntervalCaptureRequest,
     StartRecordingRequest,
@@ -35,6 +38,29 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(configuration.roi_offset_y, 20)
         self.assertEqual(configuration.roi_width, 640)
         self.assertEqual(configuration.roi_height, 480)
+
+    def test_apply_configuration_request_can_be_created_from_camera_configuration(self) -> None:
+        configuration = CameraConfiguration(
+            exposure_time_us=1250.0,
+            gain=2.5,
+            pixel_format="Mono10",
+            acquisition_frame_rate=8.0,
+            roi_offset_x=4,
+            roi_offset_y=6,
+            roi_width=800,
+            roi_height=600,
+        )
+
+        request = ApplyConfigurationRequest.from_camera_configuration(configuration)
+
+        self.assertEqual(request.exposure_time_us, 1250.0)
+        self.assertEqual(request.gain, 2.5)
+        self.assertEqual(request.pixel_format, "Mono10")
+        self.assertEqual(request.acquisition_frame_rate, 8.0)
+        self.assertEqual(request.roi_offset_x, 4)
+        self.assertEqual(request.roi_offset_y, 6)
+        self.assertEqual(request.roi_width, 800)
+        self.assertEqual(request.roi_height, 600)
 
     def test_set_save_directory_request_resolves_append_mode(self) -> None:
         request = SetSaveDirectoryRequest(base_directory=Path("captures"), mode="append")
@@ -81,6 +107,23 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(snapshot_request.save_directory, Path("captures"))
         self.assertEqual(snapshot_request.camera_id, "cam2")
 
+    def test_save_snapshot_request_can_be_created_from_snapshot_request(self) -> None:
+        snapshot_request = SnapshotRequest(
+            save_directory=Path("captures"),
+            file_stem="snapshot_002",
+            file_extension=".raw",
+            create_directories=False,
+            camera_id="cam3",
+        )
+
+        request = SaveSnapshotRequest.from_snapshot_request(snapshot_request)
+
+        self.assertEqual(request.file_stem, "snapshot_002")
+        self.assertEqual(request.file_extension, ".raw")
+        self.assertEqual(request.save_directory, Path("captures"))
+        self.assertFalse(request.create_directories)
+        self.assertEqual(request.camera_id, "cam3")
+
     def test_start_recording_request_maps_to_recording_request(self) -> None:
         request = StartRecordingRequest(
             file_stem="series_001",
@@ -103,6 +146,31 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(recording_request.target_frame_rate, 12.5)
         self.assertEqual(recording_request.queue_size, 16)
         self.assertEqual(recording_request.camera_id, "cam2")
+
+    def test_start_recording_request_can_be_created_from_recording_request(self) -> None:
+        recording_request = RecordingRequest(
+            save_directory=Path("captures"),
+            file_stem="series_002",
+            file_extension=".raw",
+            frame_limit=30,
+            duration_seconds=3.0,
+            target_frame_rate=10.0,
+            queue_size=32,
+            create_directories=False,
+            camera_id="cam4",
+        )
+
+        request = StartRecordingRequest.from_recording_request(recording_request)
+
+        self.assertEqual(request.file_stem, "series_002")
+        self.assertEqual(request.file_extension, ".raw")
+        self.assertEqual(request.save_directory, Path("captures"))
+        self.assertEqual(request.max_frame_count, 30)
+        self.assertEqual(request.duration_seconds, 3.0)
+        self.assertEqual(request.target_frame_rate, 10.0)
+        self.assertEqual(request.queue_size, 32)
+        self.assertFalse(request.create_directories)
+        self.assertEqual(request.camera_id, "cam4")
 
     def test_interval_capture_request_stores_expected_fields(self) -> None:
         request = IntervalCaptureRequest(
@@ -143,6 +211,29 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(interval_capture_request.max_frame_count, 5)
         self.assertEqual(interval_capture_request.duration_seconds, 10.0)
         self.assertEqual(interval_capture_request.camera_id, "cam2")
+
+    def test_start_interval_capture_request_can_be_created_from_interval_capture_request(self) -> None:
+        interval_capture_request = IntervalCaptureRequest(
+            save_directory=Path("captures"),
+            file_stem="interval_002",
+            interval_seconds=0.5,
+            file_extension=".raw",
+            max_frame_count=9,
+            duration_seconds=4.0,
+            create_directories=False,
+            camera_id="cam5",
+        )
+
+        request = StartIntervalCaptureRequest.from_interval_capture_request(interval_capture_request)
+
+        self.assertEqual(request.file_stem, "interval_002")
+        self.assertEqual(request.interval_seconds, 0.5)
+        self.assertEqual(request.file_extension, ".raw")
+        self.assertEqual(request.save_directory, Path("captures"))
+        self.assertEqual(request.max_frame_count, 9)
+        self.assertEqual(request.duration_seconds, 4.0)
+        self.assertFalse(request.create_directories)
+        self.assertEqual(request.camera_id, "cam5")
 
 
 if __name__ == "__main__":

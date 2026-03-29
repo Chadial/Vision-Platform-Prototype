@@ -66,7 +66,7 @@ class CommandController:
         validate_camera_configuration(config)
         self._configuration_validation_service.validate(config, self._get_effective_capability_profile())
         self._camera_service.apply_configuration(config)
-        return ApplyConfigurationCommandResult(applied_configuration=config)
+        return ApplyConfigurationCommandResult.from_applied_configuration(config)
 
     def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
         self._capability_profile = capability_profile
@@ -76,7 +76,9 @@ class CommandController:
             validate_save_directory_request(path)
             path = path.resolve_directory()
         self._default_save_directory = path
-        return SaveDirectoryCommandResult(selected_directory=path, was_cleared=path is None)
+        if path is None:
+            return SaveDirectoryCommandResult.cleared()
+        return SaveDirectoryCommandResult.selected(path)
 
     def save_snapshot(self, request: SnapshotRequest | SaveSnapshotRequest) -> SnapshotCommandResult:
         if isinstance(request, SaveSnapshotRequest):
@@ -84,7 +86,7 @@ class CommandController:
         self._require_initialized_camera("save a snapshot")
         validate_snapshot_request(request)
         saved_path = self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
-        return SnapshotCommandResult(saved_path=saved_path)
+        return SnapshotCommandResult.from_saved_path(saved_path)
 
     def start_recording(self, request: RecordingRequest | StartRecordingRequest) -> RecordingCommandResult:
         if isinstance(request, StartRecordingRequest):
@@ -92,12 +94,12 @@ class CommandController:
         self._require_initialized_camera("start recording")
         validate_recording_request(request)
         status = self._recording_service.start_recording(self._resolve_recording_request(request))
-        return RecordingCommandResult(status=status)
+        return RecordingCommandResult.from_status(status)
 
     def stop_recording(self, request: StopRecordingRequest | None = None) -> RecordingCommandResult:
         stop_request = request or StopRecordingRequest()
-        return RecordingCommandResult(
-            status=self._recording_service.stop_recording(),
+        return RecordingCommandResult.from_status(
+            self._recording_service.stop_recording(),
             stop_reason=stop_request.reason,
         )
 
@@ -112,7 +114,7 @@ class CommandController:
         self._require_initialized_camera("start interval capture")
         validate_interval_capture_request(request)
         status = self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
-        return IntervalCaptureCommandResult(status=status)
+        return IntervalCaptureCommandResult.from_status(status)
 
     def stop_interval_capture(
         self,
@@ -121,8 +123,8 @@ class CommandController:
         if self._interval_capture_service is None:
             raise RuntimeError("Interval capture service is not configured.")
         stop_request = request or StopIntervalCaptureRequest()
-        return IntervalCaptureCommandResult(
-            status=self._interval_capture_service.stop_capture(),
+        return IntervalCaptureCommandResult.from_status(
+            self._interval_capture_service.stop_capture(),
             stop_reason=stop_request.reason,
         )
 

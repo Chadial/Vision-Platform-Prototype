@@ -15,6 +15,19 @@ class ApplyConfigurationRequest:
     roi_width: Optional[int] = None
     roi_height: Optional[int] = None
 
+    @classmethod
+    def from_camera_configuration(cls, configuration: CameraConfiguration) -> "ApplyConfigurationRequest":
+        return cls(
+            exposure_time_us=configuration.exposure_time_us,
+            gain=configuration.gain,
+            pixel_format=configuration.pixel_format,
+            acquisition_frame_rate=configuration.acquisition_frame_rate,
+            roi_offset_x=configuration.roi_offset_x,
+            roi_offset_y=configuration.roi_offset_y,
+            roi_width=configuration.roi_width,
+            roi_height=configuration.roi_height,
+        )
+
     def to_camera_configuration(self) -> CameraConfiguration:
         return CameraConfiguration(
             exposure_time_us=self.exposure_time_us,

@@ -17,6 +17,20 @@ class StartRecordingRequest:
     create_directories: bool = True
     camera_id: Optional[str] = None
 
+    @classmethod
+    def from_recording_request(cls, request: RecordingRequest) -> "StartRecordingRequest":
+        return cls(
+            file_stem=request.file_stem,
+            file_extension=request.file_extension,
+            save_directory=request.save_directory,
+            max_frame_count=request.frame_limit,
+            duration_seconds=request.duration_seconds,
+            target_frame_rate=request.target_frame_rate,
+            queue_size=request.queue_size,
+            create_directories=request.create_directories,
+            camera_id=request.camera_id,
+        )
+
     def to_recording_request(self) -> RecordingRequest:
         return RecordingRequest(
             save_directory=self.save_directory,

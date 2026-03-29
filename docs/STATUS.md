@@ -177,6 +177,7 @@ The repository currently provides a structured Python prototype for the vision p
 - `WP06` is now completed: the focus-method surface no longer only names multiple methods ahead of implementation, because `tenengrad` is now a real second evaluator path, `evaluate_focus(...)` dispatches explicitly by requested method, and preview-/snapshot-adjacent focus consumers plus the stream-service preview factory can select `laplace` or `tenengrad` explicitly without widening the UI or host-facing surface
 - `WP07` is now completed: `tracking_core` no longer only reserves future tracking space, because a first profile-based edge kernel now exists as a reusable analysis baseline under the existing ROI/frame model boundaries
 - `WP08` is now completed: `api_service` no longer only reserves future API space, because a first adapter-facing status DTO family and mapper now exist above the shared command/controller layer
+- `WP09` is now completed: adapter-facing command request DTOs now expose explicit `from_*` mapping methods in addition to their existing `to_*` methods, while typed command results now also expose named constructors for their common result shapes and the controller uses those factories instead of assembling result fields inline
 
 ## Partially Implemented
 
@@ -314,8 +315,8 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Continue with `WP-009` from `docs/WORKPACKAGES.md` to harden the contracts that are most likely to survive direct C# porting.
-2. Keep later API follow-up bounded to real adapter activation work instead of reopening the first transport-neutral DTO preparation package.
-3. Keep later ROI-related follow-up bounded to richer editing, additional ROI producers, or host-surface attachment instead of reopening the baseline workflow package.
+1. Continue with `WP-010` from `docs/WORKPACKAGES.md` to define the first bounded offline/postprocess path above the current analysis and command baselines.
+2. Keep later handover follow-up bounded to additional explicit contract clusters instead of reopening this first request/result hardening package.
+3. Keep later API follow-up bounded to real adapter activation work instead of reopening the first transport-neutral DTO preparation package.
 4. Keep any later OpenCV follow-up bounded to UI/display concerns instead of reopening the baseline operator package.
 5. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.

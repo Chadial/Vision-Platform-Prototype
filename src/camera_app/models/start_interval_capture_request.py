@@ -16,6 +16,19 @@ class StartIntervalCaptureRequest:
     create_directories: bool = True
     camera_id: Optional[str] = None
 
+    @classmethod
+    def from_interval_capture_request(cls, request: IntervalCaptureRequest) -> "StartIntervalCaptureRequest":
+        return cls(
+            file_stem=request.file_stem,
+            interval_seconds=request.interval_seconds,
+            file_extension=request.file_extension,
+            save_directory=request.save_directory,
+            max_frame_count=request.max_frame_count,
+            duration_seconds=request.duration_seconds,
+            create_directories=request.create_directories,
+            camera_id=request.camera_id,
+        )
+
     def to_interval_capture_request(self) -> IntervalCaptureRequest:
         return IntervalCaptureRequest(
             save_directory=self.save_directory,
