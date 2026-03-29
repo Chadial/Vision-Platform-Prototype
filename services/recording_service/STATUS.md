@@ -3,6 +3,7 @@
 - maturity: active core module
 - implemented: snapshot saving, snapshot-side focus capture, interval capture, recording queue, frame writer, deterministic naming
 - working now: simulator-backed snapshot/recording/interval flows and root smoke scripts
+- working now: bounded recording can now complete, start again, and recover on the same service path after a selected writer-side failure without requiring a process restart, backed by targeted simulator-first tests
 - working now: snapshot-side focus evaluation can reuse the shared ROI state path without moving ROI ownership into snapshot save logic
 - partial: trigger-based recording and full hardware validation are still open
 - known issues: recording flow still lives largely in `src/camera_app/services`, but naming and frame writing now live behind `src/vision_platform/services/recording_service`
