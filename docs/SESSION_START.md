@@ -51,8 +51,8 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Priority
 
 1. Keep the Python core stable and understandable.
-2. Next harden the host-neutral command surface unless the user explicitly redirects the session.
-3. Keep OpenCV prototype work separate and only in the UI/display-facing layer.
+2. Next consolidate the ROI workflow now that the current command-surface and bounded OpenCV follow-up slices are complete.
+3. Keep any further OpenCV work separate and only in the UI/display-facing layer.
 4. Continue documenting verified state and next steps as features land.
 5. Broaden real-hardware validation when practical.
 
@@ -93,11 +93,13 @@ Read these for every new session:
   - `docs/HARDWARE_CAPABILITIES.md`
   - `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
 - For the next OpenCV UI/operator work:
-  - `docs/session_workpackages/wp03_opencv_ui_operator_block.md`
+  - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - For camera-oriented command-surface work:
   - `docs/session_workpackages/wp01_camera_cli.md`
 - For host-neutral command-surface follow-up work:
-  - `docs/session_workpackages/wp02_host_integration_command_surface.md`
+  - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
+- For the next regular analysis-boundary work:
+  - `docs/session_workpackages/wp05_roi_workflow_consolidation.md`
 
 ## Working Defaults
 

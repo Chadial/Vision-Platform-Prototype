@@ -61,10 +61,11 @@ class OpenCvSmokeDemoTests(unittest.TestCase):
 
     def test_preview_demo_main_returns_zero(self) -> None:
         fake_result = type("Result", (), {"rendered_frames": 3, "focus_preview_state": None})()
+        print_mock = MagicMock()
         with patch("vision_platform.apps.opencv_prototype.preview_demo.configure_logging"), patch(
             "vision_platform.apps.opencv_prototype.preview_demo.run_opencv_preview_demo",
             return_value=fake_result,
-        ), patch("argparse.ArgumentParser.parse_args", return_value=type("Args", (), {
+        ), patch("builtins.print", print_mock), patch("argparse.ArgumentParser.parse_args", return_value=type("Args", (), {
             "sample_dir": None,
             "poll_interval_seconds": 0.03,
             "frame_limit": 3,
@@ -76,6 +77,11 @@ class OpenCvSmokeDemoTests(unittest.TestCase):
             result = preview_main()
 
         self.assertEqual(result, 0)
+        print_mock.assert_any_call(
+            "Preview controls: left click=select point, "
+            "i=in o=out f=fit x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit, "
+            "q/Esc or window close=quit"
+        )
 
     def test_preview_demo_main_returns_one_on_failure(self) -> None:
         print_mock = MagicMock()
@@ -120,10 +126,11 @@ class OpenCvSmokeDemoTests(unittest.TestCase):
             "rendered_frames": 3,
             "preview_frame_info": type("Info", (), {"frame_id": 1, "width": 640, "height": 480, "pixel_format": "Mono8"})(),
         })()
+        print_mock = MagicMock()
         with patch("vision_platform.apps.opencv_prototype.hardware_preview_demo.configure_logging"), patch(
             "vision_platform.apps.opencv_prototype.hardware_preview_demo.run_hardware_preview_demo",
             return_value=fake_result,
-        ), patch("argparse.ArgumentParser.parse_args", return_value=type("Args", (), {
+        ), patch("builtins.print", print_mock), patch("argparse.ArgumentParser.parse_args", return_value=type("Args", (), {
             "camera_id": None,
             "poll_interval_seconds": 0.03,
             "frame_limit": None,
@@ -135,6 +142,11 @@ class OpenCvSmokeDemoTests(unittest.TestCase):
             result = hardware_preview_main()
 
         self.assertEqual(result, 0)
+        print_mock.assert_any_call(
+            "Preview controls: left click=select point, "
+            "i=in o=out f=fit x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit, "
+            "q/Esc or window close=quit"
+        )
 
     def test_hardware_preview_demo_main_returns_one_on_failure(self) -> None:
         print_mock = MagicMock()

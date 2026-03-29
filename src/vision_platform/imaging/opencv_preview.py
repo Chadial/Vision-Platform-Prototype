@@ -173,6 +173,8 @@ class OpenCvPreviewWindow:
         self._fit_to_window = True
         self._manual_zoom_scale = None
         self._viewport_origin_scaled = (0, 0)
+        self._pan_anchor_viewport_point = None
+        self._pan_anchor_origin_scaled = None
 
     def close(self) -> None:
         if self._window_created:
@@ -277,12 +279,27 @@ class OpenCvPreviewWindow:
         focus_line = self._build_focus_status_line()
         if focus_line:
             status_lines.append(focus_line)
-        shortcut_line = "i=in o=out f=fit +=snapshot x=crosshair"
-        if self._focus_state_provider is not None:
-            shortcut_line += " y=focus"
-        shortcut_line += " r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"
+        shortcut_line = self.build_shortcut_hint(
+            has_snapshot_shortcut=self._snapshot_callback is not None,
+            has_focus_toggle=self._focus_state_provider is not None,
+        )
         status_lines.append(shortcut_line)
         return status_lines
+
+    @staticmethod
+    def build_shortcut_hint(
+        *,
+        has_snapshot_shortcut: bool,
+        has_focus_toggle: bool,
+    ) -> str:
+        shortcut_parts = ["i=in", "o=out", "f=fit"]
+        if has_snapshot_shortcut:
+            shortcut_parts.append("+=snapshot")
+        shortcut_parts.append("x=crosshair")
+        if has_focus_toggle:
+            shortcut_parts.append("y=focus")
+        shortcut_parts.extend(["r=rect", "e=ellipse", "wheel=zoom", "mdrag=pan", "c=copy", "q=quit"])
+        return " ".join(shortcut_parts)
 
     def _calculate_status_band_height(self, status_lines: list[str]) -> int:
         visible_lines = [line for line in status_lines if line]

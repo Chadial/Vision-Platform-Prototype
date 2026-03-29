@@ -98,7 +98,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         self.assertEqual(len(status_lines), 2)
         self.assertIn("FIT 1.25x", status_lines[0])
         self.assertIn("WARN: Capability probe unavailable", status_lines[0])
-        self.assertEqual(status_lines[1], "i=in o=out f=fit +=snapshot x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit")
+        self.assertEqual(status_lines[1], "i=in o=out f=fit x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit")
 
     def test_status_lines_stay_clean_when_warning_provider_returns_none(self) -> None:
         preview_service = MagicMock()
@@ -110,7 +110,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
 
         status_lines = window._build_status_lines()
 
-        self.assertEqual(status_lines, ["FIT 1.25x", "i=in o=out f=fit +=snapshot x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"])
+        self.assertEqual(status_lines, ["FIT 1.25x", "i=in o=out f=fit x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"])
 
     def test_status_lines_include_fps_when_multiple_renders_were_recorded(self) -> None:
         preview_service = MagicMock()
@@ -249,7 +249,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         hidden_lines = window._build_status_lines()
 
         self.assertIn("Focus: laplace=12.34", visible_lines)
-        self.assertEqual(hidden_lines, ["FIT 1.00x | Focus hidden", "i=in o=out f=fit +=snapshot x=crosshair y=focus r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"])
+        self.assertEqual(hidden_lines, ["FIT 1.00x | Focus hidden", "i=in o=out f=fit x=crosshair y=focus r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"])
 
     def test_r_and_e_shortcuts_toggle_roi_entry_modes(self) -> None:
         preview_service = MagicMock()
@@ -267,7 +267,16 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         self.assertIn("ROI mode: rectangle", rectangle_lines[1])
         self.assertIn("ROI mode set to ellipse", ellipse_lines[0])
         self.assertIn("ROI mode: ellipse", ellipse_lines[1])
-        self.assertEqual(cleared_lines, ["FIT 1.00x | ROI mode cleared", "i=in o=out f=fit +=snapshot x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"])
+        self.assertEqual(cleared_lines, ["FIT 1.00x | ROI mode cleared", "i=in o=out f=fit x=crosshair r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"])
+
+    def test_status_lines_include_snapshot_shortcut_only_when_snapshot_callback_exists(self) -> None:
+        preview_service = MagicMock()
+        window = OpenCvPreviewWindow(preview_service, snapshot_callback=MagicMock())
+        window._last_display_scale = 1.0
+
+        status_lines = window._build_status_lines()
+
+        self.assertIn("+=snapshot", status_lines[1])
 
     def test_rectangle_roi_is_created_on_second_click_and_pushed_to_roi_state_service(self) -> None:
         preview_service = MagicMock()
@@ -483,6 +492,25 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         window._handle_mouse_event(event=2, x=30, y=40)
 
         self.assertEqual(window._last_status_message, "Pan unavailable in fit mode")
+
+    def test_enable_fit_to_window_clears_active_pan_state(self) -> None:
+        preview_service = MagicMock()
+        window = OpenCvPreviewWindow(preview_service)
+        window._fit_to_window = False
+        window._manual_zoom_scale = 2.0
+        window._viewport_origin_scaled = (40, 50)
+        window._pan_anchor_viewport_point = (30, 40)
+        window._pan_anchor_origin_scaled = (40, 50)
+
+        window.enable_fit_to_window()
+        pan_updated = window._update_pan((20, 25))
+
+        self.assertTrue(window.is_fit_to_window_enabled)
+        self.assertIsNone(window.manual_zoom_scale)
+        self.assertEqual(window._viewport_origin_scaled, (0, 0))
+        self.assertIsNone(window._pan_anchor_viewport_point)
+        self.assertIsNone(window._pan_anchor_origin_scaled)
+        self.assertFalse(pan_updated)
 
 
 if __name__ == "__main__":

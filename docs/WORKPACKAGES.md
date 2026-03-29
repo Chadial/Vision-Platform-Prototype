@@ -128,8 +128,8 @@ This is the current PM overview of work packages to activate or defer.
 | PM Order | Work Package | Purpose | Activation State | Priority | Detailed File |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Camera CLI Baseline Narrowing | keep the CLI intentionally thin and stable over the shared control layer | dormant | active baseline, not primary next package | `docs/session_workpackages/wp01_camera_cli.md` |
-| 2 | Host Integration Command Surface | harden the shared host-neutral command surface for later CLI, API, and C# embedding reuse | current next | next primary package | `docs/session_workpackages/wp02_host_integration_command_surface.md` |
-| 3 | OpenCV UI Operator Follow-Up | continue bounded UI/operator work without leaking screen concerns into core services | active lane | secondary active lane | `docs/session_workpackages/wp03_opencv_ui_operator_block.md` |
+| 2 | Host Integration Command Surface | harden the shared host-neutral command surface for later CLI, API, and C# embedding reuse | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp02_host_integration_command_surface.md` |
+| 3 | OpenCV UI Operator Follow-Up | continue bounded UI/operator work without leaking screen concerns into core services | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md` |
 | 4 | Hardware Revalidation Follow-Up | re-run selected hardware checks and capture new evidence when hardware is attached again | conditional | conditional / deferred until hardware is attached | `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md` |
 | 5 | ROI Workflow Consolidation | define ownership and reuse of ROI state across preview, snapshot, and analysis | queued | next package after current control/UI stabilization | `docs/session_workpackages/wp05_roi_workflow_consolidation.md` |
 | 6 | Focus Method Expansion | add a stronger focus-method slice beyond the current baseline | queued | after ROI workflow consolidation | `docs/session_workpackages/wp06_focus_method_expansion.md` |
@@ -143,14 +143,16 @@ This is the current PM overview of work packages to activate or defer.
 
 These are the work packages PM should treat as the current actionable backlog:
 
-1. `Host Integration Command Surface`
-2. `OpenCV UI Operator Follow-Up`
-3. `ROI Workflow Consolidation`
+1. `ROI Workflow Consolidation`
+2. `Focus Method Expansion`
+3. `Tracking Core Baseline`
 
 These are important but should not be treated as the main always-on stream:
 
 1. `Camera CLI Baseline Narrowing`
 2. `Hardware Revalidation Follow-Up`
+3. `Host Integration Command Surface`
+4. `OpenCV UI Operator Follow-Up`
 
 These should remain queued behind the above:
 
@@ -230,25 +232,23 @@ Detailed work-package files:
 The current coarse PM order should be:
 
 1. treat the CLI baseline as intentionally narrow unless a concrete defect appears
-2. activate the host-integration command-surface package as the next core-control package
-3. keep OpenCV UI work in a separate UI-owned lane
-4. use hardware validation as a revalidation package when hardware is attached, not as the main always-active stream
-5. after that, activate the ROI workflow package
-6. then activate the focus expansion package
-7. only then open the next tracking or API preparation package
+2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
+3. use hardware validation as a revalidation package when hardware is attached, not as the main always-active stream
+4. activate the ROI workflow package as the next regular package
+5. then activate the focus expansion package
+6. only then open the next tracking or API preparation package
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp02_host_integration_command_surface.md`
+- `docs/session_workpackages/wp05_roi_workflow_consolidation.md`
 
 Reason:
 
-- it best matches the current strategic order in `docs/NEXT_SESSION_ORDER.md`
-- it follows the already established narrow CLI baseline
-- it improves the host-neutral control layer that later CLI, API, and C# embedding all depend on
-- it is smaller and less architecture-risky than jumping directly to API, tracking, or broader frontend work
+- the current control-surface and bounded OpenCV UI follow-up packages are now completed
+- the current recommended order already places ROI workflow consolidation after control/UI stabilization
+- it stays within existing module boundaries and advances the next analysis-MVP boundary without opening API or frontend expansion prematurely
 
 ## Fresh Agent Decision Rule
 
@@ -266,8 +266,8 @@ When a fresh agent is not explicitly assigned a package:
 The repository now has explicit detailed session work-package files for all currently identified packages:
 
 - `docs/session_workpackages/wp01_camera_cli.md`
-- `docs/session_workpackages/wp02_host_integration_command_surface.md`
-- `docs/session_workpackages/wp03_opencv_ui_operator_block.md`
+- `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
+- `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `docs/session_workpackages/wp05_roi_workflow_consolidation.md`
 - `docs/session_workpackages/wp06_focus_method_expansion.md`
