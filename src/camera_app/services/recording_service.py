@@ -18,11 +18,12 @@ from camera_app.storage.file_naming import build_recording_frame_path, build_rec
 from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_recording_request
 from vision_platform.services.recording_service.traceability import (
-    append_recording_trace_image_row,
-    append_recording_trace_run_end,
-    append_recording_trace_run_start,
-    open_recording_trace_log,
-    resolve_recording_trace_log_path,
+    append_trace_image_row,
+    append_trace_run_end,
+    append_trace_run_start,
+    build_recording_stable_context,
+    open_trace_log,
+    resolve_trace_log_path,
 )
 
 
@@ -249,18 +250,23 @@ class RecordingService:
 
     def _open_traceability_log(self, request: RecordingRequest) -> None:
         configuration = self._configuration_provider() if self._configuration_provider is not None else None
-        log_path, reused_existing_log, _stable_context = resolve_recording_trace_log_path(request, configuration)
-        self._trace_log_handle, self._trace_log_writer = open_recording_trace_log(
+        stable_context = build_recording_stable_context(request, configuration)
+        log_path, reused_existing_log = resolve_trace_log_path(request.save_directory, stable_context)
+        self._trace_log_handle, self._trace_log_writer = open_trace_log(
             log_path,
-            _stable_context,
+            stable_context,
             reused_existing_log=reused_existing_log,
         )
         self._trace_run_id = f"{request.file_stem}@{self._recording_session_started_utc or self._current_system_time_utc()}"
-        append_recording_trace_run_start(
+        append_trace_run_start(
             self._trace_log_handle,
+            "bounded_recording",
             self._trace_run_id,
-            request,
+            request.file_stem,
             self._recording_session_started_utc,
+            request.frame_limit,
+            request.duration_seconds,
+            request.target_frame_rate,
         )
 
     def _build_recording_log_metadata(
@@ -329,9 +335,10 @@ class RecordingService:
         if self._trace_log_writer is None or self._trace_log_handle is None or self._trace_run_id is None:
             raise RuntimeError("Recording traceability log is not initialized.")
 
-        append_recording_trace_image_row(
+        append_trace_image_row(
             self._trace_log_writer,
             self._trace_log_handle,
+            "bounded_recording",
             self._trace_run_id,
             image_name,
             frame,
@@ -371,10 +378,13 @@ class RecordingService:
             end_state = "failed" if final_status.last_error else "completed"
             if active_request is not None and self._trace_log_handle is not None and self._trace_run_id is not None:
                 try:
-                    append_recording_trace_run_end(
+                    append_trace_run_end(
                         self._trace_log_handle,
+                        "bounded_recording",
                         self._trace_run_id,
-                        final_status,
+                        final_status.frames_written,
+                        final_status.dropped_frames,
+                        final_status.last_error,
                         session_end_utc,
                         end_state,
                     )
