@@ -51,11 +51,12 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Priority
 
 1. Keep the Python core stable and understandable.
-2. Use `Host Control Closure` as the current default planning lane, with `docs/session_workpackages/wp12_host_control_closure.md` as the first execution-ready slice.
-3. Open an additional frontend package only when another shell beyond the current OpenCV prototype is actually needed.
-4. Keep any further OpenCV work separate and only in the UI/display-facing layer.
-5. Continue documenting verified state and next steps as features land.
-6. Broaden real-hardware validation when practical.
+2. Treat `Host Control Closure`, `Experiment Reliability Closure`, and the first `Data And Logging Closure` slice as landed baseline hardening.
+3. Use `Offline And Measurement Closure` as the current default planning lane; derive its first detailed session package on activation.
+4. Open an additional frontend package only when another shell beyond the current OpenCV prototype is actually needed.
+5. Keep any further OpenCV work separate and only in the UI/display-facing layer.
+6. Continue documenting verified state and next steps as features land.
+7. Broaden real-hardware validation when practical.
 
 ## Mandatory Reads
 

@@ -17,6 +17,30 @@ class _FakeRawFrame:
 
 
 class SnapshotServiceTests(unittest.TestCase):
+    def test_save_snapshot_writes_bmp_for_supported_visible_format(self) -> None:
+        fake_driver = MagicMock()
+        fake_driver.capture_snapshot.return_value = CapturedFrame(
+            raw_frame=_FakeRawFrame(bytes([0, 127, 200, 255])),
+            width=2,
+            height=2,
+            frame_id=8,
+            pixel_format="Mono8",
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            request = SnapshotRequest(
+                save_directory=Path(temp_dir),
+                file_stem="capture_001",
+                file_extension=".bmp",
+            )
+
+            saved_path = SnapshotService(fake_driver).save_snapshot(request)
+
+            self.assertEqual(saved_path, Path(temp_dir) / "capture_001.bmp")
+            self.assertTrue(saved_path.exists())
+            self.assertEqual(saved_path.read_bytes()[:2], b"BM")
+            fake_driver.capture_snapshot.assert_called_once_with()
+
     def test_save_snapshot_captures_frame_and_writes_to_explicit_path(self) -> None:
         fake_driver = MagicMock()
         fake_driver.capture_snapshot.return_value = CapturedFrame(

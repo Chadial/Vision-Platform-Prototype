@@ -28,6 +28,40 @@ class _FakeOpenCvAdapter:
 
 
 class FrameWriterTests(unittest.TestCase):
+    def test_write_frame_creates_bmp_file_for_mono8_frame(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(bytes([0, 127, 200, 255])),
+            width=2,
+            height=2,
+            pixel_format="Mono8",
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            target_path = Path(temp_dir) / "snapshot.bmp"
+
+            saved_path = FrameWriter().write_frame(frame, target_path)
+
+            self.assertEqual(saved_path, target_path)
+            self.assertTrue(target_path.exists())
+            self.assertEqual(target_path.read_bytes()[:2], b"BM")
+
+    def test_write_frame_creates_bmp_file_for_rgb8_frame(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(bytes([255, 0, 0, 0, 255, 0])),
+            width=2,
+            height=1,
+            pixel_format="Rgb8",
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            target_path = Path(temp_dir) / "snapshot.bmp"
+
+            saved_path = FrameWriter().write_frame(frame, target_path)
+
+            self.assertEqual(saved_path, target_path)
+            self.assertTrue(target_path.exists())
+            self.assertEqual(target_path.read_bytes()[:2], b"BM")
+
     def test_write_frame_creates_png_file_for_mono8_frame(self) -> None:
         frame = CapturedFrame(
             raw_frame=_FakeRawFrame(bytes([0, 127, 200, 255])),
@@ -86,6 +120,20 @@ class FrameWriterTests(unittest.TestCase):
             target_path = Path(temp_dir) / "snapshot.png"
 
             with self.assertRaisesRegex(RuntimeError, "requires the optional OpenCV path"):
+                FrameWriter().write_frame(frame, target_path)
+
+    def test_write_frame_rejects_bmp_for_mono16(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(b"\x01\x00\x02\x00\x03\x00\x04\x00"),
+            width=2,
+            height=2,
+            pixel_format="Mono16",
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            target_path = Path(temp_dir) / "snapshot.bmp"
+
+            with self.assertRaisesRegex(RuntimeError, "not supported for BMP output"):
                 FrameWriter().write_frame(frame, target_path)
 
     def test_write_frame_uses_optional_opencv_path_for_mono16_png(self) -> None:

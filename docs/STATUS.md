@@ -19,7 +19,7 @@ Each status update should state progress and gaps against both roadmaps.
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation is no longer only simulator-backed: the March 27, 2026 hardware passes now cover an integrated command-flow baseline for snapshot save, preview readiness, interval capture from the shared preview stream, frame-limit recording, duration-only recording, target-frame-rate recording, supported alternate pixel format capture (`Mono10` as `.raw`), and explicit hardware-side failures for invalid camera id, unsupported pixel format, and invalid ROI increment choices on the Allied Vision `1800 U-1240m`. Phase 9 can therefore be treated as prototype-level hardware-validated for the current camera baseline, with remaining work limited to edge-case expansion rather than baseline viability. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes, and this branch now adds a first unified camera-oriented CLI baseline on top of the existing controller and service layer.
 - Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls, mouse-wheel zoom, middle-drag pan, cursor-anchored zoom, top-left image anchoring, a dedicated bottom status band, FPS readout, operator toggles for crosshair and focus-status visibility, a first two-click ROI creation baseline for rectangle and ellipse with live preview, a preview-frame snapshot shortcut driven by an explicit save directory, and a first layer of concise operator-facing warning/error feedback while keeping those concerns explicitly in the UI/display layer. The shared contract layer under `libraries/common_models` now also intentionally exposes some target-facing surface ahead of full implementation, with feature readiness expected to be marked in module-local status docs. Tracking/API modules remain open, but the Python camera baseline can now be regarded as architecturally, simulator-, and prototype-level hardware-validated for the tested camera path, while this branch also introduces a UI-independent CLI surface for the already implemented capture and status operations. The next mandatory milestones against the global roadmap are to validate and narrow that CLI surface deliberately, continue the remaining operator-facing UI controls on top of the preview baseline, and follow up on remaining hardware edge cases.
-- Against `docs/WORKPACKAGES.md`: project-level prioritization now runs through the centralized work-package queue instead of many distributed module roadmaps. The earlier command-surface, bounded OpenCV UI, ROI, focus, tracking, first API-preparation, and first postprocess packages can be treated as completed baseline-hardening work, while the next project phase is now intentionally framed as an Extended MVP closure phase rather than breadth expansion. The current default next lane is `Host Control Closure`, and its first execution-ready slice is now `docs/session_workpackages/wp12_host_control_closure.md`, which narrows the immediate focus to a host-process-friendly command/result/status path for `status`, `snapshot`, and `recording`. Hardware revalidation remains conditional and should support later reliability closure slices rather than acting as the default stream on its own.
+- Against `docs/WORKPACKAGES.md`: project-level prioritization now runs through the centralized work-package queue instead of many distributed module roadmaps. The earlier command-surface, bounded OpenCV UI, ROI, focus, tracking, first API-preparation, and first postprocess packages can be treated as completed baseline-hardening work, while the next project phase is now intentionally framed as an Extended MVP closure phase rather than breadth expansion. The first `Host Control Closure` and `Experiment Reliability Closure` slices are now landed through `docs/session_workpackages/wp12_host_control_closure.md` and `docs/session_workpackages/wp13_experiment_reliability_closure.md`. This branch adds the first `Data And Logging Closure` slice through `docs/session_workpackages/wp14_data_logging_closure.md`, narrowing the immediate data/logging focus to practical visible-format support through `BMP` on the existing frame-writing path. Hardware revalidation remains conditional and should support later reliability closure slices rather than acting as the default stream on its own.
 
 ## Merge Note
 
@@ -64,6 +64,7 @@ The repository currently provides a structured Python prototype for the vision p
 - optional OpenCV hardware preview demo for local live inspection with an explicit camera id
 - integrated hardware command-flow runner for Phase 9 validation across snapshot, preview-backed interval capture, and recording
 - optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
+- dependency-free visible `BMP` output for `Mono8`, `Rgb8`, and `Bgr8` on the shared frame-writing path
 - viewport-based OpenCV preview controls for fit-to-window and zoom on large hardware frames
 - additional service hardening so preview/recording cleanup resets internal state defensively even when acquisition stop fails during recovery
 - additional shared-stream cleanup hardening so real-hardware preview-backed acquisition can shut down without Vimba X `Invalid Camera` errors after the integrated Phase 9 run
@@ -125,9 +126,9 @@ The repository currently provides a structured Python prototype for the vision p
 ### Snapshot Flow
 
 - snapshot request to target-path flow implemented
-- frame writer added for `.png`, `.raw`, and `.bin`
+- frame writer added for `.png`, `.bmp`, `.raw`, and `.bin`
 - `FrameWriter` implementation now lives in `vision_platform.services.recording_service`
-- frame writer can now use an optional OpenCV adapter for higher-bit grayscale `.png` and `.tiff`
+- frame writer can now use an optional OpenCV adapter for higher-bit grayscale `.png` and `.tiff`, while `.bmp` stays on the dependency-free writer path for `Mono8`, `Rgb8`, and `Bgr8`
 - snapshot logging added
 - snapshot smoke-test flow added
 - snapshot smoke entry point now lives in `vision_platform.apps.opencv_prototype`
@@ -160,6 +161,7 @@ The repository currently provides a structured Python prototype for the vision p
 - target-frame-rate pacing implemented for recording requests
 - recording state and error tracking implemented
 - repeated bounded recording invocation and reuse after a selected writer-side failure are now explicitly covered by simulator-backed reliability tests on the same service path
+- the first `Data And Logging Closure` slice now explicitly covers `BMP` as an additional practical visible output format on the shared writer path
 
 ### Focus And ROI Foundations
 
@@ -248,6 +250,7 @@ The repository currently provides a structured Python prototype for the vision p
 - snapshot smoke execution now rejects partially injected service dependencies to avoid inconsistent test and demo wiring
 - simulated demo and command-flow demo now return a shared typed result model instead of loosely shaped dictionaries
 - frame output validation now rejects unsupported pixel-format and file-extension combinations such as RGB-to-TIFF before writing
+- frame output validation now also accepts `.bmp` only for `Mono8`, `Rgb8`, and `Bgr8`, while rejecting unsupported combinations such as `Mono16` to `BMP`
 - dedicated OpenCV smoke-demo tests now verify the preview and save demo entry points against the simulator-backed path
 - preview and recording cleanup now preserve stable service state even when `stop_acquisition()` itself fails during shutdown or recovery
 - additional tests now verify that startup failures keep their original exception even if cleanup also fails afterwards
@@ -320,7 +323,7 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Use `docs/session_workpackages/wp13_experiment_reliability_closure.md` as the current default next implementation package until the repository-level queue is advanced to the next closure slice.
-2. Treat the first bounded-recording restart/recovery reliability slice as simulator-backed baseline evidence, then move toward `Data And Logging Closure` or a later hardware-backed reliability follow-up instead of reopening frontend breadth.
+1. Treat `docs/session_workpackages/wp14_data_logging_closure.md` as the landed first `Data And Logging Closure` slice and derive the first `Offline And Measurement Closure` package on activation.
+2. Use the `BMP` visible-format slice as landed baseline evidence for `Data And Logging Closure`, then move toward one narrow offline-usefulness proof instead of reopening frontend breadth.
 3. Keep later postprocess, API, and handover follow-up bounded to explicit later closure slices rather than reopening those earlier baseline packages opportunistically.
 4. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.
