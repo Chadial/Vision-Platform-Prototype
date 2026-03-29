@@ -127,7 +127,7 @@ This is the current PM overview of work packages to activate or defer.
 
 | PM Order | Work Package | Purpose | Activation State | Priority | Detailed File |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Camera CLI Baseline Narrowing | keep the CLI intentionally thin and stable over the shared control layer | dormant | active baseline, not primary next package | `docs/session_workpackages/wp01_camera_cli.md` |
+| 1 | Camera CLI Baseline Narrowing | keep the CLI intentionally thin and stable over the shared control layer | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp01_camera_cli.md` |
 | 2 | Host Integration Command Surface | harden the shared host-neutral command surface for later CLI, API, and C# embedding reuse | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp02_host_integration_command_surface.md` |
 | 3 | OpenCV UI Operator Follow-Up | continue bounded UI/operator work without leaking screen concerns into core services | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md` |
 | 4 | Hardware Revalidation Follow-Up | re-run selected hardware checks and capture new evidence when hardware is attached again | conditional | conditional / deferred until hardware is attached | `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md` |
@@ -147,8 +147,8 @@ These are the work packages PM should treat as the current actionable backlog:
 
 These are important but should not be treated as the main always-on stream:
 
-1. `Camera CLI Baseline Narrowing`
-2. `Hardware Revalidation Follow-Up`
+1. `Hardware Revalidation Follow-Up`
+2. `Camera CLI Baseline Narrowing`
 3. `Host Integration Command Surface`
 4. `OpenCV UI Operator Follow-Up`
 
@@ -170,7 +170,7 @@ Goal:
 
 Detailed work-package files:
 
-- `docs/session_workpackages/wp01_camera_cli.md`
+- `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/session_workpackages/wp02_host_integration_command_surface.md`
 - `docs/session_workpackages/wp03_opencv_ui_operator_block.md`
 - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
@@ -258,7 +258,7 @@ When a fresh agent is not explicitly assigned a package:
 
 The repository now has explicit detailed session work-package files for all currently identified packages:
 
-- `docs/session_workpackages/wp01_camera_cli.md`
+- `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
 - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
