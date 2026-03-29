@@ -38,6 +38,7 @@
   - the zoom-mode status line now also includes the current `view=x,y` viewport origin so operator pan checks remain understandable even under very dark hardware-preview conditions
   - shortcut hint text in the status band and preview-demo startup output is now capability-aware, so preview paths without snapshot-save wiring or focus wiring no longer advertise those controls as if they were available
   - returning to fit-to-window now also clears any active pan anchor state so stale drag state does not survive a viewport mode reset
+  - committed active ROI state now comes from the shared `RoiStateService` when the preview path is wired to it, while the OpenCV window keeps only draft ROI interaction state locally until the ROI is committed
   - demo entry points now return a non-zero exit code with concise terminal-facing operator error text when preview startup fails, while common in-preview unavailable states such as missing focus, missing preview frame, unavailable snapshot path, or invalid wheel-pan context are already surfaced through the status band
 - remaining risks:
   - broader hardware-backed validation is still needed beyond the first verified live-preview path

@@ -43,6 +43,8 @@ The repository currently provides a structured Python prototype for the vision p
 - `IntervalCaptureService` for deterministic timed single-image capture from the shared live stream
 - `camera_app.bootstrap` as a small composition root for consistently wiring driver, services, stream orchestration, and command controller
 - `RoiStateService` as a small service-layer holder for one active ROI selection that preview-adjacent consumers can reuse
+- OpenCV preview ownership alignment so a wired `RoiStateService` is also the committed active ROI source for preview rendering, while the window keeps only draft ROI entry interaction state locally
+- explicit ROI precedence now lives in one shared ROI-state rule: explicit per-call ROI overrides the shared active ROI; otherwise consumers use the shared active ROI; otherwise they fall back to full-frame behavior
 - `SnapshotFocusService` as a separate snapshot-analysis consumer that can reuse the same active ROI state path without mixing focus logic into snapshot saving
 - `OverlayCompositionService` as a UI-free display composition layer that can merge active ROI plus preview/snapshot focus overlays into one shared payload
 - simulator-backed overlay-payload demo that consumes the shared payload and prints a simple console summary without committing to a concrete renderer
@@ -71,6 +73,8 @@ The repository currently provides a structured Python prototype for the vision p
 - the OpenCV hardware-preview path now also supports click-based point selection with image-space coordinate display in a dedicated bottom status band and `c`-based coordinate copy, using a reusable coordinate-export formatter that can later be reused by an embedded host GUI
 - the OpenCV preview/operator path now also keeps its shortcut hints capability-aware, so startup text and the in-window status band advertise snapshot/focus controls only when those paths are actually wired in the active preview entry point
 - the OpenCV preview/operator path now also clears active pan anchors when returning to fit-to-window, so stale drag state does not survive a viewport-mode reset
+- the ROI workflow consolidation package is now completed: when the OpenCV preview path is wired to `RoiStateService`, that service now acts as the committed active ROI source for preview rendering as well as downstream preview-focus, snapshot-focus, and overlay-composition consumers
+- ROI workflow precedence is now also explicit and shared through `RoiStateService.resolve_active_roi(...)`, so ROI-consuming services no longer each restate that fallback rule privately
 - new repository-level module workspaces for apps, integrations, services, and libraries
 - new `src/vision_platform` namespace that exposes the current platform shape without breaking legacy `camera_app` imports
 - new shared foundation modules for common models, ROI groundwork, and focus groundwork
@@ -164,6 +168,7 @@ The repository currently provides a structured Python prototype for the vision p
 - preview-adjacent consumers can now read an active ROI through `RoiStateService`, while explicit per-call ROI still remains possible
 - snapshot-side focus consumers can now reuse the same ROI state path or override it explicitly per call
 - overlay composition is now a separate service-layer concern that can merge active ROI plus preview/snapshot focus states into one UI-free payload
+- the first `WP05` slice now aligns the OpenCV preview path with that same shared ROI ownership rule for committed ROI state, while leaving in-progress ROI drafting local to the window
 - live preview-adjacent consumers now derive focus state from preview frames, while richer metric selection and operator-facing overlay controls remain open
 
 ## Partially Implemented
@@ -302,8 +307,8 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Execute `WP-005` from `docs/WORKPACKAGES.md` to consolidate ROI ownership and reuse across preview, snapshot, and analysis paths.
-2. Execute `WP-006` from `docs/WORKPACKAGES.md` after ROI workflow consolidation to expand the focus method baseline deliberately.
+1. Execute `WP-006` from `docs/WORKPACKAGES.md` to expand the focus method baseline deliberately now that the ROI workflow boundary is explicit.
+2. Keep later ROI-related follow-up bounded to richer editing, additional ROI producers, or host-surface attachment instead of reopening the baseline workflow package.
 3. Keep any later OpenCV follow-up bounded to UI/display concerns instead of reopening the baseline operator package.
 4. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.
 5. Keep the Python core stable as the handover baseline for the later C# phase.

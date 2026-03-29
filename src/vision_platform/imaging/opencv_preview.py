@@ -78,7 +78,7 @@ class OpenCvPreviewWindow:
         self._crosshair_visible = True
         self._focus_status_visible = True
         self._roi_mode: str | None = None
-        self._active_roi: RoiDefinition | None = None
+        self._fallback_active_roi: RoiDefinition | None = None
         self._roi_anchor_point: tuple[int, int] | None = None
         self._roi_preview_point: tuple[int, int] | None = None
         self._last_cursor_viewport_point: tuple[int, int] | None = None
@@ -344,8 +344,9 @@ class OpenCvPreviewWindow:
                 preview_text = self._coordinate_export_service.format_point(*self._roi_preview_point)
                 return f"{base_line} preview={preview_text}"
             return base_line
-        if self._active_roi is not None:
-            return f"ROI active: {self._active_roi.shape}"
+        active_roi = self._get_active_roi()
+        if active_roi is not None:
+            return f"ROI active: {active_roi.shape}"
         if self._roi_mode is None:
             return None
         if self._roi_mode == "rectangle":
@@ -478,11 +479,9 @@ class OpenCvPreviewWindow:
             return
 
         roi = self._build_roi_definition(self._roi_mode, self._roi_anchor_point, selected_point)
-        self._active_roi = roi
+        self._set_active_roi(roi)
         self._roi_anchor_point = None
         self._roi_preview_point = None
-        if self._roi_state_service is not None:
-            self._roi_state_service.set_active_roi(roi)
         self._last_status_message = f"ROI saved as {roi.shape}"
 
     def _handle_roi_mouse_move(self, selected_point: tuple[int, int] | None) -> None:
@@ -512,8 +511,9 @@ class OpenCvPreviewWindow:
         draft_roi = self._build_draft_roi()
         if draft_roi is not None:
             self._draw_roi_definition(display_image, draft_roi)
-        if self._active_roi is not None:
-            self._draw_roi_definition(display_image, self._active_roi)
+        active_roi = self._get_active_roi()
+        if active_roi is not None:
+            self._draw_roi_definition(display_image, active_roi)
 
     def _draw_viewport_outline_if_needed(self, display_image) -> None:
         mapping = self._last_viewport_mapping
@@ -581,6 +581,17 @@ class OpenCvPreviewWindow:
             return
 
         self._last_status_message = f"Snapshot saved: {saved_path.name}"
+
+    def _get_active_roi(self) -> RoiDefinition | None:
+        if self._roi_state_service is not None:
+            return self._roi_state_service.get_active_roi()
+        return self._fallback_active_roi
+
+    def _set_active_roi(self, roi: RoiDefinition) -> None:
+        if self._roi_state_service is not None:
+            self._roi_state_service.set_active_roi(roi)
+            return
+        self._fallback_active_roi = roi
 
     @staticmethod
     def _copy_text_to_clipboard(text: str) -> None:

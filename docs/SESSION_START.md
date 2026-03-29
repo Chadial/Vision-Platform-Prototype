@@ -51,7 +51,7 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Priority
 
 1. Keep the Python core stable and understandable.
-2. Next consolidate the ROI workflow now that the current command-surface and bounded OpenCV follow-up slices are complete.
+2. Next expand the focus method baseline now that the ROI workflow boundary is explicit.
 3. Keep any further OpenCV work separate and only in the UI/display-facing layer.
 4. Continue documenting verified state and next steps as features land.
 5. Broaden real-hardware validation when practical.
@@ -99,7 +99,7 @@ Read these for every new session:
 - For host-neutral command-surface follow-up work:
   - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
 - For the next regular analysis-boundary work:
-  - `docs/session_workpackages/wp05_roi_workflow_consolidation.md`
+  - `docs/session_workpackages/wp06_focus_method_expansion.md`
 
 ## Working Defaults
 
