@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 import unittest
 from unittest.mock import MagicMock
 
+from tests import _path_setup
 from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.models import CapturedFrame
 from vision_platform.services.recording_service import SnapshotFocusCapture, SnapshotFocusService

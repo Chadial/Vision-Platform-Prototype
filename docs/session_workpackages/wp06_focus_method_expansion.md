@@ -31,17 +31,89 @@ Excluded:
 
 Add one reviewable focus-method slice that improves the current baseline while keeping the focus module portable and easy to hand over later.
 
+## Execution Readiness Assessment
+
+For a fresh agent, the package was directionally valid but not yet execution-ready enough:
+
+- the first concrete slice was not explicit
+- the repository already exposed multiple `FocusMethod` names, but the implementation still only had one real evaluator path
+- it was unclear whether the next slice should add a second metric or only tighten method selection
+
+The package is now refined so the next bounded slice can be chosen directly without reopening the broader focus roadmap.
+
 ## Status
 
-- current state: queued; depends on clearer ROI workflow ownership before choosing the next method slice
+- current state: active; `SP1` completed, `SP2` next
 
 ## Sub-Packages
 
-1. review current focus baseline and consumer expectations
-2. choose one next method or method-selection improvement
-3. implement the smallest useful focus expansion
-4. compare behavior against the current baseline
-5. document what is baseline versus optional
+### SP1 Tenengrad Method Baseline
+
+- Goal: add one real second focus metric and make method selection explicit inside `focus_core`
+- Scope:
+  - implement a `tenengrad` evaluator path in `focus_core`
+  - make `evaluate_focus(...)` honor `FocusRequest.method`
+  - preserve the current Laplace baseline as the default path
+- Non-Scope:
+  - UI controls for method switching
+  - broad metric bake-offs
+  - host/API-facing focus configuration
+- Validation:
+  - targeted `tests.test_focus_core`
+  - targeted preview/snapshot focus-consumer tests only if the new method path is exercised there
+- Dependencies:
+  - existing ROI workflow clarification from `WP05`
+  - existing `FocusRequest.method` contract
+- Exit Criterion:
+  - `laplace` and `tenengrad` are both real, test-covered focus methods, and `evaluate_focus(...)` selects the requested one explicitly
+
+### SP2 Method Selection Reuse In Consumers
+
+- Goal: keep preview/snapshot consumers portable once more than one focus method exists
+- Scope:
+  - decide whether consumer services should continue injecting evaluators only or accept an explicit method selector path
+  - keep any change local and avoid UI-heavy configuration
+- Non-Scope:
+  - broad host-surface contract work
+  - OpenCV menu/control expansion
+- Validation:
+  - targeted `tests.test_focus_preview_service`
+  - targeted `tests.test_snapshot_focus_service`
+- Dependencies:
+  - SP1
+- Exit Criterion:
+  - focus-consuming services have one explicit and documented way to stay compatible with multiple focus methods
+
+### SP3 Baseline Comparison And Documentation
+
+- Goal: make the baseline-versus-optional focus story reconstructible from permanent docs
+- Scope:
+  - record why `tenengrad` was selected as the next slice
+  - distinguish current baseline, secondary method support, and deferred future metric families
+- Non-Scope:
+  - new metrics beyond the selected slice
+  - roadmap reprioritization outside `WP06`
+- Validation:
+  - permanent docs match the implemented focus surface
+- Dependencies:
+  - SP1 and any SP2 outcome
+- Exit Criterion:
+  - a later agent can see which methods are implemented, which path is default, and what remains deferred
+
+### SP4 Deferred Focus Expansion Boundary
+
+- Goal: close the package without turning it into a broad focus-experiment lane
+- Scope:
+  - explicitly defer broader metric families, comparison tooling, and UI/host method switching if still open
+  - record narrow follow-up notes for later analysis packages if needed
+- Non-Scope:
+  - tracking, autofocus, or postprocess expansion
+- Validation:
+  - `WP06` remains one bounded method-expansion package
+- Dependencies:
+  - SP1 to SP3
+- Exit Criterion:
+  - no additional focus-method work remains inside this package without expanding its intended boundary
 
 ## Open Questions
 
@@ -68,6 +140,23 @@ What remains open:
 - whether one additional focus method should become the next baseline extension
 - how focus-method selection should be represented once more than one method matters
 
+Chosen first slice:
+
+- `SP1 Tenengrad Method Baseline`
+- reason: it is the smallest end-to-end slice that converts the existing multi-method contract from placeholder naming into real implemented behavior without introducing UI or host-surface scope
+
+Implemented progress:
+
+- `SP1` completed
+- `focus_core` now implements a real `tenengrad` evaluator path alongside the existing Laplace baseline
+- `evaluate_focus(...)` now dispatches explicitly through `FocusRequest.method` instead of silently treating all requests as Laplace
+- `laplace` remains the default method path when no explicit request is supplied
+- preview-facing consumers remain compatible through the existing evaluator-injection boundary, and focused tests now exercise a Tenengrad-backed preview consumer path
+
+Remaining package focus:
+
+- `SP2` should decide whether multi-method usage in preview/snapshot consumers should stay evaluator-injected only or expose a small explicit method-selection path without widening the UI or host contract
+
 ## Execution Plan
 
 1. re-read:
@@ -86,6 +175,10 @@ What remains open:
 
 - targeted focus-core tests
 - simulator-backed preview or snapshot focus tests if the selected slice affects consumers
+
+Completed validation for `SP1`:
+
+- `.\.venv\Scripts\python.exe -m unittest tests.test_focus_core tests.test_focus_preview_service tests.test_snapshot_focus_service tests.test_vision_platform_namespace`
 
 ## Documentation Updates
 

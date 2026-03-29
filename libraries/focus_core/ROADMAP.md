@@ -2,8 +2,8 @@
 
 ## Next
 
-- wire the baseline Laplace score into preview consumers without coupling UI into the core
-- define how ROI-local scoring plugs into stream and snapshot paths
+- decide whether multi-method support in preview/snapshot consumers should stay evaluator-injected or gain a small explicit selection path
+- keep `laplace` as the default path while documenting when `tenengrad` should be chosen instead
 - keep results portable enough for later C# DTOs
 
 ## Later

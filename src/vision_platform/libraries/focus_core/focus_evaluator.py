@@ -16,6 +16,17 @@ class FocusEvaluator(ABC):
         """Compute one focus score for the supplied frame."""
 
 
+def create_focus_evaluator(method: str) -> FocusEvaluator:
+    """Create the evaluator that matches one portable focus-method name."""
+
+    normalized_method = method.strip().lower()
+    if normalized_method == "laplace":
+        return LaplaceFocusEvaluator()
+    if normalized_method == "tenengrad":
+        return TenengradFocusEvaluator()
+    raise ValueError(f"Unsupported focus method '{method}'.")
+
+
 class LaplaceFocusEvaluator(FocusEvaluator):
     """Compute a manual-focus score using the variance of a discrete Laplacian."""
 
@@ -70,10 +81,65 @@ class LaplaceFocusEvaluator(FocusEvaluator):
         )
 
 
+class TenengradFocusEvaluator(FocusEvaluator):
+    """Compute a manual-focus score using mean squared Sobel gradient magnitude."""
+
+    def evaluate(self, frame: FrameData | CapturedFrame, request: FocusRequest | None = None) -> FocusResult:
+        focus_request = request or FocusRequest(method="tenengrad")
+        frame_data = _to_frame_data(frame)
+        if not focus_score_available(frame_data, focus_request):
+            return FocusResult(
+                method="tenengrad",
+                metric_name="tenengrad_mean_gradient_energy",
+                score=0.0,
+                is_valid=False,
+                roi_id=focus_request.roi.roi_id if focus_request.roi is not None else None,
+                source_frame_id=frame_data.metadata.frame_id,
+            )
+
+        intensity_plane, dynamic_range = _decode_intensity_plane(
+            data=frame_data.data or b"",
+            width=frame_data.metadata.width or 0,
+            height=frame_data.metadata.height or 0,
+            pixel_format=frame_data.metadata.pixel_format,
+        )
+        bounded_plane, mask = _apply_roi(
+            intensity_plane,
+            width=frame_data.metadata.width or 0,
+            height=frame_data.metadata.height or 0,
+            request=focus_request,
+        )
+        if bounded_plane is None or len(bounded_plane) < 3 or len(bounded_plane[0]) < 3:
+            return FocusResult(
+                method="tenengrad",
+                metric_name="tenengrad_mean_gradient_energy",
+                score=0.0,
+                is_valid=False,
+                roi_id=focus_request.roi.roi_id if focus_request.roi is not None else None,
+                source_frame_id=frame_data.metadata.frame_id,
+            )
+
+        score = _tenengrad_score(
+            bounded_plane,
+            mask=mask,
+            normalize=focus_request.normalize,
+            dynamic_range=dynamic_range,
+        )
+        return FocusResult(
+            method="tenengrad",
+            metric_name="tenengrad_mean_gradient_energy",
+            score=score,
+            is_valid=True,
+            roi_id=focus_request.roi.roi_id if focus_request.roi is not None else None,
+            source_frame_id=frame_data.metadata.frame_id,
+        )
+
+
 def evaluate_focus(frame: FrameData | CapturedFrame, request: FocusRequest | None = None) -> FocusResult:
     """Convenience entry point for the default manual-focus metric."""
 
-    return LaplaceFocusEvaluator().evaluate(frame, request=request)
+    focus_request = request or FocusRequest(method="laplace")
+    return create_focus_evaluator(focus_request.method).evaluate(frame, request=focus_request)
 
 
 def focus_score_available(frame: FrameData | CapturedFrame, request: FocusRequest) -> bool:
@@ -212,4 +278,59 @@ def _laplace_kernel_is_inside_mask(mask: list[list[bool]], x: int, y: int) -> bo
         and mask[y + 1][x]
         and mask[y][x - 1]
         and mask[y][x + 1]
+    )
+
+
+def _tenengrad_score(
+    plane: list[list[int]],
+    mask: list[list[bool]] | None,
+    normalize: bool,
+    dynamic_range: int,
+) -> float:
+    gradient_energies: list[float] = []
+    for y in range(1, len(plane) - 1):
+        previous_row = plane[y - 1]
+        current_row = plane[y]
+        next_row = plane[y + 1]
+        for x in range(1, len(current_row) - 1):
+            if mask is not None and not _sobel_kernel_is_inside_mask(mask, x=x, y=y):
+                continue
+            gradient_x = (
+                -previous_row[x - 1]
+                + previous_row[x + 1]
+                - (2 * current_row[x - 1])
+                + (2 * current_row[x + 1])
+                - next_row[x - 1]
+                + next_row[x + 1]
+            )
+            gradient_y = (
+                previous_row[x - 1]
+                + (2 * previous_row[x])
+                + previous_row[x + 1]
+                - next_row[x - 1]
+                - (2 * next_row[x])
+                - next_row[x + 1]
+            )
+            gradient_energies.append(float(gradient_x * gradient_x + gradient_y * gradient_y))
+
+    if not gradient_energies:
+        return 0.0
+
+    mean_energy = sum(gradient_energies) / len(gradient_energies)
+    if not normalize:
+        return mean_energy
+    return mean_energy / float(dynamic_range * dynamic_range)
+
+
+def _sobel_kernel_is_inside_mask(mask: list[list[bool]], x: int, y: int) -> bool:
+    return (
+        mask[y - 1][x - 1]
+        and mask[y - 1][x]
+        and mask[y - 1][x + 1]
+        and mask[y][x - 1]
+        and mask[y][x]
+        and mask[y][x + 1]
+        and mask[y + 1][x - 1]
+        and mask[y + 1][x]
+        and mask[y + 1][x + 1]
     )

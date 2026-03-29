@@ -11,7 +11,13 @@ from vision_platform.libraries.common_models import (
     RoiDefinition,
     RoiOverlayData,
 )
-from vision_platform.libraries.focus_core import LaplaceFocusEvaluator, build_focus_overlay_data, focus_score_available
+from vision_platform.libraries.focus_core import (
+    create_focus_evaluator,
+    LaplaceFocusEvaluator,
+    TenengradFocusEvaluator,
+    build_focus_overlay_data,
+    focus_score_available,
+)
 from vision_platform.libraries.roi_core import roi_bounds, roi_centroid, roi_mask, roi_pixel_bounds
 from vision_platform.services.display_service import OverlayCompositionService
 from vision_platform.services.recording_service import SnapshotFocusService, SnapshotService
@@ -54,6 +60,8 @@ class VisionPlatformNamespaceTests(unittest.TestCase):
             )
         )
         self.assertIsInstance(LaplaceFocusEvaluator(), LaplaceFocusEvaluator)
+        self.assertIsInstance(TenengradFocusEvaluator(), TenengradFocusEvaluator)
+        self.assertIsInstance(create_focus_evaluator("tenengrad"), TenengradFocusEvaluator)
         self.assertIsInstance(
             build_focus_overlay_data(
                 focus_result=LaplaceFocusEvaluator().evaluate(
