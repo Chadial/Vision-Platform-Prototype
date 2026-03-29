@@ -390,6 +390,8 @@ Use a simple trunk-based workflow.
 - keep commits focused and reviewable
 - separate structural refactors, behavior changes, tests, and docs when practical
 - merge only after relevant local validation
+- after a work-package branch is complete, validated, and scope-clean, continue through the merge flow by default instead of stopping at "ready to merge"
+- do not treat "committed" as the default stopping point when the merge gate is already satisfied
 
 Branch names must describe scope, for example:
 
@@ -398,6 +400,21 @@ Branch names must describe scope, for example:
 - `docs/centralize-workflow-governance`
 
 When git commands change repository state, run them serially and re-check branch or worktree state before the next state-changing command.
+
+Autonomous merge rule:
+
+- once a coherent work-package branch has:
+  - passed the relevant local validation
+  - updated the required permanent docs
+  - shown no unrelated worktree changes
+  - and introduced no unresolved scope conflict with the intended integration branch
+- agents should by default:
+  1. switch to the intended integration branch
+  2. re-check branch and clean worktree state
+  3. merge serially
+  4. re-check state after each merge
+  5. delete only those local topic branches that are now merged and no longer needed
+- stop for confirmation only if a merge conflict, validation failure, unclear integration target, or policy-sensitive risk appears
 
 Use `docs/git_strategy.md` as the operational source for branch, commit, and merge constraints.
 

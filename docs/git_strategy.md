@@ -105,6 +105,12 @@ Safe pattern:
 2. inspect the result with `git status --short`, `git branch --show-current`, or `git log --oneline -1` as needed
 3. only then run the next state-changing git command
 
+Apply the same pattern to merge cleanup:
+
+1. merge one branch
+2. inspect the result
+3. only then merge the next branch or delete the merged topic branch
+
 ## Expected Branch Flow
 
 For a normal work package:
@@ -114,8 +120,32 @@ For a normal work package:
 3. add or update tests for the touched scope
 4. update docs if status, structure, or roadmap changed
 5. run local validation
-6. merge only when the branch is internally consistent
+6. if the branch is internally consistent, continue through merge rather than stopping at a "ready" state
 7. delete the local topic branch after merge unless there is a deliberate short-term reason to keep it
+
+## Autonomous Merge Rule
+
+Default behavior after a completed work package is:
+
+1. validate the touched scope
+2. confirm the worktree is clean on the topic branch
+3. confirm the intended integration branch is clear
+4. switch to the integration branch and re-check state
+5. merge serially
+6. re-check `git status --short` and `git log --oneline -1` after each merge
+7. delete only those local topic branches that are now merged and not still needed for another immediate branch flow
+
+Do not stop at "final commit" by default when the branch already satisfies its merge gate.
+
+Ask for confirmation before merge only when one of these applies:
+
+- the intended integration branch is unclear
+- merge conflicts appear
+- the branch includes unresolved mixed scope
+- required validation is missing or failed
+- there is an explicit review, release, or hold requirement for that branch
+
+If none of those conditions apply, agents should proceed through the merge autonomously.
 
 ## Required Validation Before Merge
 
