@@ -136,15 +136,14 @@ This is the current PM overview of work packages to activate or defer.
 | 7 | Tracking Core Baseline | establish the first edge/tracking foundation slice | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp07_tracking_core_baseline.md` |
 | 8 | API Surface Preparation | prepare the first external adapter above the host-neutral control layer | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp08_api_surface_preparation.md` |
 | 9 | C# Handover Hardening | identify and tighten contracts that are most likely to survive direct C# porting | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md` |
-| 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | current next | next package after the first handover-hardening boundary close-out | `docs/session_workpackages/wp10_postprocess_baseline.md` |
-| 11 | Additional Frontends | prepare desktop and later web-capable paths | queued | low current priority | `docs/session_workpackages/wp11_additional_frontends.md` |
+| 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp10_postprocess_baseline.md` |
+| 11 | Additional Frontends | prepare desktop and later web-capable paths | current next | only if another frontend shell is actually needed | `docs/session_workpackages/wp11_additional_frontends.md` |
 
 ## Immediate PM Backlog
 
 These are the work packages PM should treat as the current actionable backlog:
 
-1. `Postprocess Baseline`
-2. `Additional Frontends`
+1. `Additional Frontends`
 
 These are important but should not be treated as the main always-on stream:
 
@@ -155,7 +154,7 @@ These are important but should not be treated as the main always-on stream:
 
 These should remain queued behind the above:
 
-1. `Additional Frontends`
+None right now beyond the current next package.
 
 ## Rough PM Sequence
 
@@ -218,7 +217,7 @@ Goal:
 
 Detailed work-package files:
 
-- `docs/session_workpackages/wp10_postprocess_baseline.md`
+- `docs/archive/session_workpackages/wp10_postprocess_baseline.md`
 - `docs/session_workpackages/wp11_additional_frontends.md`
 
 ## Current Recommended Order
@@ -236,13 +235,13 @@ The current coarse PM order should be:
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `docs/session_workpackages/wp10_postprocess_baseline.md`
+- `docs/session_workpackages/wp11_additional_frontends.md`
 
 Reason:
 
-- the ROI/focus/tracking MVP boundary, first API DTO preparation slice, and first handover-oriented request/result hardening are now explicitly implemented and documented
-- the next open package is the postprocess baseline
-- that next package can now build on clearer command, analysis, adapter, and handover-boundary contracts without reopening the earlier baseline packages
+- the ROI/focus/tracking MVP boundary, first API DTO preparation slice, first handover-oriented request/result hardening, and first offline postprocess baseline are now explicitly implemented and documented
+- the next open package is `Additional Frontends`, but only when another frontend shell is actually needed
+- until that condition is real, the more valuable default is to keep the current Python baseline stable rather than opening a speculative frontend lane
 
 ## Fresh Agent Decision Rule
 
@@ -268,7 +267,7 @@ The repository now has explicit detailed session work-package files for all curr
 - `docs/archive/session_workpackages/wp07_tracking_core_baseline.md`
 - `docs/archive/session_workpackages/wp08_api_surface_preparation.md`
 - `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md`
-- `docs/session_workpackages/wp10_postprocess_baseline.md`
+- `docs/archive/session_workpackages/wp10_postprocess_baseline.md`
 - `docs/session_workpackages/wp11_additional_frontends.md`
 
 ## PM Refinement Rule

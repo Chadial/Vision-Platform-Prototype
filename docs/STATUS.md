@@ -178,6 +178,7 @@ The repository currently provides a structured Python prototype for the vision p
 - `WP07` is now completed: `tracking_core` no longer only reserves future tracking space, because a first profile-based edge kernel now exists as a reusable analysis baseline under the existing ROI/frame model boundaries
 - `WP08` is now completed: `api_service` no longer only reserves future API space, because a first adapter-facing status DTO family and mapper now exist above the shared command/controller layer
 - `WP09` is now completed: adapter-facing command request DTOs now expose explicit `from_*` mapping methods in addition to their existing `to_*` methods, while typed command results now also expose named constructors for their common result shapes and the controller uses those factories instead of assembling result fields inline
+- `WP10` is now completed: `postprocess_tool` no longer only reserves future offline tooling space, because a first stored-image focus-report baseline now exists above the current sample-image ingestion and focus-core contracts
 
 ## Partially Implemented
 
@@ -315,8 +316,8 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Continue with `WP-010` from `docs/WORKPACKAGES.md` to define the first bounded offline/postprocess path above the current analysis and command baselines.
-2. Keep later handover follow-up bounded to additional explicit contract clusters instead of reopening this first request/result hardening package.
-3. Keep later API follow-up bounded to real adapter activation work instead of reopening the first transport-neutral DTO preparation package.
-4. Keep any later OpenCV follow-up bounded to UI/display concerns instead of reopening the baseline operator package.
+1. Continue with `WP-011` from `docs/WORKPACKAGES.md` only if another frontend shell is actually needed; otherwise keep the current Python core stable and avoid opening new UI lanes opportunistically.
+2. Keep later postprocess follow-up bounded to additional offline slices that reuse the same shared contracts instead of growing the first report-oriented baseline into a workstation.
+3. Keep later handover follow-up bounded to additional explicit contract clusters instead of reopening the first request/result hardening package.
+4. Keep later API follow-up bounded to real adapter activation work instead of reopening the first transport-neutral DTO preparation package.
 5. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.
