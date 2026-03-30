@@ -54,9 +54,14 @@ Or use the launcher:
 
 - `.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py`
 
+Or use the bounded local convenience helper:
+
+- `.\scripts\run_python_baseline.ps1`
+
 Current practical preference:
 
 - prefer the package entry point when the project interpreter and repository root are already explicit
+- use `run_python_baseline.ps1` when repeated local shell use matters more than typing the full interpreter path every time
 - use the launcher when repo-local path bootstrapping is more convenient for smoke commands or operator use
 
 Examples:
@@ -65,6 +70,7 @@ Examples:
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source simulated
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
 .\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py recording --source simulated --base-directory .\captures\sim_smoke --frame-limit 3
+.\scripts\run_python_baseline.ps1 status --source simulated
 ```
 
 ## Implementation Location

@@ -26,7 +26,8 @@ Use this startup order by default:
 
 1. package entry point with the project interpreter
 2. repo-local launcher script when `src` path bootstrapping is needed
-3. hardware-specific integrated launcher only for bounded real-device evidence
+3. repo-local PowerShell convenience helper for repeated local operator use
+4. hardware-specific integrated launcher only for bounded real-device evidence
 
 Current preferred interpreter:
 
@@ -66,6 +67,35 @@ Why this still exists:
 
 ### 3. Integrated hardware command-flow runner
 
+### 3. Operator convenience helper
+
+Use this when repeated local shell use is more important than typing the full interpreter-plus-launcher form every time:
+
+```powershell
+.\scripts\run_python_baseline.ps1
+```
+
+Examples:
+
+```powershell
+.\scripts\run_python_baseline.ps1 status --source simulated
+.\scripts\run_python_baseline.ps1 snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
+```
+
+Why this exists:
+
+- it keeps the current `.venv` path explicit inside one bounded helper
+- it preserves the existing `run_camera_cli.py` launcher path instead of inventing a new app surface
+- it reduces local operator and developer startup friction without becoming a packaging contract
+
+Boundary:
+
+- this helper is convenience only
+- it does not replace the preferred package entry point
+- it does not define cross-machine launch normalization
+
+### 4. Integrated hardware command-flow runner
+
 Use this only for bounded real-device confidence passes:
 
 ```powershell
@@ -82,6 +112,7 @@ The current practical startup surface is intentionally small:
 
 - `vision_platform.apps.camera_cli`
 - `scripts/launchers/run_camera_cli.py`
+- `scripts/run_python_baseline.ps1`
 - `scripts/launchers/run_hardware_command_flow.py`
 - selected visual inspection launchers under `scripts/launchers/` only when preview inspection is actually needed
 
@@ -115,6 +146,12 @@ Use the launcher-script form when shell or operator convenience outweighs direct
 .\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py status --source simulated
 ```
 
+Use the convenience-helper form when repeated local usage matters more than preserving the full explicit interpreter command at the shell prompt:
+
+```powershell
+.\scripts\run_python_baseline.ps1 status --source simulated
+```
+
 ## Launch Readiness Checklist
 
 Before normal simulator-backed use:
@@ -138,6 +175,7 @@ Treat the startup baseline as ready when:
 
 - the package entry point works from the project interpreter
 - the launcher fallback works from repository root
+- the convenience helper works from repository root and clearly behaves as a thin wrapper
 - command help and current runbook references agree on the preferred form
 - simulator-backed commands do not require extra rediscovery
 
