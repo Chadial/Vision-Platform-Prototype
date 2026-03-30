@@ -2,11 +2,15 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
+from camera_app.imaging import OpenCvPreviewWindow as LegacyOpenCvPreviewWindow
 from vision_platform.imaging import OpenCvPreviewWindow
 from vision_platform.services.stream_service.roi_state_service import RoiStateService
 
 
 class OpenCvPreviewWindowTests(unittest.TestCase):
+    def test_legacy_camera_app_imaging_package_reexports_platform_preview_window(self) -> None:
+        self.assertIs(LegacyOpenCvPreviewWindow, OpenCvPreviewWindow)
+
     def test_render_latest_frame_uses_adapter_when_frame_exists(self) -> None:
         preview_service = MagicMock()
         preview_service.get_latest_frame.return_value = MagicMock(width=320, height=240)
