@@ -22,6 +22,28 @@ Current repository note:
 - the optional OpenCV preview/save path is already implemented and simulator-tested
 - neither of those facts closes Phase 8 or Phase 9 without at least one real-hardware validation pass
 
+## Current Verified Hardware Status
+
+Current repository position after the March 27 and March 30, 2026 runs:
+
+- the Python camera subsystem can now be treated as hardware-validated at prototype level for the tested camera path `DEV_1AB22C046D81`
+- the current integrated baseline has real-device evidence for:
+  - preview readiness
+  - snapshot
+  - bounded recording
+  - interval capture
+  - host-readable status / polling
+  - traceability / recording-log output
+  - offline reuse of hardware-generated `BMP` output
+- the current hardware status should still be read as `acceptable with residual issues`, not as full hardware closure
+
+The main residuals still under observation are:
+
+- `vmbpyLog <VmbError.NotAvailable: -30>` during otherwise successful runs
+- duplicate SDK-visible entries for `DEV_1AB22C046D81`
+- bounded but not perfectly stable interval timing
+- remaining timing-sensitive device-reuse observations when separate real-device CLI invocations are fired back-to-back too aggressively
+
 ## Preconditions
 
 Before starting:
@@ -273,6 +295,14 @@ Observed result from the WP28 hardware spot-check:
   - `roi_offset_x=17`
   - returned `configuration_error`
   - message included `OffsetX`, range `0..2024`, increment `2`, base `0`, nearest valid values `16, 18`
+
+Additional nuance from the WP28 spot-check:
+
+- one immediately following second CLI invalid-configuration invocation briefly reproduced `camera already in use` before the same offset check was retried successfully after a short pause
+- this should be read as a residual timing-sensitive reuse observation, not as a rollback of the WP27 improvement:
+  - the targeted WP27 serial proofs still passed
+  - the later offset retry produced the intended capability-aware `configuration_error`
+  - continued observation is still warranted for tightly back-to-back separate hardware CLI processes
 
 Additional camera-specific rerun on March 30, 2026 against `docs/HARDWARE_CAPABILITIES.md`:
 
@@ -531,4 +561,4 @@ If this checklist passes on real hardware, the Python repository can be treated 
 
 That is the right point to freeze the Python baseline and use it as the handover reference for the later C# phase.
 
-Until then, keep the project status phrased as simulator-validated rather than fully hardware-validated.
+Until the residuals above are either explained or judged permanently acceptable, phrase the project as hardware-validated at prototype level with residual observations, not as fully closed hardware productization.
