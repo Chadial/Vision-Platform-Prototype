@@ -266,7 +266,7 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 23 | Host Command Confirmation Hardening | return one more explicit confirmed-settings subset for host-triggered capture and recording commands | active lane | landed host-control follow-up after `WP22`; command results now expose a narrower explicit confirmed-settings subset without widening the transport surface | `docs/session_workpackages/wp23_host_command_confirmation_hardening.md` |
 | 24 | Run Identity And Trace Linkage | align one deterministic run identity across host results, traceability blocks, and recording-side metadata outputs | active lane | landed cross-lane linkage slice; the current host path now reuses the same narrow `run_id` across snapshot / bounded-recording results and traceability blocks | `docs/session_workpackages/wp24_run_identity_trace_linkage.md` |
 | 25 | Experiment Recovery Validation Extension | prove one tighter simulator-first recovery block over host-driven recording failures and repeated restart behavior | active lane | landed reliability-focused validation slice; the integrated bootstrap/controller path now proves write-failure recovery plus repeated stop/restart idempotence without runtime redesign | `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md` |
-| 26 | Hardware Revalidation Resume | resume one bounded real-hardware revalidation block once the camera is attached again | current next | conditional follow-up after the current host/reliability hardening slices; activate only with hardware present | `docs/session_workpackages/wp26_hardware_revalidation_resume.md` |
+| 26 | Hardware Revalidation Resume | resume one bounded real-hardware revalidation block once the camera is attached again | active lane | landed bounded confidence rerun on March 30, 2026; future reruns stay conditional and should target concrete residual observations only | `docs/session_workpackages/wp26_hardware_revalidation_resume.md` |
 
 ## Immediate PM Backlog
 
@@ -279,6 +279,8 @@ These are the work packages PM should treat as the current actionable backlog:
 
 Most recently landed detailed packages:
 
+- `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
+  - landed the bounded March 30, 2026 real-device confidence rerun over the current integrated baseline, including preview readiness, snapshot, bounded recording, interval capture, active polling, traceability output, offline BMP reuse, and same-subsystem reuse without process restart
 - `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`
   - landed the simulator-first integrated recovery proof for writer-side recording failure, repeated stop calls, and successful restart on the same subsystem path
 - `docs/session_workpackages/wp24_run_identity_trace_linkage.md`
@@ -300,9 +302,9 @@ Most recently landed detailed packages:
 
 Current explicitly activated detailed package:
 
-- the next default lane is `WP26` as one bounded conditional hardware-evidence slice
+- `WP26` is now landed as the bounded hardware-evidence refresh for the current integrated baseline
 - `WP17`, `WP18`, `WP19`, `WP20`, `WP21`, `WP22`, `WP23`, `WP24`, and `WP25` are all landed metadata-, host-control-, or simulator-first reliability follow-ups and should no longer be treated as pending activation
-- `WP26` remains conditional on local hardware attachment
+- future hardware reruns remain conditional on local hardware attachment and should only be reopened for concrete residual observations such as the current `NotAvailable` startup log, duplicate camera enumeration behavior, or interval-timing quirks
 
 These are important but should not be treated as the main always-on stream:
 
@@ -399,7 +401,7 @@ Current activation note:
 - `WP23` is now landed as the corresponding narrow command-confirmation slice for explicit resolved save-directory, file-shape, and bounded-recording confirmations
 - `WP24` is now landed as the corresponding deterministic run-identity linkage slice across traceability and the current host path
 - `WP25` is now landed as the corresponding simulator-first integrated recovery-validation slice
-- the next default follow-up is `WP26` as one bounded conditional hardware rerun
+- `WP26` is now landed as one bounded real-device confidence rerun over the current integrated host/traceability/reliability baseline
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -422,22 +424,26 @@ The current coarse PM order should be:
 3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
 4. treat the first `Host Control Closure`, `Experiment Reliability Closure`, `WP14`, and `WP15` slices as landed baseline hardening rather than full lane closure
 5. treat `WP17`, `WP18`, `WP19`, `WP20`, and `WP21` as landed metadata-consumer, producer, policy, and stable-context hardening slices rather than as pending activation work
-6. treat `WP22`, `WP23`, `WP24`, and `WP25` as landed, then keep `WP26` as the conditional bounded hardware-evidence follow-up when the real camera path is available again
-7. use `WP26` or `Hardware Revalidation Follow-Up` as supporting reliability slices whenever hardware is attached
+6. treat `WP22`, `WP23`, `WP24`, `WP25`, and `WP26` as landed baseline-hardening slices rather than as pending activation work
+7. use `Hardware Revalidation Follow-Up` only as a conditional supporting slice if concrete residual hardware observations need narrowing while the camera remains attached
 8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
 ## Recommended Next Detailed Work Package
 
-If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
+If the user does not explicitly redirect the session, there is no new broad automatic default package created by `WP26`.
 
-- derive `WP26` for `Hardware Revalidation Resume` only when the real camera path is attached again
+Instead:
+
+- treat `WP26` as landed hardware evidence
+- reopen hardware work only if the camera remains attached and one concrete residual observation needs a narrow follow-up
+- otherwise let the next package be chosen explicitly from user direction or from the remaining closure-lane gaps
 
 Reason:
 
 - the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
 - the first host-control, reliability, visible-format, traceability, offline metadata-consumption, metadata-producer, metadata-policy, and stable-context slices are already landed
-- the active-run polling, post-command confirmation, run-identity linkage, and simulator-first recovery-validation slices are now landed, so the next tactical need is bounded fresh hardware evidence once the validated camera path is available again
-- until hardware is attached, no broader default reopening of UI, transport, or history scope is justified by PM
+- the active-run polling, post-command confirmation, run-identity linkage, simulator-first recovery-validation, and bounded real-device confidence rerun slices are now landed
+- no broader default reopening of UI, transport, or history scope is justified by PM from this result alone
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule

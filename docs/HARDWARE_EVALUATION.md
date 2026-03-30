@@ -195,18 +195,59 @@ Documented hardware-side error checks on March 27, 2026:
 - unsupported pixel format: explicit failure when trying `Mono16`, with `No Entry associated with 'Mono16'`
 - unsupported ROI combination: explicit failure for width `2001`, with device-side increment guidance `not a multiple of 8`
 
+Latest bounded revalidation on March 30, 2026:
+
+- machine: current local development machine
+- camera id: `DEV_1AB22C046D81`
+- camera model: `Allied Vision 1800 U-1240m`
+- output directories:
+  - `captures/hardware_smoke/wp26_run_001`
+  - `captures/hardware_smoke/wp26_run_002`
+  - `captures/hardware_smoke/wp26_run_003`
+  - `captures/hardware_smoke/wp26_cli_snapshot`
+  - `captures/hardware_smoke/wp26_cli_recording`
+
+Bounded evidence covered:
+
+- hardware-backed `status` command on the current CLI host surface
+- integrated snapshot + preview + interval capture + bounded recording run through `run_hardware_command_flow.py`
+- in-process active polling inspection during interval capture and bounded recording on the same subsystem instance
+- second normal save run on the same subsystem instance without process restart
+- traceability/logging inspection over generated hardware artifacts
+- practical offline reuse by running the current postprocess focus-report path against a hardware-generated `BMP` snapshot
+- hardware-backed CLI `snapshot` and bounded `recording` command-result envelopes
+
+Observed result from the March 30, 2026 bounded rerun:
+
+- preview readiness passed on the real device path
+- snapshot save passed through both the integrated flow and the current CLI host surface
+- bounded recording passed through both the integrated flow and the current CLI host surface
+- interval capture passed on the integrated/in-process real-device path
+- active host-readable polling was meaningful during real interval capture and real bounded recording, including `active_run` samples for both operation kinds
+- traceability and recording-log outputs were written for the generated hardware artifact folders
+- hardware-generated `BMP` output remained usable through the current offline focus-report path together with traceability joins
+- a second normal save run on the same subsystem instance succeeded without process restart after preview, interval capture, and bounded recording had already completed
+
+Residual observations from the March 30, 2026 bounded rerun:
+
+- successful hardware-backed `status`, `snapshot`, and `recording` runs still emitted a `vmbpyLog <VmbError.NotAvailable: -30>` line during startup or teardown without failing the command
+- hardware enumeration exposed duplicate entries for `DEV_1AB22C046D81`, one with serial `067WH` and one with serial `N/A`
+- the in-process interval-capture rerun completed successfully but reported `skipped_intervals=1`, so interval timing on the real path should still be treated as boundedly acceptable rather than perfectly scheduler-stable
+
 ## Current Pass / Fail Matrix
 
-Current baseline for camera `DEV_1AB22C046D81` on March 27, 2026:
+Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 2026 runs:
 
 | Area | Result | Notes |
 | --- | --- | --- |
-| Initialization / Shutdown | PASS | Integrated hardware runs completed cleanly after shared-stream cleanup hardening |
-| Explicit Camera Selection | PASS | Hardware runs used explicit camera id `DEV_1AB22C046D81` |
+| Initialization / Shutdown | PASS with residual note | Integrated hardware runs completed cleanly, but successful hardware-backed commands still emitted a `vmbpyLog <VmbError.NotAvailable: -30>` line that should remain under observation |
+| Explicit Camera Selection | PASS with residual note | Hardware runs used explicit camera id `DEV_1AB22C046D81`; enumeration currently shows duplicate SDK-visible entries for that same id |
 | Configuration Application | PASS | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; camera-side frame-rate control also works when `AcquisitionFrameRateEnable` is enabled first |
-| Snapshot Save | PASS | `Mono8` and `Mono10` snapshot paths produced plausible files |
-| Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow |
-| Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths all completed on hardware |
+| Snapshot Save | PASS | `Mono8`, `Mono10`, and hardware-backed `BMP` snapshot paths produced plausible files |
+| Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow and in the in-process bounded rerun |
+| Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths completed on hardware; March 30 also revalidated bounded recording plus active polling on the current host-oriented baseline |
+| Interval Capture / Active Polling | PASS with residual note | Interval capture completed on hardware and active polling was meaningful, but one rerun reported `skipped_intervals=1` |
+| Traceability / Offline Reuse | PASS | Traceability logs, recording logs, run linkage, and offline BMP reuse behaved plausibly on hardware-generated output |
 | Error / Boundary Checks | PASS | Invalid camera id, unsupported pixel format, and invalid ROI increment failures were explicit and recoverable |
 
 ## 1. Initialization And Shutdown
