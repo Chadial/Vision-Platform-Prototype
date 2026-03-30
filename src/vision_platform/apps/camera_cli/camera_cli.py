@@ -153,7 +153,7 @@ def _handle_status_command(
         status=status,
         result={
             "status_source": "poll",
-            "confirmed_settings": _build_confirmed_settings(status),
+            "confirmed_settings": _build_status_confirmed_settings(status),
         },
     )
 
@@ -179,7 +179,7 @@ def _handle_snapshot_command(
         result={
             "saved_path": snapshot_result.saved_path,
             "selected_save_directory": selected_save_directory,
-            "confirmed_settings": _build_confirmed_settings(status),
+            "confirmed_settings": _build_snapshot_confirmed_settings(status, args, selected_save_directory),
         },
         snapshot_path=snapshot_result.saved_path,
         selected_save_directory=selected_save_directory,
@@ -245,7 +245,7 @@ def _handle_recording_command(
                 "duration_seconds": args.duration_seconds,
                 "target_frame_rate": args.target_frame_rate,
             },
-            "confirmed_settings": _build_confirmed_settings(status),
+            "confirmed_settings": _build_recording_confirmed_settings(status, args, selected_save_directory),
         },
         selected_save_directory=selected_save_directory,
     )
@@ -370,13 +370,45 @@ def _emit_envelope(payload: dict[str, Any], stream) -> None:
     print(json.dumps(_to_serializable(payload), indent=2, sort_keys=True), file=stream)
 
 
-def _build_confirmed_settings(status: SubsystemStatus) -> dict[str, Any]:
+def _build_status_confirmed_settings(status: SubsystemStatus) -> dict[str, Any]:
     configuration = status.configuration
     return {
         "camera_id": status.camera.camera_id,
         "pixel_format": configuration.pixel_format if configuration is not None else None,
         "exposure_time_us": configuration.exposure_time_us if configuration is not None else None,
     }
+
+
+def _build_snapshot_confirmed_settings(
+    status: SubsystemStatus,
+    args: argparse.Namespace,
+    selected_save_directory: Path,
+) -> dict[str, Any]:
+    confirmed_settings = _build_status_confirmed_settings(status)
+    confirmed_settings.update(
+        {
+            "resolved_save_directory": selected_save_directory,
+            "resolved_file_stem": args.file_stem,
+            "resolved_file_extension": args.file_extension,
+        }
+    )
+    return confirmed_settings
+
+
+def _build_recording_confirmed_settings(
+    status: SubsystemStatus,
+    args: argparse.Namespace,
+    selected_save_directory: Path,
+) -> dict[str, Any]:
+    confirmed_settings = _build_snapshot_confirmed_settings(status, args, selected_save_directory)
+    confirmed_settings.update(
+        {
+            "accepted_frame_limit": args.frame_limit,
+            "accepted_duration_seconds": args.duration_seconds,
+            "accepted_target_frame_rate": args.target_frame_rate,
+        }
+    )
+    return confirmed_settings
 
 
 def _add_common_camera_arguments(parser: argparse.ArgumentParser) -> None:
