@@ -340,6 +340,6 @@ The repository currently provides a structured Python prototype for the vision p
 1. Treat `docs/session_workpackages/wp16_data_logging_traceability.md` as the landed traceability baseline inside `Data And Logging Closure`, now including optional per-image analysis ROI and focus metadata support.
 2. Treat the compact offline metadata-consumption follow-up as implemented in the current branch through the postprocess focus-report path, while keeping broader offline follow-up work explicitly bounded to later packages.
 3. Treat `WP18`, `WP19`, `WP20`, and `WP21` as the landed artifact-metadata clarification, producer-wiring, policy-hardening, and stable-context exposure follow-ups for the current metadata-aware offline/reporting baseline.
-4. Derive the next narrow post-`WP21` closure slice around host-control or another equally bounded experiment-facing follow-up, instead of reopening broad UI, API, or frontend breadth by default.
-5. Keep later postprocess, API, and handover follow-up bounded to explicit later closure slices rather than reopening those earlier baseline packages opportunistically.
-6. Re-run hardware-explicit CLI and preview validation only after a camera is connected again, so simulator-first notes are narrowed with real-device evidence rather than speculation.
+4. Use `WP22` as the next default slice for host-readable status polling hardening during active experiment runs.
+5. Keep `WP23`, `WP24`, and `WP25` as the prepared next host-control, trace-linkage, and simulator-first recovery-validation sequence behind that polling slice.
+6. Activate `WP26` only when a camera is connected again, so hardware reruns narrow the current simulator-first closure work with fresh real-device evidence instead of speculation.

@@ -262,7 +262,11 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 19 | Focus Metadata Producer Wiring | wire the artifact-level focus metadata producer into normal save flows without freezing broader statistics policy | active lane | landed narrow follow-up after `WP18`; snapshot and bounded-recording flows can now emit focus metadata when explicitly configured | `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md` |
 | 20 | Focus Metadata Policy Hardening | define and test explicit defaults, bounds, and validation policy for artifact-level focus summary metadata | active lane | landed narrow post-`WP19` policy slice; current summary fields now require `focus_method`, a positive integer `focus_score_frame_interval`, and non-negative `focus_value_stddev` values | `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md` |
 | 21 | Offline Stable Context Exposure | expose one compact folder-level stable-context summary from traceability headers in the offline focus report | active lane | landed narrow post-`WP20` consumer slice; the additive report-bundle path now exposes stable header context while the existing list-return path stays usable | `docs/session_workpackages/wp21_offline_stable_context_exposure.md` |
-| 22 | Host Status Polling Hardening | tighten one narrow host-readable status payload slice during active experiment runs | current next | next bounded post-`WP21` closure slice; derive one execution-ready package before widening broader transport or UI scope | to be derived |
+| 22 | Host Status Polling Hardening | tighten one narrow host-readable status payload slice during active experiment runs | current next | next bounded post-`WP21` closure slice; expose a conservative active-run polling subset before widening broader transport or UI scope | `docs/session_workpackages/wp22_host_status_polling_hardening.md` |
+| 23 | Host Command Confirmation Hardening | return one more explicit confirmed-settings subset for host-triggered capture and recording commands | active lane | next host-control follow-up after `WP22`; keep confirmation narrow and command-result-oriented | `docs/session_workpackages/wp23_host_command_confirmation_hardening.md` |
+| 24 | Run Identity And Trace Linkage | align one deterministic run identity across host results, traceability blocks, and recording-side metadata outputs | queued | cross-lane linkage follow-up after the current host-status and command-confirmation slices | `docs/session_workpackages/wp24_run_identity_trace_linkage.md` |
+| 25 | Experiment Recovery Validation Extension | prove one tighter simulator-first recovery block over host-driven recording failures and repeated restart behavior | queued | next reliability-focused validation slice after the current host-control tightening work | `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md` |
+| 26 | Hardware Revalidation Resume | resume one bounded real-hardware revalidation block once the camera is attached again | conditional | conditional follow-up after the current host/reliability hardening slices; activate only with hardware present | `docs/session_workpackages/wp26_hardware_revalidation_resume.md` |
 
 ## Immediate PM Backlog
 
@@ -288,8 +292,9 @@ Most recently landed detailed packages:
 
 Current explicitly activated detailed package:
 
-- no post-`WP21` detailed package is active yet
-- the next default lane is to derive `WP22` as one narrow host-status polling hardening slice
+- the next default lane is `WP22` as one narrow host-status polling hardening slice
+- `WP23`, `WP24`, and `WP25` are now also prepared as explicit follow-on packages inside the same closure phase
+- `WP26` is prepared but remains conditional on local hardware attachment
 - `WP17`, `WP18`, `WP19`, `WP20`, and `WP21` are all landed metadata-consumer or metadata-policy follow-ups and should no longer be treated as pending activation
 
 These are important but should not be treated as the main always-on stream:
@@ -383,7 +388,9 @@ Current activation note:
 - `WP19` is now landed behind `WP18` and wires that metadata into normal snapshot and bounded-recording save paths when explicitly configured
 - `WP20` is now landed as the first explicit policy-hardening slice over those current focus-summary metadata structures
 - `WP21` is now landed as the corresponding compact folder-level stable-context exposure slice above the same traceability baseline
-- the next default follow-up is to derive `WP22` as one narrow host-status polling hardening slice
+- the next default follow-up is `WP22` as one narrow host-status polling hardening slice
+- `WP23`, `WP24`, and `WP25` now define the next prepared host-control, trace-linkage, and recovery-validation sequence behind that slice
+- `WP26` keeps the next bounded hardware rerun explicit without treating hardware as the default always-on stream
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -406,8 +413,8 @@ The current coarse PM order should be:
 3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
 4. treat the first `Host Control Closure`, `Experiment Reliability Closure`, `WP14`, and `WP15` slices as landed baseline hardening rather than full lane closure
 5. treat `WP17`, `WP18`, `WP19`, `WP20`, and `WP21` as landed metadata-consumer, producer, policy, and stable-context hardening slices rather than as pending activation work
-6. derive `WP22` as the next narrow default extension package around host-readable status polling hardening
-7. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
+6. execute `WP22` first, then keep `WP23`, `WP24`, and `WP25` as the prepared narrow sequence for the next host-control and reliability hardening steps
+7. use `WP26` or `Hardware Revalidation Follow-Up` as supporting reliability slices whenever hardware is attached
 8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
 ## Recommended Next Detailed Work Package
@@ -421,6 +428,7 @@ Reason:
 - the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
 - the first host-control, reliability, visible-format, traceability, offline metadata-consumption, metadata-producer, metadata-policy, and stable-context slices are already landed
 - the next tactical need is to tighten one narrow host-readable status polling slice during active experiment runs instead of reopening broader UI or transport breadth
+- the following next needs are now also explicit as prepared narrow packages: command-result confirmation tightening, deterministic run-linkage alignment, simulator-first recovery validation, and a conditional bounded hardware rerun
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule
@@ -460,6 +468,11 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
 - `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
 - `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
+- `docs/session_workpackages/wp22_host_status_polling_hardening.md`
+- `docs/session_workpackages/wp23_host_command_confirmation_hardening.md`
+- `docs/session_workpackages/wp24_run_identity_trace_linkage.md`
+- `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`
+- `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
 
 The new Extended MVP closure lanes are intentionally introduced first at the PM level.
 
@@ -477,6 +490,11 @@ Current explicit activation:
 - `Focus Metadata Producer Wiring` now has its landed execution-ready file at `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
 - `Focus Metadata Policy Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
 - `Offline Stable Context Exposure` now has its landed execution-ready file at `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
+- `Host Status Polling Hardening` now has its prepared execution-ready file at `docs/session_workpackages/wp22_host_status_polling_hardening.md`
+- `Host Command Confirmation Hardening` now has its prepared execution-ready file at `docs/session_workpackages/wp23_host_command_confirmation_hardening.md`
+- `Run Identity And Trace Linkage` now has its prepared execution-ready file at `docs/session_workpackages/wp24_run_identity_trace_linkage.md`
+- `Experiment Recovery Validation Extension` now has its prepared execution-ready file at `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`
+- `Hardware Revalidation Resume` now has its prepared execution-ready file at `docs/session_workpackages/wp26_hardware_revalidation_resume.md`, but it remains conditional on hardware availability
 
 ## PM Refinement Rule
 
