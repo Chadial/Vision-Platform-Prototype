@@ -234,6 +234,23 @@ Residual observations from the March 30, 2026 bounded rerun:
 - hardware enumeration exposed duplicate entries for `DEV_1AB22C046D81`, one with serial `067WH` and one with serial `N/A`
 - the in-process interval-capture rerun completed successfully but reported `skipped_intervals=1`, so interval timing on the real path should still be treated as boundedly acceptable rather than perfectly scheduler-stable
 
+Additional camera-specific rerun on March 30, 2026 against `docs/HARDWARE_CAPABILITIES.md`:
+
+- integrated `Mono8` command-flow rerun with `exposure_time_us=10031.291`, `gain=3.0`, `roi_width=2000`, `roi_height=1500`
+- integrated bounded-recording rerun with the same configuration and `target_frame_rate=5.0`
+- hardware-backed `Mono10` snapshot rerun to `.raw`
+- explicit invalid-setting reruns for unsupported `Mono16` and invalid ROI width `2001`
+- bounded CLI snapshot rerun with non-zero ROI offsets `roi_offset_x=16`, `roi_offset_y=4`
+
+Observed result from the camera-specific rerun:
+
+- the combined `Mono8` + exposure + gain + ROI-size path remained hardware-valid
+- the bounded `target_frame_rate=5.0` path remained hardware-valid
+- `Mono10` snapshot save to `.raw` remained hardware-valid
+- unsupported `Mono16` still failed explicitly with `No Entry associated with 'Mono16'`
+- invalid ROI width `2001` still failed explicitly against the width increment rule
+- non-zero ROI offsets were now also confirmed on hardware through the CLI host path and traceability output, so the earlier assumption that this camera behaved strictly as a size-only ROI target should no longer be treated as current truth
+
 ## Current Pass / Fail Matrix
 
 Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 2026 runs:
@@ -248,7 +265,8 @@ Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 
 | Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths completed on hardware; March 30 also revalidated bounded recording plus active polling on the current host-oriented baseline |
 | Interval Capture / Active Polling | PASS with residual note | Interval capture completed on hardware and active polling was meaningful, but one rerun reported `skipped_intervals=1` |
 | Traceability / Offline Reuse | PASS | Traceability logs, recording logs, run linkage, and offline BMP reuse behaved plausibly on hardware-generated output |
-| Error / Boundary Checks | PASS | Invalid camera id, unsupported pixel format, and invalid ROI increment failures were explicit and recoverable |
+| Error / Boundary Checks | PASS | Invalid camera id, unsupported `Mono16`, and invalid ROI increment failures were explicit and recoverable |
+| Camera-Specific Capability Rerun | PASS with correction | March 30 reruns refreshed the documented `Mono8`, `Mono10`, acquisition-frame-rate, and ROI behavior for `DEV_1AB22C046D81`, and corrected the earlier assumption that ROI offsets were effectively fixed to `0` |
 
 ## 1. Initialization And Shutdown
 

@@ -23,6 +23,7 @@ Code-side capability helpers now also exist:
 Snapshot date:
 
 - March 27, 2026
+- refreshed with additional device-specific reruns on March 30, 2026
 
 Connected device:
 
@@ -74,12 +75,19 @@ Observed ROI-related constraints from previous hardware validation:
 
 - width range: `8 .. 4024`, increment `8`
 - height range: `8 .. 3036`, increment `2`
-- `OffsetX` and `OffsetY` were constrained to `0` on the tested configuration path
+- live capability probe on March 30, 2026 exposed:
+  - `OffsetX` range `0 .. 2024`, increment `2`
+  - `OffsetY` range `0 .. 1536`, increment `2`
+
+Observed March 30, 2026 rerun result:
+
+- a hardware-backed CLI snapshot succeeded with `roi_offset_x=16`, `roi_offset_y=4`, `roi_width=2000`, `roi_height=1500`
+- the saved traceability header for that run recorded `roi_x=16`, `roi_y=4`, `roi_width=2000`, `roi_height=1500`
 
 Implication:
 
-- this device currently behaves like a size-only ROI target in the tested mode
-- feature work should not assume free ROI panning on this camera without re-validation in another mode
+- this camera should no longer be treated as strictly size-only on the current tested path
+- bounded ROI panning now has fresh real-device evidence on this device, although broad ROI-mode exploration is still outside the current scope
 
 ## Pixel Format And Bit Depth
 
@@ -101,6 +109,7 @@ Validated save-path facts from hardware runs:
 - `Mono8` snapshot and recording paths are working
 - `Mono10` snapshot save to `.raw` is working
 - unsupported `Mono16` fails explicitly on this device because no matching enum entry exists
+- March 30, 2026 reruns refreshed `Mono8` snapshot/recording with exposure, gain, ROI, and target-frame-rate configuration on the same device
 
 Implication:
 
@@ -147,6 +156,7 @@ Confirmed hardware behavior:
 - with `AcquisitionFrameRateEnable = False`, `AcquisitionFrameRate` is read-only
 - enabling `AcquisitionFrameRateEnable` makes `AcquisitionFrameRate` writable
 - setting a reduced rate such as `5.0` succeeds and reads back approximately `4.9991`
+- the March 30, 2026 hardware-backed CLI status rerun again confirmed `acquisition_frame_rate=5.0` with `AcquisitionFrameRateEnable = True` and read-back around `4.9995`
 
 Implication:
 
@@ -277,7 +287,21 @@ Safe assumptions for later feature work on this exact camera:
 
 Constraints to keep visible:
 
-- ROI offset freedom was not observed in the tested mode
+- ROI offsets are now observed as working on the current tested path, but only one bounded offset configuration was revalidated so far
 - trigger writability appears mode-dependent
 - packed higher-bit formats need explicit software handling
 - image-conditioning features exist, but using them may conflict with measurement-oriented capture goals
+
+## March 30, 2026 Device-Specific Rerun Note
+
+The bounded camera-specific rerun on March 30, 2026 confirmed these device-facing facts again on `DEV_1AB22C046D81`:
+
+- combined `Mono8` configuration with `exposure_time_us=10031.291`, `gain=3.0`, `roi_width=2000`, and `roi_height=1500` worked in the integrated hardware flow
+- the same camera-side configuration remained compatible with bounded recording at `target_frame_rate=5.0`
+- `Mono10` snapshot save to `.raw` still worked
+- invalid `Mono16` still failed explicitly with `No Entry associated with 'Mono16'`
+- invalid ROI width `2001` still failed explicitly against the device increment requirement
+
+Residual observation:
+
+- successful runs still emitted a `vmbpyLog <VmbError.NotAvailable: -30>` line, so hardware evidence should be treated as acceptable with a known SDK/logging quirk rather than as perfectly clean
