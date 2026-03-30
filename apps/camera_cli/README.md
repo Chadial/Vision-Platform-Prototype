@@ -19,6 +19,7 @@ Provides a camera-oriented command-line app surface for exercising the existing 
 - consolidated bounded `recording` command
 - consolidated bounded `interval-capture` command
 - simulator-backed and hardware-backed source selection
+- bounded repo-local `camera_alias -> camera_id` resolution for repeated hardware use
 
 ## Inputs / Outputs
 
@@ -77,6 +78,7 @@ vision-platform-cli status --source simulated
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
 .\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py recording --source simulated --base-directory .\captures\sim_smoke --frame-limit 3
 .\scripts\run_python_baseline.ps1 status --source simulated
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-alias tested_camera
 ```
 
 ## Implementation Location

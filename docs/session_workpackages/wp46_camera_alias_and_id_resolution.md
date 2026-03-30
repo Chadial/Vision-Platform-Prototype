@@ -27,7 +27,7 @@ The narrow goal is to support bounded repo-local camera aliases for known camera
 ## Branch
 
 - intended branch: `feature/camera-alias-and-id-resolution`
-- activation state: active lane
+- activation state: landed
 
 ## Scope
 
@@ -70,6 +70,15 @@ Target outcome for implementation:
 - the first touched entry path can accept either a direct camera id or a configured alias
 - unresolved aliases fail clearly and host-readably
 - no discovery, inventory, or profile-management scope is introduced incidentally
+
+Landed outcome:
+
+- the camera CLI now accepts `--camera-alias` in addition to direct `--camera-id`
+- repo-local alias resolution lives in `configs/camera_aliases.json`
+- the current tested example alias `tested_camera` resolves to `DEV_1AB22C046D81`
+- alias resolution happens before the unchanged `camera_service.initialize(camera_id=...)` path
+- unknown aliases and conflicting `--camera-id` plus `--camera-alias` input now return one bounded `camera_selection_error` envelope
+- March 30, 2026 hardware validation succeeded through the alias path for `status` and `snapshot(.bmp)` on the attached tested camera
 
 ## Execution Plan
 
