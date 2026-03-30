@@ -303,6 +303,7 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 42 | Vision Platform Namespace Coverage And Compatibility Audit | tighten trust in the preferred `vision_platform` import surface while keeping remaining compatibility shims explicit | active lane | landed trust-and-shim audit slice; current remaining `camera_app` dependencies are now bounded, tested, and documented as intentional compatibility seams rather than silent drift | `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md` |
 | 43 | Python Baseline Packaging Manifest And Environment Guardrails | make the bounded local Python baseline easier to set up and re-enter without pretending to solve full product packaging | active lane | landed operational-readiness follow-up; the package manifest now exposes `vision-platform-cli`, bootstrap output carries clearer install guardrails, and the bounded local install contract now lives in `docs/PYTHON_BASELINE_ENVIRONMENT.md` | `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md` |
 | 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | active lane | landed selective-expansion slice; `api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without introducing framework or transport runtime scope | `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
+| 45 | Stored Camera Configuration Profiles Baseline | introduce one bounded named profile baseline over the current host-neutral `CameraConfiguration` path | current next | prepared post-closure operational-readiness / selective-expansion slice; camera-class-first named profiles should begin with a `default` profile and continue to reuse the existing capability-aware configuration path | `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md` |
 
 ## Immediate PM Backlog
 
@@ -529,31 +530,20 @@ The current coarse PM order should be:
 21. treat `WP42` as the landed trust-and-shim audit; remaining `camera_app` dependencies inside `vision_platform` are now tested and documented as explicit compatibility seams
 22. treat `WP43` as landed; the bounded package-manifest and environment-contract guardrails are now explicit through `vision-platform-cli`, bootstrap output, and `docs/PYTHON_BASELINE_ENVIRONMENT.md`
 23. treat `WP38` and `WP44` as landed selective-expansion slices rather than as open default lanes
-24. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+24. treat `WP45` as the current next bounded profile-baseline slice over the existing `CameraConfiguration` path rather than as a property-store or alias-system expansion
+25. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
 
-There is currently no forced default next detailed package.
-
-If the user does not explicitly redirect the session after this:
-
-- choose a fresh residual-driven hardening slice or explicitly define the next selective-expansion need
+`WP45 Stored Camera Configuration Profiles Baseline`
 
 Reason:
 
 - the repository already has a usable Python working baseline with operations, startup, and bounded host-contract references documented
-- the immediate post-closure operational-readiness and first handover-clarification pair is now landed through `WP31`, `WP32`, and `WP33`
-- `WP34` has removed the most visible remaining host-surface asymmetry by normalizing bounded `interval-capture` into the same result-ownership style as the other bounded host commands
-- `WP35` has already narrowed the main current startup/enumeration residual enough that the next best slice is now contract/lifecycle clarification rather than another immediate hardware rerun
-- `WP36` has now clarified the detached-recording boundary without reopening runtime scope, and `WP37` has already added the smallest justified local startup helper without widening into packaging
-- `WP39` has already handled the first bounded trust-and-shrink pass for module-local docs
-- the first justified architecture-convergence slice is now landed through `WP40`
-- the second justified architecture-convergence slice is now landed through `WP41`
-- the trust-and-shim audit is now landed through `WP42`
-- the bounded packaging/environment guardrail slice is now also landed through `WP43`
-- the narrow selective offline follow-up is now also landed through `WP38`
-- the bounded adapter-facing command-envelope slice is now also landed through `WP44`
-- the next justified step should therefore come from a concrete residual or an explicitly chosen selective-expansion need rather than from a forced generic default
+- the bounded environment, launch, host-contract, and adapter-facing slices are already landed through `WP31` to `WP44`
+- a small profile baseline now offers concrete operational reuse value without reopening broad transport, UI, or hardware scope
+- the user has explicitly identified camera-class-first named configuration profiles as the next justified convenience and handover seam
+- that need can be addressed through one bounded profile-oriented slice that still reuses the current `CameraConfiguration` and capability-aware validation path
 
 ## Fresh Agent Decision Rule
 
@@ -615,6 +605,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
 - `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
 - `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
+- `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
@@ -655,6 +646,7 @@ Current explicit activation:
 - `Vision Platform Namespace Coverage And Compatibility Audit` now has its landed execution-ready file at `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
 - `Python Baseline Packaging Manifest And Environment Guardrails` now has its landed execution-ready file at `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
 - `Bounded API Adapter Command Surface` now has its landed execution-ready file at `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
+- `Stored Camera Configuration Profiles Baseline` now has its prepared execution-ready file at `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
 
 ## PM Refinement Rule
 
