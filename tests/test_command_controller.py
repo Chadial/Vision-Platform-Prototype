@@ -3,6 +3,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
+from camera_app.control import CommandController as LegacyCommandController
 from vision_platform.control import CommandController
 from vision_platform.models import (
     ApplyConfigurationCommandResult,
@@ -31,6 +32,9 @@ from vision_platform.models import (
 
 
 class CommandControllerTests(unittest.TestCase):
+    def test_legacy_camera_app_control_package_reexports_platform_controller(self) -> None:
+        self.assertIs(LegacyCommandController, CommandController)
+
     def test_save_snapshot_uses_default_save_directory_when_request_has_none(self) -> None:
         camera_service = MagicMock()
         snapshot_service = MagicMock()

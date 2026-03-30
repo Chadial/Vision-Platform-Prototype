@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
+from camera_app.imaging import OpenCvFrameAdapter as LegacyOpenCvFrameAdapter
 from vision_platform.imaging import OpenCvFrameAdapter
 from vision_platform.models import CapturedFrame
 
@@ -114,6 +115,9 @@ class _FakeCv2:
 
 
 class OpenCvFrameAdapterTests(unittest.TestCase):
+    def test_legacy_camera_app_imaging_package_reexports_platform_adapter(self) -> None:
+        self.assertIs(LegacyOpenCvFrameAdapter, OpenCvFrameAdapter)
+
     def test_to_image_converts_mono16_buffer_without_normalization(self) -> None:
         adapter = OpenCvFrameAdapter(cv2_module=_FakeCv2(), numpy_module=_FakeNumpy())
         frame = CapturedFrame(

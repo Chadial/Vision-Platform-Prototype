@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 from time import sleep
 import unittest
 
+from camera_app.bootstrap import build_simulated_camera_subsystem as build_legacy_simulated_camera_subsystem
 from tests import _path_setup
 from vision_platform import build_camera_subsystem, build_simulated_camera_subsystem
 from vision_platform.integrations.camera import SimulatedCameraDriver
@@ -32,6 +33,13 @@ class _FailingOnceFrameWriter:
 
 
 class BootstrapTests(unittest.TestCase):
+    def test_legacy_camera_app_bootstrap_shim_reuses_platform_bootstrap(self) -> None:
+        legacy_subsystem = build_legacy_simulated_camera_subsystem()
+        platform_subsystem = build_simulated_camera_subsystem()
+
+        self.assertEqual(type(legacy_subsystem), type(platform_subsystem))
+        self.assertEqual(type(legacy_subsystem.command_controller), type(platform_subsystem.command_controller))
+
     def test_build_camera_subsystem_wires_shared_services_consistently(self) -> None:
         subsystem = build_camera_subsystem(SimulatedCameraDriver())
 
