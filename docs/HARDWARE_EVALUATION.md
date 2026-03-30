@@ -234,6 +234,25 @@ Residual observations from the March 30, 2026 bounded rerun:
 - hardware enumeration exposed duplicate entries for `DEV_1AB22C046D81`, one with serial `067WH` and one with serial `N/A`
 - the in-process interval-capture rerun completed successfully but reported `skipped_intervals=1`, so interval timing on the real path should still be treated as boundedly acceptable rather than perfectly scheduler-stable
 
+WP27 lifecycle follow-up on March 30, 2026:
+
+- narrowed the most plausible shared lifecycle seam to capability probing during `CameraService.initialize()`: the real-hardware path previously opened the camera through `VimbaXCameraDriver` and then re-entered Vimba X again through `probe_camera_capabilities(...)`
+- the current baseline now probes hardware capability data from the already opened driver camera instead of opening a second Vimba/camera context during initialization
+- supporting unit coverage now exists for:
+  - open-camera capability serialization
+  - driver-side capability probing on the already opened camera
+  - `CameraService` preference for driver-provided probe payloads with fallback to the older live-probe path
+
+Observed result from the WP27 serial hardware proof:
+
+- serial `status -> status` on `DEV_1AB22C046D81` succeeded without `camera already in use`
+- serial `snapshot -> status` on the same camera id succeeded without `camera already in use`
+- serial bounded `recording(frame_limit=5) -> status` on the same camera id also succeeded without `camera already in use`
+- generated proof directories:
+  - `captures/hardware_smoke/wp27_reuse_check`
+  - `captures/hardware_smoke/wp27_recording_reuse_check`
+- the residual `vmbpyLog <VmbError.NotAvailable: -30>` line was not the target of this slice and may still appear independently of the narrowed reuse result
+
 Additional camera-specific rerun on March 30, 2026 against `docs/HARDWARE_CAPABILITIES.md`:
 
 - integrated `Mono8` command-flow rerun with `exposure_time_us=10031.291`, `gain=3.0`, `roi_width=2000`, `roi_height=1500`
@@ -257,7 +276,7 @@ Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 
 
 | Area | Result | Notes |
 | --- | --- | --- |
-| Initialization / Shutdown | PASS with residual note | Integrated hardware runs completed cleanly, but successful hardware-backed commands still emitted a `vmbpyLog <VmbError.NotAvailable: -30>` line that should remain under observation |
+| Initialization / Shutdown | PASS with narrower reuse confidence | Integrated hardware runs completed cleanly, and the March 30 WP27 serial `status -> status`, `snapshot -> status`, and `recording -> status` proofs no longer reproduced `camera already in use`; successful commands may still emit a `vmbpyLog <VmbError.NotAvailable: -30>` line that remains under observation |
 | Explicit Camera Selection | PASS with residual note | Hardware runs used explicit camera id `DEV_1AB22C046D81`; enumeration currently shows duplicate SDK-visible entries for that same id |
 | Configuration Application | PASS | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; camera-side frame-rate control also works when `AcquisitionFrameRateEnable` is enabled first |
 | Snapshot Save | PASS | `Mono8`, `Mono10`, and hardware-backed `BMP` snapshot paths produced plausible files |

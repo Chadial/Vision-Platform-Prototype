@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `fix/hardware-camera-lifecycle-cleanup`
-- activation state: current next execution-ready package after landed `WP26`
+- activation state: landed on March 30, 2026 as the narrow lifecycle follow-up after `WP26`
 
 ## Scope
 
@@ -72,6 +72,14 @@ The March 30, 2026 bounded hardware reruns showed:
 The unresolved question is:
 
 - does the current integrated Python baseline release the camera deterministically enough across real-world serial execution paths?
+
+Implemented narrowing result:
+
+- the most plausible shared lifecycle seam was the capability-probe path during `CameraService.initialize()`
+- the real-hardware path previously opened the camera through `VimbaXCameraDriver` and then immediately re-entered Vimba X through `probe_camera_capabilities(...)`
+- this slice now probes capability data from the already opened driver camera instead of opening a second Vimba/camera context during initialization
+- the March 30, 2026 serial hardware proofs on `DEV_1AB22C046D81` (`status -> status`, `snapshot -> status`, `recording -> status`) no longer reproduced `camera already in use`
+- this slice does not close the residual `vmbpyLog <VmbError.NotAvailable: -30>` observation or the duplicate SDK enumeration note
 
 ## Narrow Decisions
 
@@ -129,6 +137,20 @@ Recommended supporting local validation:
 - at least one previously flaky serial hardware reuse path is now reliable enough to document
 - no broad hardware exploration or transport work is bundled
 - hardware-backed evidence is recorded explicitly
+
+## Completion Note
+
+Landed evidence for this slice:
+
+- unit validation:
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_camera_service tests.test_capability_probe tests.test_vimbax_camera_driver`
+- serial real-device proofs on `DEV_1AB22C046D81`:
+  - `status -> status`
+  - `snapshot(.bmp) -> status`
+  - bounded `recording(frame_limit=5) -> status`
+- artifact folders:
+  - `captures/hardware_smoke/wp27_reuse_check`
+  - `captures/hardware_smoke/wp27_recording_reuse_check`
 
 ## Recovery Note
 

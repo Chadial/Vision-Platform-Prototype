@@ -4,6 +4,7 @@ from camera_app.drivers.camera_driver import CameraDriver
 from camera_app.models.camera_capability_profile import CameraCapabilityProfile
 from camera_app.models.camera_configuration import CameraConfiguration
 from camera_app.models.camera_status import CameraStatus
+from vision_platform.integrations.camera.capability_probe import DEFAULT_FEATURE_NAMES
 from vision_platform.services.camera_capability_service import CameraCapabilityService
 
 
@@ -61,7 +62,12 @@ class CameraService:
             return
 
         try:
-            self._capability_profile = self._capability_service.probe_live(camera_id=self._camera_status.camera_id)
+            probe_capabilities = getattr(self._driver, "probe_capabilities", None)
+            if callable(probe_capabilities):
+                payload = probe_capabilities(feature_names=DEFAULT_FEATURE_NAMES)
+                self._capability_profile = self._capability_service.from_probe_payload(payload)
+            else:
+                self._capability_profile = self._capability_service.probe_live(camera_id=self._camera_status.camera_id)
         except Exception as exc:
             self._camera_status.capability_probe_error = str(exc)
             return

@@ -6,6 +6,10 @@ from typing import Optional
 from vmbpy import Camera, VmbSystem
 
 from vision_platform.integrations.camera.camera_driver import CameraDriver
+from vision_platform.integrations.camera.capability_probe import (
+    DEFAULT_FEATURE_NAMES,
+    probe_open_camera_capabilities,
+)
 from vision_platform.models import CameraConfiguration, CameraStatus, CapturedFrame
 
 
@@ -158,6 +162,9 @@ class VimbaXCameraDriver(CameraDriver):
 
     def get_status(self) -> CameraStatus:
         return self._refresh_status()
+
+    def probe_capabilities(self, feature_names: tuple[str, ...] = DEFAULT_FEATURE_NAMES) -> dict:
+        return probe_open_camera_capabilities(self._require_camera(), feature_names=feature_names)
 
     def shutdown(self) -> None:
         if self._camera is not None:
