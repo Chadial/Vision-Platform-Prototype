@@ -4,6 +4,7 @@
 
 - `docs/SESSION_START.md`: compact session bootstrap and reading map
 - `docs/WORKFLOW.md`: operational execution flow for agents
+- `docs/DOCUMENTATION_PLAYBOOK.md`: documentation model and maintenance rules
 - `docs/WORKPACKAGES.md`: central work-package queue and next-step prioritization
 - `docs/root_category_audit.md`: meaning and decision rules for `apps/`, `integrations/`, `services/`, and `libraries/`
 - primary command-surface rule: keep one host-neutral control layer; CLI is a local adapter and future API/feed work should reuse that same layer
@@ -62,3 +63,4 @@ For each prepared-only module:
 Governance note:
 
 - `docs/module_doc_audit.md` records the current keep/shrink guidance for module-local docs
+- `docs/DOCUMENTATION_PLAYBOOK.md` records the broader repo-level role split between stable, operational, current-state, and boundary docs

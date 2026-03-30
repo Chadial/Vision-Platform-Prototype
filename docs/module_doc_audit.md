@@ -107,3 +107,8 @@ The intended model remains:
 
 - central PM and status in `docs/`
 - local reality and boundaries in module docs
+
+Repo-wide documentation role split:
+
+- `docs/DOCUMENTATION_PLAYBOOK.md` is the central reference for stable docs, operational docs, current-state docs, and deferred/boundary docs
+- this audit remains focused specifically on module-local documentation, not on replacing that broader playbook

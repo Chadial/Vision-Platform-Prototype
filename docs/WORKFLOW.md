@@ -135,11 +135,18 @@ If full validation is not possible:
 
 When the work changes repository state:
 
+- use `docs/DOCUMENTATION_PLAYBOOK.md` first to identify whether the affected docs are stable, operational, current-state, or boundary docs
 - update `docs/STATUS.md`
 - update `docs/WORKPACKAGES.md`
 - update the active detailed `docs/session_workpackages/wpXX_*.md` file with progress, sub-work-package decisions, and discoveries
 - update relevant module `STATUS.md` when module reality changed
 - update `docs/MODULE_INDEX.md` only if module visibility or purpose changed
+
+Default discipline:
+
+- do not update all docs after every change
+- update only the smallest doc set whose role was actually affected
+- prefer one sharp additive clarification over large prose rewrites
 
 ### 8. Close The Slice
 

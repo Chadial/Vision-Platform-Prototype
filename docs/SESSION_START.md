@@ -18,6 +18,7 @@ Read this first to get from zero context to a workable repository overview witho
 8. Read the target module's `README.md` and `STATUS.md` before changing code in that module; read that module's `ROADMAP.md` only when the local module plan is directly needed.
 9. If the target module is `prepared only`, read its `ROADMAP.md` before first activation work in that module.
 10. If the task may create a new module or move logic across `apps/`, `integrations/`, `services/`, or `libraries/`, read `docs/root_category_audit.md` first.
+11. If the task changes documentation structure, update rules, or documentation role boundaries, read `docs/DOCUMENTATION_PLAYBOOK.md`.
 
 ## Current Baseline
 
@@ -82,6 +83,8 @@ Read these for every new session:
   - `docs/ProjectAgents.md`
 - For any substantive repository change:
   - `docs/git_strategy.md`
+- For documentation-model or documentation-maintenance questions:
+  - `docs/DOCUMENTATION_PLAYBOOK.md`
 - For dirty or mixed worktrees:
   - `docs/branch_backlog.md`
 - For git or branch workflow questions:
@@ -119,6 +122,7 @@ Read these for every new session:
 - `docs/PYTHON_BASELINE_RUNBOOK.md` is the compact operating reference for the current post-closure Python baseline.
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` is the compact startup-surface reference for the preferred current entry points.
 - `docs/HOST_CONTRACT_BASELINE.md` is the compact stable-now / deferred-later reference for the bounded current host surface.
+- `docs/DOCUMENTATION_PLAYBOOK.md` is the documentation-role and maintenance reference for stable, operational, and current-state docs.
 - `docs/module_doc_audit.md` is the current reference for how module-local docs should be used and trimmed.
 - `docs/root_category_audit.md` is the current reference for how `apps/`, `integrations/`, `services/`, and `libraries/` are meant to be used.
 - `docs/ROADMAP.md` is the repository delivery sequence.
