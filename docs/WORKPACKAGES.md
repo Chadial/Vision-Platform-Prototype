@@ -257,9 +257,10 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | active lane | third Extended MVP closure lane; first narrow slice landed through `WP14`, lane still open for traceability extensions | `docs/session_workpackages/wp14_data_logging_closure.md` |
 | 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | active lane | fourth Extended MVP closure lane; first narrow slice landed through `WP15`, lane still open for metadata-aware offline reuse | `docs/session_workpackages/wp15_offline_measurement_closure.md` |
 | 16 | Data And Logging Traceability Extension | add one stable artifact-level metadata traceability path for saved snapshot and bounded recording outputs | active lane | first post-`WP14` extension slice; landed through `WP16` with one shared folder-local appendable trace log for snapshot and bounded recording | `docs/session_workpackages/wp16_data_logging_traceability.md` |
-| 17 | Offline And Measurement Metadata Extension | reuse saved artifact metadata in the offline report path so artifact context and focus results stay linked | current next | likely follow-up after `WP16`; narrow metadata-aware offline slice now prepared for activation | `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md` |
+| 17 | Offline And Measurement Metadata Extension | reuse saved artifact metadata in the offline report path so artifact context and focus results stay linked | active lane | landed narrow metadata-aware offline slice; compact postprocess reporting now joins folder-local traceability rows by saved image name | `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md` |
 | 18 | Focus Metadata Artifact Extension | define one narrow reusable artifact-level focus and analysis-ROI metadata baseline above the traceability path | active lane | landed narrow extension after `WP16`; focus summary metadata now requires an explicit aggregation basis, while exact defaults/bounds still need later testing and definition | `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md` |
 | 19 | Focus Metadata Producer Wiring | wire the artifact-level focus metadata producer into normal save flows without freezing broader statistics policy | active lane | landed narrow follow-up after `WP18`; snapshot and bounded-recording flows can now emit focus metadata when explicitly configured | `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md` |
+| 20 | Focus Metadata Policy Hardening | define and test explicit defaults, bounds, and validation policy for artifact-level focus summary metadata | current next | next narrow post-`WP19` closure slice; derive one execution-ready package before implementation instead of widening UI/API scope | to be derived |
 
 ## Immediate PM Backlog
 
@@ -270,19 +271,21 @@ These are the work packages PM should treat as the current actionable backlog:
 3. `Data And Logging Closure`
 4. `Offline And Measurement Closure`
 
-Most recently landed detailed package:
+Most recently landed detailed packages:
 
-- `docs/session_workpackages/wp16_data_logging_traceability.md`
-  - first post-`WP14` extension slice inside `Data And Logging Closure`
-  - landed one shared folder-local appendable traceability log for snapshot and bounded recording
+- `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
+  - landed the consumer-side offline metadata join over folder-local traceability data
+- `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
+  - landed the explicit aggregation-basis requirement for stored focus-summary fields
+- `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
+  - landed the explicit producer wiring for snapshot and bounded-recording save flows
 
 Current explicitly activated detailed package:
 
-- `Offline And Measurement Metadata Extension` is now the default next lane
-- detailed activation file now exists as `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
-- `Focus Metadata Artifact Extension` is now landed as a narrow follow-up and should not be folded back into `WP16`
-- `WP18` now also carries one explicit reminder for later agents: aggregation-policy details for focus summary metadata are not finalized yet and must be tested and defined later instead of being assumed silently
-- `WP19` is now also landed as the producer-wiring follow-up, but its composition stays explicit; repository-wide mandatory defaults for focus-summary policy remain later work
+- no post-`WP19` detailed package is active yet
+- the next default lane is to derive `WP20` as one narrow focus-summary metadata policy hardening slice
+- `WP17` is now landed as the consumer-side offline follow-up and should no longer be treated as pending activation
+- `WP18` and `WP19` are both landed, but aggregation-policy details for focus summary metadata are still intentionally open and should be tested and defined later instead of being assumed silently
 
 These are important but should not be treated as the main always-on stream:
 
@@ -370,9 +373,10 @@ Current activation note:
 - `Offline And Measurement Closure` now has its first landed slice in `docs/session_workpackages/wp15_offline_measurement_closure.md`
 - that slice intentionally stayed narrow and centered offline focus-report reuse of saved `BMP` artifacts
 - `WP16` is now landed and extends `Data And Logging Closure` at the traceability level with one shared folder-local appendable traceability log for snapshot and bounded recording
-- `WP17` is now the active next extension package and should consume that new traceability baseline from the offline/reporting side
+- `WP17` is now landed as the corresponding offline/reporting consumer slice over that traceability baseline
 - `WP18` is now landed behind that and makes optional focus/analysis ROI artifact metadata more explicit without silently finalizing focus-summary aggregation defaults or bounds
 - `WP19` is now landed behind `WP18` and wires that metadata into normal snapshot and bounded-recording save paths when explicitly configured
+- the next default follow-up is to derive `WP20` as one narrow policy-hardening slice over those now-landed metadata structures
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -394,22 +398,22 @@ The current coarse PM order should be:
 2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
 3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
 4. treat the first `Host Control Closure`, `Experiment Reliability Closure`, `WP14`, and `WP15` slices as landed baseline hardening rather than full lane closure
-5. keep `WP17` as the default next extension package inside `Offline And Measurement Closure`
-6. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
-7. follow the landed `WP16` traceability baseline with a metadata-aware offline extension rather than reopening broad frontend or architecture work
+5. treat `WP17`, `WP18`, and `WP19` as landed metadata-consumer and producer hardening slices rather than as pending activation work
+6. derive `WP20` as the next narrow default extension package around explicit focus-summary metadata policy hardening
+7. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
 8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- derive `WP17` for `Offline And Measurement Metadata Extension`
+- derive `WP20` for `Focus Metadata Policy Hardening`
 
 Reason:
 
 - the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
-- the first host-control, reliability, visible-format, offline-artifact-reuse, and traceability slices are already landed
-- the next tactical need is to consume that new traceability data in one narrow offline/reporting follow-up
+- the first host-control, reliability, visible-format, traceability, offline metadata-consumption, and metadata-producer slices are already landed
+- the next tactical need is to make the still-open focus-summary metadata policy explicit and testable instead of leaving defaults and bounds implicit
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule
@@ -459,7 +463,7 @@ Current explicit activation:
 - `Data And Logging Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp14_data_logging_closure.md`
 - `Offline And Measurement Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp15_offline_measurement_closure.md`
 - `Data And Logging Traceability Extension` now has its first landed implementation-oriented package at `docs/session_workpackages/wp16_data_logging_traceability.md`
-- `Offline And Measurement Metadata Extension` now has its prepared execution-ready file at `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
+- `Offline And Measurement Metadata Extension` now has its landed execution-ready file at `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
 - `Focus Metadata Artifact Extension` now has its landed execution-ready file at `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
 - `Focus Metadata Producer Wiring` now has its landed execution-ready file at `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
 
