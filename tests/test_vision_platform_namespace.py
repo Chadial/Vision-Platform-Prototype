@@ -1,6 +1,10 @@
+from pathlib import Path
+import re
 import unittest
 
+from tests import _path_setup
 from vision_platform import build_simulated_camera_subsystem
+from vision_platform.apps.opencv_prototype.demo_result import DemoRunResult
 from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.libraries.common_models import (
     DisplayOverlayPayload,
@@ -29,6 +33,9 @@ from vision_platform.apps.postprocess_tool import format_focus_report, run_focus
 
 
 class VisionPlatformNamespaceTests(unittest.TestCase):
+    def test_opencv_demo_result_is_owned_by_platform_app_namespace(self) -> None:
+        self.assertEqual(DemoRunResult.__module__, "vision_platform.apps.opencv_prototype.demo_result")
+
     def test_platform_namespace_re_exports_existing_core_types(self) -> None:
         subsystem = build_simulated_camera_subsystem()
 
@@ -93,6 +100,89 @@ class VisionPlatformNamespaceTests(unittest.TestCase):
         self.assertTrue(callable(summarize_overlay_payload))
         self.assertTrue(callable(run_focus_report))
         self.assertTrue(callable(format_focus_report))
+
+    def test_camera_app_imports_inside_vision_platform_are_limited_to_known_compatibility_boundaries(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        allowed_paths = {
+            "src/vision_platform/apps/camera_cli/camera_cli.py",
+            "src/vision_platform/apps/opencv_prototype/command_flow_demo.py",
+            "src/vision_platform/apps/opencv_prototype/export_camera_capabilities.py",
+            "src/vision_platform/apps/opencv_prototype/focus_preview_demo.py",
+            "src/vision_platform/apps/opencv_prototype/hardware_command_flow.py",
+            "src/vision_platform/apps/opencv_prototype/hardware_preview_demo.py",
+            "src/vision_platform/apps/opencv_prototype/overlay_payload_demo.py",
+            "src/vision_platform/apps/opencv_prototype/preview_demo.py",
+            "src/vision_platform/apps/opencv_prototype/save_demo.py",
+            "src/vision_platform/apps/opencv_prototype/simulated_demo.py",
+            "src/vision_platform/apps/opencv_prototype/snapshot_smoke.py",
+            "src/vision_platform/bootstrap.py",
+            "src/vision_platform/control/command_controller.py",
+            "src/vision_platform/integrations/camera/camera_driver.py",
+            "src/vision_platform/models/apply_configuration_command_result.py",
+            "src/vision_platform/models/apply_configuration_request.py",
+            "src/vision_platform/models/camera_capability_profile.py",
+            "src/vision_platform/models/camera_configuration.py",
+            "src/vision_platform/models/camera_status.py",
+            "src/vision_platform/models/captured_frame.py",
+            "src/vision_platform/models/interval_capture_command_result.py",
+            "src/vision_platform/models/interval_capture_request.py",
+            "src/vision_platform/models/interval_capture_status.py",
+            "src/vision_platform/models/preview_frame_info.py",
+            "src/vision_platform/models/recording_command_result.py",
+            "src/vision_platform/models/recording_request.py",
+            "src/vision_platform/models/recording_status.py",
+            "src/vision_platform/models/save_directory_command_result.py",
+            "src/vision_platform/models/save_snapshot_request.py",
+            "src/vision_platform/models/save_snapshot_result.py",
+            "src/vision_platform/models/set_save_directory_request.py",
+            "src/vision_platform/models/set_save_directory_result.py",
+            "src/vision_platform/models/snapshot_command_result.py",
+            "src/vision_platform/models/snapshot_request.py",
+            "src/vision_platform/models/start_interval_capture_request.py",
+            "src/vision_platform/models/start_recording_request.py",
+            "src/vision_platform/models/stop_interval_capture_request.py",
+            "src/vision_platform/models/stop_recording_request.py",
+            "src/vision_platform/models/subsystem_status.py",
+            "src/vision_platform/services/recording_service/camera_service.py",
+            "src/vision_platform/services/recording_service/file_naming.py",
+            "src/vision_platform/services/recording_service/frame_writer.py",
+            "src/vision_platform/services/recording_service/interval_capture_service.py",
+            "src/vision_platform/services/recording_service/recording_service.py",
+            "src/vision_platform/services/recording_service/snapshot_service.py",
+        }
+
+        offending_paths: list[str] = []
+        for path in (repo_root / "src" / "vision_platform").rglob("*.py"):
+            text = path.read_text(encoding="utf-8")
+            if not re.search(r"^\s*(from|import)\s+camera_app\b", text, re.MULTILINE):
+                continue
+            relative_path = path.relative_to(repo_root).as_posix()
+            if relative_path not in allowed_paths:
+                offending_paths.append(relative_path)
+
+        self.assertEqual(offending_paths, [])
+
+    def test_camera_app_imports_in_tests_are_limited_to_explicit_compatibility_checks(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        allowed_test_paths = {
+            "tests/test_bootstrap.py",
+            "tests/test_command_controller.py",
+            "tests/test_file_naming.py",
+            "tests/test_frame_writer.py",
+            "tests/test_opencv_adapter.py",
+            "tests/test_opencv_preview.py",
+        }
+
+        offending_paths: list[str] = []
+        for path in (repo_root / "tests").rglob("*.py"):
+            text = path.read_text(encoding="utf-8")
+            if not re.search(r"^\s*(from|import)\s+camera_app\b", text, re.MULTILINE):
+                continue
+            relative_path = path.relative_to(repo_root).as_posix()
+            if relative_path not in allowed_test_paths:
+                offending_paths.append(relative_path)
+
+        self.assertEqual(offending_paths, [])
 
 
 if __name__ == "__main__":

@@ -3,8 +3,8 @@ from tempfile import TemporaryDirectory
 from time import sleep
 import unittest
 
-from camera_app.bootstrap import build_simulated_camera_subsystem as build_legacy_simulated_camera_subsystem
 from tests import _path_setup
+from camera_app.bootstrap import build_simulated_camera_subsystem as build_legacy_simulated_camera_subsystem
 from vision_platform import build_camera_subsystem, build_simulated_camera_subsystem
 from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.models import (

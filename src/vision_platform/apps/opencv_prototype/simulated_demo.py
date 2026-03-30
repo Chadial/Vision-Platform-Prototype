@@ -5,7 +5,7 @@ from pathlib import Path
 from time import sleep
 
 from camera_app.logging.log_service import configure_logging
-from camera_app.smoke.demo_result import DemoRunResult
+from vision_platform.apps.opencv_prototype.demo_result import DemoRunResult
 from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.models import CameraConfiguration, IntervalCaptureRequest, RecordingRequest, SnapshotRequest
 from vision_platform.services.recording_service import CameraService, SnapshotService

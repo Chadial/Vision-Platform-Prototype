@@ -162,6 +162,17 @@ The current stable architectural boundaries are:
 - ROI and focus logic stay reusable outside UI shells
 - saved-artifact traceability and bounded offline reuse are part of the current baseline
 
+## Current Intentional Compatibility Bridges
+
+The preferred import and ownership surface is now `src/vision_platform`, but some compatibility bridges remain intentional:
+
+- `src/camera_app.bootstrap`, `src/camera_app.control`, `src/camera_app.imaging`, and `src/camera_app.storage` remain as legacy compatibility shims
+- `vision_platform.models` still re-exports a number of model owners that physically remain under `camera_app.models`
+- selected `vision_platform` implementation modules still depend on `camera_app` services, validation helpers, or logging helpers where the physical owner has not yet moved
+- selected OpenCV prototype app entry points still use the legacy logging helper while now owning their local `DemoRunResult` type inside `vision_platform.apps.opencv_prototype`
+
+These bridges should be read as explicit compatibility seams, not as uncertainty about the preferred namespace.
+
 ## Intentionally Deferred
 
 The following are intentionally deferred rather than missing by accident:
