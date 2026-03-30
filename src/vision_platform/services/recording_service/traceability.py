@@ -206,6 +206,14 @@ def append_trace_run_end(
     handle.flush()
 
 
+def build_snapshot_run_id(saved_path: Path) -> str:
+    return saved_path.stem
+
+
+def build_bounded_recording_run_id(file_stem: str, session_started_utc: str) -> str:
+    return f"{file_stem}@{session_started_utc}"
+
+
 def record_snapshot_trace(
     saved_path: Path,
     request: SnapshotRequest,
@@ -216,7 +224,7 @@ def record_snapshot_trace(
     stable_context = build_snapshot_stable_context(request, configuration)
     log_path, reused_existing_log = resolve_trace_log_path(request.save_directory, stable_context)
     handle, writer = open_trace_log(log_path, stable_context, reused_existing_log=reused_existing_log)
-    run_id = saved_path.stem
+    run_id = build_snapshot_run_id(saved_path)
     try:
         append_trace_run_start(
             handle,
@@ -452,6 +460,8 @@ __all__ = [
     "append_trace_run_start",
     "build_trace_artifact_metadata",
     "build_recording_stable_context",
+    "build_bounded_recording_run_id",
+    "build_snapshot_run_id",
     "build_snapshot_stable_context",
     "iter_trace_log_paths",
     "load_trace_log",

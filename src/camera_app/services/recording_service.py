@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import replace
 import logging
 from datetime import datetime, timezone
 from queue import Empty, Full, Queue
@@ -22,6 +23,7 @@ from vision_platform.services.recording_service.traceability import (
     append_trace_image_row,
     append_trace_run_end,
     append_trace_run_start,
+    build_bounded_recording_run_id,
     build_recording_stable_context,
     open_trace_log,
     resolve_trace_log_path,
@@ -63,6 +65,7 @@ class RecordingService:
         self._trace_log_handle: TextIO | None = None
         self._trace_log_writer: csv.writer | None = None
         self._trace_run_id: str | None = None
+        self._last_completed_run_id: str | None = None
 
     def start_recording(self, request: RecordingRequest) -> RecordingStatus:
         self._validate_request(request)
@@ -78,6 +81,7 @@ class RecordingService:
             self._active_request = request
             self._frame_queue = Queue(maxsize=request.queue_size)
             self._stop_event.clear()
+            self._last_completed_run_id = None
             self._acquisition_stopped = False
             self._recording_session_started_utc = self._current_system_time_utc()
             self._recording_deadline = (
@@ -88,6 +92,8 @@ class RecordingService:
                 self._artifact_focus_metadata_producer.reset()
             self._open_recording_log(request)
             self._open_traceability_log(request)
+            with self._status_lock:
+                self._status.run_id = self._trace_run_id
             if self._shared_frame_source is not None:
                 self._shared_frame_source.acquire()
             else:
@@ -106,6 +112,7 @@ class RecordingService:
             raise
 
     def stop_recording(self) -> RecordingStatus:
+        active_run_id = self._trace_run_id or self._last_completed_run_id
         self._stop_event.set()
 
         active_thread = current_thread()
@@ -115,7 +122,7 @@ class RecordingService:
             self._writer_thread.join(timeout=1.0)
 
         self._finalize_recording()
-        return self.get_status()
+        return replace(self.get_status(), run_id=active_run_id)
 
     def get_status(self) -> RecordingStatus:
         with self._status_lock:
@@ -125,6 +132,7 @@ class RecordingService:
                 dropped_frames=self._status.dropped_frames,
                 save_directory=self._status.save_directory,
                 active_file_stem=self._status.active_file_stem,
+                run_id=self._status.run_id,
                 last_error=self._status.last_error,
             )
 
@@ -262,7 +270,10 @@ class RecordingService:
             stable_context,
             reused_existing_log=reused_existing_log,
         )
-        self._trace_run_id = f"{request.file_stem}@{self._recording_session_started_utc or self._current_system_time_utc()}"
+        self._trace_run_id = build_bounded_recording_run_id(
+            request.file_stem,
+            self._recording_session_started_utc or self._current_system_time_utc(),
+        )
         append_trace_run_start(
             self._trace_log_handle,
             "bounded_recording",
@@ -386,6 +397,7 @@ class RecordingService:
             session_started_utc = self._recording_session_started_utc
             session_end_utc = self._current_system_time_utc() if active_request is not None else None
             end_state = "failed" if final_status.last_error else "completed"
+            completed_run_id = self._trace_run_id
             if active_request is not None and self._trace_log_handle is not None and self._trace_run_id is not None:
                 try:
                     append_trace_run_end(
@@ -419,10 +431,12 @@ class RecordingService:
                 self._trace_log_handle = None
                 self._trace_log_writer = None
                 self._trace_run_id = None
+            self._last_completed_run_id = completed_run_id
             with self._status_lock:
                 self._status.is_recording = False
                 self._status.save_directory = None
                 self._status.active_file_stem = None
+                self._status.run_id = None
 
             if stop_error is not None and not suppress_errors:
                 raise stop_error

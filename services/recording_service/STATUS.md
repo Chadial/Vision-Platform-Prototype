@@ -4,6 +4,7 @@
 - implemented: snapshot saving, snapshot-side focus capture, interval capture, recording queue, frame writer, deterministic naming
 - implemented: dependency-free visible frame output now covers `.png` and `.bmp` for `Mono8`, `Rgb8`, and `Bgr8`, while higher-bit grayscale `.png`/`.tiff` still use the optional OpenCV path
 - implemented: snapshot save and bounded recording now both write into one folder-local appendable traceability log that reuses the same file when stable context still matches and starts a new run block when only run/session fields differ
+- implemented: snapshot and bounded recording now also share deterministic `run_id` rules at the traceability boundary, so host-visible command results can point back to the same saved-artifact run identity without inventing a broader run model
 - implemented: the shared traceability row shape now also supports optional per-image analysis ROI and focus metadata without turning those artifact-level fields into stable-header identity
 - implemented: the shared traceability helper now also exposes a narrow reader path for later offline metadata consumption over one folder's traceability logs
 - implemented: focus summary metadata now requires an explicit aggregation-basis field in the shared traceability row shape when summary fields are stored, so `focus_value_mean` and `focus_value_stddev` are no longer ambiguous standalone artifact values

@@ -33,6 +33,7 @@ class ApiServiceTests(unittest.TestCase):
                 dropped_frames=1,
                 save_directory=Path("C:/captures/recording"),
                 active_file_stem="recording",
+                run_id="recording@2026-03-30T12:00:00+00:00",
             ),
             interval_capture=IntervalCaptureStatus(
                 is_capturing=False,
@@ -58,10 +59,12 @@ class ApiServiceTests(unittest.TestCase):
         self.assertEqual(payload.camera.camera_id, "sim-api")
         self.assertEqual(payload.configuration.pixel_format, "Mono8")
         self.assertEqual(payload.recording.save_directory, str(Path("C:/captures/recording")))
+        self.assertEqual(payload.recording.run_id, "recording@2026-03-30T12:00:00+00:00")
         self.assertEqual(payload.interval_capture.save_directory, str(Path("C:/captures/interval")))
         self.assertIsNotNone(payload.active_run)
         self.assertEqual(payload.active_run.operation_kind, "recording")
         self.assertEqual(payload.active_run.active_file_stem, "recording")
+        self.assertEqual(payload.active_run.run_id, "recording@2026-03-30T12:00:00+00:00")
         self.assertEqual(payload.default_save_directory, str(Path("C:/captures")))
         self.assertTrue(payload.can_save_snapshot)
 

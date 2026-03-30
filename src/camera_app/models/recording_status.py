@@ -10,5 +10,6 @@ class RecordingStatus:
     dropped_frames: int = 0
     save_directory: Optional[Path] = None
     active_file_stem: Optional[str] = None
+    run_id: Optional[str] = None
     last_error: Optional[str] = None
 

@@ -42,6 +42,7 @@ class ApiRecordingStatusPayload:
     dropped_frames: int
     save_directory: str | None
     active_file_stem: str | None
+    run_id: str | None
     last_error: str | None
 
 
@@ -60,6 +61,7 @@ class ApiActiveRunStatusPayload:
     operation_kind: str
     save_directory: str | None
     active_file_stem: str | None
+    run_id: str | None
     frames_written: int
     last_error: str | None
 
@@ -123,6 +125,7 @@ def map_subsystem_status_to_api_payload(status: SubsystemStatus) -> ApiSubsystem
             dropped_frames=status.recording.dropped_frames,
             save_directory=_stringify_path(status.recording.save_directory),
             active_file_stem=status.recording.active_file_stem,
+            run_id=status.recording.run_id,
             last_error=status.recording.last_error,
         ),
         interval_capture=ApiIntervalCaptureStatusPayload(
@@ -159,6 +162,7 @@ def _map_active_run_status(status: SubsystemStatus) -> ApiActiveRunStatusPayload
             operation_kind="recording",
             save_directory=_stringify_path(recording.save_directory),
             active_file_stem=recording.active_file_stem,
+            run_id=recording.run_id,
             frames_written=recording.frames_written,
             last_error=recording.last_error,
         )
@@ -169,6 +173,7 @@ def _map_active_run_status(status: SubsystemStatus) -> ApiActiveRunStatusPayload
             operation_kind="interval_capture",
             save_directory=_stringify_path(interval_capture.save_directory),
             active_file_stem=interval_capture.active_file_stem,
+            run_id=None,
             frames_written=interval_capture.frames_written,
             last_error=interval_capture.last_error,
         )
