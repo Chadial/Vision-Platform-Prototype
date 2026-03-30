@@ -23,14 +23,15 @@ Each status update should state progress and gaps against both roadmaps.
 
 The current prepared post-closure follow-up sequence is now:
 
-1. `WP33 Host Contract Stability And Deferred Surface Clarification`
+No single pinned post-closure follow-up is currently set.
 
 This sequence should be read as:
 
 - first landed residual-driven hardening / diagnostics slices through `WP30`
 - then one landed operational-readiness runbook slice through `WP31`
 - then one landed startup-surface slice through `WP32`
-- then one later-handover/productization clarification slice
+- then one landed later-handover/productization clarification slice through `WP33`
+- any further slice should now be derived from explicit residuals, user direction, or a deliberate selective-expansion decision
 
 The active post-closure phase should now be read in four work types:
 
@@ -62,6 +63,7 @@ The compact operating reference for that baseline now lives at:
 
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
+- `docs/HOST_CONTRACT_BASELINE.md`
 
 The repository currently provides a structured Python prototype for the vision platform with:
 
@@ -386,6 +388,7 @@ The repository currently provides a structured Python prototype for the vision p
 2. Treat `WP27` and `WP28` as landed post-closure hardening slices rather than as proof that the baseline is still unfinished.
 3. Treat `WP31` as landed and use `docs/PYTHON_BASELINE_RUNBOOK.md` as the compact operating reference for the current Python baseline.
 4. Treat `WP32` as landed and use `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` as the compact startup-surface reference for the preferred current entry points.
-5. Use `WP33` as the next explicit post-closure sequence unless a more urgent user-driven residual overrides it.
-6. Prefer the prepared operational-readiness slices over broad new breadth by default.
-7. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+5. Treat `WP33` as landed and use `docs/HOST_CONTRACT_BASELINE.md` as the compact stable-now / deferred-later reference for the current bounded host surface.
+6. If no more urgent residual overrides it, derive the next slice from explicit post-closure need rather than assuming another pending closure default.
+7. Prefer targeted hardening, selective expansion, or handover preparation over broad new breadth by default.
+8. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.

@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `docs/host-contract-stability-clarification`
-- activation state: queued
+- activation state: landed
 
 ## Scope
 
@@ -61,6 +61,11 @@ What this package does not close:
 ## Session Goal
 
 Leave the repository with one clearer host-contract baseline so later handover or integration work starts from explicit documented stability assumptions instead of inference.
+
+Implemented result:
+
+- central host-contract clarification added at `docs/HOST_CONTRACT_BASELINE.md`
+- command vocabulary, central startup docs, PM/status surfaces, and CLI status notes now point to an explicit stable-now / deferred-later split instead of leaving the current host surface to inference
 
 ## Execution Plan
 

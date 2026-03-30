@@ -403,3 +403,31 @@ That means:
 - current request classes remain the domain-facing contract
 - later JSON or DTO shapes can be mapped from them
 - the core service layer should stay transport-agnostic
+
+## Current Stability Boundary
+
+For the current post-closure Python baseline, these command terms should be treated as stable enough for bounded near-term host reuse:
+
+- `ApplyConfigurationRequest`
+- `SetSaveDirectoryRequest`
+- `SaveSnapshotRequest`
+- `StartRecordingRequest`
+- `StopRecordingRequest`
+- `StartIntervalCaptureRequest`
+- `StopIntervalCaptureRequest`
+- `SubsystemStatus`
+
+What this does mean:
+
+- the request vocabulary is the current reusable host-facing nucleus
+- later C# or transport mapping should build on these terms rather than rename them casually
+
+What this does not mean:
+
+- every current transport-facing nested payload is fully frozen
+- broader API or IPC DTO families are already defined
+- detached multi-invocation lifecycle control is already part of the stable current host baseline
+
+For the stable-now versus deferred-later split of the broader host-facing surface, use:
+
+- `docs/HOST_CONTRACT_BASELINE.md`
