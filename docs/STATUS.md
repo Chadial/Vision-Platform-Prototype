@@ -25,11 +25,10 @@ There is now one new prepared post-closure follow-up sequence.
 
 Current prepared order:
 
-1. `WP41 Vision Platform Storage Physical Migration` as the default next architecture-convergence slice
-2. `WP42 Vision Platform Namespace Coverage And Compatibility Audit` as the post-migration trust-and-shim audit
-3. `WP43 Python Baseline Packaging Manifest And Environment Guardrails` as the next small operational-readiness candidate
-4. `WP38 Selective Offline Follow-Up` only when a concrete offline / measurement need is chosen
-5. `WP44 Bounded API Adapter Command Surface` only when a concrete adapter-facing consumer need is chosen
+1. `WP42 Vision Platform Namespace Coverage And Compatibility Audit` as the default post-migration trust-and-shim audit
+2. `WP43 Python Baseline Packaging Manifest And Environment Guardrails` as the next small operational-readiness candidate
+3. `WP38 Selective Offline Follow-Up` only when a concrete offline / measurement need is chosen
+4. `WP44 Bounded API Adapter Command Surface` only when a concrete adapter-facing consumer need is chosen
 
 This sequence should be read as:
 
@@ -45,7 +44,7 @@ This sequence should be read as:
   - `WP38` as conditional selective expansion
   - `WP39` landed as bounded module-documentation trust / shrink cleanup
   - `WP40` landed as the first architecture-convergence slice behind the preferred `vision_platform` boundary
-  - `WP41` prepared as the direct storage/persistence follow-up
+  - `WP41` landed as the direct storage/persistence follow-up
   - `WP42` prepared as the namespace trust / compatibility-audit follow-up
   - `WP43` prepared as a bounded operational-readiness guardrail slice
   - `WP44` prepared as a conditional adapter-facing selective-expansion slice
@@ -415,8 +414,8 @@ The repository currently provides a structured Python prototype for the vision p
 10. Treat `WP38` as the conditional offline / measurement selective-expansion option rather than as the default next slice.
 11. Treat `WP39` as landed; the first bounded module-doc trust / shrink pass is complete and `docs/module_doc_audit.md` now captures the tighter guidance.
 12. Treat `WP40` as landed: `vision_platform.bootstrap`, `vision_platform.control`, and `vision_platform.imaging` now own the implementation directly while `camera_app` remains the compatibility shim layer.
-13. Treat `WP41` as the current next storage/persistence follow-up after landed `WP40`.
-14. Treat `WP42` as the trust-and-shim audit after those migration slices.
+13. Treat `WP41` as landed: storage-facing legacy service imports now point at platform-owned file-naming and frame-writer helpers directly, while `camera_app.storage` remains the compatibility shim layer.
+14. Treat `WP42` as the current next trust-and-shim audit after those migration slices.
 15. Treat `WP43` as the next small operational-readiness candidate once namespace convergence is clearer.
 16. Treat `WP44` as a conditional adapter-facing selective-expansion option, not as an always-on next step.
 17. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
