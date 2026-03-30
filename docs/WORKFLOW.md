@@ -68,6 +68,27 @@ Selection priority:
 4. stay inside existing module boundaries
 5. minimize churn
 
+### 3a. Package Precision Rule
+
+When creating a new work package or materially refining an active one, keep lane-level intent and slice-level scope explicitly separated.
+
+At minimum, the package should make these points explicit:
+
+- `Closure Lane`: the broader tactical lane the package belongs to
+- `Slice Role`: for example `baseline`, `patch`, `extension`, `producer`, `consumer`, or `validation`
+- `Scope Level`: whether the package touches stable context, run/session, artifact/per-image scope, or only a subset of those levels
+- `Producer / Consumer / Structure impact`: whether the package is mainly structure-only, producer-facing, consumer-facing, or one narrow stated combination
+- what the package does not close inside the lane
+- which policy questions remain open and still require later testing or definition
+
+Additional precision rules:
+
+- if the package touches traceability, logging, metadata, save artifacts, or offline reuse, explicitly distinguish stable-context, run/session, and artifact/per-image placement rather than leaving those levels implicit
+- if the package only defines metadata shape, say so explicitly; if it only writes metadata, say so explicitly; if it only consumes metadata, say so explicitly
+- if a field or policy is not finalized, record that explicitly under a short section such as `Open Policy Questions`, `Not Yet Frozen`, or `Requires Later Testing/Definition`
+- if the package title is broader than the selected slice, explicitly state that the package is only one narrow slice and does not close the whole lane
+- keep package text explicit about what larger concerns are intentionally deferred
+
 ### 4. Read Only The Needed Local Context
 
 Before editing a module, read:
@@ -150,5 +171,13 @@ A work package is well formed when it includes:
 - validation
 - done criteria
 - follow-up recommendation
+
+For future package generation and refinement, that quality bar also requires:
+
+- explicit lane vs. slice wording
+- explicit scope-level wording where metadata/logging/traceability is involved
+- explicit producer vs. consumer vs. structure ownership
+- explicit recording of unresolved policy choices instead of silently freezing or omitting them
+- explicit wording that keeps narrow slices visibly narrower than their lane titles
 
 If a planned item is too large to satisfy those points, split it first.
