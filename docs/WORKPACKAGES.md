@@ -292,6 +292,11 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 31 | Python Baseline Operations Runbook | document the stable operating baseline, known-good commands, hardware assumptions, and residual rules for real use | active lane | landed first operational-readiness slice; the compact central runbook now lives in `docs/PYTHON_BASELINE_RUNBOOK.md` without changing product scope | `docs/session_workpackages/wp31_python_baseline_operations_runbook.md` |
 | 32 | Entry-Point And Launch Readiness Baseline | tighten the practical startup surface for the Python baseline through clearer launch paths and bounded readiness polish | active lane | landed second operational-readiness slice; the compact startup-surface reference now lives in `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` without opening packaging work | `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md` |
 | 33 | Host Contract Stability And Deferred Surface Clarification | define which host-facing command/status/result fields are stable now and which broader surfaces remain intentionally deferred | active lane | landed later-handover/productization clarification slice; the compact stable-now / deferred-later reference now lives in `docs/HOST_CONTRACT_BASELINE.md` without widening transport scope | `docs/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md` |
+| 34 | Interval-Capture Host Contract Normalization | bring the current bounded `interval-capture` path closer to the same host-envelope expectations used by the other bounded host commands | current next | next hardening slice; remove the most visible remaining host-surface asymmetry without broadening transport scope | `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md` |
+| 35 | Hardware Enumeration And Startup Residual Narrowing | narrow duplicate camera enumeration and remaining startup-log ambiguity on the tested hardware path | active lane | next residual-driven hardware follow-up when the tested camera path is available | `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md` |
+| 36 | Detached Recording Lifecycle Decision Slice | document the current bounded recording meaning versus any later detached lifecycle control direction | queued | next decision-oriented later-handover slice; clarify scope before any broader recording-control expansion | `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md` |
+| 37 | Python Baseline Operator Start Helper | reduce repeated local startup friction with one bounded helper if justified | queued | next operational-readiness polish candidate after the runbook and launch-baseline pair | `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md` |
+| 38 | Selective Offline Follow-Up | preserve one bounded offline-expansion option only when a concrete user need appears | conditional | optional selective-expansion candidate, not the default next lane | `docs/session_workpackages/wp38_selective_offline_followup.md` |
 
 ## Immediate PM Backlog
 
@@ -303,7 +308,11 @@ These are the work-package groups PM should treat as the current actionable post
 
 Current prepared post-closure sequence:
 
-No default prepared follow-up is currently pinned.
+1. `WP34 Interval-Capture Host Contract Normalization`
+2. `WP35 Hardware Enumeration And Startup Residual Narrowing`
+3. `WP36 Detached Recording Lifecycle Decision Slice`
+4. `WP37 Python Baseline Operator Start Helper`
+5. `WP38 Selective Offline Follow-Up`
 
 Most recently landed detailed packages:
 
@@ -341,6 +350,10 @@ Current explicitly activated detailed package state:
 - `WP31` is now landed as the first compact operational-readiness runbook slice
 - `WP32` is now landed as the startup-surface follow-up to that runbook slice
 - `WP33` is now landed as the first explicit host-contract stability / deferred-scope clarification slice
+- `WP34` is the current default prepared post-closure activation
+- `WP35` is the next active residual-driven hardware follow-up when hardware is available
+- `WP36` and `WP37` are the next queued handover / operational-readiness follow-ups
+- `WP38` remains conditional selective expansion only
 - `WP12` through `WP26` should now be read primarily as the landed Extended MVP closure history that established the current Python working baseline
 - `WP27` through `WP30` are already landed post-closure hardening / diagnostics slices on top of that baseline
 - future hardware reruns remain conditional on local hardware attachment and should only be reopened for concrete residual observations such as the current `NotAvailable` startup log, duplicate camera enumeration behavior, or interval-timing quirks
@@ -494,17 +507,24 @@ The current coarse PM order should be:
 11. treat `WP31` as the landed compact runbook slice for the current Python baseline
 12. treat `WP32` as the landed startup and launcher-clarity slice for the current Python baseline
 13. treat `WP33` as the landed host-contract stability / deferred-scope clarification slice for the current bounded host surface
-14. select any further technical slice only from concrete residuals or an explicit user-directed lane, then revisit tracking, broader API, C# handover widening, and additional frontends as post-closure expansion candidates rather than closure obligations
+14. treat `WP34` as the next narrow hardening default for removing the remaining `interval-capture` host-surface asymmetry
+15. treat `WP35` as the next hardware-residual follow-up only when the tested camera path is available
+16. treat `WP36` and `WP37` as the next queued handover and operational-readiness follow-ups
+17. treat `WP38` as conditional selective expansion only
+18. select any further technical slice only from concrete residuals or an explicit user-directed lane, then revisit tracking, broader API, C# handover widening, and additional frontends as post-closure expansion candidates rather than closure obligations
 
 ## Recommended Next Detailed Work Package
 
-If the user does not explicitly redirect the session, there is currently no single pinned default package after `WP33`.
+If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
+
+- `WP34 Interval-Capture Host Contract Normalization`
 
 Reason:
 
 - the repository already has a usable Python working baseline with operations, startup, and bounded host-contract references documented
 - the immediate post-closure operational-readiness and first handover-clarification pair is now landed through `WP31`, `WP32`, and `WP33`
-- further work should now be derived from concrete residuals, explicit user direction, or a deliberate selective-expansion decision rather than from an assumed generic next closure slice
+- the most visible remaining host-surface asymmetry is that `interval-capture` is still not normalized into the same bounded host-result slice as `status`, `snapshot`, and bounded `recording`
+- that makes `WP34` the smallest justified next hardening slice before broader productization or selective expansion
 
 ## Fresh Agent Decision Rule
 
@@ -555,6 +575,11 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp31_python_baseline_operations_runbook.md`
 - `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md`
 - `docs/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md`
+- `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md`
+- `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
+- `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
+- `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
+- `docs/session_workpackages/wp38_selective_offline_followup.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
@@ -584,6 +609,11 @@ Current explicit activation:
 - `Python Baseline Operations Runbook` now has its landed execution-ready file at `docs/session_workpackages/wp31_python_baseline_operations_runbook.md`
 - `Entry-Point And Launch Readiness Baseline` now has its landed execution-ready file at `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md`
 - `Host Contract Stability And Deferred Surface Clarification` now has its landed execution-ready file at `docs/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md`
+- `Interval-Capture Host Contract Normalization` now has its prepared execution-ready file at `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md`
+- `Hardware Enumeration And Startup Residual Narrowing` now has its prepared execution-ready file at `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
+- `Detached Recording Lifecycle Decision Slice` now has its prepared execution-ready file at `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
+- `Python Baseline Operator Start Helper` now has its prepared execution-ready file at `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
+- `Selective Offline Follow-Up` now has its prepared execution-ready file at `docs/session_workpackages/wp38_selective_offline_followup.md`
 
 ## PM Refinement Rule
 

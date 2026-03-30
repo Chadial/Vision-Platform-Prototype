@@ -23,7 +23,11 @@ Each status update should state progress and gaps against both roadmaps.
 
 The current prepared post-closure follow-up sequence is now:
 
-No single pinned post-closure follow-up is currently set.
+1. `WP34 Interval-Capture Host Contract Normalization`
+2. `WP35 Hardware Enumeration And Startup Residual Narrowing`
+3. `WP36 Detached Recording Lifecycle Decision Slice`
+4. `WP37 Python Baseline Operator Start Helper`
+5. `WP38 Selective Offline Follow-Up`
 
 This sequence should be read as:
 
@@ -31,7 +35,11 @@ This sequence should be read as:
 - then one landed operational-readiness runbook slice through `WP31`
 - then one landed startup-surface slice through `WP32`
 - then one landed later-handover/productization clarification slice through `WP33`
-- any further slice should now be derived from explicit residuals, user direction, or a deliberate selective-expansion decision
+- then one explicit post-closure continuation:
+  - `WP34` and `WP35` as hardening
+  - `WP36` as handover / decision clarification
+  - `WP37` as operational-readiness polish
+  - `WP38` as conditional selective expansion
 
 The active post-closure phase should now be read in four work types:
 
@@ -389,6 +397,7 @@ The repository currently provides a structured Python prototype for the vision p
 3. Treat `WP31` as landed and use `docs/PYTHON_BASELINE_RUNBOOK.md` as the compact operating reference for the current Python baseline.
 4. Treat `WP32` as landed and use `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` as the compact startup-surface reference for the preferred current entry points.
 5. Treat `WP33` as landed and use `docs/HOST_CONTRACT_BASELINE.md` as the compact stable-now / deferred-later reference for the current bounded host surface.
-6. If no more urgent residual overrides it, derive the next slice from explicit post-closure need rather than assuming another pending closure default.
-7. Prefer targeted hardening, selective expansion, or handover preparation over broad new breadth by default.
-8. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+6. Use `WP34` as the next narrow hardening default for removing the remaining `interval-capture` host-surface asymmetry.
+7. Keep `WP35` as the next hardware-residual slice only when the tested camera path is available.
+8. Treat `WP36` through `WP38` as the next prepared post-closure sequence behind those hardening slices.
+9. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
