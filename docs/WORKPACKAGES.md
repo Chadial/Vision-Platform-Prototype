@@ -287,8 +287,8 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 26 | Hardware Revalidation Resume | resume one bounded real-hardware revalidation block once the camera is attached again | dormant | landed final bounded confidence rerun inside the closed Extended MVP phase; future reruns are residual-driven only | `docs/session_workpackages/wp26_hardware_revalidation_resume.md` |
 | 27 | Hardware Lifecycle And Camera Release Hardening | narrow the remaining real-device lifecycle gap around camera release, process-to-process reuse, and cleanup determinism | active lane | landed first post-closure hardening slice after the bounded hardware baseline was already real | `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md` |
 | 28 | Capability-Aware ROI Constraint Reporting | make ROI width/height/offset constraint failures clearer and more host-usable on capability-backed camera paths | active lane | landed first post-closure diagnostics/polish slice; strict capability enforcement remains intact while host-readable guidance improved | `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md` |
-| 29 | Hardware Startup Warning Classification | classify and narrow the remaining real-device startup warnings so hardware runs distinguish actionable lifecycle issues from SDK-noise residuals | current next | first prepared post-`WP28` hardening slice; target the current `VmbError.NotAvailable` / duplicate-enumeration residual without reopening hardware breadth | `docs/session_workpackages/wp29_hardware_startup_warning_classification.md` |
-| 30 | Interval Capture Timing And Polling Tightening | tighten bounded interval-capture timing evidence and active-run polling meaning on the integrated baseline | active lane | second prepared hardening slice; narrow the current skipped-interval / timing-confidence residual without redesigning scheduling or transport | `docs/session_workpackages/wp30_interval_capture_timing_polling_tightening.md` |
+| 29 | Hardware Startup Warning Classification | classify and narrow the remaining real-device startup warnings so hardware runs distinguish actionable lifecycle issues from SDK-noise residuals | active lane | landed post-closure diagnostics slice; current March 30 evidence shows `VmbError.NotAvailable: -30` persists as a non-blocking SDK log residual during successful `status` / `snapshot` runs, while capability probing still succeeds and does not surface it as `capability_probe_error` | `docs/session_workpackages/wp29_hardware_startup_warning_classification.md` |
+| 30 | Interval Capture Timing And Polling Tightening | tighten bounded interval-capture timing evidence and active-run polling meaning on the integrated baseline | current next | next prepared hardening slice; narrow the current skipped-interval / timing-confidence residual without redesigning scheduling or transport | `docs/session_workpackages/wp30_interval_capture_timing_polling_tightening.md` |
 | 31 | Python Baseline Operations Runbook | document the stable operating baseline, known-good commands, hardware assumptions, and residual rules for real use | queued | first operational-readiness slice; make the post-closure Python baseline easier to run and trust without changing product scope | `docs/session_workpackages/wp31_python_baseline_operations_runbook.md` |
 | 32 | Entry-Point And Launch Readiness Baseline | tighten the practical startup surface for the Python baseline through clearer launch paths and bounded readiness polish | queued | second operational-readiness slice; improve how the current baseline is started and handed over without building a full installer | `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md` |
 | 33 | Host Contract Stability And Deferred Surface Clarification | define which host-facing command/status/result fields are stable now and which broader surfaces remain intentionally deferred | queued | first later-handover/productization slice; make the current host baseline easier to hand over without widening transport scope | `docs/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md` |
@@ -303,14 +303,15 @@ These are the work-package groups PM should treat as the current actionable post
 
 Current prepared post-closure sequence:
 
-1. `WP29 Hardware Startup Warning Classification`
-2. `WP30 Interval Capture Timing And Polling Tightening`
-3. `WP31 Python Baseline Operations Runbook`
-4. `WP32 Entry-Point And Launch Readiness Baseline`
-5. `WP33 Host Contract Stability And Deferred Surface Clarification`
+1. `WP30 Interval Capture Timing And Polling Tightening`
+2. `WP31 Python Baseline Operations Runbook`
+3. `WP32 Entry-Point And Launch Readiness Baseline`
+4. `WP33 Host Contract Stability And Deferred Surface Clarification`
 
 Most recently landed detailed packages:
 
+- `docs/session_workpackages/wp29_hardware_startup_warning_classification.md`
+  - landed narrow diagnostics follow-up; fresh March 30 serial hardware `status` and `snapshot(.bmp)` proofs showed that `vmbpyLog <VmbError.NotAvailable: -30>` still appears during successful runs, but the current host/status surface remains successful with `capabilities_available=True` and `capability_probe_error=None`, so the line is currently classified as non-blocking SDK/logging residual rather than active startup failure
 - `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
   - landed narrow follow-up to improve host-usable ROI constraint reporting around width/height/offset increments and ranges, including clearer CLI-side configuration errors
 - `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
@@ -338,11 +339,10 @@ Most recently landed detailed packages:
 
 Current explicitly activated detailed package state:
 
-- `WP29` is the current default prepared post-closure activation
-- `WP30` is prepared as the next adjacent hardening slice behind `WP29`
+- `WP30` is the current default prepared post-closure activation
 - `WP31` through `WP33` are prepared as the first operational-readiness and later-handover follow-ups
 - `WP12` through `WP26` should now be read primarily as the landed Extended MVP closure history that established the current Python working baseline
-- `WP27` and `WP28` are already landed post-closure hardening slices on top of that baseline
+- `WP27`, `WP28`, and `WP29` are already landed post-closure hardening / diagnostics slices on top of that baseline
 - future hardware reruns remain conditional on local hardware attachment and should only be reopened for concrete residual observations such as the current `NotAvailable` startup log, duplicate camera enumeration behavior, or interval-timing quirks
 
 These are important but should not be treated as the main always-on stream:
@@ -489,22 +489,24 @@ The current coarse PM order should be:
 6. treat `WP22`, `WP23`, `WP24`, `WP25`, and `WP26` as landed baseline-hardening slices rather than as pending activation work
 7. treat `WP12` through `WP26` as the closed Extended MVP foundation rather than as still-open proof work
 8. treat `WP27` and `WP28` as the first landed post-closure hardening slices
-9. treat `WP29` and `WP30` as the first prepared residual-driven hardening sequence after the landed `WP27` / `WP28` pair
-10. treat `WP31` and `WP32` as the first operational-readiness sequence for making the Python baseline easier to run and trust
-11. treat `WP33` as the first explicit later-handover clarification slice without widening the current host transport surface
-12. select any further technical slice only from concrete residuals or an explicit user-directed lane, then revisit tracking, broader API, C# handover widening, and additional frontends as post-closure expansion candidates rather than closure obligations
+9. treat `WP29` as the landed startup-warning classification slice that narrowed the current `NotAvailable` residual to non-blocking SDK/logging noise on the successful tested path
+10. treat `WP30` as the next residual-driven hardening slice after that clarification
+11. treat `WP31` and `WP32` as the first operational-readiness sequence for making the Python baseline easier to run and trust
+12. treat `WP33` as the first explicit later-handover clarification slice without widening the current host transport surface
+13. select any further technical slice only from concrete residuals or an explicit user-directed lane, then revisit tracking, broader API, C# handover widening, and additional frontends as post-closure expansion candidates rather than closure obligations
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- `WP29 Hardware Startup Warning Classification`
+- `WP30 Interval Capture Timing And Polling Tightening`
 
 Reason:
 
 - the repository already has a usable Python working baseline with command, preview, recording, storage, traceability, offline reuse, and bounded real-hardware evidence
 - the Extended MVP closure question is no longer "is there a real baseline?" but "what is the next justified improvement on top of that baseline?"
-- the most concrete remaining residuals are still narrow hardening topics around startup warning clarity and interval-capture timing confidence
+- the startup-warning residual has now been narrowed enough to classify the current `NotAvailable` line as non-blocking SDK/logging noise on the successful tested path
+- the next most concrete remaining residual is interval-capture timing confidence
 - broad frontend preparation, transport growth, offline tooling growth, and C# handover remain meaningful later, but they are now post-closure phase options rather than unfinished MVP proof obligations
 
 ## Fresh Agent Decision Rule
@@ -580,7 +582,7 @@ Current explicit activation:
 - `Hardware Revalidation Resume` now has its landed execution-ready file at `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
 - `Hardware Lifecycle And Camera Release Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
 - `Capability-Aware ROI Constraint Reporting` now has its landed execution-ready file at `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
-- `Hardware Startup Warning Classification` now has its prepared execution-ready file at `docs/session_workpackages/wp29_hardware_startup_warning_classification.md`
+- `Hardware Startup Warning Classification` now has its landed execution-ready file at `docs/session_workpackages/wp29_hardware_startup_warning_classification.md`
 - `Interval Capture Timing And Polling Tightening` now has its prepared execution-ready file at `docs/session_workpackages/wp30_interval_capture_timing_polling_tightening.md`
 - `Python Baseline Operations Runbook` now has its prepared execution-ready file at `docs/session_workpackages/wp31_python_baseline_operations_runbook.md`
 - `Entry-Point And Launch Readiness Baseline` now has its prepared execution-ready file at `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md`

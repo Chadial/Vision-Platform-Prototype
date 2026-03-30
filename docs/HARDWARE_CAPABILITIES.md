@@ -304,4 +304,4 @@ The bounded camera-specific rerun on March 30, 2026 confirmed these device-facin
 
 Residual observation:
 
-- successful runs still emitted a `vmbpyLog <VmbError.NotAvailable: -30>` line, so hardware evidence should be treated as acceptable with a known SDK/logging quirk rather than as perfectly clean
+- successful runs still emitted a `vmbpyLog <VmbError.NotAvailable: -30>` line, and the later WP29 serial `status` / `snapshot(.bmp)` rerun showed the same residual while the host/status envelope still reported `capabilities_available = true` and `capability_probe_error = null`; this should currently be treated as non-blocking SDK/logging quirk rather than active capability-probe failure
