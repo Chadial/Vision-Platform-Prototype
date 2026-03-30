@@ -8,7 +8,9 @@ from tests import _path_setup
 from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.models import CameraConfiguration, CapturedFrame, SnapshotRequest
 from vision_platform.services.recording_service import SnapshotService
+from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
 from vision_platform.services.recording_service.traceability import build_trace_artifact_metadata, record_snapshot_trace
+from vision_platform.services.stream_service.roi_state_service import RoiStateService
 
 
 class _FakeRawFrame:
@@ -304,6 +306,58 @@ class SnapshotServiceTests(unittest.TestCase):
                 focus_method="laplace",
                 focus_value_mean=0.75,
             )
+
+    def test_save_snapshot_wires_focus_metadata_producer_into_trace_log(self) -> None:
+        fake_driver = MagicMock()
+        fake_driver.capture_snapshot.return_value = CapturedFrame(
+            raw_frame=_FakeRawFrame(bytes([0, 10, 20, 30, 40, 50, 60, 70, 80])),
+            width=3,
+            height=3,
+            frame_id=12,
+            camera_timestamp=777,
+            pixel_format="Mono8",
+        )
+        roi_state_service = RoiStateService()
+        roi_state_service.set_active_roi(
+            RoiDefinition(
+                roi_id="roi-focus",
+                shape="rectangle",
+                points=((0, 0), (2, 2)),
+            )
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            request = SnapshotRequest(
+                save_directory=Path(temp_dir),
+                file_stem="capture_001",
+                file_extension=".bmp",
+            )
+
+            service = SnapshotService(
+                fake_driver,
+                artifact_focus_metadata_producer=ArtifactFocusMetadataProducer(
+                    focus_method="laplace",
+                    focus_score_frame_interval=3,
+                    roi_state_service=roi_state_service,
+                ),
+            )
+            service.save_snapshot(request)
+
+            trace_rows = list(
+                csv.reader(
+                    line
+                    for line in (Path(temp_dir) / "saved_artifact_traceability.csv").read_text(encoding="utf-8").splitlines()
+                    if line and not line.startswith("# ")
+                )
+            )
+            self.assertEqual(trace_rows[1][7], "rectangle")
+            self.assertEqual(trace_rows[1][8], "rectangle(0,0,2,2)")
+            self.assertEqual(trace_rows[1][9], "laplace")
+            self.assertEqual(trace_rows[1][10], "3")
+            self.assertTrue(trace_rows[1][11])
+            self.assertTrue(trace_rows[1][12])
+            self.assertEqual(trace_rows[1][13], "rectangle")
+            self.assertEqual(trace_rows[1][14], "rectangle(0,0,2,2)")
 
     def test_save_snapshot_logs_and_reraises_writer_errors(self) -> None:
         fake_driver = MagicMock()

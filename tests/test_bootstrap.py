@@ -28,6 +28,16 @@ class BootstrapTests(unittest.TestCase):
         self.assertIs(subsystem.command_controller._recording_service, subsystem.recording_service)
         self.assertIs(subsystem.command_controller._interval_capture_service, subsystem.interval_capture_service)
 
+    def test_build_camera_subsystem_can_wire_focus_metadata_producers(self) -> None:
+        subsystem = build_camera_subsystem(
+            SimulatedCameraDriver(),
+            artifact_focus_method="laplace",
+            focus_score_frame_interval=5,
+        )
+
+        self.assertIsNotNone(subsystem.snapshot_service._artifact_focus_metadata_producer)
+        self.assertIsNotNone(subsystem.recording_service._artifact_focus_metadata_producer)
+
     def test_build_simulated_camera_subsystem_supports_command_controller_interval_flow(self) -> None:
         subsystem = build_simulated_camera_subsystem()
 
