@@ -56,11 +56,21 @@ class ApiIntervalCaptureStatusPayload:
 
 
 @dataclass(slots=True)
+class ApiActiveRunStatusPayload:
+    operation_kind: str
+    save_directory: str | None
+    active_file_stem: str | None
+    frames_written: int
+    last_error: str | None
+
+
+@dataclass(slots=True)
 class ApiSubsystemStatusPayload:
     camera: ApiCameraStatusPayload
     configuration: ApiCameraConfigurationPayload | None
     recording: ApiRecordingStatusPayload
     interval_capture: ApiIntervalCaptureStatusPayload
+    active_run: ApiActiveRunStatusPayload | None
     default_save_directory: str | None
     is_save_directory_configured: bool
     has_interval_capture_service: bool
@@ -123,6 +133,7 @@ def map_subsystem_status_to_api_payload(status: SubsystemStatus) -> ApiSubsystem
             active_file_stem=status.interval_capture.active_file_stem,
             last_error=status.interval_capture.last_error,
         ),
+        active_run=_map_active_run_status(status),
         default_save_directory=_stringify_path(status.default_save_directory),
         is_save_directory_configured=status.is_save_directory_configured,
         has_interval_capture_service=status.has_interval_capture_service,
@@ -139,3 +150,27 @@ def _stringify_path(path) -> str | None:
     if path is None:
         return None
     return str(path)
+
+
+def _map_active_run_status(status: SubsystemStatus) -> ApiActiveRunStatusPayload | None:
+    recording = status.recording
+    if recording.is_recording:
+        return ApiActiveRunStatusPayload(
+            operation_kind="recording",
+            save_directory=_stringify_path(recording.save_directory),
+            active_file_stem=recording.active_file_stem,
+            frames_written=recording.frames_written,
+            last_error=recording.last_error,
+        )
+
+    interval_capture = status.interval_capture
+    if interval_capture.is_capturing:
+        return ApiActiveRunStatusPayload(
+            operation_kind="interval_capture",
+            save_directory=_stringify_path(interval_capture.save_directory),
+            active_file_stem=interval_capture.active_file_stem,
+            frames_written=interval_capture.frames_written,
+            last_error=interval_capture.last_error,
+        )
+
+    return None
