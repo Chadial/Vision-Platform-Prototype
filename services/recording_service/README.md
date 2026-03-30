@@ -35,6 +35,7 @@ Traceability note:
 
 - snapshot saving and bounded recording now both write into one folder-local appendable traceability log with stable context header, run/session blocks, and per-image rows
 - per-image traceability rows now also support optional focus-summary aggregation metadata, with an explicit aggregation-basis field required when summary fields such as `focus_value_mean` or `focus_value_stddev` are stored
+- normal snapshot and bounded-recording save flows can now emit that focus metadata through an explicit producer wiring path when the subsystem or service composition enables it
 - the existing per-recording CSV path remains in place; the traceability log is an additional narrow baseline for host- and offline-readable experiment context
 
 ## Dependencies

@@ -1,6 +1,7 @@
 """Recording and persistence service access through the platform namespace."""
 
 __all__ = [
+    "ArtifactFocusMetadataProducer",
     "CameraService",
     "FrameWriter",
     "IntervalCaptureService",
@@ -16,6 +17,10 @@ __all__ = [
 
 
 def __getattr__(name: str):
+    if name == "ArtifactFocusMetadataProducer":
+        from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
+
+        return ArtifactFocusMetadataProducer
     if name == "CameraService":
         from vision_platform.services.recording_service.camera_service import CameraService
 

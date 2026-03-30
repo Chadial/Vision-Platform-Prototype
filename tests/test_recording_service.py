@@ -9,6 +9,9 @@ from tests import _path_setup
 from vision_platform.models import CameraConfiguration, CapturedFrame, RecordingRequest
 from vision_platform.services.recording_service import FrameWriter
 from vision_platform.services.recording_service import RecordingService
+from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
+from vision_platform.services.stream_service.roi_state_service import RoiStateService
+from vision_platform.libraries.common_models import RoiDefinition
 
 
 class _FakeRecordingDriver:
@@ -52,6 +55,7 @@ class _StreamingRecordingDriver:
                 height=1,
                 frame_id=self._next_frame_id,
                 camera_timestamp=5000 + self._next_frame_id,
+                pixel_format="Mono8",
             )
             self._next_frame_id += 1
             return frame
@@ -709,6 +713,59 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertTrue(second_trace.exists())
             self.assertIn("# context.exposure_time_us: 2500.0", first_trace.read_text(encoding="utf-8").splitlines())
             self.assertIn("# context.exposure_time_us: 3000.0", second_trace.read_text(encoding="utf-8").splitlines())
+
+    def test_recording_wires_focus_metadata_producer_into_trace_rows(self) -> None:
+        driver = _StreamingRecordingDriver()
+        roi_state_service = RoiStateService()
+        roi_state_service.set_active_roi(
+            RoiDefinition(
+                roi_id="roi-recording",
+                shape="ellipse",
+                points=((1, 1), (2, 2)),
+            )
+        )
+        service = RecordingService(
+            driver,
+            poll_interval_seconds=0.001,
+            artifact_focus_metadata_producer=ArtifactFocusMetadataProducer(
+                focus_method="laplace",
+                focus_score_frame_interval=3,
+                roi_state_service=roi_state_service,
+            ),
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            service.start_recording(
+                RecordingRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="series",
+                    file_extension=".bmp",
+                    frame_limit=3,
+                    queue_size=4,
+                )
+            )
+
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording:
+                    break
+                sleep(0.01)
+
+            trace_rows = list(
+                csv.reader(
+                    line
+                    for line in (Path(temp_dir) / "saved_artifact_traceability.csv").read_text(encoding="utf-8").splitlines()
+                    if line and not line.startswith("# ")
+                )
+            )
+            self.assertEqual(trace_rows[1][7], "ellipse")
+            self.assertEqual(trace_rows[1][8], "ellipse(1,1,2,2)")
+            self.assertEqual(trace_rows[1][9], "laplace")
+            self.assertEqual(trace_rows[1][10], "3")
+            self.assertTrue(trace_rows[1][11])
+            self.assertTrue(trace_rows[1][12])
+            self.assertEqual(trace_rows[1][13], "ellipse")
+            self.assertEqual(trace_rows[1][14], "ellipse(1,1,2,2)")
 
 
 if __name__ == "__main__":

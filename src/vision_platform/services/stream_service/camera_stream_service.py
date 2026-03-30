@@ -6,6 +6,7 @@ from vision_platform.integrations.camera import CameraDriver
 from vision_platform.libraries.common_models import FocusMethod
 from vision_platform.models import CameraConfiguration, CapturedFrame, PreviewFrameInfo
 from vision_platform.services.recording_service import (
+    ArtifactFocusMetadataProducer,
     IntervalCaptureService,
     RecordingService,
 )
@@ -61,6 +62,7 @@ class CameraStreamService:
         frame_writer: FrameWriter | None = None,
         poll_interval_seconds: float = 0.01,
         configuration_provider: Callable[[], CameraConfiguration | None] | None = None,
+        artifact_focus_metadata_producer: ArtifactFocusMetadataProducer | None = None,
     ) -> RecordingService:
         return RecordingService(
             self._driver,
@@ -68,6 +70,7 @@ class CameraStreamService:
             poll_interval_seconds=poll_interval_seconds,
             configuration_provider=configuration_provider,
             shared_frame_source=self._shared_frame_source,
+            artifact_focus_metadata_producer=artifact_focus_metadata_producer,
         )
 
     def create_interval_capture_service(
