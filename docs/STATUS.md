@@ -23,14 +23,13 @@ Each status update should state progress and gaps against both roadmaps.
 
 The current prepared post-closure follow-up sequence is now:
 
-1. `WP30 Interval Capture Timing And Polling Tightening`
-2. `WP31 Python Baseline Operations Runbook`
-3. `WP32 Entry-Point And Launch Readiness Baseline`
-4. `WP33 Host Contract Stability And Deferred Surface Clarification`
+1. `WP31 Python Baseline Operations Runbook`
+2. `WP32 Entry-Point And Launch Readiness Baseline`
+3. `WP33 Host Contract Stability And Deferred Surface Clarification`
 
 This sequence should be read as:
 
-- first one landed and one prepared residual-driven hardening slice
+- first landed residual-driven hardening / diagnostics slices through `WP30`
 - then two operational-readiness slices
 - then one later-handover/productization clarification slice
 
@@ -381,6 +380,6 @@ The repository currently provides a structured Python prototype for the vision p
 
 1. Treat `WP12` through `WP26` as the closed Extended MVP foundation that established the current Python working baseline.
 2. Treat `WP27` and `WP28` as landed post-closure hardening slices rather than as proof that the baseline is still unfinished.
-3. Use `WP30` through `WP33` as the next explicit post-closure sequence unless a more urgent user-driven residual overrides it.
-4. Prefer the prepared hardening and operational-readiness slices over broad new breadth by default.
+3. Use `WP31` through `WP33` as the next explicit post-closure sequence unless a more urgent user-driven residual overrides it.
+4. Prefer the prepared operational-readiness slices over broad new breadth by default.
 5. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.

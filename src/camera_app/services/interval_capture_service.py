@@ -123,15 +123,13 @@ class IntervalCaptureService:
             try:
                 frame = self._get_latest_frame()
                 if frame is None:
-                    with self._status_lock:
-                        self._status.skipped_intervals += 1
+                    self._record_timing_skip("no new frame was available at the scheduled capture time")
                     self._next_capture_due_at = monotonic() + self._active_request.interval_seconds
                     continue
 
                 frame_key = (frame.frame_id, id(frame.raw_frame))
                 if frame_key == last_frame_key:
-                    with self._status_lock:
-                        self._status.skipped_intervals += 1
+                    self._record_timing_skip("no new frame arrived before the next scheduled capture time")
                     self._next_capture_due_at = monotonic() + self._active_request.interval_seconds
                     continue
 
@@ -145,6 +143,8 @@ class IntervalCaptureService:
                 next_frame_index += 1
                 with self._status_lock:
                     self._status.frames_written = next_frame_index
+                    if self._status.last_error and self._status.last_error.startswith("Interval timing warning:"):
+                        self._status.last_error = None
                 self._next_capture_due_at = monotonic() + self._active_request.interval_seconds
             except Exception as exc:
                 self._record_error(f"Interval capture failed: {exc}")
@@ -163,6 +163,11 @@ class IntervalCaptureService:
         self._logger.error(message, exc_info=True)
         with self._status_lock:
             self._status.last_error = message
+
+    def _record_timing_skip(self, reason: str) -> None:
+        with self._status_lock:
+            self._status.skipped_intervals += 1
+            self._status.last_error = f"Interval timing warning: {reason}"
 
     def _finalize_capture(self, suppress_errors: bool = False) -> None:
         with self._cleanup_lock:
@@ -191,6 +196,18 @@ class IntervalCaptureService:
             self._next_capture_due_at = None
             self._acquisition_started = False
             with self._status_lock:
+                if (
+                    self._status.skipped_intervals > 0
+                    and self._status.last_error is not None
+                    and self._status.last_error.startswith("Interval timing warning:")
+                ):
+                    self._status.last_error = (
+                        f"Interval capture completed with skipped_intervals={self._status.skipped_intervals}"
+                    )
+                elif self._status.last_error is None and self._status.skipped_intervals > 0:
+                    self._status.last_error = (
+                        f"Interval capture completed with skipped_intervals={self._status.skipped_intervals}"
+                    )
                 self._status.is_capturing = False
                 self._status.save_directory = None
                 self._status.active_file_stem = None

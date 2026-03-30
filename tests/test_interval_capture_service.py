@@ -34,6 +34,29 @@ class _StreamingIntervalDriver:
         return frame
 
 
+class _StaticIntervalDriver:
+    def __init__(self) -> None:
+        self.start_calls = 0
+        self.stop_calls = 0
+        self._frame = CapturedFrame(
+            raw_frame=b"x",
+            width=1,
+            height=1,
+            frame_id=0,
+            camera_timestamp=1000,
+            pixel_format="Mono8",
+        )
+
+    def start_acquisition(self) -> None:
+        self.start_calls += 1
+
+    def stop_acquisition(self) -> None:
+        self.stop_calls += 1
+
+    def get_latest_frame(self) -> CapturedFrame:
+        return self._frame
+
+
 class IntervalCaptureServiceTests(unittest.TestCase):
     def test_interval_capture_writes_sequence_until_frame_limit(self) -> None:
         driver = _StreamingIntervalDriver()
@@ -127,6 +150,43 @@ class IntervalCaptureServiceTests(unittest.TestCase):
                 shared_frame_source.release()
 
             self.assertEqual(service.get_status().frames_written, 2)
+            self.assertEqual(driver.start_calls, 1)
+            self.assertEqual(driver.stop_calls, 1)
+
+    def test_interval_capture_reports_timing_warning_and_completion_summary_when_intervals_are_skipped(self) -> None:
+        driver = _StaticIntervalDriver()
+        service = IntervalCaptureService(driver, poll_interval_seconds=0.001)
+
+        with TemporaryDirectory() as temp_dir:
+            status = service.start_capture(
+                IntervalCaptureRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="interval",
+                    file_extension=".raw",
+                    interval_seconds=0.005,
+                    duration_seconds=0.03,
+                )
+            )
+
+            self.assertTrue(status.is_capturing)
+            saw_active_warning = False
+            for _ in range(200):
+                status = service.get_status()
+                if status.last_error and status.last_error.startswith("Interval timing warning:"):
+                    saw_active_warning = True
+                if not status.is_capturing:
+                    break
+                sleep(0.005)
+
+            final_status = service.get_status()
+            self.assertTrue(saw_active_warning)
+            self.assertFalse(final_status.is_capturing)
+            self.assertEqual(final_status.frames_written, 1)
+            self.assertGreater(final_status.skipped_intervals, 0)
+            self.assertEqual(
+                final_status.last_error,
+                f"Interval capture completed with skipped_intervals={final_status.skipped_intervals}",
+            )
             self.assertEqual(driver.start_calls, 1)
             self.assertEqual(driver.stop_calls, 1)
 
