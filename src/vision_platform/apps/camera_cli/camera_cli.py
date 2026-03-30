@@ -11,8 +11,16 @@ from typing import Any, Sequence
 from camera_app.logging.log_service import configure_logging
 from vision_platform.bootstrap import build_camera_subsystem, build_simulated_camera_subsystem
 from vision_platform.apps.camera_cli.camera_aliases import CameraAliasResolutionError, resolve_camera_id
+from vision_platform.apps.camera_cli.camera_configuration_profiles import (
+    CameraConfigurationProfileResolutionError,
+    has_configuration_values,
+    merge_configuration_requests,
+    normalize_camera_class_name,
+    resolve_camera_configuration_profile,
+)
 from vision_platform.models import (
     ApplyConfigurationRequest,
+    CameraStatus,
     SaveSnapshotRequest,
     SetSaveDirectoryRequest,
     StartIntervalCaptureRequest,
@@ -112,15 +120,23 @@ def run_cli(argv: Sequence[str] | None = None) -> CameraCliResult:
     camera_service = subsystem.camera_service
 
     try:
-        camera_service.initialize(camera_id=resolved_camera_id)
+        initialized_status = camera_service.initialize(camera_id=resolved_camera_id)
         try:
-            _apply_configuration_if_requested(controller, args)
+            profile_identity = _apply_configuration_if_requested(controller, args, initialized_status)
         except ValueError as exc:
             raise CameraCliError(
                 error_type="configuration_error",
                 message=str(exc),
                 details={"stage": "apply_configuration"},
             ) from exc
+        except CameraConfigurationProfileResolutionError as exc:
+            raise CameraCliError(
+                error_type="configuration_error",
+                message=str(exc),
+                details={"stage": "load_configuration_profile", **exc.details},
+            ) from exc
+        args.configuration_profile_id = profile_identity[0] if profile_identity is not None else None
+        args.configuration_profile_camera_class = profile_identity[1] if profile_identity is not None else None
         return args.command_handler(args, parser, subsystem)
     finally:
         camera_service.shutdown()
@@ -181,6 +197,8 @@ def _handle_snapshot_command(
             file_extension=args.file_extension,
             camera_id=_resolve_camera_id(args),
             camera_alias=args.camera_alias,
+            configuration_profile_id=args.configuration_profile_id,
+            configuration_profile_camera_class=args.configuration_profile_camera_class,
         )
     )
     status = controller.get_status()
@@ -263,6 +281,8 @@ def _handle_recording_command(
             queue_size=args.queue_size,
             camera_id=_resolve_camera_id(args),
             camera_alias=args.camera_alias,
+            configuration_profile_id=args.configuration_profile_id,
+            configuration_profile_camera_class=args.configuration_profile_camera_class,
         )
     )
     _wait_for_recording_completion(controller)
@@ -323,37 +343,56 @@ def _resolve_camera_id(args: argparse.Namespace) -> str | None:
         ) from exc
 
 
-def _apply_configuration_if_requested(controller, args: argparse.Namespace) -> None:
-    if not _has_configuration_overrides(args):
-        return
+def _apply_configuration_if_requested(
+    controller,
+    args: argparse.Namespace,
+    initialized_status: CameraStatus,
+) -> tuple[str, str] | None:
+    override_request = _build_configuration_override_request(args)
+    profile_identity: tuple[str, str] | None = None
+    effective_request = override_request
 
-    controller.apply_configuration(
-        ApplyConfigurationRequest(
-            exposure_time_us=args.exposure_time_us,
-            gain=args.gain,
-            pixel_format=args.pixel_format,
-            acquisition_frame_rate=args.acquisition_frame_rate,
-            roi_offset_x=args.roi_offset_x,
-            roi_offset_y=args.roi_offset_y,
-            roi_width=args.roi_width,
-            roi_height=args.roi_height,
+    if args.configuration_profile is not None:
+        resolved_profile = resolve_camera_configuration_profile(
+            profile_id=args.configuration_profile,
+            camera_class=_resolve_profile_camera_class(args, initialized_status),
         )
+        effective_request = merge_configuration_requests(resolved_profile.configuration, override_request)
+        profile_identity = (resolved_profile.profile_id, resolved_profile.camera_class)
+
+    if not has_configuration_values(effective_request):
+        return profile_identity
+
+    controller.apply_configuration(effective_request)
+    return profile_identity
+
+
+def _resolve_profile_camera_class(args: argparse.Namespace, initialized_status: CameraStatus) -> str:
+    if args.profile_camera_class:
+        return args.profile_camera_class
+
+    if initialized_status.camera_model:
+        return normalize_camera_class_name(initialized_status.camera_model)
+
+    raise CameraConfigurationProfileResolutionError(
+        message="Configuration profile resolution requires --profile-camera-class when the camera model is unavailable.",
+        details={
+            "profile_id": args.configuration_profile,
+            "camera_id": initialized_status.camera_id,
+        },
     )
 
 
-def _has_configuration_overrides(args: argparse.Namespace) -> bool:
-    return any(
-        value is not None
-        for value in (
-            args.exposure_time_us,
-            args.gain,
-            args.pixel_format,
-            args.acquisition_frame_rate,
-            args.roi_offset_x,
-            args.roi_offset_y,
-            args.roi_width,
-            args.roi_height,
-        )
+def _build_configuration_override_request(args: argparse.Namespace) -> ApplyConfigurationRequest:
+    return ApplyConfigurationRequest(
+        exposure_time_us=args.exposure_time_us,
+        gain=args.gain,
+        pixel_format=args.pixel_format,
+        acquisition_frame_rate=args.acquisition_frame_rate,
+        roi_offset_x=args.roi_offset_x,
+        roi_offset_y=args.roi_offset_y,
+        roi_width=args.roi_width,
+        roi_height=args.roi_height,
     )
 
 
@@ -513,6 +552,16 @@ def _add_common_camera_arguments(parser: argparse.ArgumentParser) -> None:
 
 
 def _add_common_configuration_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--configuration-profile",
+        default=None,
+        help="Named camera-class configuration profile from configs/camera_configuration_profiles.json.",
+    )
+    parser.add_argument(
+        "--profile-camera-class",
+        default=None,
+        help="Optional explicit camera-class key for profile resolution; defaults to a normalized camera model.",
+    )
     parser.add_argument("--exposure-time-us", type=float, default=None, help="Exposure time in microseconds.")
     parser.add_argument("--gain", type=float, default=None, help="Gain value to apply before the command runs.")
     parser.add_argument("--pixel-format", default=None, help="Pixel format such as Mono8 or Mono10.")
