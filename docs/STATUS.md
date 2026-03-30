@@ -26,6 +26,7 @@ There is currently no forced always-on post-closure follow-up sequence.
 The only prepared remaining package in the current queue is:
 
 1. `WP38 Selective Offline Follow-Up` only when a concrete offline / measurement need is chosen
+2. `WP39 Module Documentation Audit And Shrink Pass` only when module-local doc drift is the actual problem to solve
 
 This sequence should be read as:
 
@@ -39,6 +40,7 @@ This sequence should be read as:
   - `WP36` landed as bounded recording-lifecycle decision clarification
   - `WP37` landed as bounded operator-start convenience polish
   - `WP38` as conditional selective expansion
+  - `WP39` as conditional meta-documentation cleanup
 
 The active post-closure phase should now be read in four work types:
 
@@ -401,4 +403,5 @@ The repository currently provides a structured Python prototype for the vision p
 8. Treat `WP36` as landed and use `docs/RECORDING_LIFECYCLE_BOUNDARY.md` as the compact decision boundary for bounded recording versus detached-later scope.
 9. Treat `WP37` as landed and use `scripts/run_python_baseline.ps1` only as a bounded local convenience helper rather than a new startup contract.
 10. Treat `WP38` as the next conditional selective-expansion slice only when a concrete offline need is chosen.
-11. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+11. Treat `WP39` as the bounded module-doc audit / shrink slice only when local doc drift becomes a real near-term friction.
+12. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
