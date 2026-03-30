@@ -71,6 +71,18 @@ class CameraCliTests(unittest.TestCase):
         self.assertIsNone(payload["status"]["active_run"])
         self.assertIsNone(payload["error"])
 
+    def test_status_command_accepts_camera_alias(self) -> None:
+        result = run_cli(
+            [
+                "status",
+                "--camera-alias",
+                "tested_camera",
+            ]
+        )
+
+        self.assertEqual(result.operation, "status")
+        self.assertEqual(result.status.camera.camera_id, "DEV_1AB22C046D81")
+
     def test_snapshot_command_uses_new_subdirectory_save_mode(self) -> None:
         with TemporaryDirectory() as temp_dir:
             result = run_cli(
@@ -278,6 +290,49 @@ class CameraCliTests(unittest.TestCase):
         self.assertIsNone(payload["status"])
         self.assertEqual(payload["error"]["code"], "argument_error")
         self.assertIn("--frame-limit", payload["error"]["message"])
+
+    def test_main_prints_camera_selection_error_for_unknown_camera_alias(self) -> None:
+        stdout = StringIO()
+        stderr = StringIO()
+
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            exit_code = main(
+                [
+                    "status",
+                    "--camera-alias",
+                    "missing_camera",
+                ]
+            )
+
+        payload = json.loads(stderr.getvalue())
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertFalse(payload["success"])
+        self.assertEqual(payload["error"]["code"], "camera_selection_error")
+        self.assertEqual(payload["error"]["details"]["camera_alias"], "missing_camera")
+
+    def test_main_prints_camera_selection_error_for_combined_camera_id_and_alias(self) -> None:
+        stdout = StringIO()
+        stderr = StringIO()
+
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            exit_code = main(
+                [
+                    "status",
+                    "--camera-id",
+                    "DEV_DIRECT",
+                    "--camera-alias",
+                    "tested_camera",
+                ]
+            )
+
+        payload = json.loads(stderr.getvalue())
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertFalse(payload["success"])
+        self.assertEqual(payload["error"]["code"], "camera_selection_error")
+        self.assertEqual(payload["error"]["details"]["camera_id"], "DEV_DIRECT")
+        self.assertEqual(payload["error"]["details"]["camera_alias"], "tested_camera")
 
     @patch("vision_platform.apps.camera_cli.camera_cli._build_subsystem_for_args")
     def test_main_prints_configuration_error_envelope_for_invalid_roi_configuration(

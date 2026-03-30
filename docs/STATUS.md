@@ -46,7 +46,7 @@ This sequence should be read as:
   - `WP43` landed as a bounded operational-readiness guardrail slice
   - `WP44` landed as a bounded adapter-facing selective-expansion slice
   - `WP45` is prepared as the next bounded camera-class-first configuration-profile slice
-  - `WP46` is prepared as the follow-up bounded camera-alias / explicit-id convenience slice
+  - `WP46` landed as the follow-up bounded camera-alias / explicit-id convenience slice
 
 The active post-closure phase should now be read in four work types:
 
@@ -103,6 +103,7 @@ The repository currently provides a structured Python prototype for the vision p
 - `OverlayCompositionService` as a UI-free display composition layer that can merge active ROI plus preview/snapshot focus overlays into one shared payload
 - simulator-backed overlay-payload demo that consumes the shared payload and prints a simple console summary without committing to a concrete renderer
 - first unified camera CLI app entry point with `status`, `snapshot`, `recording`, and `interval-capture` subcommands above the existing command-controller path
+- repo-local CLI camera alias resolution through `configs/camera_aliases.json`, with the tested example alias `tested_camera` resolving to the current hardware path
 - first host-oriented CLI command envelope baseline for `status`, `snapshot`, and bounded `recording`, with stable success/failure ownership, machine-readable error payloads, and adapter-facing status serialization
 - explicit `SubsystemStatus` model with host-facing command readiness flags
 - camera status metadata that identifies hardware vs. simulation source kind and active driver name
@@ -418,5 +419,5 @@ The repository currently provides a structured Python prototype for the vision p
 15. Treat `WP43` as landed: the bounded package-manifest and environment-contract guardrails are now explicit through `vision-platform-cli`, clearer bootstrap output, and `docs/PYTHON_BASELINE_ENVIRONMENT.md`.
 16. Treat `WP44` as landed: `vision_platform.services.api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without implying any framework runtime.
 17. Treat `WP45` as the current next bounded profile-baseline slice: named configuration profiles should start camera-class-first, begin with a `default` profile, and continue to reuse the existing capability-aware configuration path.
-18. Treat `WP46` as the prepared follow-up convenience slice: camera aliases should resolve repo-locally to explicit `camera_id` values while preserving direct id usage and avoiding discovery or inventory scope.
+18. Treat `WP46` as landed: camera aliases now resolve repo-locally to explicit `camera_id` values in the CLI path while preserving direct id usage and avoiding discovery or inventory scope.
 19. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.

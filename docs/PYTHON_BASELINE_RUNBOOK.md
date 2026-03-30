@@ -68,6 +68,7 @@ Assumptions for real-hardware work:
 - the local `vmbpy` wheel from that SDK is installed into the same `.venv`
 - the camera is physically attached
 - the intended camera id is known
+- or the repo-local alias file `configs/camera_aliases.json` contains the intended hardware alias
 
 When these assumptions are not confirmed, prefer simulator-first execution.
 
@@ -167,10 +168,15 @@ Equivalent local convenience-helper form:
 Preferred bounded hardware commands on tested path:
 
 ```powershell
-.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-id DEV_1AB22C046D81
-.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-alias tested_camera
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-alias tested_camera --base-directory .\captures\hardware_smoke --file-extension .bmp
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --frame-limit 5
 ```
+
+Practical camera-selection rule:
+
+- use direct `--camera-id` when you need exact explicitness
+- use `--camera-alias` when the repo-local mapping is already trusted and you want shorter repeatable hardware commands
 
 Preferred integrated hardware evidence command:
 
