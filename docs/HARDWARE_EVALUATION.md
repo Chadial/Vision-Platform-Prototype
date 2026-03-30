@@ -22,6 +22,12 @@ Current repository note:
 - the optional OpenCV preview/save path is already implemented and simulator-tested
 - neither of those facts closes Phase 8 or Phase 9 without at least one real-hardware validation pass
 
+## Current Hardware Verdict
+
+- current hardware baseline: prototype-level validated on the tested camera path `DEV_1AB22C046D81`
+- residual observations: `vmbpyLog <VmbError.NotAvailable: -30>`, duplicate SDK visibility for the tested camera id, bounded interval jitter, and timing-sensitive back-to-back CLI reuse observations
+- next likely hardware follow-up: only residual-driven narrowing such as remaining lifecycle timing observations or further diagnostics around host-visible device constraints, not broad new hardware exploration
+
 ## Current Verified Hardware Status
 
 Current repository position after the March 27 and March 30, 2026 runs:
@@ -561,4 +567,4 @@ If this checklist passes on real hardware, the Python repository can be treated 
 
 That is the right point to freeze the Python baseline and use it as the handover reference for the later C# phase.
 
-Until the residuals above are either explained or judged permanently acceptable, phrase the project as hardware-validated at prototype level with residual observations, not as fully closed hardware productization.
+At the current documented state, phrase the project as hardware-validated at bounded prototype level on the tested camera path, not as broadly hardware-validated across wider device, stress, or performance matrices.
