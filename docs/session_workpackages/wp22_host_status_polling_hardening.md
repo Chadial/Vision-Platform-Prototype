@@ -4,7 +4,21 @@
 
 This work package defines the next execution-ready slice after the landed offline metadata and traceability follow-ups.
 
+Closure lane:
+
+- Host Control Closure with a narrow overlap into Experiment Reliability observability during active work
+
+Slice role:
+
+- host-facing polling hardening for current-state visibility during active experiment runs
+
+Scope level:
+
+- runtime status / active-run view
+
 Its purpose is to tighten the host-readable polling surface during active experiment runs without widening the repository into broader API or transport work.
+
+The narrow goal is to make active work more observable through additive polling fields, not to redesign the full status surface or the broader host transport boundary.
 
 ## Branch
 
@@ -29,18 +43,32 @@ Selected slice for this package:
   - active save directory where available
   - frames written or equivalent progress field where already available
   - last error or failure marker where already present
+- keep the package explicitly centered on polling current state during active work rather than confirming post-command resolution details
 
 Excluded:
 
 - new transport work
 - broad status redesign
 - run/session history
+- post-command confirmation shaping
 - UI changes
 - hardware-only validation
+
+What this package does not close:
+
+- command confirmation after host-triggered operations
+- run history or historical activity browsing
+- transport/API expansion
+- general status-model redesign
 
 ## Session Goal
 
 Leave the repository with one explicit proof that a host can poll a running experiment and receive a tighter, additive active-run status subset without inferring it indirectly from scattered fields.
+
+This package should be read as:
+
+- `WP22` = polling current state during active work
+- `WP23` = confirming a narrow resolved subset after host commands
 
 ## Execution Plan
 
@@ -77,7 +105,9 @@ Required automated validation:
 ## Merge Gate
 
 - the slice stays additive and polling-focused
+- the slice remains centered on active-run observability rather than post-command confirmation
 - no transport or UI widening is bundled
+- no broad status-model redesign or run-history behavior is bundled
 - targeted tests pass locally
 
 ## Recovery Note
