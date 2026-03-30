@@ -22,14 +22,11 @@ Read this first to get from zero context to a workable repository overview witho
 
 ## Current Baseline
 
-- The repository is a Python-first vision platform prototype with a parallel repository reorganization toward `src/vision_platform`.
-- Legacy compatibility still exists under `src/camera_app`, but new platform-facing code is being moved into `src/vision_platform`.
-- The core baseline is implemented for snapshot, preview, recording, interval capture, simulated drivers, and host-style command flow.
-- The optional OpenCV prototype now includes a first real-hardware preview path with viewport-based `fit-to-window` and zoom controls.
-- The OpenCV prototype also now includes a first operator-facing point-selection baseline with crosshair display, coordinate readout, and `c`-based coordinate copy.
-- A first camera-oriented CLI baseline now exists under `src/vision_platform/apps/camera_cli` for status, snapshot, bounded recording, and bounded interval capture without the OpenCV preview path.
-- ROI mask primitives, a first focus baseline, and UI-free overlay payload composition are implemented.
-- Phase 9 hardware validation has been completed for the previously connected camera path, but the physical hardware is currently not attached locally.
+- The repository now operates from a post-closure Python working baseline, not from an open Extended MVP closure phase.
+- The preferred platform-facing implementation surface is `src/vision_platform`, with `src/camera_app` retained as a compatibility bridge while physical migration stays incremental.
+- The bounded baseline already covers snapshot, preview, bounded recording, bounded interval capture, simulation, host-style command flow, traceability, and bounded offline reuse.
+- The tested hardware path has bounded real-device evidence on `DEV_1AB22C046D81`; broader hardware matrix coverage is still intentionally out of scope.
+- The OpenCV prototype remains an optional frontend/prototype path rather than the platform core.
 
 ## Current Truth Map
 
@@ -37,7 +34,7 @@ Read this first to get from zero context to a workable repository overview witho
 - legacy compatibility surface: `src/camera_app/...`
 - module docs live in the root module folders under `apps/`, `integrations/`, `services/`, and `libraries/`
 - module `README.md`: purpose, boundaries, intended contract surface
-- module `STATUS.md`: current implemented state, gaps, risks, next step
+- module `STATUS.md`: current implemented state, residuals, and local known limits
 - module `ROADMAP.md`: optional local future intent only when genuinely useful; central project planning now lives in `docs/WORKPACKAGES.md`
 - session work-package handoff notes live under `docs/session_workpackages/`, with completed ones moved to `docs/archive/session_workpackages/`
 
@@ -52,13 +49,11 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Priority
 
 1. Keep the Python core stable and understandable.
-2. Treat `Host Control Closure`, `Experiment Reliability Closure`, and the first `Data And Logging Closure` slice as landed baseline hardening.
-3. Treat `WP14`, `WP15`, and `WP16` as landed narrow slices inside still-open closure lanes.
-4. Use the next offline metadata-consumption slice as the current default planning direction; derive its detailed package on activation.
-5. Open an additional frontend package only when another shell beyond the current OpenCV prototype is actually needed.
-6. Keep any further OpenCV work separate and only in the UI/display-facing layer.
-7. Continue documenting verified state and next steps as features land.
-8. Broaden real-hardware validation when practical.
+2. Treat the current Python baseline as already real and reusable on its bounded tested path.
+3. Derive new slices from concrete residuals, operational friction, or explicit expansion needs rather than from old MVP-closure logic.
+4. Keep host/control, runtime services, hardware integration, and UI/frontend shells separated.
+5. Open broader transport, frontend, offline, or handover scope only when there is a clear reason.
+6. Continue documenting verified state and stable boundaries without turning docs into shadow PM surfaces.
 
 ## Mandatory Reads
 
@@ -101,8 +96,13 @@ Read these for every new session:
   - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
   - `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
 - For operational or launch-readiness questions:
+  - `docs/MANUALS_INDEX.md`
   - `docs/PYTHON_BASELINE_RUNBOOK.md`
   - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
+- For architecture or boundary questions:
+  - `docs/MANUALS_INDEX.md`
+  - `docs/ARCHITECTURE_BASELINE.md`
+  - `docs/architecture_principles.md`
 - For host-contract or handover-boundary questions:
   - `docs/HOST_CONTRACT_BASELINE.md`
   - `docs/COMMANDS.md`
@@ -121,6 +121,8 @@ Read these for every new session:
 - `docs/WORKPACKAGES.md` is the central queue for the next concrete work slice.
 - `docs/PYTHON_BASELINE_RUNBOOK.md` is the compact operating reference for the current post-closure Python baseline.
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` is the compact startup-surface reference for the preferred current entry points.
+- `docs/MANUALS_INDEX.md` is the compact reading map for manuals and boundary notes.
+- `docs/ARCHITECTURE_BASELINE.md` is the compact architecture reference for the current post-closure baseline.
 - `docs/HOST_CONTRACT_BASELINE.md` is the compact stable-now / deferred-later reference for the bounded current host surface.
 - `docs/DOCUMENTATION_PLAYBOOK.md` is the documentation-role and maintenance reference for stable, operational, and current-state docs.
 - `docs/module_doc_audit.md` is the current reference for how module-local docs should be used and trimmed.

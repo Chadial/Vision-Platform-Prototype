@@ -2,7 +2,13 @@
 
 ## Purpose
 
-This repository is being reorganized from a camera-subsystem prototype into a modular vision platform. The existing Python prototype remains the executable baseline, but the repository structure now reflects broader platform modules defined in `docs/ProjectDescription.md`.
+This repository now operates from a post-closure Python working baseline while preserving a modular vision-platform structure for later expansion and handover.
+
+Use this document as a compact repository-level overview.
+
+For architecture detail, use:
+
+- `docs/ARCHITECTURE_BASELINE.md`
 
 ## Active Platform Modules
 
@@ -14,31 +20,43 @@ This repository is being reorganized from a camera-subsystem prototype into a mo
 - `libraries/roi_core`: ROI geometry helpers for overlays and analysis consumers
 - `libraries/focus_core`: focus-analysis baseline with overlay-ready result mapping
 
-## Prepared Platform Modules
+## Active Supporting Modules
 
 - `libraries/tracking_core`
 - `services/api_service`
 - `apps/postprocess_tool`
+
+## Prepared Later Modules
+
 - `apps/desktop_app`
 
-## Code Mapping In This Reorganization Round
+## Code Mapping
 
-- stable implementation remains in `src/camera_app`
-- new platform-facing import surface is introduced in `src/vision_platform`
-- repository-level module folders now own roadmap/status/readme documents
-- runnable app access remains available through the existing root scripts and new `apps/opencv_prototype` wrappers
+- preferred platform-facing import surface: `src/vision_platform`
+- compatibility bridge: `src/camera_app`
+- repository-level module folders own local `README.md`, `STATUS.md`, and optional `ROADMAP.md`
+- runnable app access remains available through package entry points and bounded launcher scripts
 
-## Operational Governance
+## Current Working Baseline
 
-- `docs/git_strategy.md` defines the required branch and commit discipline
-- `docs/branch_backlog.md` assigns unfinished worktree changes to future branches
-- repository reorganization work should use those two documents before new commits are created from mixed local states
+- bounded host-oriented command surface
+- snapshot, preview, bounded recording, and bounded interval capture
+- traceability and recording-log output
+- optional OpenCV prototype path for local preview/inspection
+- bounded real-hardware validation on the tested camera path
+- bounded offline follow-up through the current postprocess baseline
 
-## Architectural Direction
+## Operating References
 
-- keep hardware access isolated
-- keep stream and recording orchestration separate
-- avoid UI-coupled core logic
-- introduce shared, portable models before analysis and API expansion
-- keep focus consumer-driven and ROI geometry reusable across consumers
-- retain Python pragmatism while preparing a later C# handover
+- `docs/MANUALS_INDEX.md`
+- `docs/PYTHON_BASELINE_RUNBOOK.md`
+- `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
+- `docs/HOST_CONTRACT_BASELINE.md`
+
+## Planning And Governance References
+
+- `docs/STATUS.md`
+- `docs/WORKPACKAGES.md`
+- `docs/ROADMAP.md`
+- `docs/GlobalRoadmap.md`
+- `docs/git_strategy.md`
