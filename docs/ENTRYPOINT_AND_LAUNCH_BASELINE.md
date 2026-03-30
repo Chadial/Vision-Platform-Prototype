@@ -216,5 +216,6 @@ Treat this as a follow-up trigger when:
 ## Relation To Other Docs
 
 - `docs/PYTHON_BASELINE_RUNBOOK.md`: practical operating order, residuals, and baseline decision rules
+- `docs/REFERENCE_SCENARIOS.md`: official bounded snapshot / recording / interval command recipes
 - `docs/HARDWARE_EVALUATION.md`: real-device evidence and residual hardware observations
 - `apps/camera_cli/README.md`: module-local CLI purpose and usage notes

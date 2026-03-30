@@ -18,11 +18,13 @@ This is an index, not a new manual layer.
 
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
 - `docs/PYTHON_BASELINE_ENVIRONMENT.md`
+- `docs/REFERENCE_SCENARIOS.md`
 
 Use for:
 
 - known-good run order
 - bounded local install profiles and environment contract
+- official bounded snapshot / recording / interval reference recipes
 - simulator-versus-hardware choice
 - current residual interpretation
 

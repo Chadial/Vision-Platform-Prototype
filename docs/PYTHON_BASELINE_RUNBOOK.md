@@ -75,6 +75,10 @@ For the bounded local install contract behind these assumptions, use:
 
 - `docs/PYTHON_BASELINE_ENVIRONMENT.md`
 
+For the official bounded confidence and handover recipes, use:
+
+- `docs/REFERENCE_SCENARIOS.md`
+
 ## Known-Good Entry Points
 
 For the launch-priority rules behind these paths, use:
