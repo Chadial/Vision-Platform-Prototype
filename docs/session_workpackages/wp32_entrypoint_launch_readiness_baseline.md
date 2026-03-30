@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `fix/entrypoint-launch-readiness-baseline`
-- activation state: queued
+- activation state: landed
 
 ## Scope
 
@@ -57,6 +57,11 @@ What this package does not close:
 ## Session Goal
 
 Leave the repository with one clearer and less error-prone practical launch baseline for the current Python system.
+
+Implemented result:
+
+- central startup-surface reference added at `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
+- runbook, session bootstrap, PM/status surfaces, and `apps/camera_cli/README.md` now align on preferred `python -m` entrypoint versus launcher fallback
 
 ## Execution Plan
 

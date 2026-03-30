@@ -47,11 +47,24 @@ Provides a camera-oriented command-line app surface for exercising the existing 
 
 Prefer the package entry point:
 
-- `python -m vision_platform.apps.camera_cli`
+- `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli`
 
 Or use the launcher:
 
-- `scripts/launchers/run_camera_cli.py`
+- `.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py`
+
+Current practical preference:
+
+- prefer the package entry point when the project interpreter and repository root are already explicit
+- use the launcher when repo-local path bootstrapping is more convenient for smoke commands or operator use
+
+Examples:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source simulated
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
+.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py recording --source simulated --base-directory .\captures\sim_smoke --frame-limit 3
+```
 
 ## Implementation Location
 

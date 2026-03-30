@@ -24,7 +24,8 @@ It does not define:
 
 - current baseline: usable Python working baseline with bounded host-oriented and hardware-validated evidence on tested camera path `DEV_1AB22C046D81`
 - preferred interpreter: `.\.venv\Scripts\python.exe`
-- preferred command entry point: `.\scripts\launchers\run_camera_cli.py`
+- preferred command entry point: `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli`
+- preferred launcher fallback: `.\scripts\launchers\run_camera_cli.py`
 - preferred integrated real-hardware evidence path: `.\scripts\launchers\run_hardware_command_flow.py`
 - current hardware residuals: `vmbpyLog <VmbError.NotAvailable: -30>`, duplicate SDK visibility for the tested camera id, bounded interval jitter, timing-sensitive back-to-back CLI reuse observations
 
@@ -64,10 +65,14 @@ When these assumptions are not confirmed, prefer simulator-first execution.
 
 ## Known-Good Entry Points
 
+For the launch-priority rules behind these paths, use:
+
+- `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
+
 Primary command entry point:
 
 ```powershell
-.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli
 ```
 
 Supported current commands:
@@ -85,6 +90,7 @@ Preferred hardware integration runner:
 
 Useful secondary launchers:
 
+- `.\scripts\launchers\run_camera_cli.py`
 - `.\scripts\launchers\run_snapshot_smoke.py`
 - `.\scripts\launchers\run_simulated_demo.py`
 - `.\scripts\launchers\run_hardware_preview_demo.py`
@@ -92,7 +98,8 @@ Useful secondary launchers:
 
 Current practical rule:
 
-- use `run_camera_cli.py` for bounded host-surface checks
+- prefer `python -m vision_platform.apps.camera_cli` when the project interpreter and repository root are already explicit
+- use `run_camera_cli.py` for bounded host-surface checks when a repo-local launcher is more practical
 - use `run_hardware_command_flow.py` for integrated real-device confidence passes
 - use the OpenCV launchers only when local visual inspection is actually needed
 
@@ -126,17 +133,17 @@ For a normal bounded session, use this order:
 Preferred simulated sanity commands:
 
 ```powershell
-.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py status --source simulated
-.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
-.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py recording --source simulated --base-directory .\captures\sim_smoke --frame-limit 3
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source simulated
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source simulated --base-directory .\captures\sim_smoke --frame-limit 3
 ```
 
 Preferred bounded hardware commands on tested path:
 
 ```powershell
-.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py status --source hardware --camera-id DEV_1AB22C046D81
-.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py snapshot --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --file-extension .bmp
-.\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py recording --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --frame-limit 5
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-id DEV_1AB22C046D81
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --frame-limit 5
 ```
 
 Preferred integrated hardware evidence command:
