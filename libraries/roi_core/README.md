@@ -19,6 +19,23 @@ Prepares reusable ROI concepts for live overlay, focus analysis, tracking, and p
 - rectangle and ellipse mask derivation for analysis consumers
 - placeholder structure for freehand support
 
+## Freehand Note
+
+- freehand ROI support is not part of the current MVP baseline
+- any future artifact- or metadata-level ROI serialization must be frozen in this module's documentation before downstream consumers rely on it
+- the intended canonical text-oriented baseline for later reuse is:
+  - `global`
+  - `rectangle(x1,y1,x2,y2)`
+  - `ellipse(x_c,y_c,x_corner,y_corner)`
+  - `freehand(x1,y1,x2,y2,...,xn,yn)`
+- when used later, these formats should stay canonical:
+  - no extra whitespace
+  - `rectangle(...)` uses two stored corner points in order
+  - `ellipse(...)` uses center point followed by one corner/edge-defining point in order
+  - `freehand(...)` point order must match the stored ROI point order
+  - integer-valued coordinates should serialize without trailing `.0`
+  - non-integer coordinates should use one compact stable decimal form
+
 ## Inputs / Outputs
 
 - inputs: `RoiDefinition`
