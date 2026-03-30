@@ -20,7 +20,7 @@ from vision_platform.models import (
     StopRecordingRequest,
     SubsystemStatus,
 )
-from vision_platform.services.api_service import map_subsystem_status_to_api_payload
+from vision_platform.services.api_service import build_error_command_payload, build_success_command_payload
 from vision_platform.services.recording_service.traceability import build_snapshot_run_id
 
 
@@ -377,29 +377,24 @@ def _validate_argument_combinations(parser: argparse.ArgumentParser, args: argpa
 
 
 def _build_success_envelope(result: CameraCliResult) -> dict[str, Any]:
-    return {
-        "success": True,
-        "command": result.operation,
-        "source": result.source,
-        "result": _to_serializable(result.result),
-        "status": _to_serializable(map_subsystem_status_to_api_payload(result.status)),
-        "error": None,
-    }
+    return _to_serializable(
+        build_success_command_payload(
+            command=result.operation,
+            source=result.source,
+            result=result.result,
+            status=result.status,
+        )
+    )
 
 
 def _build_error_envelope(error: CameraCliError) -> dict[str, Any]:
-    return {
-        "success": False,
-        "command": None,
-        "source": None,
-        "result": None,
-        "status": None,
-        "error": {
-            "code": error.error_type,
-            "message": error.message,
-            "details": _to_serializable(error.details),
-        },
-    }
+    return _to_serializable(
+        build_error_command_payload(
+            code=error.error_type,
+            message=error.message,
+            details=error.details,
+        )
+    )
 
 
 def _emit_envelope(payload: dict[str, Any], stream) -> None:
