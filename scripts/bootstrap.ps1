@@ -66,15 +66,16 @@ Write-Host ""
 Write-Host "Bootstrap completed."
 Write-Host "Virtual environment: $venvPath"
 Write-Host "Python executable: $pythonExe"
-if ($IncludeOpenCv) {
-    Write-Host "Installed profile: $installProfile"
-} elseif ($Dev) {
-    Write-Host "Installed profile: $installProfile"
-} else {
-    Write-Host "Installed profile: $installProfile"
-}
+Write-Host "Installed profile: $installProfile"
 if ($VmbPyWheel) {
     Write-Host "Installed VmbPy wheel: $VmbPyWheel"
 } else {
     Write-Host "VmbPy wheel: not installed by bootstrap"
+    Write-Host "Hardware guardrail: real-camera commands still require a local Vimba X SDK install and a VmbPy wheel in this .venv."
 }
+if (-not $IncludeOpenCv) {
+    Write-Host "OpenCV extra: not installed; preview/save helpers that require OpenCV remain unavailable."
+}
+Write-Host "Preferred package entry point: $pythonExe -m vision_platform.apps.camera_cli"
+Write-Host "Installed console entry point after editable install: vision-platform-cli"
+Write-Host "Preferred local helper: .\\scripts\\run_python_baseline.ps1"
