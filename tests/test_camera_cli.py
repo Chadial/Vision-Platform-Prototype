@@ -147,8 +147,60 @@ class CameraCliTests(unittest.TestCase):
             self.assertEqual(result.operation, "interval-capture")
             self.assertEqual(result.status.interval_capture.frames_written, 2)
             self.assertFalse(result.status.interval_capture.is_capturing)
+            self.assertEqual(result.result["selected_save_directory"], Path(temp_dir))
+            self.assertEqual(result.result["frames_written"], 2)
+            self.assertEqual(result.result["stop_reason"], "bounded_completion")
+            self.assertEqual(result.result["capture_bounds"]["frame_limit"], 2)
+            self.assertIsNone(result.result["capture_bounds"]["duration_seconds"])
+            self.assertEqual(result.result["capture_bounds"]["interval_seconds"], 0.01)
+            self.assertEqual(result.result["confirmed_settings"]["camera_id"], "simulated-camera")
+            self.assertEqual(result.result["confirmed_settings"]["resolved_save_directory"], Path(temp_dir))
+            self.assertEqual(result.result["confirmed_settings"]["resolved_file_stem"], "interval")
+            self.assertEqual(result.result["confirmed_settings"]["resolved_file_extension"], ".raw")
+            self.assertEqual(result.result["confirmed_settings"]["accepted_frame_limit"], 2)
+            self.assertIsNone(result.result["confirmed_settings"]["accepted_duration_seconds"])
+            self.assertEqual(result.result["confirmed_settings"]["accepted_interval_seconds"], 0.01)
             self.assertTrue((Path(temp_dir) / "interval_000000.raw").exists())
             self.assertTrue((Path(temp_dir) / "interval_000001.raw").exists())
+
+    def test_interval_capture_command_prints_json_summary(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            stdout = StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "interval-capture",
+                        "--base-directory",
+                        temp_dir,
+                        "--file-stem",
+                        "interval",
+                        "--interval-seconds",
+                        "0.01",
+                        "--frame-limit",
+                        "2",
+                    ]
+                )
+
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(payload["success"])
+            self.assertEqual(payload["command"], "interval-capture")
+            self.assertEqual(payload["source"], "simulated")
+            self.assertEqual(payload["result"]["selected_save_directory"], temp_dir)
+            self.assertEqual(payload["result"]["frames_written"], 2)
+            self.assertEqual(payload["result"]["stop_reason"], "bounded_completion")
+            self.assertEqual(payload["result"]["capture_bounds"]["frame_limit"], 2)
+            self.assertIsNone(payload["result"]["capture_bounds"]["duration_seconds"])
+            self.assertEqual(payload["result"]["capture_bounds"]["interval_seconds"], 0.01)
+            self.assertEqual(payload["result"]["confirmed_settings"]["camera_id"], "simulated-camera")
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_save_directory"], temp_dir)
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_file_stem"], "interval")
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_file_extension"], ".raw")
+            self.assertEqual(payload["result"]["confirmed_settings"]["accepted_frame_limit"], 2)
+            self.assertIsNone(payload["result"]["confirmed_settings"]["accepted_duration_seconds"])
+            self.assertEqual(payload["result"]["confirmed_settings"]["accepted_interval_seconds"], 0.01)
+            self.assertEqual(payload["status"]["interval_capture"]["frames_written"], 2)
+            self.assertFalse(payload["status"]["interval_capture"]["is_capturing"])
 
     def test_recording_command_prints_json_summary(self) -> None:
         with TemporaryDirectory() as temp_dir:

@@ -217,11 +217,27 @@ def _handle_interval_capture_command(
         )
     )
     _wait_for_interval_capture_completion(controller)
-    controller.stop_interval_capture(StopIntervalCaptureRequest())
+    interval_capture_result = controller.stop_interval_capture(StopIntervalCaptureRequest(reason="bounded_completion"))
+    status = controller.get_status()
     return CameraCliResult(
         operation="interval-capture",
         source=args.source,
-        status=controller.get_status(),
+        status=status,
+        result={
+            "selected_save_directory": selected_save_directory,
+            "frames_written": status.interval_capture.frames_written,
+            "stop_reason": interval_capture_result.stop_reason,
+            "capture_bounds": {
+                "frame_limit": args.frame_limit,
+                "duration_seconds": args.duration_seconds,
+                "interval_seconds": args.interval_seconds,
+            },
+            "confirmed_settings": _build_interval_capture_confirmed_settings(
+                status,
+                args,
+                selected_save_directory,
+            ),
+        },
         selected_save_directory=selected_save_directory,
     )
 
@@ -436,6 +452,25 @@ def _build_recording_confirmed_settings(
             "accepted_frame_limit": args.frame_limit,
             "accepted_duration_seconds": args.duration_seconds,
             "accepted_target_frame_rate": args.target_frame_rate,
+        }
+    )
+    return confirmed_settings
+
+
+def _build_interval_capture_confirmed_settings(
+    status: SubsystemStatus,
+    args: argparse.Namespace,
+    selected_save_directory: Path,
+) -> dict[str, Any]:
+    confirmed_settings = _build_status_confirmed_settings(status)
+    confirmed_settings.update(
+        {
+            "resolved_save_directory": selected_save_directory,
+            "resolved_file_stem": args.file_stem,
+            "resolved_file_extension": args.file_extension,
+            "accepted_frame_limit": args.frame_limit,
+            "accepted_duration_seconds": args.duration_seconds,
+            "accepted_interval_seconds": args.interval_seconds,
         }
     )
     return confirmed_settings
