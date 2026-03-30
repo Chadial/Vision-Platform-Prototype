@@ -4,7 +4,21 @@
 
 This work package defines the next simulator-first reliability validation slice after the host-control tightening sequence.
 
+Closure lane:
+
+- Experiment Reliability Closure
+
+Slice role:
+
+- validation / recovery extension
+
+Orientation:
+
+- simulator-first validation of bounded recovery behavior, with only minimal adjacent fixes if tests expose concrete defects
+
 Its purpose is to prove one tighter recovery block over host-driven recording failures and repeated restart behavior without depending on hardware availability.
+
+The narrow goal is to validate one bounded recovery matrix more tightly, not to redesign the broader runtime, transport, or hardware-validation story.
 
 ## Branch
 
@@ -26,6 +40,7 @@ Selected slice for this package:
   - subsequent successful restart
   - host-visible status recovery after failure
   - repeated stop/restart idempotence around the affected flow
+- keep the slice simulator-first by design so it can prove behavior tightly before any later hardware-backed confirmation work
 
 Excluded:
 
@@ -33,12 +48,33 @@ Excluded:
 - hardware-backed validation
 - new transport work
 
+What this package does not close:
+
+- the whole reliability lane
+- broad runtime redesign
+- hardware validation
+- broader transport or host-surface work
+
 ## Session Goal
 
 Leave the repository with one tighter locally verifiable proof that the experiment-facing recording path can fail, recover, and be started again without process restart.
+
+This package should be read as:
+
+- a tighter bounded recovery matrix
+- simulator-first by design
+- later hardware-backed confirmation still remains separate
 
 ## Validation
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest tests.test_recording_service tests.test_command_controller tests.test_bootstrap
 ```
+
+## Merge Gate
+
+- the slice remains validation-first and simulator-first
+- only minimal adjacent fixes are allowed when tests expose concrete defects
+- no broad runtime redesign, hardware-validation expansion, or transport work is bundled
+- the package is not treated as closure of the whole reliability lane
+- targeted tests pass locally
