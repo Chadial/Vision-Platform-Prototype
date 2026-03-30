@@ -307,6 +307,47 @@ class SnapshotServiceTests(unittest.TestCase):
                 focus_value_mean=0.75,
             )
 
+    def test_build_trace_artifact_metadata_requires_focus_method_for_focus_summary_fields(self) -> None:
+        with self.assertRaisesRegex(ValueError, "focus_method"):
+            build_trace_artifact_metadata(
+                focus_score_frame_interval=3,
+                focus_value_mean=0.75,
+            )
+
+    def test_build_trace_artifact_metadata_rejects_non_positive_focus_score_frame_interval(self) -> None:
+        with self.assertRaisesRegex(ValueError, "positive integer"):
+            build_trace_artifact_metadata(
+                focus_method="laplace",
+                focus_score_frame_interval=0,
+            )
+
+    def test_build_trace_artifact_metadata_rejects_non_integer_focus_score_frame_interval(self) -> None:
+        with self.assertRaisesRegex(ValueError, "positive integer"):
+            build_trace_artifact_metadata(
+                focus_method="laplace",
+                focus_score_frame_interval="2.5",
+            )
+
+    def test_build_trace_artifact_metadata_rejects_negative_focus_value_stddev(self) -> None:
+        with self.assertRaisesRegex(ValueError, "non-negative"):
+            build_trace_artifact_metadata(
+                focus_method="laplace",
+                focus_score_frame_interval=3,
+                focus_value_stddev=-0.1,
+            )
+
+    def test_build_trace_artifact_metadata_accepts_string_focus_score_frame_interval(self) -> None:
+        metadata = build_trace_artifact_metadata(
+            focus_method="laplace",
+            focus_score_frame_interval="3",
+            focus_value_mean=0.75,
+            focus_value_stddev=0.0,
+        )
+
+        self.assertEqual(metadata.focus_score_frame_interval, "3")
+        self.assertEqual(metadata.focus_value_mean, "0.75")
+        self.assertEqual(metadata.focus_value_stddev, "0.0")
+
     def test_save_snapshot_wires_focus_metadata_producer_into_trace_log(self) -> None:
         fake_driver = MagicMock()
         fake_driver.capture_snapshot.return_value = CapturedFrame(

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
+from math import isfinite
 from pathlib import Path
 from typing import TextIO
 
@@ -390,16 +391,56 @@ def _serialize_roi(
 
 def _validate_focus_metadata(metadata: TraceArtifactMetadata) -> None:
     has_summary_values = metadata.focus_value_mean is not None or metadata.focus_value_stddev is not None
-    if has_summary_values and metadata.focus_score_frame_interval is None:
-        raise ValueError(
-            "focus_value_mean and focus_value_stddev require an explicit aggregation basis such as focus_score_frame_interval."
+    if has_summary_values:
+        if metadata.focus_score_frame_interval is None:
+            raise ValueError(
+                "focus_value_mean and focus_value_stddev require an explicit aggregation basis such as focus_score_frame_interval."
+            )
+        if not _has_text(metadata.focus_method):
+            raise ValueError("focus summary metadata requires focus_method when summary values are stored.")
+
+    if metadata.focus_score_frame_interval is not None:
+        _parse_positive_int(
+            metadata.focus_score_frame_interval,
+            field_name="focus_score_frame_interval",
         )
+
+    if metadata.focus_value_stddev is not None:
+        stddev = _parse_float(metadata.focus_value_stddev, field_name="focus_value_stddev")
+        if stddev < 0:
+            raise ValueError("focus_value_stddev must be non-negative when provided.")
 
 
 def _format_coordinate(value: float) -> str:
     if float(value).is_integer():
         return str(int(value))
     return format(value, "g")
+
+
+def _has_text(value: str | None) -> bool:
+    return value is not None and bool(value.strip())
+
+
+def _parse_positive_int(value: str, *, field_name: str) -> int:
+    stripped = value.strip()
+    try:
+        parsed = int(stripped)
+    except ValueError as exc:
+        raise ValueError(f"{field_name} must be a positive integer when provided.") from exc
+    if str(parsed) != stripped or parsed <= 0:
+        raise ValueError(f"{field_name} must be a positive integer when provided.")
+    return parsed
+
+
+def _parse_float(value: str, *, field_name: str) -> float:
+    stripped = value.strip()
+    try:
+        parsed = float(stripped)
+    except ValueError as exc:
+        raise ValueError(f"{field_name} must be numeric when provided.") from exc
+    if not isfinite(parsed):
+        raise ValueError(f"{field_name} must be numeric when provided.")
+    return parsed
 
 
 __all__ = [

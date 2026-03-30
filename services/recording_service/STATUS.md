@@ -7,13 +7,14 @@
 - implemented: the shared traceability row shape now also supports optional per-image analysis ROI and focus metadata without turning those artifact-level fields into stable-header identity
 - implemented: the shared traceability helper now also exposes a narrow reader path for later offline metadata consumption over one folder's traceability logs
 - implemented: focus summary metadata now requires an explicit aggregation-basis field in the shared traceability row shape when summary fields are stored, so `focus_value_mean` and `focus_value_stddev` are no longer ambiguous standalone artifact values
+- implemented: the shared traceability validation now also requires `focus_method` for stored focus-summary values, treats `focus_score_frame_interval` as a positive integer count for the current summary baseline, and rejects negative `focus_value_stddev` values
 - implemented: snapshot and bounded-recording save flows now support an explicit reusable focus-metadata producer path, and bootstrap composition can opt into that producer wiring
 - working now: simulator-backed snapshot/recording/interval flows and root smoke scripts
 - working now: bounded recording can now complete, start again, and recover on the same service path after a selected writer-side failure without requiring a process restart, backed by targeted simulator-first tests
 - working now: snapshot-side focus evaluation can reuse the shared ROI state path without moving ROI ownership into snapshot save logic
 - partial: trigger-based recording and full hardware validation are still open
 - partial: producer wiring is now available, but focus metadata emission still depends on explicit service/bootstrap configuration rather than a repository-wide mandatory default
-- partial: exact defaults, bounds, and later validation policy for focus-summary aggregation are still open and remain follow-up work beyond the current explicit artifact-metadata shape
+- partial: the first shared summary-field validation policy is now explicit, but broader statistics policy, additional aggregation-basis shapes, and any repository-wide default-emission policy remain follow-up work
 - partial: broader data/logging closure work such as richer metadata consumption, wider artifact/linkage coverage, and series-structure refinement is still open beyond the current traceability baseline
 - known issues: recording flow still lives largely in `src/camera_app/services`, but naming and frame writing now live behind `src/vision_platform/services/recording_service`
 - technical debt: `camera_app.storage` is now a compatibility shim and should eventually stop being the primary import surface
