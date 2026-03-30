@@ -15,10 +15,10 @@ from camera_app.models.captured_frame import CapturedFrame
 from camera_app.models.recording_request import RecordingRequest
 from camera_app.models.recording_status import RecordingStatus
 from camera_app.services.shared_frame_source import SharedFrameSource
-from camera_app.storage.file_naming import build_recording_frame_path, build_recording_log_path
-from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_recording_request
 from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
+from vision_platform.services.recording_service.file_naming import build_recording_frame_path, build_recording_log_path
+from vision_platform.services.recording_service.frame_writer import FrameWriter
 from vision_platform.services.recording_service.traceability import (
     append_trace_image_row,
     append_trace_run_end,

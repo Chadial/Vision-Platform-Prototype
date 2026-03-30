@@ -9,9 +9,9 @@ from camera_app.models.captured_frame import CapturedFrame
 from camera_app.models.interval_capture_request import IntervalCaptureRequest
 from camera_app.models.interval_capture_status import IntervalCaptureStatus
 from camera_app.services.shared_frame_source import SharedFrameSource
-from camera_app.storage.file_naming import build_interval_capture_frame_path
-from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_interval_capture_request
+from vision_platform.services.recording_service.file_naming import build_interval_capture_frame_path
+from vision_platform.services.recording_service.frame_writer import FrameWriter
 
 
 class IntervalCaptureService:
