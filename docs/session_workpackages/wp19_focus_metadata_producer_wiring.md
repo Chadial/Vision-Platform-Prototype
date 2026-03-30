@@ -4,9 +4,15 @@
 
 This work package defines the next narrow execution-ready slice after the landed `WP18` artifact-metadata shape clarification.
 
-Its purpose is to move the repository from "artifact-level focus metadata fields are defined and validated" toward "normal snapshot and bounded-recording save flows can emit those fields through explicit producer wiring instead of manual test-only injection."
+Its purpose is to move the repository from "artifact-level focus metadata fields are defined and validated" toward "normal snapshot and bounded-recording save flows can emit that artifact-level focus metadata family through explicit producer wiring instead of manual test-only injection."
 
-The narrow goal is to wire one reusable focus-metadata producer into the existing save paths without silently freezing broader focus-statistics policy.
+The narrow goal is to wire one reusable producer into the existing save paths so selected artifact-level focus metadata, including associated ROI metadata when available, can be emitted without silently freezing broader focus-statistics policy or implying broader ROI-management scope.
+
+## Current Context
+
+`WP16` established the shared traceability/logging path, and `WP18` clarified the narrow artifact-level metadata shape above that path.
+
+`WP19` is the already-landed producer-side follow-up: it wires normal save flows so they can emit that selected artifact-level focus/ROI metadata family when the composition enables it.
 
 ## Branch
 
@@ -17,9 +23,10 @@ The narrow goal is to wire one reusable focus-metadata producer into the existin
 
 Included:
 
-- add one reusable producer for artifact-level focus metadata
+- add one reusable producer for the artifact-level focus metadata family
 - wire that producer into `SnapshotService` and `RecordingService`
 - allow bootstrap / subsystem composition to opt into the producer explicitly
+- allow emitted fields to include focus method/value fields, aggregation-basis fields when present, and related artifact-level ROI metadata when present
 - keep summary fields gated behind an explicit aggregation basis
 - add focused tests for snapshot, recording, and bootstrap wiring
 - update docs so the producer path is no longer only implied by traceability structure
@@ -28,25 +35,38 @@ Excluded:
 
 - new focus methods
 - broad statistics-policy finalization
+- ROI editor behavior
+- ROI explorer behavior
+- general ROI-management infrastructure
 - UI or offline workstation expansion
 - broad reporting redesign
 - transport/API work
 
 ## Session Goal
 
-Leave the repository with one explicit producer path so saved artifacts can carry focus metadata through normal save handling when the subsystem is configured to do so.
+Leave the repository with one explicit producer path so normal snapshot and bounded-recording save handling can emit the selected artifact-level focus/ROI metadata family when the subsystem is configured to do so.
 
 ## Execution Plan
 
 1. Inspect the current traceability writer path and existing focus services.
-2. Add one reusable artifact-level focus metadata producer.
-3. Wire it into snapshot and bounded-recording save flows.
-4. Expose the wiring through explicit bootstrap configuration instead of hidden defaults.
-5. Keep summary fields conditional on an explicit aggregation basis.
-6. Add targeted tests for snapshot, recording, and bootstrap behavior.
-7. Update status and PM docs once the producer path is real.
+2. Check where focus-related artifact metadata is already available and where associated ROI metadata is already available.
+3. Add one reusable artifact-level metadata producer for the selected focus/ROI family.
+4. Wire it into snapshot and bounded-recording save flows where those fields can be emitted without broadening the package.
+5. Expose the wiring through explicit bootstrap configuration instead of hidden defaults.
+6. Keep summary fields conditional on an explicit aggregation basis.
+7. Keep missing metadata non-fatal and keep ROI metadata out of stable-header identity.
+8. Add targeted tests for snapshot, recording, and bootstrap behavior.
+9. Update status and PM docs once the producer path is real.
 
 ## Validation
+
+Validation emphasis:
+
+- focus metadata may be emitted when available
+- associated artifact-level ROI metadata may be emitted when available
+- missing focus or ROI metadata remains non-fatal
+- ROI metadata does not become stable-header identity
+- no ROI-management or ROI-authoring scope is implied by the producer path
 
 Required automated validation:
 
@@ -77,7 +97,11 @@ Recommended focused validation:
 ## Merge Gate
 
 - the slice remains narrow and centered on producer wiring
+- save flows can emit the selected artifact-level focus metadata family, including associated ROI metadata when available
 - save flows only emit summary fields when an explicit aggregation basis is present
+- missing metadata remains non-fatal
+- ROI metadata remains artifact-level metadata rather than stable-header identity
+- no new ROI-management scope is implied
 - tests pass locally
 - docs clearly state that stronger defaults and bounds remain later policy work
 

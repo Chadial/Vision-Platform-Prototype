@@ -60,6 +60,25 @@ That means a real implementation work package should usually contain:
 
 This file should not try to duplicate that full detail for every item.
 
+When creating or materially refining future work packages, apply this precision discipline as well:
+
+- explicitly distinguish the broader `Closure Lane` from the selected narrow slice
+- explicitly name the `Slice Role`, such as `baseline`, `patch`, `extension`, `producer`, `consumer`, or `validation`
+- explicitly state that the package does not close the whole lane unless that is genuinely true
+- explicitly distinguish stable-context, run/session, and artifact/per-image scope whenever metadata, logging, traceability, save-artifact behavior, or offline artifact reuse is involved
+- explicitly distinguish whether the package is structure-only, producer-facing, consumer-facing, or one narrow combination
+- explicitly record unresolved policy choices rather than silently freezing or omitting them
+- explicitly state the small gap the package closes and the larger concerns it intentionally defers
+
+For future package generation, a short classification block or equivalent wording should make these points explicit:
+
+- `Closure Lane`
+- `Slice Role`
+- `Scope Level`
+- `Producer / Consumer / Structure impact`
+- `What this package does not close`
+- `Which policy questions remain open`
+
 ## Activation State Legend
 
 Use these meanings consistently:
