@@ -25,9 +25,10 @@ It does not define:
 Use this startup order by default:
 
 1. package entry point with the project interpreter
-2. repo-local launcher script when `src` path bootstrapping is needed
-3. repo-local PowerShell convenience helper for repeated local operator use
-4. hardware-specific integrated launcher only for bounded real-device evidence
+2. installed console script from the editable package install
+3. repo-local launcher script when `src` path bootstrapping is needed
+4. repo-local PowerShell convenience helper for repeated local operator use
+5. hardware-specific integrated launcher only for bounded real-device evidence
 
 Current preferred interpreter:
 
@@ -53,6 +54,27 @@ Why this is preferred:
 
 ### 2. Camera CLI launcher fallback
 
+### 2. Installed console script
+
+Use this when the editable install is already trusted and a shorter local command is useful:
+
+```powershell
+vision-platform-cli
+```
+
+Why this now exists:
+
+- it proves the current package manifest exposes one bounded CLI entry point
+- it reduces local shell friction without introducing a second business-logic path
+- it stays tied to the same `vision_platform.apps.camera_cli:main` owner as the preferred package form
+
+Boundary:
+
+- this is still a local editable-install convenience, not installer-grade packaging
+- it does not replace the explicit interpreter form as the clearest baseline command
+
+### 3. Camera CLI launcher fallback
+
 Use this when a repo-local launcher is more practical for operators or scripts:
 
 ```powershell
@@ -65,9 +87,7 @@ Why this still exists:
 - it remains convenient for local shell usage and repeatable smoke commands
 - it stays aligned with the same package `main()` path rather than introducing separate business logic
 
-### 3. Integrated hardware command-flow runner
-
-### 3. Operator convenience helper
+### 4. Operator convenience helper
 
 Use this when repeated local shell use is more important than typing the full interpreter-plus-launcher form every time:
 
@@ -94,7 +114,7 @@ Boundary:
 - it does not replace the preferred package entry point
 - it does not define cross-machine launch normalization
 
-### 4. Integrated hardware command-flow runner
+### 5. Integrated hardware command-flow runner
 
 Use this only for bounded real-device confidence passes:
 
@@ -111,6 +131,7 @@ It is the preferred integrated runner when hardware evidence is the actual goal.
 The current practical startup surface is intentionally small:
 
 - `vision_platform.apps.camera_cli`
+- installed `vision-platform-cli`
 - `scripts/launchers/run_camera_cli.py`
 - `scripts/run_python_baseline.ps1`
 - `scripts/launchers/run_hardware_command_flow.py`
@@ -146,6 +167,12 @@ Use the launcher-script form when shell or operator convenience outweighs direct
 .\.venv\Scripts\python.exe .\scripts\launchers\run_camera_cli.py status --source simulated
 ```
 
+Use the installed console-script form when the editable install is already trusted:
+
+```powershell
+vision-platform-cli status --source simulated
+```
+
 Use the convenience-helper form when repeated local usage matters more than preserving the full explicit interpreter command at the shell prompt:
 
 ```powershell
@@ -174,6 +201,7 @@ Before bounded hardware use:
 Treat the startup baseline as ready when:
 
 - the package entry point works from the project interpreter
+- the installed console script resolves after editable install
 - the launcher fallback works from repository root
 - the convenience helper works from repository root and clearly behaves as a thin wrapper
 - command help and current runbook references agree on the preferred form

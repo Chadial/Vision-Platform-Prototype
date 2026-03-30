@@ -97,6 +97,7 @@ Read these for every new session:
   - `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
 - For operational or launch-readiness questions:
   - `docs/MANUALS_INDEX.md`
+  - `docs/PYTHON_BASELINE_ENVIRONMENT.md`
   - `docs/PYTHON_BASELINE_RUNBOOK.md`
   - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
 - For architecture or boundary questions:
@@ -120,6 +121,7 @@ Read these for every new session:
 - `docs/STATUS.md` is the current implementation truth.
 - `docs/WORKPACKAGES.md` is the central queue for the next concrete work slice.
 - `docs/PYTHON_BASELINE_RUNBOOK.md` is the compact operating reference for the current post-closure Python baseline.
+- `docs/PYTHON_BASELINE_ENVIRONMENT.md` is the compact bounded install-profile and environment-contract reference.
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` is the compact startup-surface reference for the preferred current entry points.
 - `docs/MANUALS_INDEX.md` is the compact reading map for manuals and boundary notes.
 - `docs/ARCHITECTURE_BASELINE.md` is the compact architecture reference for the current post-closure baseline.

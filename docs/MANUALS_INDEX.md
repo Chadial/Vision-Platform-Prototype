@@ -17,10 +17,12 @@ This is an index, not a new manual layer.
 ### Operate The Current Python Baseline
 
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
+- `docs/PYTHON_BASELINE_ENVIRONMENT.md`
 
 Use for:
 
 - known-good run order
+- bounded local install profiles and environment contract
 - simulator-versus-hardware choice
 - current residual interpretation
 

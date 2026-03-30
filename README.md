@@ -43,7 +43,7 @@ The repository is now also organized as the first step toward a broader modular 
 
 ## Current State
 
-The repository is currently a simulator-validated Python prototype with:
+The repository is currently a bounded post-closure Python working baseline with simulator-backed coverage and prototype-level hardware evidence on the tested camera path, including:
 
 - a core architecture built for Allied Vision / Vimba X while keeping SDK-specific code isolated in the driver layer
 - clean driver/service/storage/control separation
@@ -58,7 +58,7 @@ The repository is currently a simulator-validated Python prototype with:
 - a first manual-focus baseline with ROI-aware evaluation hooks
 - UI-free overlay-payload composition for preview/snapshot-adjacent consumers
 
-Real hardware is available again for targeted preview and smoke validation, but the repository should still not yet be treated as fully hardware-validated. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md).
+The repository should not yet be treated as broadly hardware-validated across wider device or stress matrices. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md).
 
 ## Repository Layout
 
@@ -172,6 +172,14 @@ Optional variants:
 .\scripts\bootstrap.ps1 -VmbPyWheel "C:\Path\To\vmbpy-X.Y.Z-py-none-any.whl"
 .\scripts\bootstrap.ps1 -IncludeOpenCv -VmbPyWheel "C:\Path\To\vmbpy-X.Y.Z-py-none-any.whl"
 ```
+
+After editable install, the bounded installed console entry point is:
+
+```powershell
+vision-platform-cli
+```
+
+Use `docs/PYTHON_BASELINE_ENVIRONMENT.md` for the current install profiles, environment guardrails, and local entry-point expectations.
 
 ## Vimba X Setup
 
@@ -368,6 +376,7 @@ For this repository, the intended order is:
 7. Read [pyproject.toml](pyproject.toml) for the supported Python version and dependency source of truth.
 8. Use `.python-version` as the preferred interpreter hint.
 9. Use [`scripts/bootstrap.ps1`](scripts/bootstrap.ps1) for fast Windows setup, or this README for the exact manual commands.
+10. Use [`docs/PYTHON_BASELINE_ENVIRONMENT.md`](docs/PYTHON_BASELINE_ENVIRONMENT.md) for the current bounded local install contract.
 
 ## Subsystem Bootstrap
 

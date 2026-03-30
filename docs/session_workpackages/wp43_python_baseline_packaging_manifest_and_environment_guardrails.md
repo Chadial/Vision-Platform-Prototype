@@ -17,7 +17,7 @@ Its purpose is to make the current Python baseline easier to install, recognize,
 ## Branch
 
 - intended branch: `chore/python-baseline-packaging-guardrails`
-- activation state: queued
+- activation state: landed
 
 ## Scope
 
@@ -37,6 +37,13 @@ Excluded:
 ## Session Goal
 
 Leave the repository with one clearer bounded local environment contract for the current Python baseline so setup and re-entry require less rediscovery.
+
+Landed outcome:
+
+- `pyproject.toml` now exposes one bounded installed console script, `vision-platform-cli`, above the existing CLI `main()` owner
+- the bootstrap path now prints clearer guardrails around missing `VmbPy` and optional OpenCV support instead of only reporting a coarse install profile
+- the current bounded local install contract now lives in `docs/PYTHON_BASELINE_ENVIRONMENT.md`
+- runbook, launch-baseline, root README, and camera-CLI docs now point to the same environment contract and entry-point expectations
 
 ## Validation
 
