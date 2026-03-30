@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `fix/interval-capture-timing-polling-tightening`
-- activation state: active lane
+- activation state: landed on March 30, 2026
 
 ## Scope
 
@@ -73,6 +73,16 @@ The immediate remaining gap is:
 - treat one bounded real-device proof as sufficient if hardware is attached
 - prefer clearer accounting over broader scheduling ambition
 
+Implemented narrowing result:
+
+- skipped intervals now set one explicit non-fatal timing warning in `IntervalCaptureStatus.last_error` while the run is still active
+- successful frame writes clear that transient timing warning again
+- if a bounded interval-capture run finishes successfully with skipped intervals, the final status now carries one compact completion summary of the form `Interval capture completed with skipped_intervals=N`
+- fresh March 30, 2026 real-device evidence on `DEV_1AB22C046D81` showed:
+  - active polling exposed timing warnings while `skipped_intervals` rose
+  - the run still completed successfully with `frames_written = 3`
+  - the final status reported `skipped_intervals = 7` with the compact completion summary
+
 ## Execution Plan
 
 1. Re-read:
@@ -115,6 +125,21 @@ Recommended hardware validation if the camera is attached:
 - no broad scheduler or status redesign is bundled
 - targeted tests pass locally
 - any hardware observation is recorded explicitly if rerun
+
+## Completion Note
+
+Landed evidence for this slice:
+
+- automated validation:
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_interval_capture_service tests.test_command_controller tests.test_camera_cli tests.test_api_service`
+- bounded real-device interval-capture rerun on `DEV_1AB22C046D81`:
+  - `interval_seconds = 0.1`
+  - `max_frame_count = 3`
+- observed result:
+  - active polling surfaced non-fatal timing warnings while skips accumulated
+  - final status completed successfully with `frames_written = 3`
+  - final status reported `skipped_intervals = 7`
+  - final status carried `Interval capture completed with skipped_intervals=7`
 
 ## Recovery Note
 

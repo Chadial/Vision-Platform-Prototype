@@ -280,6 +280,27 @@ Current interpretation after WP29:
 - it is not currently evidenced as a capability-probe failure surfaced through the repository status model
 - it should therefore remain documented as residual noise under observation, not as proof that startup is failing
 
+Latest WP30 interval timing and polling rerun on March 30, 2026:
+
+- one bounded real-device interval-capture rerun with active polling was executed on `DEV_1AB22C046D81`
+- configuration used:
+  - `interval_seconds = 0.1`
+  - `max_frame_count = 3`
+  - output directory `captures/hardware_smoke/wp30_interval_capture`
+- observed active polling result:
+  - `skipped_intervals` rose during timing gaps
+  - `last_error` surfaced non-fatal timing warnings during active work
+  - the warning cleared again after successful writes
+- observed completion result:
+  - final status completed successfully with `frames_written = 3`
+  - final status reported `skipped_intervals = 7`
+  - final status carried the compact completion summary `Interval capture completed with skipped_intervals=7`
+
+Current interpretation after WP30:
+
+- the current interval-capture path should still be treated as boundedly acceptable rather than perfectly scheduler-stable
+- however, the polling and completion surfaces are now explicit enough that timing skips no longer have to be inferred only from a bare counter
+
 WP27 lifecycle follow-up on March 30, 2026:
 
 - narrowed the most plausible shared lifecycle seam to capability probing during `CameraService.initialize()`: the real-hardware path previously opened the camera through `VimbaXCameraDriver` and then re-entered Vimba X again through `probe_camera_capabilities(...)`
@@ -357,7 +378,7 @@ Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 
 | Snapshot Save | PASS | `Mono8`, `Mono10`, and hardware-backed `BMP` snapshot paths produced plausible files |
 | Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow and in the in-process bounded rerun |
 | Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths completed on hardware; March 30 also revalidated bounded recording plus active polling on the current host-oriented baseline |
-| Interval Capture / Active Polling | PASS with residual note | Interval capture completed on hardware and active polling was meaningful, but one rerun reported `skipped_intervals=1` |
+| Interval Capture / Active Polling | PASS with clearer timing semantics | Interval capture completed on hardware, active polling now surfaces non-fatal timing warnings during skipped intervals, and the latest bounded rerun completed with `frames_written=3` and final summary `completed with skipped_intervals=7` |
 | Traceability / Offline Reuse | PASS | Traceability logs, recording logs, run linkage, and offline BMP reuse behaved plausibly on hardware-generated output |
 | Error / Boundary Checks | PASS | Invalid camera id, unsupported `Mono16`, and invalid ROI increment failures were explicit and recoverable |
 | Camera-Specific Capability Rerun | PASS with correction | March 30 reruns refreshed the documented `Mono8`, `Mono10`, acquisition-frame-rate, and ROI behavior for `DEV_1AB22C046D81`, and corrected the earlier assumption that ROI offsets were effectively fixed to `0` |

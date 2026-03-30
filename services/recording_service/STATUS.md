@@ -14,6 +14,7 @@
 - working now: bounded recording can now complete, start again, and recover on the same service path after a selected writer-side failure without requiring a process restart, backed by targeted simulator-first tests
 - working now: the simulator-first recovery proof now also reaches the integrated bootstrap / command-controller path, including repeated stop calls after writer-side failure and successful restart on the same subsystem instance
 - working now: the March 30, 2026 hardware rerun refreshed the current integrated real-device baseline for snapshot, interval capture, bounded recording, folder-local traceability output, and immediate reuse on the same subsystem instance without process restart
+- working now: the interval-capture path now surfaces non-fatal timing warnings during active skipped intervals and records a compact completion summary when a bounded run finishes with skipped intervals
 - working now: the March 30, 2026 `WP27` lifecycle follow-up narrowed one shared real-device initialization seam by reusing the already opened driver camera for capability probing, and serial `snapshot -> status` plus bounded `recording -> status` proofs no longer reproduced `camera already in use`
 - working now: hardware-generated `BMP` snapshot output now has fresh real-device evidence for practical reuse through the current offline focus-report path together with traceability joins
 - working now: snapshot-side focus evaluation can reuse the shared ROI state path without moving ROI ownership into snapshot save logic
@@ -21,7 +22,7 @@
 - partial: producer wiring is now available, but focus metadata emission still depends on explicit service/bootstrap configuration rather than a repository-wide mandatory default
 - partial: the first shared summary-field validation policy is now explicit, but broader statistics policy, additional aggregation-basis shapes, and any repository-wide default-emission policy remain follow-up work
 - partial: broader data/logging closure work such as richer metadata consumption, wider artifact/linkage coverage, and series-structure refinement is still open beyond the current traceability baseline
-- partial: the latest real-device interval-capture rerun completed successfully but reported `skipped_intervals=1`, so the current hardware path should be treated as acceptable-with-residual-timing-quirks rather than perfectly scheduler-stable
+- partial: the latest real-device interval-capture rerun now reports timing skips more explicitly in both active polling and the final completion state, but the current hardware path should still be treated as acceptable-with-residual-timing-quirks rather than perfectly scheduler-stable
 - partial: successful real-device startup and command runs still emit a `vmbpyLog <VmbError.NotAvailable: -30>` line during initialization or teardown; this is a residual hardware observation that remains to be narrowed if it becomes operationally relevant
 - known issues: recording flow still lives largely in `src/camera_app/services`, but naming and frame writing now live behind `src/vision_platform/services/recording_service`
 - technical debt: `camera_app.storage` is now a compatibility shim and should eventually stop being the primary import surface
