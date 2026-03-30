@@ -51,3 +51,26 @@ What this package does not close:
 
 Leave the repository with one clearer documented decision boundary for bounded current recording versus any later detached host-control path.
 
+## Landed Outcome
+
+Observed result on March 30, 2026:
+
+- the current repository already has one consistent bounded-recording baseline across:
+  - CLI host envelopes
+  - simulator-first recovery tests
+  - traceability / `run_id` linkage
+  - bounded real-hardware evidence
+- no current repository surface actually implements detached multi-invocation recording lifecycle control
+- the main remaining ambiguity was therefore documentation and handover reading, not missing runtime behavior
+
+Decision recorded by this slice:
+
+- `recording` on the current stable Python baseline means bounded in-process recording on one live subsystem ownership boundary
+- `StartRecordingRequest` and `StopRecordingRequest` should not currently be read as a promise of detached start-in-one-process / stop-in-another-process control
+- detached multi-invocation recording lifecycle control remains intentionally deferred
+
+Smallest later activation shape recorded:
+
+- if detached recording is chosen later, the smallest justified next step should start with one explicit long-lived host-owned subsystem boundary plus one narrow identity-bearing start/status/stop surface
+- it should not begin as broad transport redesign, daemonization, or general background-job management
+

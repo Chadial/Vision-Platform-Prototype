@@ -23,9 +23,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 The current prepared post-closure follow-up sequence is now:
 
-1. `WP36 Detached Recording Lifecycle Decision Slice`
-2. `WP37 Python Baseline Operator Start Helper`
-3. `WP38 Selective Offline Follow-Up`
+1. `WP37 Python Baseline Operator Start Helper`
+2. `WP38 Selective Offline Follow-Up`
 
 This sequence should be read as:
 
@@ -36,7 +35,7 @@ This sequence should be read as:
 - then one explicit post-closure continuation:
   - `WP34` landed as bounded host-surface normalization
   - `WP35` landed as bounded enumeration / startup residual narrowing
-  - `WP36` as handover / decision clarification
+  - `WP36` landed as bounded recording-lifecycle decision clarification
   - `WP37` as operational-readiness polish
   - `WP38` as conditional selective expansion
 
@@ -398,5 +397,6 @@ The repository currently provides a structured Python prototype for the vision p
 5. Treat `WP33` as landed and use `docs/HOST_CONTRACT_BASELINE.md` as the compact stable-now / deferred-later reference for the current bounded host surface.
 6. Treat `WP34` as landed and read bounded `interval-capture` as part of the normalized current host-envelope baseline.
 7. Treat `WP35` as landed bounded enumeration / startup residual narrowing on the tested hardware path.
-8. Use `WP36` as the current next post-closure slice, with `WP37` and `WP38` behind it.
-9. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+8. Treat `WP36` as landed and use `docs/RECORDING_LIFECYCLE_BOUNDARY.md` as the compact decision boundary for bounded recording versus detached-later scope.
+9. Use `WP37` as the current next post-closure slice, with `WP38` behind it.
+10. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.

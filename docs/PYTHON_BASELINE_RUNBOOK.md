@@ -46,6 +46,12 @@ The current baseline should not be described as:
 - packaging-complete
 - final transport / API surface
 
+Recording lifecycle boundary:
+
+- current `recording` is bounded and in-process
+- separate CLI or process invocations should not currently be treated as detached start / later stop control
+- use `docs/RECORDING_LIFECYCLE_BOUNDARY.md` for the stable-now versus deferred-later recording semantics
+
 ## Preferred Environment
 
 Use the project virtual environment:
