@@ -5,10 +5,35 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from tests import _path_setup
-from vision_platform.integrations.camera.capability_probe import probe_camera_capabilities, write_camera_capabilities_json
+from vision_platform.integrations.camera.capability_probe import (
+    probe_camera_capabilities,
+    probe_open_camera_capabilities,
+    write_camera_capabilities_json,
+)
 
 
 class CapabilityProbeTests(unittest.TestCase):
+    def test_probe_open_camera_capabilities_serializes_selected_features_without_system_open(self) -> None:
+        exposure_feature = MagicMock()
+        exposure_feature.is_readable.return_value = True
+        exposure_feature.is_writeable.return_value = True
+        exposure_feature.get.return_value = 1000.0
+
+        fake_camera = MagicMock()
+        fake_camera.get_id.return_value = "CAM-001"
+        fake_camera.get_name.return_value = "TestCam"
+        fake_camera.get_model.return_value = "ModelA"
+        fake_camera.get_serial.return_value = "SER-001"
+        fake_camera.get_interface_id.return_value = "IF-001"
+        fake_camera.get_all_features.return_value = [object()]
+        fake_camera.get_feature_by_name.return_value = exposure_feature
+
+        payload = probe_open_camera_capabilities(fake_camera, feature_names=("ExposureTime",))
+
+        self.assertEqual(payload["camera"]["camera_id"], "CAM-001")
+        self.assertEqual(payload["feature_count"], 1)
+        self.assertEqual(payload["features"]["ExposureTime"]["value"], 1000.0)
+
     @patch("vision_platform.integrations.camera.capability_probe.VmbSystem")
     def test_probe_camera_capabilities_serializes_selected_features(self, vmb_system_type: MagicMock) -> None:
         exposure_feature = MagicMock()

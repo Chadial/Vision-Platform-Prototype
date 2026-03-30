@@ -97,6 +97,29 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         fake_camera.__exit__.assert_called()
         fake_vmb_system.__exit__.assert_called()
 
+    def test_probe_capabilities_uses_current_open_camera(self) -> None:
+        feature = MagicMock()
+        feature.is_readable.return_value = True
+        feature.is_writeable.return_value = True
+        feature.get.return_value = "Mono8"
+
+        fake_camera = MagicMock()
+        fake_camera.get_id.return_value = "CAM-001"
+        fake_camera.get_name.return_value = "TestCam"
+        fake_camera.get_model.return_value = "ModelA"
+        fake_camera.get_serial.return_value = "SER-001"
+        fake_camera.get_interface_id.return_value = "IF-001"
+        fake_camera.get_all_features.return_value = [object()]
+        fake_camera.get_feature_by_name.return_value = feature
+
+        driver = VimbaXCameraDriver()
+        driver._camera = fake_camera
+
+        payload = driver.probe_capabilities(feature_names=("PixelFormat",))
+
+        self.assertEqual(payload["camera"]["camera_id"], "CAM-001")
+        self.assertEqual(payload["features"]["PixelFormat"]["value"], "Mono8")
+
     def test_apply_configuration_sets_only_provided_features(self) -> None:
         exposure_feature = MagicMock()
         exposure_feature.is_writeable.return_value = True

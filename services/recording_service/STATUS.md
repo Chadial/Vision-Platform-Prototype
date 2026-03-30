@@ -14,6 +14,7 @@
 - working now: bounded recording can now complete, start again, and recover on the same service path after a selected writer-side failure without requiring a process restart, backed by targeted simulator-first tests
 - working now: the simulator-first recovery proof now also reaches the integrated bootstrap / command-controller path, including repeated stop calls after writer-side failure and successful restart on the same subsystem instance
 - working now: the March 30, 2026 hardware rerun refreshed the current integrated real-device baseline for snapshot, interval capture, bounded recording, folder-local traceability output, and immediate reuse on the same subsystem instance without process restart
+- working now: the March 30, 2026 `WP27` lifecycle follow-up narrowed one shared real-device initialization seam by reusing the already opened driver camera for capability probing, and serial `snapshot -> status` plus bounded `recording -> status` proofs no longer reproduced `camera already in use`
 - working now: hardware-generated `BMP` snapshot output now has fresh real-device evidence for practical reuse through the current offline focus-report path together with traceability joins
 - working now: snapshot-side focus evaluation can reuse the shared ROI state path without moving ROI ownership into snapshot save logic
 - partial: trigger-based recording and full hardware validation are still open
