@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `fix/interval-capture-host-contract-normalization`
-- activation state: current next
+- activation state: landed
 
 ## Scope
 
@@ -52,6 +52,12 @@ What this package does not close:
 ## Session Goal
 
 Leave the repository with one less special-case host command by making the current bounded `interval-capture` path clearer and closer to the rest of the host-oriented baseline.
+
+Implemented result:
+
+- bounded `interval-capture` now returns one narrow structured result subset inside the current CLI host envelope
+- that subset now includes selected save directory, frames written, stop reason, accepted capture bounds, and confirmed settings
+- the command no longer remains a result-shape special case relative to `status`, `snapshot`, and bounded `recording`
 
 ## Validation
 

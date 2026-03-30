@@ -32,6 +32,7 @@ Provides a camera-oriented command-line app surface for exercising the existing 
 - `status` now also carries one additive `active_run` subset for active bounded recording or interval-capture work without widening into command-result confirmation
 - `snapshot` returns a short-running command result with saved-path confirmation
 - `recording` currently means bounded in-process recording that starts and completes within one invocation and then returns a final structured result
+- `interval-capture` now also returns a bounded structured result with selected save directory, frames written, stop reason, accepted bounds, and a narrow confirmed-settings subset instead of remaining a result-shape special case
 - the first host-oriented error shape is intentionally minimal: `code`, `message`, `details`
 - command results now also include a small confirmed-settings subset for experiment traceability, such as camera id, pixel format, exposure, resolved save directory, resolved file stem / extension, and accepted recording bounds where relevant
 - `snapshot` and bounded `recording` now also expose one deterministic `run_id` aligned with the traceability logs, while the bounded-recording status path surfaces that identity only during active work

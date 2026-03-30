@@ -71,12 +71,14 @@ The current bounded host-oriented command surface is:
 - `status`
 - `snapshot`
 - bounded `recording`
+- bounded `interval-capture`
 
 Current meaning:
 
 - `status` is the polling-oriented command for host-readable current state
 - `snapshot` is a short-running save command with a stable success/error envelope
 - `recording` means bounded in-process recording that starts and completes within one invocation
+- `interval-capture` means bounded in-process timed capture that starts and completes within one invocation and now returns the same bounded result-ownership style as the other host-oriented commands
 
 ### Stable error envelope
 
@@ -123,7 +125,7 @@ The current bounded confirmed-settings subset is stable enough for near-term hos
 - exposure
 - resolved save directory
 - resolved file stem / extension where applicable
-- accepted bounded recording limits where applicable
+- accepted bounded recording or interval-capture limits where applicable
 
 This subset is intentionally small.
 
@@ -148,7 +150,6 @@ The following areas are intentionally deferred rather than accidentally unfinish
 - richer query or search surfaces
 - generalized artifact browsing
 - detached multi-invocation recording lifecycle control
-- broader interval-capture normalization into the same host-result contract slice as `status`, `snapshot`, and bounded `recording`
 - preview-oriented control surfaces
 - frontend- or IPC-specific payload contracts
 - full external-interface freeze for all nested fields
