@@ -116,6 +116,7 @@ class PostprocessToolTests(unittest.TestCase):
                         points=((1, 2), (30, 40)),
                     ),
                     focus_method="laplace",
+                    focus_score_frame_interval=7,
                     focus_value_mean=0.75,
                     focus_value_stddev=0.05,
                 ),
@@ -131,12 +132,14 @@ class PostprocessToolTests(unittest.TestCase):
         self.assertEqual(entry.analysis_roi_type, "rectangle")
         self.assertEqual(entry.analysis_roi_data, "rectangle(1,2,30,40)")
         self.assertEqual(entry.focus_method, "laplace")
+        self.assertEqual(entry.focus_score_frame_interval, "7")
         self.assertEqual(entry.focus_value_mean, "0.75")
         self.assertEqual(entry.focus_value_stddev, "0.05")
         self.assertIn("artifact_kind=snapshot", report)
         self.assertIn("run_id=frame_a", report)
         self.assertIn("analysis_roi_type=rectangle", report)
         self.assertIn("focus_method=laplace", report)
+        self.assertIn("focus_score_frame_interval=7", report)
 
     def test_run_focus_report_degrades_when_only_some_images_have_trace_rows(self) -> None:
         with TemporaryDirectory() as temp_dir:

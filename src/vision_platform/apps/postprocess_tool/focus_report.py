@@ -30,6 +30,7 @@ class PostprocessFocusReportEntry:
     analysis_roi_type: str | None = None
     analysis_roi_data: str | None = None
     focus_method: str | None = None
+    focus_score_frame_interval: str | None = None
     focus_value_mean: str | None = None
     focus_value_stddev: str | None = None
 
@@ -65,6 +66,7 @@ def run_focus_report(
                 analysis_roi_type=_metadata_value(artifact_row, "analysis_roi_type"),
                 analysis_roi_data=_metadata_value(artifact_row, "analysis_roi_data"),
                 focus_method=_metadata_value(artifact_row, "focus_method"),
+                focus_score_frame_interval=_metadata_value(artifact_row, "focus_score_frame_interval"),
                 focus_value_mean=_metadata_value(artifact_row, "focus_value_mean"),
                 focus_value_stddev=_metadata_value(artifact_row, "focus_value_stddev"),
             )
@@ -180,6 +182,8 @@ def _format_optional_metadata(entry: PostprocessFocusReportEntry) -> str:
         metadata_parts.append(f" analysis_roi_data={entry.analysis_roi_data}")
     if entry.focus_method:
         metadata_parts.append(f" focus_method={entry.focus_method}")
+    if entry.focus_score_frame_interval:
+        metadata_parts.append(f" focus_score_frame_interval={entry.focus_score_frame_interval}")
     if entry.focus_value_mean:
         metadata_parts.append(f" focus_value_mean={entry.focus_value_mean}")
     if entry.focus_value_stddev:
