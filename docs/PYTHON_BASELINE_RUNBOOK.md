@@ -26,6 +26,7 @@ It does not define:
 - preferred interpreter: `.\.venv\Scripts\python.exe`
 - preferred command entry point: `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli`
 - preferred launcher fallback: `.\scripts\launchers\run_camera_cli.py`
+- preferred local convenience helper: `.\scripts\run_python_baseline.ps1`
 - preferred integrated real-hardware evidence path: `.\scripts\launchers\run_hardware_command_flow.py`
 - current hardware residuals: `vmbpyLog <VmbError.NotAvailable: -30>`, duplicate SDK visibility for the tested camera id, bounded interval jitter, timing-sensitive back-to-back CLI reuse observations
 
@@ -96,6 +97,7 @@ Preferred hardware integration runner:
 
 Useful secondary launchers:
 
+- `.\scripts\run_python_baseline.ps1`
 - `.\scripts\launchers\run_camera_cli.py`
 - `.\scripts\launchers\run_snapshot_smoke.py`
 - `.\scripts\launchers\run_simulated_demo.py`
@@ -105,6 +107,7 @@ Useful secondary launchers:
 Current practical rule:
 
 - prefer `python -m vision_platform.apps.camera_cli` when the project interpreter and repository root are already explicit
+- use `run_python_baseline.ps1` as the bounded local convenience wrapper when repeated shell use matters more than keeping the full interpreter command visible
 - use `run_camera_cli.py` for bounded host-surface checks when a repo-local launcher is more practical
 - use `run_hardware_command_flow.py` for integrated real-device confidence passes
 - use the OpenCV launchers only when local visual inspection is actually needed
@@ -142,6 +145,12 @@ Preferred simulated sanity commands:
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source simulated
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source simulated --base-directory .\captures\sim_smoke --frame-limit 3
+```
+
+Equivalent local convenience-helper form:
+
+```powershell
+.\scripts\run_python_baseline.ps1 status --source simulated
 ```
 
 Preferred bounded hardware commands on tested path:

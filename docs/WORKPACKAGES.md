@@ -295,7 +295,7 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 34 | Interval-Capture Host Contract Normalization | bring the current bounded `interval-capture` path closer to the same host-envelope expectations used by the other bounded host commands | active lane | landed hardening slice; bounded `interval-capture` now returns selected save directory, frames written, stop reason, accepted capture bounds, and confirmed settings in the current host-envelope model | `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md` |
 | 35 | Hardware Enumeration And Startup Residual Narrowing | narrow duplicate camera enumeration and remaining startup-log ambiguity on the tested hardware path | active lane | landed residual-driven hardware follow-up; raw Vimba X enumeration still duplicates `DEV_1AB22C046D81`, but the repository now prefers the richer candidate and preserves serial `067WH` in host-visible status while `VmbError.NotAvailable: -30` remains non-blocking residual noise | `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md` |
 | 36 | Detached Recording Lifecycle Decision Slice | document the current bounded recording meaning versus any later detached lifecycle control direction | active lane | landed decision-oriented handover slice; the stable-now versus deferred-later recording boundary now lives in `docs/RECORDING_LIFECYCLE_BOUNDARY.md` without implementing detached lifecycle control | `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md` |
-| 37 | Python Baseline Operator Start Helper | reduce repeated local startup friction with one bounded helper if justified | current next | next operational-readiness polish candidate after the runbook and launch-baseline pair | `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md` |
+| 37 | Python Baseline Operator Start Helper | reduce repeated local startup friction with one bounded helper if justified | active lane | landed operational-readiness polish slice; `scripts/run_python_baseline.ps1` now provides one thin local convenience wrapper over the existing `.venv` plus `run_camera_cli.py` path without becoming a new startup contract | `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md` |
 | 38 | Selective Offline Follow-Up | preserve one bounded offline-expansion option only when a concrete user need appears | conditional | optional selective-expansion candidate, not the default next lane | `docs/session_workpackages/wp38_selective_offline_followup.md` |
 
 ## Immediate PM Backlog
@@ -308,8 +308,7 @@ These are the work-package groups PM should treat as the current actionable post
 
 Current prepared post-closure sequence:
 
-1. `WP37 Python Baseline Operator Start Helper`
-2. `WP38 Selective Offline Follow-Up`
+1. `WP38 Selective Offline Follow-Up`
 
 Most recently landed detailed packages:
 
@@ -319,6 +318,8 @@ Most recently landed detailed packages:
   - landed residual-narrowing follow-up; raw Vimba X enumeration still duplicates `DEV_1AB22C046D81`, but the repository now prefers the richer duplicate candidate and preserves the richer pre-open serial `067WH` in host-visible status even when the opened camera object degrades to `N/A`
 - `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
   - landed decision-oriented handover slice; current `recording` is now explicitly documented as bounded in-process recording on one live subsystem boundary, while detached multi-invocation lifecycle control remains intentionally deferred
+- `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
+  - landed operational-readiness polish slice; `scripts/run_python_baseline.ps1` now gives one bounded PowerShell convenience helper for repeated local CLI startup without replacing the preferred package entry point
 - `docs/session_workpackages/wp29_hardware_startup_warning_classification.md`
   - landed narrow diagnostics follow-up; fresh March 30 serial hardware `status` and `snapshot(.bmp)` proofs showed that `vmbpyLog <VmbError.NotAvailable: -30>` still appears during successful runs, but the current host/status surface remains successful with `capabilities_available=True` and `capability_probe_error=None`, so the line is currently classified as non-blocking SDK/logging residual rather than active startup failure
 - `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
@@ -354,7 +355,7 @@ Current explicitly activated detailed package state:
 - `WP34` is now landed as the bounded `interval-capture` host-contract normalization slice
 - `WP35` is now landed as the bounded enumeration / startup residual-narrowing slice
 - `WP36` is now landed as the bounded detached-recording lifecycle decision slice
-- `WP37` is the current default prepared operational-readiness follow-up
+- `WP37` is now landed as the bounded operator-start convenience slice
 - `WP38` remains conditional selective expansion only
 - `WP12` through `WP26` should now be read primarily as the landed Extended MVP closure history that established the current Python working baseline
 - `WP27` through `WP30` are already landed post-closure hardening / diagnostics slices on top of that baseline
@@ -512,14 +513,17 @@ The current coarse PM order should be:
 14. treat `WP34` as the landed bounded `interval-capture` normalization slice inside the current host-envelope baseline
 15. treat `WP35` as the landed enumeration / startup residual-narrowing slice on the tested camera path
 16. treat `WP36` as the landed recording-lifecycle boundary clarification slice
-17. treat `WP37` as the next queued operational-readiness follow-up and `WP38` as conditional selective expansion only
+17. treat `WP37` as the landed operator-start convenience slice and `WP38` as conditional selective expansion only
 18. select any further technical slice only from concrete residuals or an explicit user-directed lane, then revisit tracking, broader API, C# handover widening, and additional frontends as post-closure expansion candidates rather than closure obligations
 
 ## Recommended Next Detailed Work Package
 
-If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
+There is currently no forced always-on PM-recommended next detailed package.
 
-- `WP37 Python Baseline Operator Start Helper`
+If the user does not explicitly redirect the session:
+
+- derive the next slice from a concrete residual, operator need, or explicit expansion choice
+- only activate `WP38 Selective Offline Follow-Up` when a real offline / measurement need is actually chosen
 
 Reason:
 
@@ -527,7 +531,8 @@ Reason:
 - the immediate post-closure operational-readiness and first handover-clarification pair is now landed through `WP31`, `WP32`, and `WP33`
 - `WP34` has removed the most visible remaining host-surface asymmetry by normalizing bounded `interval-capture` into the same result-ownership style as the other bounded host commands
 - `WP35` has already narrowed the main current startup/enumeration residual enough that the next best slice is now contract/lifecycle clarification rather than another immediate hardware rerun
-- `WP36` has now clarified the detached-recording boundary without reopening runtime scope, so the next smallest justified slice is operational-readiness polish around repeated startup friction
+- `WP36` has now clarified the detached-recording boundary without reopening runtime scope, and `WP37` has already added the smallest justified local startup helper without widening into packaging
+- there is therefore no forced always-on next slice left except explicitly chosen selective expansion or a new concrete residual
 
 ## Fresh Agent Decision Rule
 
@@ -615,7 +620,7 @@ Current explicit activation:
 - `Interval-Capture Host Contract Normalization` now has its landed execution-ready file at `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md`
 - `Hardware Enumeration And Startup Residual Narrowing` now has its landed execution-ready file at `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
 - `Detached Recording Lifecycle Decision Slice` now has its landed execution-ready file at `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
-- `Python Baseline Operator Start Helper` now has its prepared execution-ready file at `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
+- `Python Baseline Operator Start Helper` now has its landed execution-ready file at `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
 - `Selective Offline Follow-Up` now has its prepared execution-ready file at `docs/session_workpackages/wp38_selective_offline_followup.md`
 
 ## PM Refinement Rule

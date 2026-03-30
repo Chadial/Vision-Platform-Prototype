@@ -51,3 +51,26 @@ What this package does not close:
 
 Leave the repository with one smaller-friction startup helper only if it materially improves repeated local use without obscuring the preferred baseline paths.
 
+## Landed Outcome
+
+Observed result on March 30, 2026:
+
+- the preferred startup surface was already clear in docs, but repeated local use still required operators and developers to repeatedly type the full `.venv` interpreter plus launcher or module form
+- the current repository already had the right bounded launcher path in `scripts/launchers/run_camera_cli.py`
+- the remaining gap was convenience, not missing startup semantics
+
+Implemented narrowing:
+
+- one bounded PowerShell convenience helper now exists at `scripts/run_python_baseline.ps1`
+- the helper:
+  - resolves repository root
+  - uses the project `.venv` interpreter explicitly
+  - delegates to `scripts/launchers/run_camera_cli.py`
+  - falls back to `--help` when no command arguments are provided
+
+Current interpretation after landing:
+
+- the helper is convenience only
+- the preferred baseline entry point remains `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli`
+- the helper reduces repeated local startup friction without introducing packaging, installer, or cross-machine launch guarantees
+
