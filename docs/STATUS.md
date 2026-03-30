@@ -69,6 +69,8 @@ The current active phase is therefore not "close the MVP", but "operate and impr
 
 The compact operating reference for that baseline now lives at:
 
+- `docs/MANUALS_INDEX.md`
+- `docs/ARCHITECTURE_BASELINE.md`
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
 - `docs/HOST_CONTRACT_BASELINE.md`

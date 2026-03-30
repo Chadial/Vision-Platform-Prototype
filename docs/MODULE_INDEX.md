@@ -3,6 +3,8 @@
 ## Root Guidance
 
 - `docs/SESSION_START.md`: compact session bootstrap and reading map
+- `docs/MANUALS_INDEX.md`: compact index for manuals, boundary notes, and operating references
+- `docs/ARCHITECTURE_BASELINE.md`: compact architecture reference for the current baseline
 - `docs/WORKFLOW.md`: operational execution flow for agents
 - `docs/DOCUMENTATION_PLAYBOOK.md`: documentation model and maintenance rules
 - `docs/WORKPACKAGES.md`: central work-package queue and next-step prioritization
@@ -64,3 +66,4 @@ Governance note:
 
 - `docs/module_doc_audit.md` records the current keep/shrink guidance for module-local docs
 - `docs/DOCUMENTATION_PLAYBOOK.md` records the broader repo-level role split between stable, operational, current-state, and boundary docs
+- `docs/MANUALS_INDEX.md` records the compact reading map for central manuals and boundary notes

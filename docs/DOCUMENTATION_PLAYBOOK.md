@@ -43,6 +43,7 @@ Current examples:
 
 - `AGENTS.md`
 - `docs/ProjectDescription.md`
+- `docs/ARCHITECTURE_BASELINE.md`
 - `docs/architecture_principles.md`
 - `docs/root_category_audit.md`
 - `docs/COMMANDS.md`
@@ -70,6 +71,7 @@ Typical content:
 
 Current examples:
 
+- `docs/MANUALS_INDEX.md`
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
 - `docs/HARDWARE_EVALUATION.md`
@@ -354,5 +356,10 @@ Recommended immediate integration:
 - `docs/WORKFLOW.md`
 - `docs/MODULE_INDEX.md`
 - `docs/module_doc_audit.md`
+
+Additional compact anchor docs now in use:
+
+- `docs/MANUALS_INDEX.md`
+- `docs/ARCHITECTURE_BASELINE.md`
 
 This is enough to change behavior without forcing a large documentation migration.
