@@ -310,7 +310,6 @@ These are the work-package groups PM should treat as the current actionable post
 Current prepared post-closure sequence:
 
 1. `WP38 Selective Offline Follow-Up`
-2. `WP39 Module Documentation Audit And Shrink Pass` only when module-local doc drift is the actual problem to solve
 
 Most recently landed detailed packages:
 
