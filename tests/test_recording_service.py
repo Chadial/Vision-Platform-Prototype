@@ -696,6 +696,46 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# run.frame_limit: 3", trace_lines)
             self.assertIn("# run.duration_seconds: 0.05", trace_lines)
 
+    def test_recording_traceability_carries_alias_and_profile_context(self) -> None:
+        driver = _StreamingRecordingDriver()
+        service = RecordingService(
+            driver,
+            poll_interval_seconds=0.001,
+            configuration_provider=lambda: CameraConfiguration(
+                exposure_time_us=2500.0,
+                gain=1.5,
+                pixel_format="Mono8",
+            ),
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            service.start_recording(
+                RecordingRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="series",
+                    file_extension=".raw",
+                    frame_limit=2,
+                    queue_size=4,
+                    camera_id="DEV_1AB22C046D81",
+                    camera_alias="tested_camera",
+                    configuration_profile_id="default",
+                    configuration_profile_camera_class="alvium_1800_u_1240m",
+                )
+            )
+
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording:
+                    break
+                sleep(0.01)
+
+            trace_lines = (Path(temp_dir) / "saved_artifact_traceability.csv").read_text(encoding="utf-8").splitlines()
+
+        self.assertIn("# context.camera_id: DEV_1AB22C046D81", trace_lines)
+        self.assertIn("# context.camera_alias: tested_camera", trace_lines)
+        self.assertIn("# context.configuration_profile_id: default", trace_lines)
+        self.assertIn("# context.configuration_profile_camera_class: alvium_1800_u_1240m", trace_lines)
+
     def test_recording_traceability_creates_new_log_when_context_changes(self) -> None:
         driver = _StreamingRecordingDriver()
         current_configuration = CameraConfiguration(
