@@ -224,10 +224,16 @@ Status:
 
 This phase should mean:
 
-1. harden the now-usable Python working baseline
-2. reduce operational rough edges and clarify stable versus deferred areas
-3. make the Python baseline easier to use, validate, and hand over
-4. expand transport, offline tooling, frontend scope, or C#-handover scope only when there is a clear reason
+1. `Hardening`
+   - smooth the last real friction points in the current Python baseline
+   - continue lifecycle / cleanup follow-ups, host-readable diagnostics, bounded reliability polish, and small real-use rough-edge removal
+2. `Operational readiness`
+   - make the Python baseline easier to use, run, document, and trust
+   - improve docs, packaging / startup paths, clearer stable contracts, and activation / operating rules when needed
+3. `Selective expansion`
+   - open broader host / transport, offline / measurement, or UI / frontend scope only when there is a concrete reason
+4. `Later product / handover preparation`
+   - keep C# handover, broader productization, additional frontends, and wider hardware / deployment coverage visible as later phase directions rather than immediate default obligations
 
 This phase should not mean:
 
