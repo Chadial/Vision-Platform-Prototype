@@ -25,8 +25,7 @@ There is now one new prepared post-closure follow-up sequence.
 
 Current prepared order:
 
-1. `WP38 Selective Offline Follow-Up` only when a concrete offline / measurement need is chosen
-2. `WP44 Bounded API Adapter Command Surface` only when a concrete adapter-facing consumer need is chosen
+1. `WP44 Bounded API Adapter Command Surface` only when a concrete adapter-facing consumer need is chosen
 
 This sequence should be read as:
 
@@ -39,7 +38,7 @@ This sequence should be read as:
   - `WP35` landed as bounded enumeration / startup residual narrowing
   - `WP36` landed as bounded recording-lifecycle decision clarification
   - `WP37` landed as bounded operator-start convenience polish
-  - `WP38` as conditional selective expansion
+  - `WP38` landed as conditional selective offline follow-up once explicitly chosen
   - `WP39` landed as bounded module-documentation trust / shrink cleanup
   - `WP40` landed as the first architecture-convergence slice behind the preferred `vision_platform` boundary
   - `WP41` landed as the direct storage/persistence follow-up
@@ -409,7 +408,7 @@ The repository currently provides a structured Python prototype for the vision p
 7. Treat `WP35` as landed bounded enumeration / startup residual narrowing on the tested hardware path.
 8. Treat `WP36` as landed and use `docs/RECORDING_LIFECYCLE_BOUNDARY.md` as the compact decision boundary for bounded recording versus detached-later scope.
 9. Treat `WP37` as landed and use `scripts/run_python_baseline.ps1` only as a bounded local convenience helper rather than a new startup contract.
-10. Treat `WP38` as the conditional offline / measurement selective-expansion option rather than as the default next slice.
+10. Treat `WP38` as landed: the compact offline focus-report bundle now adds one additive summary line for entry count, traceability-join coverage, and the current highest-score image without widening into export or explorer scope.
 11. Treat `WP39` as landed; the first bounded module-doc trust / shrink pass is complete and `docs/module_doc_audit.md` now captures the tighter guidance.
 12. Treat `WP40` as landed: `vision_platform.bootstrap`, `vision_platform.control`, and `vision_platform.imaging` now own the implementation directly while `camera_app` remains the compatibility shim layer.
 13. Treat `WP41` as landed: storage-facing legacy service imports now point at platform-owned file-naming and frame-writer helpers directly, while `camera_app.storage` remains the compatibility shim layer.

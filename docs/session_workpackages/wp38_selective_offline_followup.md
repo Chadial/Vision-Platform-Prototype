@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `feature/selective-offline-followup`
-- activation state: conditional
+- activation state: landed
 
 ## Scope
 
@@ -49,4 +49,10 @@ What this package does not close:
 ## Session Goal
 
 Keep one clearly bounded offline-expansion option visible without making it the default planning lane.
+
+Landed outcome:
+
+- the compact offline focus-report bundle now exposes one additive summary line above the existing per-image path
+- that summary line reports entry count, traceability-join coverage, and the current highest-score image
+- the existing list-return path and the narrow text-report character remain unchanged
 

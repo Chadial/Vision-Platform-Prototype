@@ -296,7 +296,7 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 35 | Hardware Enumeration And Startup Residual Narrowing | narrow duplicate camera enumeration and remaining startup-log ambiguity on the tested hardware path | active lane | landed residual-driven hardware follow-up; raw Vimba X enumeration still duplicates `DEV_1AB22C046D81`, but the repository now prefers the richer candidate and preserves serial `067WH` in host-visible status while `VmbError.NotAvailable: -30` remains non-blocking residual noise | `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md` |
 | 36 | Detached Recording Lifecycle Decision Slice | document the current bounded recording meaning versus any later detached lifecycle control direction | active lane | landed decision-oriented handover slice; the stable-now versus deferred-later recording boundary now lives in `docs/RECORDING_LIFECYCLE_BOUNDARY.md` without implementing detached lifecycle control | `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md` |
 | 37 | Python Baseline Operator Start Helper | reduce repeated local startup friction with one bounded helper if justified | active lane | landed operational-readiness polish slice; `scripts/run_python_baseline.ps1` now provides one thin local convenience wrapper over the existing `.venv` plus `run_camera_cli.py` path without becoming a new startup contract | `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md` |
-| 38 | Selective Offline Follow-Up | preserve one bounded offline-expansion option only when a concrete user need appears | conditional | optional selective-expansion candidate, not the default next lane | `docs/session_workpackages/wp38_selective_offline_followup.md` |
+| 38 | Selective Offline Follow-Up | preserve one bounded offline-expansion option only when a concrete user need appears | active lane | landed selective-expansion slice; the compact offline focus-report bundle now adds one additive summary line for entry count, traceability coverage, and the current highest-score image without widening into explorer or export scope | `docs/session_workpackages/wp38_selective_offline_followup.md` |
 | 39 | Module Documentation Audit And Shrink Pass | refresh module-local docs, shrink stale local roadmaps, and reduce drift between local module docs and the post-closure baseline | active lane | landed bounded meta-documentation cleanup slice; active-module roadmaps were shrunk, stale transition wording reduced, and module-local doc roles clarified without central PM rewrite | `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md` |
 | 40 | Vision Platform Control And Imaging Physical Migration | move current control and optional imaging implementation behind the preferred `src/vision_platform` boundary while preserving compatibility imports | active lane | landed first post-closure architecture-convergence slice; `vision_platform` now owns bootstrap/control/imaging implementation directly while `camera_app` remains the compatibility shim layer | `docs/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md` |
 | 41 | Vision Platform Storage Physical Migration | move storage and persistence helpers behind the preferred `src/vision_platform` boundary while preserving current behavior | active lane | landed second architecture-convergence slice; storage-facing legacy services now import platform-owned file-naming and frame-writer helpers directly while `camera_app.storage` remains the compatibility shim layer | `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md` |
@@ -314,7 +314,7 @@ These are the work-package groups PM should treat as the current actionable post
 
 Current prepared post-closure sequence:
 
-1. `WP38 Selective Offline Follow-Up`
+1. `WP44 Bounded API Adapter Command Surface`
 
 Most recently landed detailed packages:
 
@@ -528,7 +528,7 @@ The current coarse PM order should be:
 20. treat `WP41` as the landed storage/persistence follow-up; legacy storage import paths now consume platform-owned helpers while `camera_app.storage` remains the compatibility shim layer
 21. treat `WP42` as the landed trust-and-shim audit; remaining `camera_app` dependencies inside `vision_platform` are now tested and documented as explicit compatibility seams
 22. treat `WP43` as landed; the bounded package-manifest and environment-contract guardrails are now explicit through `vision-platform-cli`, bootstrap output, and `docs/PYTHON_BASELINE_ENVIRONMENT.md`
-23. treat `WP44` and `WP38` as conditional selective-expansion options rather than automatic next work
+23. treat `WP38` as landed selective offline follow-up and `WP44` as the remaining conditional adapter-facing selective-expansion option
 24. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
@@ -537,8 +537,8 @@ There is currently no forced default next detailed package.
 
 If the user does not explicitly redirect the session after this:
 
-- choose between one conditional expansion lane or a fresh residual-driven hardening slice
-- activate `WP38` or `WP44` only when a real offline or adapter-facing consumer need is actually chosen
+- choose between the remaining conditional expansion lane or a fresh residual-driven hardening slice
+- activate `WP44` only when a real adapter-facing consumer need is actually chosen
 
 Reason:
 
@@ -552,6 +552,7 @@ Reason:
 - the second justified architecture-convergence slice is now landed through `WP41`
 - the trust-and-shim audit is now landed through `WP42`
 - the bounded packaging/environment guardrail slice is now also landed through `WP43`
+- the narrow selective offline follow-up is now also landed through `WP38`
 - the next justified step should therefore come from a concrete residual or an explicitly chosen selective-expansion need rather than from a forced generic default
 
 ## Fresh Agent Decision Rule
@@ -647,7 +648,7 @@ Current explicit activation:
 - `Hardware Enumeration And Startup Residual Narrowing` now has its landed execution-ready file at `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
 - `Detached Recording Lifecycle Decision Slice` now has its landed execution-ready file at `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
 - `Python Baseline Operator Start Helper` now has its landed execution-ready file at `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
-- `Selective Offline Follow-Up` now has its prepared execution-ready file at `docs/session_workpackages/wp38_selective_offline_followup.md`
+- `Selective Offline Follow-Up` now has its landed execution-ready file at `docs/session_workpackages/wp38_selective_offline_followup.md`
 - `Module Documentation Audit And Shrink Pass` now has its landed execution-ready file at `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
 - `Vision Platform Control And Imaging Physical Migration` now has its landed execution-ready file at `docs/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md`
 - `Vision Platform Storage Physical Migration` now has its landed execution-ready file at `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md`
