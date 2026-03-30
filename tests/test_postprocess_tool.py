@@ -179,6 +179,10 @@ class PostprocessToolTests(unittest.TestCase):
             formatted = format_focus_report_bundle(report)
 
         self.assertIsNotNone(report.stable_context)
+        self.assertEqual(report.summary.total_entries, 1)
+        self.assertEqual(report.summary.valid_entries, 1)
+        self.assertEqual(report.summary.traceability_joined_entries, 1)
+        self.assertEqual(report.summary.best_source_path.name, "frame_a.bmp")
         self.assertEqual(report.stable_context.camera_id, "CAM_001")
         self.assertEqual(report.stable_context.pixel_format, "Mono8")
         self.assertEqual(report.stable_context.exposure_time_us, "2500.0")
@@ -187,6 +191,8 @@ class PostprocessToolTests(unittest.TestCase):
         self.assertEqual(report.stable_context.roi_y, "22")
         self.assertEqual(report.stable_context.roi_width, "333")
         self.assertEqual(report.stable_context.roi_height, "222")
+        self.assertIn("summary: entries=1 valid=1 traceability_joined=1", formatted)
+        self.assertIn("best=frame_a.bmp", formatted)
         self.assertIn("context: record_kind=saved_artifact_folder_log", formatted)
         self.assertIn("camera_id=CAM_001", formatted)
         self.assertIn("pixel_format=Mono8", formatted)
@@ -247,6 +253,10 @@ class PostprocessToolTests(unittest.TestCase):
             formatted = format_focus_report_bundle(report)
 
         self.assertIsNone(report.stable_context)
+        self.assertEqual(report.summary.total_entries, 1)
+        self.assertEqual(report.summary.traceability_joined_entries, 0)
+        self.assertEqual(report.summary.best_source_path.name, "frame_a.pgm")
+        self.assertIn("summary: entries=1 valid=1 traceability_joined=0", formatted)
         self.assertNotIn("context:", formatted)
         self.assertIn("frame_a.pgm: method=laplace", formatted)
 
