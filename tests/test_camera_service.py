@@ -120,6 +120,29 @@ class CameraServiceTests(unittest.TestCase):
         self.assertIsNone(service.get_capability_profile())
         self.assertTrue(service.get_status().is_initialized)
 
+    def test_initialize_classifies_not_available_capability_probe_as_non_blocking_startup_warning(self) -> None:
+        driver = MagicMock(spec=["initialize", "get_status"])
+        driver.initialize.return_value = CameraStatus(
+            is_initialized=True,
+            source_kind="hardware",
+            camera_id="CAM-001",
+        )
+        driver.get_status.return_value = CameraStatus(
+            is_initialized=True,
+            source_kind="hardware",
+            camera_id="CAM-001",
+        )
+        capability_service = MagicMock()
+        capability_service.probe_live.side_effect = RuntimeError("VmbError.NotAvailable: -30")
+        service = CameraService(driver, capability_service=capability_service)
+
+        status = service.initialize(camera_id="CAM-001")
+
+        self.assertTrue(status.is_initialized)
+        self.assertFalse(status.capabilities_available)
+        self.assertIn("Non-blocking hardware startup warning", status.capability_probe_error or "")
+        self.assertIn("VmbError.NotAvailable: -30", status.capability_probe_error or "")
+
     def test_initialize_skips_capability_probe_for_simulated_camera(self) -> None:
         driver = MagicMock()
         driver.initialize.return_value = CameraStatus(

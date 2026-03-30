@@ -262,6 +262,24 @@ Residual observations from the March 30, 2026 bounded rerun:
 - hardware enumeration exposed duplicate entries for `DEV_1AB22C046D81`, one with serial `067WH` and one with serial `N/A`
 - the in-process interval-capture rerun completed successfully but reported `skipped_intervals=1`, so interval timing on the real path should still be treated as boundedly acceptable rather than perfectly scheduler-stable
 
+Latest WP29 startup-warning classification rerun on March 30, 2026:
+
+- fresh serial CLI-host-surface proofs were rerun for:
+  - `status`
+  - `snapshot(.bmp)`
+- both commands completed successfully on `DEV_1AB22C046D81`
+- both commands still emitted `vmbpyLog <VmbError.NotAvailable: -30>` on stderr
+- the successful `status` and `snapshot` envelopes still reported:
+  - `capabilities_available = true`
+  - `capability_probe_error = null`
+  - `last_error = null`
+
+Current interpretation after WP29:
+
+- the current `NotAvailable: -30` line should be read as non-blocking SDK / logging residual on the successful tested path
+- it is not currently evidenced as a capability-probe failure surfaced through the repository status model
+- it should therefore remain documented as residual noise under observation, not as proof that startup is failing
+
 WP27 lifecycle follow-up on March 30, 2026:
 
 - narrowed the most plausible shared lifecycle seam to capability probing during `CameraService.initialize()`: the real-hardware path previously opened the camera through `VimbaXCameraDriver` and then re-entered Vimba X again through `probe_camera_capabilities(...)`
@@ -567,4 +585,4 @@ If this checklist passes on real hardware, the Python repository can be treated 
 
 That is the right point to freeze the Python baseline and use it as the handover reference for the later C# phase.
 
-At the current documented state, phrase the project as hardware-validated at bounded prototype level on the tested camera path, not as broadly hardware-validated across wider device, stress, or performance matrices.
+At the current documented state, phrase the project as hardware-validated at bounded prototype level on the tested camera path, not as broadly hardware-validated across wider device, stress, or performance matrices. The remaining `VmbError.NotAvailable: -30` line should currently be described as non-blocking SDK/logging residual on the successful tested path unless later evidence shows real startup or capability failure behind it.

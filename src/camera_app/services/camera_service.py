@@ -69,7 +69,26 @@ class CameraService:
             else:
                 self._capability_profile = self._capability_service.probe_live(camera_id=self._camera_status.camera_id)
         except Exception as exc:
-            self._camera_status.capability_probe_error = str(exc)
+            self._camera_status.capability_probe_error = self._classify_capability_probe_issue(exc)
             return
 
         self._camera_status.capabilities_available = True
+
+    @staticmethod
+    def _classify_capability_probe_issue(exc: Exception) -> str:
+        raw_message = str(exc).strip() or exc.__class__.__name__
+        normalized = raw_message.lower()
+
+        if "notavailable" in normalized or "not available" in normalized:
+            return (
+                "Non-blocking hardware startup warning during capability probe "
+                f"(likely SDK / transport noise, camera startup still succeeded): {raw_message}"
+            )
+
+        if "already in use" in normalized or "accessed camera" in normalized:
+            return (
+                "Hardware capability probe could not complete because the camera was already in use: "
+                f"{raw_message}"
+            )
+
+        return raw_message

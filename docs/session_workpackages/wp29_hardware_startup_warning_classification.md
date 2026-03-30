@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `fix/hardware-startup-warning-classification`
-- activation state: current next
+- activation state: landed on March 30, 2026
 
 ## Scope
 
@@ -75,6 +75,19 @@ The immediate remaining ambiguity is:
 - prefer documenting benign residuals over speculative broad fixes
 - only tighten code if one shared startup seam clearly improves interpretation
 
+Implemented narrowing result:
+
+- capability-probe failures now classify `NotAvailable`-style probe exceptions as non-blocking startup warnings when they do surface through the best-effort probe path
+- fresh serial CLI-host-surface proofs on `DEV_1AB22C046D81` for `status` and `snapshot(.bmp)` both succeeded
+- those successful runs still emitted `vmbpyLog <VmbError.NotAvailable: -30>` on stderr
+- the successful envelopes still reported:
+  - `capabilities_available = true`
+  - `capability_probe_error = null`
+  - `last_error = null`
+- current repository interpretation after this slice:
+  - the observed `NotAvailable: -30` line is presently classified as non-blocking SDK / logging residual on the successful tested path
+  - it is not currently evidenced as an active capability-probe failure in the repository status surface
+
 ## Execution Plan
 
 1. Re-read:
@@ -119,6 +132,20 @@ Recommended supporting local validation:
 - successful hardware runs are easier to distinguish from true startup failure
 - no broad SDK or hardware exploration work is bundled
 - updated evidence is recorded explicitly
+
+## Completion Note
+
+Landed evidence for this slice:
+
+- automated validation:
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_camera_service tests.test_vimbax_camera_driver tests.test_bootstrap`
+- serial real-device CLI proofs on `DEV_1AB22C046D81`:
+  - `status`
+  - `snapshot(.bmp)`
+- observed result:
+  - both commands succeeded
+  - `vmbpyLog <VmbError.NotAvailable: -30>` still appeared on stderr
+  - host/status envelopes still reported `capabilities_available = true`, `capability_probe_error = null`, and `last_error = null`
 
 ## Recovery Note
 
