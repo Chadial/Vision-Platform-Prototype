@@ -426,3 +426,19 @@ The repository currently provides a structured Python prototype for the vision p
 18. Treat `WP46` as landed: camera aliases now resolve repo-locally to explicit `camera_id` values in the CLI path while preserving direct id usage and avoiding discovery or inventory scope.
 19. Treat `WP47` as landed: current snapshot and bounded-recording traceability now also preserves alias and optional profile-selection context additively when the producer path provides it.
 20. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+
+## Deferred Profile-System Bucket List
+
+These items are intentionally recorded as future-facing profile-system considerations, not as active queued work:
+
+- keep the current repo-local `camera_class`-first reference-profile baseline as the shared, versioned source of truth
+- add an optional local operator-override layer only when repeated machine-local or user-local tuning becomes a real need
+- keep the intended merge precedence explicit if local overrides are ever added:
+  1. repo reference profile
+  2. local operator override
+  3. explicit CLI arguments
+- add narrow `show` / `list` inspection commands before considering any broader profile-management surface
+- keep profile creation manual or tightly controlled until a clear need exists for `save current as profile`
+- capture simple profile metadata later if useful, such as purpose, notes, or last validated hardware path
+- treat any future `camera_id`- or `camera_alias`-specific override layer as a later step above the current `camera_class` baseline, not as the first profile model
+- continue to preserve requested profile identity, resolved camera identity, and actually applied settings through traceability rather than relying only on file names or operator memory

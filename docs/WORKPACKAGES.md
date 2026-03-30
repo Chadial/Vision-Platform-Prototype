@@ -549,6 +549,14 @@ Reason:
 - the user has explicitly identified camera-class-first named configuration profiles as the next justified convenience and handover seam
 - that need can be addressed through one bounded profile-oriented slice that still reuses the current `CameraConfiguration` and capability-aware validation path
 
+Deferred future-facing bucket list for the profile system:
+
+- keep repo-local `camera_class`-first reference profiles as the shared baseline
+- add local operator overrides only if repeated machine-local tuning becomes a real operational need
+- keep merge precedence explicit if that later happens: repo reference profile, then local override, then explicit CLI args
+- prefer narrow `show` / `list` inspection before any broad profile-management UI or command surface
+- keep `save current as profile`, richer metadata, and any `camera_id` / `camera_alias` override layer as later optional steps rather than current queued obligations
+
 ## Fresh Agent Decision Rule
 
 When a fresh agent is not explicitly assigned a package:
