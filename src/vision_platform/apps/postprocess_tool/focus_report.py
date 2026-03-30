@@ -35,13 +35,42 @@ class PostprocessFocusReportEntry:
     focus_value_stddev: str | None = None
 
 
+@dataclass(slots=True)
+class PostprocessFocusReportContext:
+    record_kind: str | None = None
+    camera_id: str | None = None
+    pixel_format: str | None = None
+    exposure_time_us: str | None = None
+    gain: str | None = None
+    roi_x: str | None = None
+    roi_y: str | None = None
+    roi_width: str | None = None
+    roi_height: str | None = None
+
+
+@dataclass(slots=True)
+class PostprocessFocusReport:
+    sample_dir: Path
+    entries: list[PostprocessFocusReportEntry]
+    stable_context: PostprocessFocusReportContext | None = None
+
+
 def run_focus_report(
     sample_dir: Path,
     method: str = "laplace",
     roi: RoiDefinition | None = None,
 ) -> list[PostprocessFocusReportEntry]:
+    return run_focus_report_bundle(sample_dir, method=method, roi=roi).entries
+
+
+def run_focus_report_bundle(
+    sample_dir: Path,
+    method: str = "laplace",
+    roi: RoiDefinition | None = None,
+) -> PostprocessFocusReport:
     sample_paths = _collect_sample_paths(sample_dir)
-    traceability_rows = load_trace_logs_for_directory(sample_dir).rows_by_image_name
+    traceability_data = load_trace_logs_for_directory(sample_dir)
+    traceability_rows = traceability_data.rows_by_image_name
     entries: list[PostprocessFocusReportEntry] = []
     request = FocusRequest(method=method, roi=roi)
     for sample_path in sample_paths:
@@ -71,7 +100,11 @@ def run_focus_report(
                 focus_value_stddev=_metadata_value(artifact_row, "focus_value_stddev"),
             )
         )
-    return entries
+    return PostprocessFocusReport(
+        sample_dir=sample_dir,
+        entries=entries,
+        stable_context=_build_report_context(traceability_data.stable_context),
+    )
 
 
 def format_focus_report(entries: list[PostprocessFocusReportEntry]) -> str:
@@ -84,6 +117,17 @@ def format_focus_report(entries: list[PostprocessFocusReportEntry]) -> str:
         )
         for entry in entries
     ]
+    return "\n".join(lines)
+
+
+def format_focus_report_bundle(report: PostprocessFocusReport) -> str:
+    lines: list[str] = []
+    context_line = _format_stable_context(report.stable_context)
+    if context_line is not None:
+        lines.append(context_line)
+    entry_lines = format_focus_report(report.entries)
+    if entry_lines:
+        lines.append(entry_lines)
     return "\n".join(lines)
 
 
@@ -164,6 +208,45 @@ def _metadata_value(artifact_row: TraceArtifactRow | None, field_name: str) -> s
     return getattr(artifact_row.metadata, field_name)
 
 
+def _build_report_context(stable_context: dict[str, str]) -> PostprocessFocusReportContext | None:
+    if not stable_context:
+        return None
+    context = PostprocessFocusReportContext(
+        record_kind=_context_value(stable_context, "record_kind"),
+        camera_id=_context_value(stable_context, "camera_id"),
+        pixel_format=_context_value(stable_context, "pixel_format"),
+        exposure_time_us=_context_value(stable_context, "exposure_time_us"),
+        gain=_context_value(stable_context, "gain"),
+        roi_x=_context_value(stable_context, "roi_x"),
+        roi_y=_context_value(stable_context, "roi_y"),
+        roi_width=_context_value(stable_context, "roi_width"),
+        roi_height=_context_value(stable_context, "roi_height"),
+    )
+    if not any(
+        (
+            context.record_kind,
+            context.camera_id,
+            context.pixel_format,
+            context.exposure_time_us,
+            context.gain,
+            context.roi_x,
+            context.roi_y,
+            context.roi_width,
+            context.roi_height,
+        )
+    ):
+        return None
+    return context
+
+
+def _context_value(stable_context: dict[str, str], field_name: str) -> str | None:
+    value = stable_context.get(field_name)
+    if value is None:
+        return None
+    stripped = value.strip()
+    return stripped or None
+
+
 def _format_optional_metadata(entry: PostprocessFocusReportEntry) -> str:
     metadata_parts: list[str] = []
     if entry.artifact_kind:
@@ -191,6 +274,33 @@ def _format_optional_metadata(entry: PostprocessFocusReportEntry) -> str:
     return "".join(metadata_parts)
 
 
+def _format_stable_context(context: PostprocessFocusReportContext | None) -> str | None:
+    if context is None:
+        return None
+    parts: list[str] = []
+    if context.record_kind:
+        parts.append(f"record_kind={context.record_kind}")
+    if context.camera_id:
+        parts.append(f"camera_id={context.camera_id}")
+    if context.pixel_format:
+        parts.append(f"pixel_format={context.pixel_format}")
+    if context.exposure_time_us:
+        parts.append(f"exposure_time_us={context.exposure_time_us}")
+    if context.gain:
+        parts.append(f"gain={context.gain}")
+    if any((context.roi_x, context.roi_y, context.roi_width, context.roi_height)):
+        parts.append(
+            "roi="
+            f"({context.roi_x or '-'},"
+            f"{context.roi_y or '-'},"
+            f"{context.roi_width or '-'},"
+            f"{context.roi_height or '-'})"
+        )
+    if not parts:
+        return None
+    return "context: " + " ".join(parts)
+
+
 def _build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a thin offline focus report over stored sample or BMP images.")
     parser.add_argument("sample_dir", type=Path, help="Directory containing .pgm, .ppm, or .bmp images.")
@@ -205,14 +315,18 @@ def _build_argument_parser() -> argparse.ArgumentParser:
 def main() -> int:
     parser = _build_argument_parser()
     args = parser.parse_args()
-    report = run_focus_report(sample_dir=args.sample_dir, method=args.method)
-    print(format_focus_report(report))
+    report = run_focus_report_bundle(sample_dir=args.sample_dir, method=args.method)
+    print(format_focus_report_bundle(report))
     return 0
 
 
 __all__ = [
+    "PostprocessFocusReport",
+    "PostprocessFocusReportContext",
     "PostprocessFocusReportEntry",
     "format_focus_report",
+    "format_focus_report_bundle",
     "main",
     "run_focus_report",
+    "run_focus_report_bundle",
 ]

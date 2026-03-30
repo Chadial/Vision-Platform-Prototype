@@ -261,7 +261,8 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 18 | Focus Metadata Artifact Extension | define one narrow reusable artifact-level focus and analysis-ROI metadata baseline above the traceability path | active lane | landed narrow extension after `WP16`; focus summary metadata now requires an explicit aggregation basis, while exact defaults/bounds still need later testing and definition | `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md` |
 | 19 | Focus Metadata Producer Wiring | wire the artifact-level focus metadata producer into normal save flows without freezing broader statistics policy | active lane | landed narrow follow-up after `WP18`; snapshot and bounded-recording flows can now emit focus metadata when explicitly configured | `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md` |
 | 20 | Focus Metadata Policy Hardening | define and test explicit defaults, bounds, and validation policy for artifact-level focus summary metadata | active lane | landed narrow post-`WP19` policy slice; current summary fields now require `focus_method`, a positive integer `focus_score_frame_interval`, and non-negative `focus_value_stddev` values | `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md` |
-| 21 | Offline Stable Context Exposure | expose one compact folder-level stable-context summary from traceability headers in the offline focus report | current next | next narrow post-`WP20` consumer slice; derive one execution-ready package before implementation instead of widening offline tooling breadth | to be derived |
+| 21 | Offline Stable Context Exposure | expose one compact folder-level stable-context summary from traceability headers in the offline focus report | active lane | landed narrow post-`WP20` consumer slice; the additive report-bundle path now exposes stable header context while the existing list-return path stays usable | `docs/session_workpackages/wp21_offline_stable_context_exposure.md` |
+| 22 | Host Status Polling Hardening | tighten one narrow host-readable status payload slice during active experiment runs | current next | next bounded post-`WP21` closure slice; derive one execution-ready package before widening broader transport or UI scope | to be derived |
 
 ## Immediate PM Backlog
 
@@ -274,6 +275,8 @@ These are the work packages PM should treat as the current actionable backlog:
 
 Most recently landed detailed packages:
 
+- `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
+  - landed the additive compact stable-context exposure path for offline focus reporting
 - `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
   - landed the first explicit shared validation policy for current focus-summary metadata fields
 - `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
@@ -285,9 +288,9 @@ Most recently landed detailed packages:
 
 Current explicitly activated detailed package:
 
-- no post-`WP20` detailed package is active yet
-- the next default lane is to derive `WP21` as one narrow offline stable-context exposure slice
-- `WP17`, `WP18`, `WP19`, and `WP20` are all landed metadata-consumer or metadata-policy follow-ups and should no longer be treated as pending activation
+- no post-`WP21` detailed package is active yet
+- the next default lane is to derive `WP22` as one narrow host-status polling hardening slice
+- `WP17`, `WP18`, `WP19`, `WP20`, and `WP21` are all landed metadata-consumer or metadata-policy follow-ups and should no longer be treated as pending activation
 
 These are important but should not be treated as the main always-on stream:
 
@@ -379,7 +382,8 @@ Current activation note:
 - `WP18` is now landed behind that and makes optional focus/analysis ROI artifact metadata more explicit without silently finalizing focus-summary aggregation defaults or bounds
 - `WP19` is now landed behind `WP18` and wires that metadata into normal snapshot and bounded-recording save paths when explicitly configured
 - `WP20` is now landed as the first explicit policy-hardening slice over those current focus-summary metadata structures
-- the next default follow-up is to derive `WP21` as one narrow offline stable-context exposure slice above the same traceability baseline
+- `WP21` is now landed as the corresponding compact folder-level stable-context exposure slice above the same traceability baseline
+- the next default follow-up is to derive `WP22` as one narrow host-status polling hardening slice
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -401,8 +405,8 @@ The current coarse PM order should be:
 2. treat the host-integration and bounded OpenCV follow-up packages as completed baseline-hardening work
 3. do not open `Additional Frontends` by default, because frontend breadth is not the next tactical bottleneck
 4. treat the first `Host Control Closure`, `Experiment Reliability Closure`, `WP14`, and `WP15` slices as landed baseline hardening rather than full lane closure
-5. treat `WP17`, `WP18`, `WP19`, and `WP20` as landed metadata-consumer, producer, and policy hardening slices rather than as pending activation work
-6. derive `WP21` as the next narrow default extension package around compact offline stable-context exposure
+5. treat `WP17`, `WP18`, `WP19`, `WP20`, and `WP21` as landed metadata-consumer, producer, policy, and stable-context hardening slices rather than as pending activation work
+6. derive `WP22` as the next narrow default extension package around host-readable status polling hardening
 7. use `Hardware Revalidation Follow-Up` as one supporting slice inside reliability closure whenever hardware is attached
 8. revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
@@ -410,13 +414,13 @@ The current coarse PM order should be:
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- derive `WP21` for `Offline Stable Context Exposure`
+- derive `WP22` for `Host Status Polling Hardening`
 
 Reason:
 
 - the repository already has a broad Python camera baseline with command, preview, recording, storage, and first hardware evidence
-- the first host-control, reliability, visible-format, traceability, offline metadata-consumption, metadata-producer, and metadata-policy slices are already landed
-- the next tactical need is to expose one compact stable-context summary to offline consumers without widening the postprocess tool into a session explorer
+- the first host-control, reliability, visible-format, traceability, offline metadata-consumption, metadata-producer, metadata-policy, and stable-context slices are already landed
+- the next tactical need is to tighten one narrow host-readable status polling slice during active experiment runs instead of reopening broader UI or transport breadth
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
 ## Fresh Agent Decision Rule
@@ -455,6 +459,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
 - `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
 - `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
+- `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
 
 The new Extended MVP closure lanes are intentionally introduced first at the PM level.
 
@@ -471,6 +476,7 @@ Current explicit activation:
 - `Focus Metadata Artifact Extension` now has its landed execution-ready file at `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
 - `Focus Metadata Producer Wiring` now has its landed execution-ready file at `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
 - `Focus Metadata Policy Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
+- `Offline Stable Context Exposure` now has its landed execution-ready file at `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
 
 ## PM Refinement Rule
 
