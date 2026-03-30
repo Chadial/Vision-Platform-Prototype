@@ -23,7 +23,7 @@ Working discipline:
 ## Branch
 
 - intended branch: `refactor/vision-platform-storage-migration`
-- activation state: active lane
+- activation state: landed
 
 ## Scope
 
@@ -55,6 +55,12 @@ Excluded:
 Leave the repository with storage-facing implementation physically aligned to `src/vision_platform` while preserving the current runtime behavior and compatibility surface.
 
 This package should be read as the follow-up storage slice after `WP40`, not as work to "pull along" while `WP40` is in progress.
+
+Landed outcome:
+
+- legacy service implementations now import platform-owned `file_naming` and `frame_writer` helpers directly
+- `camera_app.storage` now acts as a package-level compatibility shim, not as the primary ownership surface
+- focused regression coverage now proves those storage compatibility edges explicitly
 
 ## Validation
 

@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 import unittest
 
 from tests import _path_setup
+from camera_app.storage import FrameWriter as LegacyFrameWriter
 from vision_platform.models import CapturedFrame
 from vision_platform.services.recording_service import FrameWriter
 
@@ -28,6 +29,9 @@ class _FakeOpenCvAdapter:
 
 
 class FrameWriterTests(unittest.TestCase):
+    def test_legacy_camera_app_storage_package_reexports_platform_frame_writer(self) -> None:
+        self.assertIs(LegacyFrameWriter, FrameWriter)
+
     def test_write_frame_creates_bmp_file_for_mono8_frame(self) -> None:
         frame = CapturedFrame(
             raw_frame=_FakeRawFrame(bytes([0, 127, 200, 255])),

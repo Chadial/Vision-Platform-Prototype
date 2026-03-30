@@ -2,6 +2,12 @@ from pathlib import Path
 import unittest
 
 from tests import _path_setup
+from camera_app.storage import (
+    build_interval_capture_frame_path as legacy_build_interval_capture_frame_path,
+    build_recording_frame_path as legacy_build_recording_frame_path,
+    build_recording_log_path as legacy_build_recording_log_path,
+    build_snapshot_path as legacy_build_snapshot_path,
+)
 from vision_platform.models import IntervalCaptureRequest, RecordingRequest, SnapshotRequest
 from vision_platform.services.recording_service import (
     build_interval_capture_frame_path,
@@ -12,6 +18,12 @@ from vision_platform.services.recording_service import (
 
 
 class FileNamingTests(unittest.TestCase):
+    def test_legacy_camera_app_storage_package_reexports_platform_file_naming(self) -> None:
+        self.assertIs(legacy_build_snapshot_path, build_snapshot_path)
+        self.assertIs(legacy_build_recording_frame_path, build_recording_frame_path)
+        self.assertIs(legacy_build_recording_log_path, build_recording_log_path)
+        self.assertIs(legacy_build_interval_capture_frame_path, build_interval_capture_frame_path)
+
     def test_build_snapshot_path_appends_extension(self) -> None:
         request = SnapshotRequest(save_directory=Path("captures"), file_stem="image_001", file_extension="png")
         self.assertEqual(build_snapshot_path(request), Path("captures/image_001.png"))

@@ -5,10 +5,10 @@ from typing import Callable
 from camera_app.drivers.camera_driver import CameraDriver
 from camera_app.models.camera_configuration import CameraConfiguration
 from camera_app.models.snapshot_request import SnapshotRequest
-from camera_app.storage.file_naming import build_snapshot_path
-from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_snapshot_request
 from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
+from vision_platform.services.recording_service.file_naming import build_snapshot_path
+from vision_platform.services.recording_service.frame_writer import FrameWriter
 from vision_platform.services.recording_service.traceability import record_snapshot_trace
 
 
