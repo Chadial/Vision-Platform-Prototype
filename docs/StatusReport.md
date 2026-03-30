@@ -21,12 +21,13 @@ Für den detaillierten verifizierten Implementierungsstand bleibt `docs/STATUS.m
 
 ## Kurzfazit
 
-Der aktuelle Stand ist am besten als **späte Extended-MVP-Closure-Phase** zu lesen.
+Der aktuelle Stand ist am besten als **geschlossene Extended-MVP-Phase mit anschliessender Post-Closure-Python-Baseline** zu lesen.
 
-Die Python-basierte Kamera- und Host-Steuerungsbasis ist funktional breit vorhanden. Die wichtigsten verbleibenden Lücken liegen nicht mehr in der Grundfunktionalität, sondern in:
+Die Python-basierte Kamera- und Host-Steuerungsbasis ist jetzt als bounded, host-orientierte, hardware-validierte Arbeitsbasis auf dem getesteten Kamerapfad zu verstehen. Die verbleibenden Aufgaben sind nicht mehr "MVP schliessen", sondern:
 
-- frischer Hardware-Revalidierung auf dem aktuellen Integrationsstand
-- bewusst zurückgestellter Breitenarbeit wie breiter API-, Frontend- oder Postprocess-Ausbau
+- Hardening und operative Restpolitur
+- kontrollierte Produktisierung der Python-Basis
+- selektive Erweiterung nur bei echtem Bedarf
 
 ## Zielbewertung Ampel
 
@@ -247,7 +248,7 @@ Offen:
 
 ## Wichtigste verbleibende Lücken
 
-- frische Hardware-Revalidierung des aktuellen integrierten Gesamtstands
+- verbleibende Hardening-Themen wie Lifecycle-Restbeobachtungen, Diagnostik und operative Kanten
 - breitere externe Transport-/API-Fläche nur bei echtem Bedarf
 - zusätzliche Frontends nicht als aktueller Default
 - Tracking, größere Offline-Werkzeuge und eigentliche C#-Umsetzung bleiben spätere Phasen
@@ -262,4 +263,4 @@ Für die ursprünglichen Projektziele ist der Stand heute:
 
 Damit ist die Plattform **kein früher Prototyp mehr**, sondern eine belastbare Python-basierte Arbeitsbasis mit klarer Host-, Daten- und Analyseorientierung.
 
-Der wichtigste nächste Reifeschritt ist nicht neue Breite, sondern **erneute reale Hardware-Evidenz** für den inzwischen weiter gehärteten integrierten Stand.
+Die Extended-MVP-Phase hat damit ihren Zweck erfüllt. Der nächste Reifeschritt ist jetzt nicht "weitere MVP-Schliessung", sondern **post-closure Hardening, operative Reife und gezielte nächste Ausbauentscheidungen**.
