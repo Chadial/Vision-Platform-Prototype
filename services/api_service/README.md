@@ -10,9 +10,11 @@ It should not become a parallel business-logic stack separate from the shared se
 
 - first adapter-facing status payload family
 - transport-neutral mapping from `SubsystemStatus` into API-service DTOs
+- additive `active_run` polling payload derived from the existing recording and interval-capture status surfaces for active host polling
 
 ## Not This Module Yet
 
 - HTTP or IPC framework wiring
 - frame/feed streaming
 - duplicate command execution logic
+- broad command-result contract redesign

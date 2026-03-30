@@ -66,6 +66,7 @@ class CameraCliTests(unittest.TestCase):
         self.assertEqual(payload["result"]["confirmed_settings"]["camera_id"], "sim-cli")
         self.assertEqual(payload["result"]["confirmed_settings"]["pixel_format"], "Mono8")
         self.assertEqual(payload["status"], json.loads(json.dumps(_as_serializable_api_status(run_result.status))))
+        self.assertIsNone(payload["status"]["active_run"])
         self.assertIsNone(payload["error"])
 
     def test_snapshot_command_uses_new_subdirectory_save_mode(self) -> None:

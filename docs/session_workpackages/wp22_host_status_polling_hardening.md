@@ -23,7 +23,7 @@ The narrow goal is to make active work more observable through additive polling 
 ## Branch
 
 - intended branch: `feature/host-status-polling-hardening`
-- activation state: current next execution-ready package after landed `WP21`
+- activation state: landed narrow slice after `WP21`; use `WP23` as the next default follow-up
 
 ## Scope
 
@@ -44,6 +44,9 @@ Selected slice for this package:
   - frames written or equivalent progress field where already available
   - last error or failure marker where already present
 - keep the package explicitly centered on polling current state during active work rather than confirming post-command resolution details
+- landed implementation note:
+  - the additive slice is implemented in the adapter-facing API-service status family as `active_run`
+  - the CLI `status` envelope reuses that same additive polling block without changing the shared core `SubsystemStatus` model
 
 Excluded:
 
@@ -87,7 +90,7 @@ This package should be read as:
 Required automated validation:
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_command_controller tests.test_bootstrap tests.test_request_models
+.\.venv\Scripts\python.exe -m unittest tests.test_api_service tests.test_camera_cli tests.test_command_controller tests.test_bootstrap tests.test_request_models
 ```
 
 ## Documentation Updates

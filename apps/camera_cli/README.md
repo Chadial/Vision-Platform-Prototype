@@ -29,6 +29,7 @@ Provides a camera-oriented command-line app surface for exercising the existing 
 ## Host-Oriented Baseline
 
 - `status` is the explicit polling-oriented command for host-readable runtime state
+- `status` now also carries one additive `active_run` subset for active bounded recording or interval-capture work without widening into command-result confirmation
 - `snapshot` returns a short-running command result with saved-path confirmation
 - `recording` currently means bounded in-process recording that starts and completes within one invocation and then returns a final structured result
 - the first host-oriented error shape is intentionally minimal: `code`, `message`, `details`

@@ -95,6 +95,7 @@ The repository currently provides a structured Python prototype for the vision p
 - preview- and snapshot-side focus consumers now also expose a small service-level focus-method selection path, so multi-method support no longer requires custom evaluator injection for every consumer
 - tracking core now also contains a first library-only edge/profile baseline that derives a dominant horizontal or vertical edge transition from full-frame or ROI-bounded image data through transport-neutral request/result contracts
 - api-service preparation now also contains a first transport-neutral adapter payload family for `SubsystemStatus`, so future external adapters do not need to serialize the shared core status model directly
+- api-service status payloads now also expose one additive `active_run` polling subset for active bounded recording or interval capture, derived from the existing shared status baseline
 - ROI core now also provides frame-clamped pixel bounds and rectangle/ellipse mask derivation so analysis consumers can apply ROI selection without reimplementing ROI math
 - freehand ROI remains a target contract direction only and is not yet implemented through ROI-core mask derivation or downstream analysis consumers
 - stream services now expose a small ROI state path so active ROI selection can be shared with preview-adjacent analysis without moving ROI ownership into UI or stream internals
@@ -244,6 +245,7 @@ The repository currently provides a structured Python prototype for the vision p
 - runtime capability-aware configuration validation is now available without any UI dependency, and it automatically falls back to generic request validation when live probing is unavailable
 - a first UI-independent camera CLI baseline now exists in `vision_platform.apps.camera_cli` for explicit command-line access to status, snapshot, bounded recording, and bounded interval capture, with the first capability slice intentionally kept to `Capture`, `Camera`, and `Storage`
 - the first Host Control Closure implementation slice now also hardens that CLI path for external process use by emitting a stable command envelope for `status`, `snapshot`, and bounded `recording`, reusing the API-service status payload mapper for the polling-oriented status portion, and exposing a minimal `code` / `message` / `details` error shape plus small confirmed-settings subsets for experiment traceability
+- the host-polling follow-up slice now also exposes one additive `active_run` subset in that CLI/API-facing status payload family, keeping active-work observability separate from later post-command confirmation work
 
 ### Validation
 
@@ -340,6 +342,6 @@ The repository currently provides a structured Python prototype for the vision p
 1. Treat `docs/session_workpackages/wp16_data_logging_traceability.md` as the landed traceability baseline inside `Data And Logging Closure`, now including optional per-image analysis ROI and focus metadata support.
 2. Treat the compact offline metadata-consumption follow-up as implemented in the current branch through the postprocess focus-report path, while keeping broader offline follow-up work explicitly bounded to later packages.
 3. Treat `WP18`, `WP19`, `WP20`, and `WP21` as the landed artifact-metadata clarification, producer-wiring, policy-hardening, and stable-context exposure follow-ups for the current metadata-aware offline/reporting baseline.
-4. Use `WP22` as the next default slice for host-readable status polling hardening during active experiment runs.
-5. Keep `WP23`, `WP24`, and `WP25` as the prepared next host-control, trace-linkage, and simulator-first recovery-validation sequence behind that polling slice.
+4. Treat `WP22` as the landed host-readable status polling hardening slice for active experiment runs.
+5. Use `WP23` as the next default slice for narrow post-command confirmed-settings hardening, then keep `WP24` and `WP25` as the prepared trace-linkage and simulator-first recovery-validation sequence behind it.
 6. Activate `WP26` only when a camera is connected again, so hardware reruns narrow the current simulator-first closure work with fresh real-device evidence instead of speculation.

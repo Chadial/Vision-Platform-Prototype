@@ -59,8 +59,63 @@ class ApiServiceTests(unittest.TestCase):
         self.assertEqual(payload.configuration.pixel_format, "Mono8")
         self.assertEqual(payload.recording.save_directory, str(Path("C:/captures/recording")))
         self.assertEqual(payload.interval_capture.save_directory, str(Path("C:/captures/interval")))
+        self.assertIsNotNone(payload.active_run)
+        self.assertEqual(payload.active_run.operation_kind, "recording")
+        self.assertEqual(payload.active_run.active_file_stem, "recording")
         self.assertEqual(payload.default_save_directory, str(Path("C:/captures")))
         self.assertTrue(payload.can_save_snapshot)
+
+    def test_map_subsystem_status_to_api_payload_exposes_interval_capture_active_run_when_recording_is_idle(self) -> None:
+        status = SubsystemStatus(
+            camera=CameraStatus(is_initialized=True, camera_id="sim-api"),
+            configuration=None,
+            recording=RecordingStatus(
+                is_recording=False,
+                frames_written=12,
+                save_directory=Path("C:/captures/recording"),
+                active_file_stem="recording",
+            ),
+            interval_capture=IntervalCaptureStatus(
+                is_capturing=True,
+                frames_written=3,
+                skipped_intervals=1,
+                save_directory=Path("C:/captures/interval"),
+                active_file_stem="interval",
+                last_error="late frame skipped",
+            ),
+        )
+
+        payload = map_subsystem_status_to_api_payload(status)
+
+        self.assertIsNotNone(payload.active_run)
+        self.assertEqual(payload.active_run.operation_kind, "interval_capture")
+        self.assertEqual(payload.active_run.save_directory, str(Path("C:/captures/interval")))
+        self.assertEqual(payload.active_run.frames_written, 3)
+        self.assertEqual(payload.active_run.last_error, "late frame skipped")
+
+    def test_map_subsystem_status_to_api_payload_leaves_active_run_empty_when_no_operation_is_active(self) -> None:
+        status = SubsystemStatus(
+            camera=CameraStatus(),
+            configuration=None,
+            recording=RecordingStatus(
+                is_recording=False,
+                frames_written=4,
+                save_directory=Path("C:/captures/recording"),
+                active_file_stem="recording",
+                last_error="writer recovered",
+            ),
+            interval_capture=IntervalCaptureStatus(
+                is_capturing=False,
+                frames_written=2,
+                save_directory=Path("C:/captures/interval"),
+                active_file_stem="interval",
+                last_error="capture completed",
+            ),
+        )
+
+        payload = map_subsystem_status_to_api_payload(status)
+
+        self.assertIsNone(payload.active_run)
 
     def test_api_payload_is_dataclass_serializable(self) -> None:
         status = SubsystemStatus(
@@ -74,7 +129,9 @@ class ApiServiceTests(unittest.TestCase):
 
         self.assertIn("camera", payload_dict)
         self.assertIn("recording", payload_dict)
+        self.assertIn("active_run", payload_dict)
         self.assertIsNone(payload_dict["default_save_directory"])
+        self.assertIsNone(payload_dict["active_run"])
         self.assertFalse(payload_dict["can_save_snapshot"])
 
 
