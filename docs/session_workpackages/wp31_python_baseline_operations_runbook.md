@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `docs/python-baseline-operations-runbook`
-- activation state: queued
+- activation state: landed
 
 ## Scope
 
@@ -59,6 +59,11 @@ What this package does not close:
 ## Session Goal
 
 Leave the repository with one compact operations runbook so a future user or agent can run the current Python baseline with less rediscovery and less accidental drift into unsupported paths.
+
+Implemented result:
+
+- central runbook added at `docs/PYTHON_BASELINE_RUNBOOK.md`
+- central status surfaces now link that runbook and no longer treat this package as pending
 
 ## Execution Plan
 
