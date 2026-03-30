@@ -27,6 +27,12 @@ Detailed implementation planning should primarily move into the centralized `doc
 - favor typed, portable contracts that can survive a later C# handover
 - avoid forcing web or desktop framework choices into the core too early
 
+Current master-roadmap interpretation:
+
+- the repository now has a usable Python working baseline on the tested hardware path
+- the former Extended MVP closure concern is no longer the active planning lens
+- near-term work should now emphasize post-closure hardening, operational readiness, and selective expansion
+
 ## Master Phases
 
 | Phase | Focus | Outcome |

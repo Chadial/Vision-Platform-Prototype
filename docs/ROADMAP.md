@@ -12,6 +12,16 @@ Project-level prioritization is now handled primarily through `docs/WORKPACKAGES
 
 Use this file for phase and sequencing context, not as the day-to-day active queue.
 
+## Current Phase Interpretation
+
+The repository should no longer be interpreted as being in an active Extended MVP closure phase.
+
+That phase is now considered closed:
+
+- the Python camera subsystem is a bounded, host-oriented, hardware-validated working baseline on the tested camera path
+- the remaining work is no longer primarily about proving the MVP is real
+- the active phase is now a post-closure Python baseline phase focused on hardening, operational readiness, controlled productization, and selective expansion
+
 ## Phase 0: Repository Reorganization Toward The Vision Platform
 
 - align the repository with `docs/ProjectDescription.md` and `docs/ProjectAgents.md`
@@ -210,13 +220,27 @@ Status:
 - a lightweight overlay-payload demo already exists, while renderer-facing overlay adapters and richer operator controls remain open
 - still requires real-hardware validation before treating the optional path as hardware-proven
 
+## Post-Closure Python Baseline Phase
+
+This phase should mean:
+
+1. harden the now-usable Python working baseline
+2. reduce operational rough edges and clarify stable versus deferred areas
+3. make the Python baseline easier to use, validate, and hand over
+4. expand transport, offline tooling, frontend scope, or C#-handover scope only when there is a clear reason
+
+This phase should not mean:
+
+- reopening MVP-closure logic as the default planning lens
+- broad backlog expansion without prioritization
+- architecture rewrite for its own sake
+
 ## Current Recommended Order
 
 From the current repository state, the practical next steps are:
 
-1. run the real hardware evaluation checklist
-2. decide whether Phase 8 can be marked complete after that run
-3. validate the already implemented optional OpenCV path against real hardware frames if that inspection path is needed
-4. structure the next OpenCV UI block around status bar, crosshair toggle, focus toggle, ROI tools, snapshot shortcut, and the operator-facing menu/control band
-5. extend the viewport path toward pan and cursor-aware zoom behavior without moving those concerns into the core
-6. keep the Python core stable as the handover baseline for the later C# phase
+1. treat the real-hardware baseline as already established on the tested camera path
+2. pick the next slice from concrete residual hardening, diagnostics, or operational-readiness needs
+3. validate the already implemented optional OpenCV path against real hardware only if that inspection path is actively needed
+4. structure any next UI, transport, offline, or C#-handover work as deliberate post-closure expansion, not as unfinished MVP proof work
+5. keep the Python core stable as the working reference baseline for later handover and selective productization
