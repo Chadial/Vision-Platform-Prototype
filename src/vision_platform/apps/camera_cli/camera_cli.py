@@ -21,6 +21,7 @@ from vision_platform.models import (
     SubsystemStatus,
 )
 from vision_platform.services.api_service import map_subsystem_status_to_api_payload
+from vision_platform.services.recording_service.traceability import build_snapshot_run_id
 
 
 @dataclass(slots=True)
@@ -178,8 +179,14 @@ def _handle_snapshot_command(
         status=status,
         result={
             "saved_path": snapshot_result.saved_path,
+            "run_id": build_snapshot_run_id(snapshot_result.saved_path),
             "selected_save_directory": selected_save_directory,
-            "confirmed_settings": _build_snapshot_confirmed_settings(status, args, selected_save_directory),
+            "confirmed_settings": _build_snapshot_confirmed_settings(
+                status,
+                args,
+                selected_save_directory,
+                run_id=build_snapshot_run_id(snapshot_result.saved_path),
+            ),
         },
         snapshot_path=snapshot_result.saved_path,
         selected_save_directory=selected_save_directory,
@@ -237,6 +244,7 @@ def _handle_recording_command(
         source=args.source,
         status=status,
         result={
+            "run_id": recording_result.status.run_id,
             "selected_save_directory": selected_save_directory,
             "frames_written": status.recording.frames_written,
             "stop_reason": recording_result.stop_reason,
@@ -245,7 +253,12 @@ def _handle_recording_command(
                 "duration_seconds": args.duration_seconds,
                 "target_frame_rate": args.target_frame_rate,
             },
-            "confirmed_settings": _build_recording_confirmed_settings(status, args, selected_save_directory),
+            "confirmed_settings": _build_recording_confirmed_settings(
+                status,
+                args,
+                selected_save_directory,
+                run_id=recording_result.status.run_id,
+            ),
         },
         selected_save_directory=selected_save_directory,
     )
@@ -383,10 +396,13 @@ def _build_snapshot_confirmed_settings(
     status: SubsystemStatus,
     args: argparse.Namespace,
     selected_save_directory: Path,
+    *,
+    run_id: str | None,
 ) -> dict[str, Any]:
     confirmed_settings = _build_status_confirmed_settings(status)
     confirmed_settings.update(
         {
+            "run_id": run_id,
             "resolved_save_directory": selected_save_directory,
             "resolved_file_stem": args.file_stem,
             "resolved_file_extension": args.file_extension,
@@ -399,8 +415,15 @@ def _build_recording_confirmed_settings(
     status: SubsystemStatus,
     args: argparse.Namespace,
     selected_save_directory: Path,
+    *,
+    run_id: str | None,
 ) -> dict[str, Any]:
-    confirmed_settings = _build_snapshot_confirmed_settings(status, args, selected_save_directory)
+    confirmed_settings = _build_snapshot_confirmed_settings(
+        status,
+        args,
+        selected_save_directory,
+        run_id=run_id,
+    )
     confirmed_settings.update(
         {
             "accepted_frame_limit": args.frame_limit,

@@ -185,6 +185,10 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# run.frame_limit: 3", trace_lines)
             self.assertIn("# run.end", trace_lines)
             self.assertIn("# run.end_state: completed", trace_lines)
+            run_id_lines = [line for line in trace_lines if line.startswith("# run.run_id: ")]
+            self.assertEqual(len(run_id_lines), 2)
+            self.assertEqual(run_id_lines[0], run_id_lines[1])
+            expected_run_id = run_id_lines[0].split(": ", 1)[1]
             trace_rows = list(csv.reader(line for line in trace_lines if line and not line.startswith("# ")))
             self.assertEqual(
                 trace_rows[0],
@@ -207,9 +211,43 @@ class RecordingServiceTests(unittest.TestCase):
                 ],
             )
             self.assertEqual(trace_rows[1][0], "bounded_recording")
+            self.assertEqual(trace_rows[1][1], expected_run_id)
             self.assertEqual(trace_rows[1][2], "series_000000.raw")
+            self.assertEqual(trace_rows[3][1], expected_run_id)
             self.assertEqual(trace_rows[3][2], "series_000002.raw")
             self.assertEqual(trace_rows[1][6:], ["", "", "", "", "", "", "", "", ""])
+
+    def test_stop_recording_result_preserves_trace_run_id_while_idle_status_clears_it(self) -> None:
+        driver = _StreamingRecordingDriver()
+        service = RecordingService(driver, poll_interval_seconds=0.001)
+
+        with TemporaryDirectory() as temp_dir:
+            service.start_recording(
+                RecordingRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="series",
+                    file_extension=".raw",
+                    frame_limit=2,
+                    queue_size=4,
+                )
+            )
+
+            active_status = service.get_status()
+            self.assertTrue(active_status.is_recording)
+            self.assertIsNotNone(active_status.run_id)
+
+            for _ in range(200):
+                status = service.get_status()
+                if not status.is_recording:
+                    break
+                sleep(0.01)
+
+            stop_status = service.stop_recording()
+            idle_status = service.get_status()
+
+        self.assertIsNotNone(stop_status.run_id)
+        self.assertFalse(idle_status.is_recording)
+        self.assertIsNone(idle_status.run_id)
 
     def test_stop_recording_stops_active_recording(self) -> None:
         frames = [

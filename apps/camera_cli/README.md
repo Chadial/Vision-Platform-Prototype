@@ -34,6 +34,7 @@ Provides a camera-oriented command-line app surface for exercising the existing 
 - `recording` currently means bounded in-process recording that starts and completes within one invocation and then returns a final structured result
 - the first host-oriented error shape is intentionally minimal: `code`, `message`, `details`
 - command results now also include a small confirmed-settings subset for experiment traceability, such as camera id, pixel format, exposure, resolved save directory, resolved file stem / extension, and accepted recording bounds where relevant
+- `snapshot` and bounded `recording` now also expose one deterministic `run_id` aligned with the traceability logs, while the bounded-recording status path surfaces that identity only during active work
 
 ## Dependencies
 

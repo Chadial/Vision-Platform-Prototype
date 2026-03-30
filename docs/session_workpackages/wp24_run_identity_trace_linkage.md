@@ -23,7 +23,7 @@ The narrow goal is to align one already-needed run identity across existing narr
 ## Branch
 
 - intended branch: `feature/run-identity-trace-linkage`
-- activation state: prepared queued follow-up after `WP23`
+- activation state: landed narrow follow-up after `WP23`; use `WP25` as the next default follow-up
 
 ## Scope
 
@@ -41,6 +41,10 @@ Selected slice for this package:
   - recording-side metadata output where applicable
   - host-visible command or status output where appropriate
 - keep the package centered on identity alignment across already-existing narrow surfaces rather than inventing a broader run/session model
+- landed implementation note:
+  - snapshot and bounded-recording host results now expose the same narrow `run_id` used by the traceability layer
+  - active bounded-recording polling reuses that same identity while the run is active
+  - idle status remains free of broader run-history behavior
 
 Excluded:
 
@@ -68,7 +72,7 @@ This package should be read as:
 ## Validation
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_recording_service tests.test_command_controller tests.test_postprocess_tool
+.\.venv\Scripts\python.exe -m unittest tests.test_recording_service tests.test_api_service tests.test_camera_cli tests.test_command_controller tests.test_postprocess_tool
 ```
 
 ## Merge Gate
