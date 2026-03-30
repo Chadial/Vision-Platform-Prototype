@@ -111,7 +111,14 @@ def run_cli(argv: Sequence[str] | None = None) -> CameraCliResult:
 
     try:
         camera_service.initialize(camera_id=args.camera_id)
-        _apply_configuration_if_requested(controller, args)
+        try:
+            _apply_configuration_if_requested(controller, args)
+        except ValueError as exc:
+            raise CameraCliError(
+                error_type="configuration_error",
+                message=str(exc),
+                details={"stage": "apply_configuration"},
+            ) from exc
         return args.command_handler(args, parser, subsystem)
     finally:
         camera_service.shutdown()

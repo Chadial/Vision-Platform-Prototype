@@ -285,7 +285,7 @@ class CommandControllerTests(unittest.TestCase):
         )
         controller = CommandController(camera_service, MagicMock(), MagicMock(), capability_profile=profile)
 
-        with self.assertRaisesRegex(ValueError, "increment 8"):
+        with self.assertRaisesRegex(ValueError, r"roi_width=14.*increment 8.*nearest valid values: 8, 16"):
             controller.apply_configuration(ApplyConfigurationRequest(roi_width=14))
 
         camera_service.apply_configuration.assert_not_called()

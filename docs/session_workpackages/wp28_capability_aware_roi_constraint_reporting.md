@@ -27,7 +27,7 @@ This package should be read as:
 ## Branch
 
 - intended branch: `fix/capability-aware-roi-constraint-reporting`
-- activation state: prepared follow-up behind `WP27`
+- activation state: landed on March 30, 2026 as the narrow follow-up behind `WP27`
 
 ## Scope
 
@@ -70,6 +70,15 @@ The March 30, 2026 hardware reruns confirmed:
 The immediate small gap is:
 
 - host-/CLI-facing ROI failures should explain device constraints more directly
+
+Implemented narrowing result:
+
+- strict ROI validation remains unchanged
+- capability-backed width/height/offset validation now includes requested value, allowed range, increment/base, and nearest valid values where practical
+- the CLI host surface now maps apply-configuration validation failures to `configuration_error` instead of only generic `command_error`
+- hardware spot-checks on `DEV_1AB22C046D81` confirmed clearer real-device messages for:
+  - invalid width `roi_width=2001`
+  - invalid offset `roi_offset_x=17`
 
 ## Narrow Decisions
 
@@ -123,6 +132,19 @@ Recommended hardware spot-check if the camera is still attached:
 - host-/CLI-facing messages become clearer for at least width and offset constraint failures
 - no auto-normalization or broader ROI feature work is bundled
 - targeted tests pass locally
+
+## Completion Note
+
+Landed evidence for this slice:
+
+- automated validation:
+  - `.\.venv\Scripts\python.exe -m unittest tests.test_camera_configuration_validation_service tests.test_command_controller tests.test_camera_cli tests.test_request_models`
+- hardware spot-checks on `DEV_1AB22C046D81`:
+  - invalid width `roi_width=2001`
+  - invalid offset `roi_offset_x=17`
+- observed real-device guidance:
+  - width message included feature `Width`, range, increment/base, and nearest valid values
+  - offset message included feature `OffsetX`, range, increment/base, and nearest valid values
 
 ## Recovery Note
 

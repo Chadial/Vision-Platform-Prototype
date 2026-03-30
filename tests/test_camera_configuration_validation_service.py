@@ -34,8 +34,30 @@ class CameraConfigurationValidationServiceTests(unittest.TestCase):
             )
         )
 
-        with self.assertRaisesRegex(ValueError, "increment 8"):
+        with self.assertRaisesRegex(
+            ValueError,
+            r"roi_width=15.*increment 8.*base 8.*allowed range 8\.\.4024.*nearest valid values: 8, 16",
+        ):
             service.validate(CameraConfiguration(roi_width=15), profile)
+
+    def test_validate_rejects_value_outside_numeric_range_with_nearest_valid_value(self) -> None:
+        service = CameraConfigurationValidationService()
+        profile = self._build_profile(
+            OffsetX=FeatureCapability(
+                name="OffsetX",
+                feature_type="IntFeature",
+                is_writeable=True,
+                minimum=0,
+                maximum=16,
+                increment=2,
+            )
+        )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            r"roi_offset_x=17.*<= 16.*allowed range 0\.\.16.*required increment 2 from base 0.*nearest valid values: 16",
+        ):
+            service.validate(CameraConfiguration(roi_offset_x=17), profile)
 
     def test_validate_rejects_enum_value_not_supported_by_camera(self) -> None:
         service = CameraConfigurationValidationService()

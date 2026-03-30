@@ -268,7 +268,7 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 25 | Experiment Recovery Validation Extension | prove one tighter simulator-first recovery block over host-driven recording failures and repeated restart behavior | active lane | landed reliability-focused validation slice; the integrated bootstrap/controller path now proves write-failure recovery plus repeated stop/restart idempotence without runtime redesign | `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md` |
 | 26 | Hardware Revalidation Resume | resume one bounded real-hardware revalidation block once the camera is attached again | active lane | landed bounded confidence rerun on March 30, 2026; future reruns stay conditional and should target concrete residual observations only | `docs/session_workpackages/wp26_hardware_revalidation_resume.md` |
 | 27 | Hardware Lifecycle And Camera Release Hardening | narrow the remaining real-device lifecycle gap around camera release, process-to-process reuse, and cleanup determinism | active lane | landed follow-up after `WP26`; the current hardware path now reuses the already opened camera for capability probing and no longer reopened Vimba/camera immediately during initialization | `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md` |
-| 28 | Capability-Aware ROI Constraint Reporting | make ROI width/height/offset constraint failures clearer and more host-usable on capability-backed camera paths | current next | narrow validation/reporting follow-up after landed `WP27`; keep strict capability enforcement but improve returned guidance | `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md` |
+| 28 | Capability-Aware ROI Constraint Reporting | make ROI width/height/offset constraint failures clearer and more host-usable on capability-backed camera paths | active lane | landed narrow validation/reporting follow-up after `WP27`; strict capability enforcement remains intact while the CLI host surface now returns clearer ROI guidance and `configuration_error` on apply-configuration failures | `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md` |
 
 ## Immediate PM Backlog
 
@@ -282,7 +282,7 @@ These are the work packages PM should treat as the current actionable backlog:
 Most recently landed detailed packages:
 
 - `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
-  - newly prepared follow-up to improve host-usable ROI constraint reporting around width/height/offset increments and ranges
+  - landed narrow follow-up to improve host-usable ROI constraint reporting around width/height/offset increments and ranges, including clearer CLI-side configuration errors
 - `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
   - landed narrow lifecycle hardening follow-up; hardware capability probing now reuses the already opened driver camera and the March 30 serial `status -> status`, `snapshot -> status`, and `recording -> status` proofs no longer reproduced `camera already in use`
 - `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
@@ -310,7 +310,7 @@ Current explicitly activated detailed package:
 
 - `WP26` is now landed as the bounded hardware-evidence refresh for the current integrated baseline
 - `WP27` is now landed as the narrow lifecycle/cleanup hardening follow-up for the current real-device initialization seam
-- `WP28` is now the default next narrow capability-aware ROI-validation follow-up
+- `WP28` is now landed as the narrow capability-aware ROI-validation and reporting follow-up
 - `WP17`, `WP18`, `WP19`, `WP20`, `WP21`, `WP22`, `WP23`, `WP24`, and `WP25` are all landed metadata-, host-control-, or simulator-first reliability follow-ups and should no longer be treated as pending activation
 - future hardware reruns remain conditional on local hardware attachment and should only be reopened for concrete residual observations such as the current `NotAvailable` startup log, duplicate camera enumeration behavior, or interval-timing quirks
 
@@ -411,7 +411,7 @@ Current activation note:
 - `WP25` is now landed as the corresponding simulator-first integrated recovery-validation slice
 - `WP26` is now landed as one bounded real-device confidence rerun over the current integrated host/traceability/reliability baseline
 - `WP27` is now landed as the narrow lifecycle/cleanup hardening follow-up for remaining real-device camera-release uncertainty
-- `WP28` remains prepared as the narrow capability-aware ROI constraint reporting follow-up
+- `WP28` is now landed as the narrow capability-aware ROI constraint reporting follow-up
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -435,14 +435,14 @@ The current coarse PM order should be:
 4. treat the first `Host Control Closure`, `Experiment Reliability Closure`, `WP14`, and `WP15` slices as landed baseline hardening rather than full lane closure
 5. treat `WP17`, `WP18`, `WP19`, `WP20`, and `WP21` as landed metadata-consumer, producer, policy, and stable-context hardening slices rather than as pending activation work
 6. treat `WP22`, `WP23`, `WP24`, `WP25`, and `WP26` as landed baseline-hardening slices rather than as pending activation work
-7. treat `WP27` as landed lifecycle hardening on the real-device initialization seam rather than as pending activation work
-8. treat `WP28` as the default next narrow validation/reporting slice, then revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
+7. treat `WP27` and `WP28` as landed real-device lifecycle and host-readable ROI-reporting hardening slices rather than as pending activation work
+8. select any next technical slice only from concrete residuals or an explicit user-directed lane, then revisit tracking, broader API, C# handover widening, and additional frontends only after the closure phase has materially advanced
 
 ## Recommended Next Detailed Work Package
 
 If the user does not explicitly redirect the session, the next PM-recommended execution-ready package is:
 
-- activate `WP28` for `Capability-Aware ROI Constraint Reporting`
+- no additional prepared post-`WP28` package is currently marked as the default next activation
 
 Reason:
 
@@ -450,7 +450,8 @@ Reason:
 - the first host-control, reliability, visible-format, traceability, offline metadata-consumption, metadata-producer, metadata-policy, and stable-context slices are already landed
 - the active-run polling, post-command confirmation, run-identity linkage, simulator-first recovery-validation, and bounded real-device confidence rerun slices are now landed
 - the double-open capability-probe seam has now been narrowed in the current hardware baseline and the March 30 serial reuse proofs no longer reproduced `camera already in use`
-- `WP28` now follows naturally by tightening host-usable reporting around capability-constrained ROI requests without changing the strict validation stance
+- `WP28` is now also landed and tightens host-usable reporting around capability-constrained ROI requests without changing the strict validation stance
+- no broader default reopening of UI, transport, or hardware breadth is justified from these two hardening slices alone
 - no broader default reopening of UI, transport, or history scope is justified by PM from this result alone
 - broad frontend preparation is still meaningful later, but it is not the highest-value default next step for the current phase
 
@@ -521,7 +522,7 @@ Current explicit activation:
 - `Experiment Recovery Validation Extension` now has its landed execution-ready file at `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`
 - `Hardware Revalidation Resume` now has its landed execution-ready file at `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
 - `Hardware Lifecycle And Camera Release Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
-- `Capability-Aware ROI Constraint Reporting` now has its prepared execution-ready file at `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
+- `Capability-Aware ROI Constraint Reporting` now has its landed execution-ready file at `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
 
 ## PM Refinement Rule
 
