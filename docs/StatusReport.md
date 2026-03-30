@@ -254,6 +254,76 @@ Offen:
 - keine allgemeine Measurement-Workbench
 - kein größeres Export-/Analyse-Framework
 
+## Jüngst abgeschlossene Post-Closure-Arbeiten
+
+Die zuletzt abgeschlossenen Arbeiten waren kein neuer Breiten-Ausbau, sondern ein zusammenhängender Post-Closure-Block zur Betriebs-, Start- und Handover-Klarheit der bestehenden Python-Basis.
+
+### WP31: Python Baseline Operations Runbook
+
+Status:
+
+- **abgeschlossen**
+
+Ergebnis:
+
+- mit `docs/PYTHON_BASELINE_RUNBOOK.md` existiert jetzt eine kompakte Betriebsreferenz für die aktuelle Python-Basis
+- dokumentiert sind bevorzugter Interpreter, bekannte Startpfade, Simulator-vs.-Hardware-Regeln, praktische Run-Reihenfolge, aktuelle Residuals und die Regel, wann die Baseline als stabil gilt
+
+Nutzen:
+
+- spätere Sessions und Nutzer müssen den operativen Stand nicht mehr aus mehreren Hardware-, CLI- und Statusdokumenten zusammensuchen
+
+### WP32: Entrypoint And Launch Readiness Baseline
+
+Status:
+
+- **abgeschlossen**
+
+Ergebnis:
+
+- mit `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` ist die Startup-Oberfläche jetzt klar priorisiert
+- Standard ist die Modulform `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli`
+- `scripts/launchers/run_camera_cli.py` bleibt der dokumentierte Launcher-Fallback
+- `run_hardware_command_flow.py` ist explizit auf bounded real-device evidence begrenzt
+
+Nutzen:
+
+- weniger Startpfad-Verwirrung
+- klarere Weitergabe an andere Entwickler oder Agenten
+- kein stilles Durcheinander zwischen Modulstart und Launcher-Skripten
+
+### WP33: Host Contract Stability And Deferred Surface Clarification
+
+Status:
+
+- **abgeschlossen**
+
+Ergebnis:
+
+- mit `docs/HOST_CONTRACT_BASELINE.md` ist der aktuelle Host-Surface jetzt explizit in `stable now` und `deferred later` getrennt
+- stabil dokumentiert sind die Command-Terme, die bounded CLI-Envelope-Struktur, die additive Polling-Sicht, der enge confirmed-settings-Slice und die `run_id`-Linkage
+- explizit deferred bleiben breitere DTO-/Transportflächen, Query-Surfaces, detached multi-invocation lifecycle control und breitere IPC-/Frontend-spezifische Contracts
+
+Nutzen:
+
+- spätere Handover- oder Integrationsarbeit startet nicht mehr aus Interpretation
+- die aktuelle Host-Basis ist bewusst schmal, aber belastbar dokumentiert
+
+### Wirkung dieses Blocks
+
+Mit `WP31` bis `WP33` ist der unmittelbare Post-Closure-Dokumentationsblock abgeschlossen:
+
+- Betrieb ist dokumentiert
+- Startpfade sind geklärt
+- Host-Vertrag ist abgegrenzt
+
+Der aktuelle nächste vorbereitete Folgeblock liegt jetzt bei:
+
+- `WP34` als `current next`
+- `WP35` als hardware-gebundene `active lane`
+- `WP36` und `WP37` als `queued`
+- `WP38` als `conditional`
+
 ## Wichtigste verbleibende Lücken
 
 - verbleibende Hardening-Themen wie Lifecycle-Restbeobachtungen, Diagnostik und operative Kanten
