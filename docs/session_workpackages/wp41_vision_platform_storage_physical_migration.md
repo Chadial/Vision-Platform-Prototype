@@ -14,6 +14,12 @@ Slice role:
 
 Its purpose is to move the current storage and persistence helpers behind the preferred `src/vision_platform` boundary without widening behavior or redesigning the recording lane.
 
+Working discipline:
+
+- do not pull this work into `WP40`
+- activate it only after `WP40` is completed and re-stabilized
+- keep this slice strictly on storage/persistence ownership rather than turning it into a broader recording refactor
+
 ## Branch
 
 - intended branch: `refactor/vision-platform-storage-migration`
@@ -29,16 +35,26 @@ Included:
 - compatibility-import preservation
 - focused regression coverage and doc updates
 
+Explicitly included and no more:
+
+- storage-facing helpers
+- persistence ownership that is immediately adjacent to those helpers
+- the minimum compatibility-shim adjustments required by that move
+
 Excluded:
 
 - new file formats
 - new recording behavior
 - large persistence redesign
 - offline reporting expansion
+- control or imaging migration
+- broad namespace cleanup outside the touched storage/persistence seam
 
 ## Session Goal
 
 Leave the repository with storage-facing implementation physically aligned to `src/vision_platform` while preserving the current runtime behavior and compatibility surface.
+
+This package should be read as the follow-up storage slice after `WP40`, not as work to "pull along" while `WP40` is in progress.
 
 ## Validation
 
@@ -58,3 +74,5 @@ Leave the repository with storage-facing implementation physically aligned to `s
 - compatibility imports still work
 - touched tests pass
 - no unrelated feature work is bundled
+- no control/imaging migration is bundled
+- no broader recording-lane redesign is bundled

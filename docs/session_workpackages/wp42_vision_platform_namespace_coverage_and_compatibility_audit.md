@@ -14,6 +14,12 @@ Slice role:
 
 Its purpose is to make the preferred `vision_platform` import surface more trustworthy while keeping the remaining `camera_app` compatibility shims intentional and explicit.
 
+Working discipline:
+
+- treat this package as audit-first and trust-building
+- do not use it as a hidden continuation of physical migration
+- only remove accidental drift where the change is small, obvious, and local
+
 ## Branch
 
 - intended branch: `test/vision-platform-namespace-coverage`
@@ -28,15 +34,27 @@ Included:
 - remove accidental import drift where easy and low-risk
 - update module and central docs so the preferred import surface is obvious
 
+Primary outcome:
+
+- clearer evidence and clearer documentation
+
+Secondary outcome only when trivial:
+
+- one or two small accidental import-drift fixes that are obvious and low-risk
+
 Excluded:
 
 - large feature changes
 - broad package renaming
 - full compatibility-surface removal
+- another hidden migration sweep across unrelated modules
+- broad shim deletion just because migration slices already landed
 
 ## Session Goal
 
 Leave the repository with clearer evidence that `vision_platform` is the preferred import surface and that any remaining `camera_app` usage is a deliberate compatibility bridge rather than drift.
+
+This package should not be used to continue `WP40` or `WP41` by another name.
 
 ## Validation
 
@@ -56,3 +74,4 @@ Leave the repository with clearer evidence that `vision_platform` is the preferr
 - preferred import surface is clearer in tests and docs
 - no accidental compatibility break is introduced
 - no broad namespace rewrite is bundled
+- any code edits remain small, obvious, and audit-driven rather than migration-driven
