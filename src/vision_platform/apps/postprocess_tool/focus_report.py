@@ -49,9 +49,19 @@ class PostprocessFocusReportContext:
 
 
 @dataclass(slots=True)
+class PostprocessFocusReportSummary:
+    total_entries: int
+    valid_entries: int
+    traceability_joined_entries: int
+    best_source_path: Path | None = None
+    best_score: float | None = None
+
+
+@dataclass(slots=True)
 class PostprocessFocusReport:
     sample_dir: Path
     entries: list[PostprocessFocusReportEntry]
+    summary: PostprocessFocusReportSummary
     stable_context: PostprocessFocusReportContext | None = None
 
 
@@ -103,6 +113,7 @@ def run_focus_report_bundle(
     return PostprocessFocusReport(
         sample_dir=sample_dir,
         entries=entries,
+        summary=_build_report_summary(entries),
         stable_context=_build_report_context(traceability_data.stable_context),
     )
 
@@ -122,6 +133,7 @@ def format_focus_report(entries: list[PostprocessFocusReportEntry]) -> str:
 
 def format_focus_report_bundle(report: PostprocessFocusReport) -> str:
     lines: list[str] = []
+    lines.append(_format_report_summary(report.summary))
     context_line = _format_stable_context(report.stable_context)
     if context_line is not None:
         lines.append(context_line)
@@ -129,6 +141,17 @@ def format_focus_report_bundle(report: PostprocessFocusReport) -> str:
     if entry_lines:
         lines.append(entry_lines)
     return "\n".join(lines)
+
+
+def _build_report_summary(entries: list[PostprocessFocusReportEntry]) -> PostprocessFocusReportSummary:
+    best_entry = max(entries, key=lambda entry: entry.score, default=None)
+    return PostprocessFocusReportSummary(
+        total_entries=len(entries),
+        valid_entries=sum(1 for entry in entries if entry.is_valid),
+        traceability_joined_entries=sum(1 for entry in entries if entry.artifact_kind is not None),
+        best_source_path=best_entry.source_path if best_entry is not None else None,
+        best_score=best_entry.score if best_entry is not None else None,
+    )
 
 
 def _collect_sample_paths(sample_dir: Path) -> list[Path]:
@@ -301,6 +324,19 @@ def _format_stable_context(context: PostprocessFocusReportContext | None) -> str
     return "context: " + " ".join(parts)
 
 
+def _format_report_summary(summary: PostprocessFocusReportSummary) -> str:
+    parts = [
+        f"entries={summary.total_entries}",
+        f"valid={summary.valid_entries}",
+        f"traceability_joined={summary.traceability_joined_entries}",
+    ]
+    if summary.best_source_path is not None:
+        parts.append(f"best={summary.best_source_path.name}")
+    if summary.best_score is not None:
+        parts.append(f"best_score={summary.best_score:.6f}")
+    return "summary: " + " ".join(parts)
+
+
 def _build_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run a thin offline focus report over stored sample or BMP images.")
     parser.add_argument("sample_dir", type=Path, help="Directory containing .pgm, .ppm, or .bmp images.")
@@ -324,6 +360,7 @@ __all__ = [
     "PostprocessFocusReport",
     "PostprocessFocusReportContext",
     "PostprocessFocusReportEntry",
+    "PostprocessFocusReportSummary",
     "format_focus_report",
     "format_focus_report_bundle",
     "main",
