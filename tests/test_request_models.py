@@ -98,6 +98,9 @@ class RequestModelTests(unittest.TestCase):
             file_extension=".png",
             save_directory=Path("captures"),
             camera_id="cam2",
+            camera_alias="alias_cam2",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="alvium_1800_u_1240m",
         )
 
         snapshot_request = request.to_snapshot_request()
@@ -106,6 +109,9 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(snapshot_request.file_extension, ".png")
         self.assertEqual(snapshot_request.save_directory, Path("captures"))
         self.assertEqual(snapshot_request.camera_id, "cam2")
+        self.assertEqual(snapshot_request.camera_alias, "alias_cam2")
+        self.assertEqual(snapshot_request.configuration_profile_id, "default")
+        self.assertEqual(snapshot_request.configuration_profile_camera_class, "alvium_1800_u_1240m")
 
     def test_save_snapshot_request_can_be_created_from_snapshot_request(self) -> None:
         snapshot_request = SnapshotRequest(
@@ -114,6 +120,9 @@ class RequestModelTests(unittest.TestCase):
             file_extension=".raw",
             create_directories=False,
             camera_id="cam3",
+            camera_alias="alias_cam3",
+            configuration_profile_id="fast_preview",
+            configuration_profile_camera_class="alvium_1800_u_1240m",
         )
 
         request = SaveSnapshotRequest.from_snapshot_request(snapshot_request)
@@ -123,6 +132,9 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(request.save_directory, Path("captures"))
         self.assertFalse(request.create_directories)
         self.assertEqual(request.camera_id, "cam3")
+        self.assertEqual(request.camera_alias, "alias_cam3")
+        self.assertEqual(request.configuration_profile_id, "fast_preview")
+        self.assertEqual(request.configuration_profile_camera_class, "alvium_1800_u_1240m")
 
     def test_start_recording_request_maps_to_recording_request(self) -> None:
         request = StartRecordingRequest(
@@ -134,6 +146,9 @@ class RequestModelTests(unittest.TestCase):
             target_frame_rate=12.5,
             queue_size=16,
             camera_id="cam2",
+            camera_alias="alias_cam2",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="alvium_1800_u_1240m",
         )
 
         recording_request = request.to_recording_request()
@@ -146,6 +161,9 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(recording_request.target_frame_rate, 12.5)
         self.assertEqual(recording_request.queue_size, 16)
         self.assertEqual(recording_request.camera_id, "cam2")
+        self.assertEqual(recording_request.camera_alias, "alias_cam2")
+        self.assertEqual(recording_request.configuration_profile_id, "default")
+        self.assertEqual(recording_request.configuration_profile_camera_class, "alvium_1800_u_1240m")
 
     def test_start_recording_request_can_be_created_from_recording_request(self) -> None:
         recording_request = RecordingRequest(
@@ -158,6 +176,9 @@ class RequestModelTests(unittest.TestCase):
             queue_size=32,
             create_directories=False,
             camera_id="cam4",
+            camera_alias="alias_cam4",
+            configuration_profile_id="inspection",
+            configuration_profile_camera_class="alvium_1800_u_1240m",
         )
 
         request = StartRecordingRequest.from_recording_request(recording_request)
@@ -171,6 +192,9 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(request.queue_size, 32)
         self.assertFalse(request.create_directories)
         self.assertEqual(request.camera_id, "cam4")
+        self.assertEqual(request.camera_alias, "alias_cam4")
+        self.assertEqual(request.configuration_profile_id, "inspection")
+        self.assertEqual(request.configuration_profile_camera_class, "alvium_1800_u_1240m")
 
     def test_interval_capture_request_stores_expected_fields(self) -> None:
         request = IntervalCaptureRequest(

@@ -47,6 +47,7 @@ This sequence should be read as:
   - `WP44` landed as a bounded adapter-facing selective-expansion slice
   - `WP45` is prepared as the next bounded camera-class-first configuration-profile slice
   - `WP46` landed as the follow-up bounded camera-alias / explicit-id convenience slice
+  - `WP47` landed as the additive traceability control-context follow-up
 
 The active post-closure phase should now be read in four work types:
 
@@ -121,6 +122,7 @@ The repository currently provides a structured Python prototype for the vision p
 - optional OpenCV-backed lossless grayscale path for `.png` and `.tiff`
 - dependency-free visible `BMP` output for `Mono8`, `Rgb8`, and `Bgr8` on the shared frame-writing path
 - one shared folder-local appendable traceability log for snapshot and bounded-recording experiment context
+- additive traceability control-context fields for alias and optional profile identity on snapshot and bounded-recording logs when the current request path provides them
 - per-image traceability rows can now also carry optional analysis ROI and focus metadata without changing stable log identity
 - focus summary metadata in those per-image rows now also requires an explicit aggregation-basis field when summary values are present
 - focus summary metadata now also requires `focus_method` when summary values are present, while the current `focus_score_frame_interval` basis is validated as a positive integer count and `focus_value_stddev` must be non-negative when present
@@ -420,4 +422,5 @@ The repository currently provides a structured Python prototype for the vision p
 16. Treat `WP44` as landed: `vision_platform.services.api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without implying any framework runtime.
 17. Treat `WP45` as the current next bounded profile-baseline slice: named configuration profiles should start camera-class-first, begin with a `default` profile, and continue to reuse the existing capability-aware configuration path.
 18. Treat `WP46` as landed: camera aliases now resolve repo-locally to explicit `camera_id` values in the CLI path while preserving direct id usage and avoiding discovery or inventory scope.
-19. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+19. Treat `WP47` as landed: current snapshot and bounded-recording traceability now also preserves alias and optional profile-selection context additively when the producer path provides it.
+20. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.

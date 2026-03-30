@@ -401,6 +401,10 @@ Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 
 | Interval Capture / Active Polling | PASS with clearer timing semantics | Interval capture completed on hardware, active polling now surfaces non-fatal timing warnings during skipped intervals, and the latest bounded rerun completed with `frames_written=3` and final summary `completed with skipped_intervals=7` |
 | Traceability / Offline Reuse | PASS | Traceability logs, recording logs, run linkage, and offline BMP reuse behaved plausibly on hardware-generated output |
 | Error / Boundary Checks | PASS | Invalid camera id, unsupported `Mono16`, and invalid ROI increment failures were explicit and recoverable |
+
+Additional March 31, 2026 bounded follow-up:
+
+- alias-backed hardware `snapshot` and bounded `recording` runs through `tested_camera -> DEV_1AB22C046D81` also wrote `camera_alias=tested_camera` into the folder-level stable traceability context while preserving the resolved `camera_id`
 | Camera-Specific Capability Rerun | PASS with correction | March 30 reruns refreshed the documented `Mono8`, `Mono10`, acquisition-frame-rate, and ROI behavior for `DEV_1AB22C046D81`, and corrected the earlier assumption that ROI offsets were effectively fixed to `0` |
 
 ## 1. Initialization And Shutdown

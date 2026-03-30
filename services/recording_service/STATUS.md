@@ -4,6 +4,7 @@
 - implemented: snapshot saving, snapshot-side focus capture, interval capture, recording queue, frame writer, deterministic naming
 - implemented: dependency-free visible frame output now covers `.png` and `.bmp` for `Mono8`, `Rgb8`, and `Bgr8`, while higher-bit grayscale `.png`/`.tiff` still use the optional OpenCV path
 - implemented: snapshot save and bounded recording now both write into one folder-local appendable traceability log that reuses the same file when stable context still matches and starts a new run block when only run/session fields differ
+- implemented: that stable traceability context now also carries additive control-context fields such as `camera_alias`, `configuration_profile_id`, and `configuration_profile_camera_class` when the current request path provides them, while the existing resolved `camera_id` remains the narrow stable hardware identifier
 - implemented: snapshot and bounded recording now also share deterministic `run_id` rules at the traceability boundary, so host-visible command results can point back to the same saved-artifact run identity without inventing a broader run model
 - implemented: the shared traceability row shape now also supports optional per-image analysis ROI and focus metadata without turning those artifact-level fields into stable-header identity
 - implemented: the shared traceability helper now also exposes a narrow reader path for later offline metadata consumption over one folder's traceability logs
@@ -17,6 +18,7 @@
 - working now: the interval-capture path now surfaces non-fatal timing warnings during active skipped intervals and records a compact completion summary when a bounded run finishes with skipped intervals
 - working now: the March 30, 2026 `WP27` lifecycle follow-up narrowed one shared real-device initialization seam by reusing the already opened driver camera for capability probing, and serial `snapshot -> status` plus bounded `recording -> status` proofs no longer reproduced `camera already in use`
 - working now: hardware-generated `BMP` snapshot output now has fresh real-device evidence for practical reuse through the current offline focus-report path together with traceability joins
+- working now: the March 31, 2026 traceability follow-up confirmed that alias-backed snapshot and bounded-recording runs on `DEV_1AB22C046D81` now write `camera_alias=tested_camera` into the folder-level stable traceability context
 - working now: snapshot-side focus evaluation can reuse the shared ROI state path without moving ROI ownership into snapshot save logic
 - partial: trigger-based recording and full hardware validation are still open
 - partial: producer wiring is now available, but focus metadata emission still depends on explicit service/bootstrap configuration rather than a repository-wide mandatory default

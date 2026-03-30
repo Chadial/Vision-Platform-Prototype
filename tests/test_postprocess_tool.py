@@ -198,6 +198,46 @@ class PostprocessToolTests(unittest.TestCase):
         self.assertIn("pixel_format=Mono8", formatted)
         self.assertIn("roi=(11,22,333,222)", formatted)
 
+    def test_run_focus_report_bundle_exposes_alias_and_profile_context_when_present(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            sample_dir = Path(temp_dir)
+            writer = FrameWriter()
+            target_path = sample_dir / "frame_alias.bmp"
+            frame = CapturedFrame(
+                raw_frame=_FakeRawFrame(bytes([0, 64, 128, 255, 128, 64, 0, 64, 128])),
+                width=3,
+                height=3,
+                frame_id=22,
+                camera_timestamp=5252,
+                pixel_format="Mono8",
+            )
+            writer.write_frame(frame, target_path)
+            record_snapshot_trace(
+                saved_path=target_path,
+                request=SnapshotRequest(
+                    save_directory=sample_dir,
+                    file_stem="frame_alias",
+                    file_extension=".bmp",
+                    camera_id="DEV_1AB22C046D81",
+                    camera_alias="tested_camera",
+                    configuration_profile_id="default",
+                    configuration_profile_camera_class="alvium_1800_u_1240m",
+                ),
+                frame=frame,
+                configuration=CameraConfiguration(pixel_format="Mono8"),
+            )
+
+            report = run_focus_report_bundle(sample_dir, method="laplace")
+            formatted = format_focus_report_bundle(report)
+
+        self.assertIsNotNone(report.stable_context)
+        self.assertEqual(report.stable_context.camera_id, "DEV_1AB22C046D81")
+        self.assertEqual(report.stable_context.camera_alias, "tested_camera")
+        self.assertEqual(report.stable_context.configuration_profile_id, "default")
+        self.assertEqual(report.stable_context.configuration_profile_camera_class, "alvium_1800_u_1240m")
+        self.assertIn("camera_alias=tested_camera", formatted)
+        self.assertIn("profile_id=default profile_camera_class=alvium_1800_u_1240m", formatted)
+
     def test_run_focus_report_degrades_when_only_some_images_have_trace_rows(self) -> None:
         with TemporaryDirectory() as temp_dir:
             sample_dir = Path(temp_dir)

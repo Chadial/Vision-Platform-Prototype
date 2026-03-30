@@ -179,6 +179,8 @@ def _handle_snapshot_command(
         SaveSnapshotRequest(
             file_stem=args.file_stem,
             file_extension=args.file_extension,
+            camera_id=_resolve_camera_id(args),
+            camera_alias=args.camera_alias,
         )
     )
     status = controller.get_status()
@@ -259,6 +261,8 @@ def _handle_recording_command(
             duration_seconds=args.duration_seconds,
             target_frame_rate=args.target_frame_rate,
             queue_size=args.queue_size,
+            camera_id=_resolve_camera_id(args),
+            camera_alias=args.camera_alias,
         )
     )
     _wait_for_recording_completion(controller)

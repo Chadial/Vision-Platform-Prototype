@@ -68,6 +68,11 @@ These names are the current bounded reference vocabulary for:
 - later C#-side mapping work
 - later transport mapping on top of the same core terms
 
+Current request-context note:
+
+- the current snapshot and bounded-recording request terms can now also carry a small additive traceability control-context subset such as `camera_alias` and optional profile identity
+- this should be read as traceability-context passthrough, not as a broader host-surface expansion or inventory model
+
 ### Stable command surface
 
 The current bounded host-oriented command surface is:
