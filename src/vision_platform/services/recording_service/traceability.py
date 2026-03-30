@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TextIO
 
+from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.models import CameraConfiguration, CapturedFrame, RecordingRequest, SnapshotRequest
 
 _TRACE_LOG_STEM = "saved_artifact_traceability"
@@ -15,7 +17,44 @@ _TRACE_ROW_HEADER = [
     "frame_id",
     "camera_timestamp",
     "system_timestamp_utc",
+    "analysis_roi_id",
+    "analysis_roi_type",
+    "analysis_roi_data",
+    "focus_method",
+    "focus_value_mean",
+    "focus_value_stddev",
+    "focus_roi_type",
+    "focus_roi_data",
 ]
+
+
+@dataclass(slots=True)
+class TraceArtifactMetadata:
+    analysis_roi_id: str | None = None
+    analysis_roi_type: str | None = None
+    analysis_roi_data: str | None = None
+    focus_method: str | None = None
+    focus_value_mean: str | None = None
+    focus_value_stddev: str | None = None
+    focus_roi_type: str | None = None
+    focus_roi_data: str | None = None
+
+
+@dataclass(slots=True)
+class TraceArtifactRow:
+    artifact_kind: str
+    run_id: str
+    image_name: str
+    frame_id: str | None
+    camera_timestamp: str | None
+    system_timestamp_utc: str | None
+    metadata: TraceArtifactMetadata
+
+
+@dataclass(slots=True)
+class TraceLogData:
+    stable_context: dict[str, str]
+    rows_by_image_name: dict[str, TraceArtifactRow]
 
 
 def resolve_trace_log_path(
@@ -117,7 +156,9 @@ def append_trace_image_row(
     run_id: str,
     image_name: str,
     frame: CapturedFrame,
+    artifact_metadata: TraceArtifactMetadata | None = None,
 ) -> None:
+    metadata = artifact_metadata or TraceArtifactMetadata()
     writer.writerow(
         [
             artifact_kind,
@@ -126,6 +167,14 @@ def append_trace_image_row(
             frame.frame_id,
             frame.camera_timestamp,
             frame.timestamp_utc.isoformat(),
+            _string_value(metadata.analysis_roi_id),
+            _string_value(metadata.analysis_roi_type),
+            _string_value(metadata.analysis_roi_data),
+            _string_value(metadata.focus_method),
+            _string_value(metadata.focus_value_mean),
+            _string_value(metadata.focus_value_stddev),
+            _string_value(metadata.focus_roi_type),
+            _string_value(metadata.focus_roi_data),
         ]
     )
     handle.flush()
@@ -157,6 +206,7 @@ def record_snapshot_trace(
     request: SnapshotRequest,
     frame: CapturedFrame,
     configuration: CameraConfiguration | None,
+    artifact_metadata: TraceArtifactMetadata | None = None,
 ) -> Path:
     stable_context = build_snapshot_stable_context(request, configuration)
     log_path, reused_existing_log = resolve_trace_log_path(request.save_directory, stable_context)
@@ -180,6 +230,7 @@ def record_snapshot_trace(
             run_id=run_id,
             image_name=saved_path.name,
             frame=frame,
+            artifact_metadata=artifact_metadata,
         )
         append_trace_run_end(
             handle,
@@ -200,6 +251,76 @@ def _iter_trace_candidates(save_directory: Path):
     yield save_directory / f"{_TRACE_LOG_STEM}{_TRACE_LOG_SUFFIX}"
     for index in range(1, 1000):
         yield save_directory / f"{_TRACE_LOG_STEM}_{index:03d}{_TRACE_LOG_SUFFIX}"
+
+
+def iter_trace_log_paths(save_directory: Path) -> list[Path]:
+    return sorted(path for path in save_directory.glob(f"{_TRACE_LOG_STEM}*{_TRACE_LOG_SUFFIX}") if path.is_file())
+
+
+def load_trace_log(path: Path) -> TraceLogData:
+    stable_context = _read_stable_context(path)
+    row_lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line and not line.startswith("#")]
+    if not row_lines:
+        return TraceLogData(stable_context=stable_context, rows_by_image_name={})
+
+    reader = csv.DictReader(row_lines)
+    rows_by_image_name: dict[str, TraceArtifactRow] = {}
+    for row in reader:
+        image_name = (row.get("image_name") or "").strip()
+        if not image_name:
+            continue
+        rows_by_image_name[image_name] = TraceArtifactRow(
+            artifact_kind=(row.get("artifact_kind") or "").strip(),
+            run_id=(row.get("run_id") or "").strip(),
+            image_name=image_name,
+            frame_id=_optional_string(row.get("frame_id")),
+            camera_timestamp=_optional_string(row.get("camera_timestamp")),
+            system_timestamp_utc=_optional_string(row.get("system_timestamp_utc")),
+            metadata=TraceArtifactMetadata(
+                analysis_roi_id=_optional_string(row.get("analysis_roi_id")),
+                analysis_roi_type=_optional_string(row.get("analysis_roi_type")),
+                analysis_roi_data=_optional_string(row.get("analysis_roi_data")),
+                focus_method=_optional_string(row.get("focus_method")),
+                focus_value_mean=_optional_string(row.get("focus_value_mean")),
+                focus_value_stddev=_optional_string(row.get("focus_value_stddev")),
+                focus_roi_type=_optional_string(row.get("focus_roi_type")),
+                focus_roi_data=_optional_string(row.get("focus_roi_data")),
+            ),
+        )
+    return TraceLogData(stable_context=stable_context, rows_by_image_name=rows_by_image_name)
+
+
+def load_trace_logs_for_directory(save_directory: Path) -> TraceLogData:
+    merged_context: dict[str, str] = {}
+    rows_by_image_name: dict[str, TraceArtifactRow] = {}
+    for path in iter_trace_log_paths(save_directory):
+        log_data = load_trace_log(path)
+        if not merged_context and log_data.stable_context:
+            merged_context = dict(log_data.stable_context)
+        rows_by_image_name.update(log_data.rows_by_image_name)
+    return TraceLogData(stable_context=merged_context, rows_by_image_name=rows_by_image_name)
+
+
+def build_trace_artifact_metadata(
+    *,
+    analysis_roi: RoiDefinition | None = None,
+    focus_method: str | None = None,
+    focus_value_mean: float | str | None = None,
+    focus_value_stddev: float | str | None = None,
+    focus_roi: RoiDefinition | None = None,
+) -> TraceArtifactMetadata:
+    analysis_roi_type, analysis_roi_data = _serialize_roi(analysis_roi)
+    focus_roi_type, focus_roi_data = _serialize_roi(focus_roi, default_type="global" if focus_method else None)
+    return TraceArtifactMetadata(
+        analysis_roi_id=analysis_roi.roi_id if analysis_roi is not None else None,
+        analysis_roi_type=analysis_roi_type,
+        analysis_roi_data=analysis_roi_data,
+        focus_method=focus_method,
+        focus_value_mean=_string_value(focus_value_mean) if focus_value_mean is not None else None,
+        focus_value_stddev=_string_value(focus_value_stddev) if focus_value_stddev is not None else None,
+        focus_roi_type=focus_roi_type,
+        focus_roi_data=focus_roi_data,
+    )
 
 
 def _read_stable_context(path: Path) -> dict[str, str]:
@@ -226,12 +347,57 @@ def _string_value(value) -> str:
     return str(value)
 
 
+def _optional_string(value: str | None) -> str | None:
+    if value is None:
+        return None
+    stripped = value.strip()
+    return stripped or None
+
+
+def _serialize_roi(
+    roi: RoiDefinition | None,
+    default_type: str | None = None,
+) -> tuple[str | None, str | None]:
+    if roi is None:
+        return default_type, None
+
+    points = tuple(roi.points)
+    if roi.shape in {"rectangle", "ellipse"} and len(points) >= 2:
+        first, second = points[0], points[1]
+        return roi.shape, (
+            f"{roi.shape}("
+            f"{_format_coordinate(first[0])},{_format_coordinate(first[1])},"
+            f"{_format_coordinate(second[0])},{_format_coordinate(second[1])})"
+        )
+
+    if points:
+        serialized_points = ",".join(
+            f"{_format_coordinate(x)},{_format_coordinate(y)}" for x, y in points
+        )
+        return roi.shape, f"{roi.shape}({serialized_points})"
+
+    return roi.shape, roi.shape
+
+
+def _format_coordinate(value: float) -> str:
+    if float(value).is_integer():
+        return str(int(value))
+    return format(value, "g")
+
+
 __all__ = [
+    "TraceArtifactMetadata",
+    "TraceArtifactRow",
+    "TraceLogData",
     "append_trace_image_row",
     "append_trace_run_end",
     "append_trace_run_start",
+    "build_trace_artifact_metadata",
     "build_recording_stable_context",
     "build_snapshot_stable_context",
+    "iter_trace_log_paths",
+    "load_trace_log",
+    "load_trace_logs_for_directory",
     "open_trace_log",
     "record_snapshot_trace",
     "resolve_trace_log_path",

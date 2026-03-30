@@ -9,6 +9,7 @@ from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.libraries.common_models import FocusRequest, RoiDefinition
 from vision_platform.libraries.focus_core import evaluate_focus
 from vision_platform.models import CapturedFrame
+from vision_platform.services.recording_service.traceability import TraceArtifactRow, load_trace_logs_for_directory
 
 
 @dataclass(slots=True)
@@ -21,6 +22,16 @@ class PostprocessFocusReportEntry:
     frame_width: int
     frame_height: int
     pixel_format: str | None
+    artifact_kind: str | None = None
+    run_id: str | None = None
+    frame_id: str | None = None
+    camera_timestamp: str | None = None
+    system_timestamp_utc: str | None = None
+    analysis_roi_type: str | None = None
+    analysis_roi_data: str | None = None
+    focus_method: str | None = None
+    focus_value_mean: str | None = None
+    focus_value_stddev: str | None = None
 
 
 def run_focus_report(
@@ -29,11 +40,13 @@ def run_focus_report(
     roi: RoiDefinition | None = None,
 ) -> list[PostprocessFocusReportEntry]:
     sample_paths = _collect_sample_paths(sample_dir)
+    traceability_rows = load_trace_logs_for_directory(sample_dir).rows_by_image_name
     entries: list[PostprocessFocusReportEntry] = []
     request = FocusRequest(method=method, roi=roi)
     for sample_path in sample_paths:
         frame = _load_focus_frame(sample_path)
         result = evaluate_focus(frame, request=request)
+        artifact_row = traceability_rows.get(sample_path.name)
         entries.append(
             PostprocessFocusReportEntry(
                 source_path=sample_path,
@@ -44,6 +57,16 @@ def run_focus_report(
                 frame_width=frame.width,
                 frame_height=frame.height,
                 pixel_format=frame.pixel_format,
+                artifact_kind=artifact_row.artifact_kind if artifact_row is not None else None,
+                run_id=artifact_row.run_id if artifact_row is not None else None,
+                frame_id=artifact_row.frame_id if artifact_row is not None else None,
+                camera_timestamp=artifact_row.camera_timestamp if artifact_row is not None else None,
+                system_timestamp_utc=artifact_row.system_timestamp_utc if artifact_row is not None else None,
+                analysis_roi_type=_metadata_value(artifact_row, "analysis_roi_type"),
+                analysis_roi_data=_metadata_value(artifact_row, "analysis_roi_data"),
+                focus_method=_metadata_value(artifact_row, "focus_method"),
+                focus_value_mean=_metadata_value(artifact_row, "focus_value_mean"),
+                focus_value_stddev=_metadata_value(artifact_row, "focus_value_stddev"),
             )
         )
     return entries
@@ -55,6 +78,7 @@ def format_focus_report(entries: list[PostprocessFocusReportEntry]) -> str:
             f"{entry.source_path.name}: method={entry.method} "
             f"score={entry.score:.6f} valid={str(entry.is_valid).lower()} "
             f"size={entry.frame_width}x{entry.frame_height} pixel_format={entry.pixel_format or '-'}"
+            f"{_format_optional_metadata(entry)}"
         )
         for entry in entries
     ]
@@ -130,6 +154,37 @@ def _load_bmp_frame(sample_path: Path) -> CapturedFrame:
         height=frame_height,
         pixel_format=pixel_format,
     )
+
+
+def _metadata_value(artifact_row: TraceArtifactRow | None, field_name: str) -> str | None:
+    if artifact_row is None:
+        return None
+    return getattr(artifact_row.metadata, field_name)
+
+
+def _format_optional_metadata(entry: PostprocessFocusReportEntry) -> str:
+    metadata_parts: list[str] = []
+    if entry.artifact_kind:
+        metadata_parts.append(f" artifact_kind={entry.artifact_kind}")
+    if entry.run_id:
+        metadata_parts.append(f" run_id={entry.run_id}")
+    if entry.frame_id:
+        metadata_parts.append(f" frame_id={entry.frame_id}")
+    if entry.camera_timestamp:
+        metadata_parts.append(f" camera_timestamp={entry.camera_timestamp}")
+    if entry.system_timestamp_utc:
+        metadata_parts.append(f" system_timestamp_utc={entry.system_timestamp_utc}")
+    if entry.analysis_roi_type:
+        metadata_parts.append(f" analysis_roi_type={entry.analysis_roi_type}")
+    if entry.analysis_roi_data:
+        metadata_parts.append(f" analysis_roi_data={entry.analysis_roi_data}")
+    if entry.focus_method:
+        metadata_parts.append(f" focus_method={entry.focus_method}")
+    if entry.focus_value_mean:
+        metadata_parts.append(f" focus_value_mean={entry.focus_value_mean}")
+    if entry.focus_value_stddev:
+        metadata_parts.append(f" focus_value_stddev={entry.focus_value_stddev}")
+    return "".join(metadata_parts)
 
 
 def _build_argument_parser() -> argparse.ArgumentParser:

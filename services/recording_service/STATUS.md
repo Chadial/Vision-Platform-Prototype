@@ -4,10 +4,13 @@
 - implemented: snapshot saving, snapshot-side focus capture, interval capture, recording queue, frame writer, deterministic naming
 - implemented: dependency-free visible frame output now covers `.png` and `.bmp` for `Mono8`, `Rgb8`, and `Bgr8`, while higher-bit grayscale `.png`/`.tiff` still use the optional OpenCV path
 - implemented: snapshot save and bounded recording now both write into one folder-local appendable traceability log that reuses the same file when stable context still matches and starts a new run block when only run/session fields differ
+- implemented: the shared traceability row shape now also supports optional per-image analysis ROI and focus metadata without turning those artifact-level fields into stable-header identity
+- implemented: the shared traceability helper now also exposes a narrow reader path for later offline metadata consumption over one folder's traceability logs
 - working now: simulator-backed snapshot/recording/interval flows and root smoke scripts
 - working now: bounded recording can now complete, start again, and recover on the same service path after a selected writer-side failure without requiring a process restart, backed by targeted simulator-first tests
 - working now: snapshot-side focus evaluation can reuse the shared ROI state path without moving ROI ownership into snapshot save logic
 - partial: trigger-based recording and full hardware validation are still open
+- partial: save paths do not yet compute and emit analysis ROI or focus metadata automatically during normal snapshot/recording flows; the traceability path is prepared for those optional fields when callers provide them
 - partial: broader data/logging closure work such as richer metadata consumption, wider artifact/linkage coverage, and series-structure refinement is still open beyond the current traceability baseline
 - known issues: recording flow still lives largely in `src/camera_app/services`, but naming and frame writing now live behind `src/vision_platform/services/recording_service`
 - technical debt: `camera_app.storage` is now a compatibility shim and should eventually stop being the primary import surface

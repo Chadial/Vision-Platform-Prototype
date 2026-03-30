@@ -18,6 +18,26 @@ Prepares the reusable focus-analysis boundary so live, snapshot, and postprocess
 - evaluator boundary that stays separate from UI and camera drivers
 - read-only overlay-data builder for preview and display consumers
 
+## Artifact Metadata Note
+
+- `focus_core` defines focus-evaluation meaning, not traceability/log ownership
+- if later artifact-level metadata reuses focus results, this module should remain the source of truth for the semantic shape of those values
+- the narrow reusable artifact-facing baseline should stay aligned with fields such as:
+  - `focus_method`
+  - `focus_score_frame_interval`
+  - `focus_value_mean`
+  - `focus_value_stddev`
+  - `focus_roi_type`
+  - `focus_roi_data`
+- `focus_value_mean` and `focus_value_stddev` should not be treated as free-floating values; if used for artifact metadata, they should describe a moving window over frame-level focus scores
+- the intended narrow baseline for that window is:
+  - field: `focus_score_frame_interval`
+  - default: `7`
+  - minimum: `3`
+  - maximum: `17`
+- focus-related artifact metadata should remain analysis metadata for saved artifacts, not stable acquisition-header identity by default
+- ROI text forms used with focus metadata should stay aligned with the canonical ROI serialization documented in `libraries/roi_core`
+
 ## Inputs / Outputs
 
 - inputs: `FrameData` or `CapturedFrame`, optional focus request

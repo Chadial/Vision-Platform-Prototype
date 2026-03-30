@@ -11,9 +11,11 @@ It should not become a second analytics core separate from the shared libraries 
 - stored-image focus report over `.pgm` / `.ppm` sample directories
 - stored-image focus report over saved `.bmp` artifacts produced by the dependency-free writer baseline
 - reuse of the simulator-backed sample-image ingestion path plus a narrow saved-`BMP` loader above `focus_core`
+- compact metadata-aware offline reuse of saved artifacts when a folder-local traceability log is present, with deterministic join by saved image name
 
 ## Not This Module Yet
 
 - broad offline workstation behavior
 - arbitrary file-format loading beyond the current narrow `.pgm` / `.ppm` / `.bmp` baseline
+- run/session or ROI explorer behavior
 - export pipelines beyond compact text reporting

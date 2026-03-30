@@ -5,8 +5,10 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
 
 from tests import _path_setup
+from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.models import CameraConfiguration, CapturedFrame, SnapshotRequest
 from vision_platform.services.recording_service import SnapshotService
+from vision_platform.services.recording_service.traceability import build_trace_artifact_metadata, record_snapshot_trace
 
 
 class _FakeRawFrame:
@@ -47,7 +49,22 @@ class SnapshotServiceTests(unittest.TestCase):
             trace_rows = list(csv.reader(line for line in trace_lines if line and not line.startswith("# ")))
             self.assertEqual(
                 trace_rows[0],
-                ["artifact_kind", "run_id", "image_name", "frame_id", "camera_timestamp", "system_timestamp_utc"],
+                [
+                    "artifact_kind",
+                    "run_id",
+                    "image_name",
+                    "frame_id",
+                    "camera_timestamp",
+                    "system_timestamp_utc",
+                    "analysis_roi_id",
+                    "analysis_roi_type",
+                    "analysis_roi_data",
+                    "focus_method",
+                    "focus_value_mean",
+                    "focus_value_stddev",
+                    "focus_roi_type",
+                    "focus_roi_data",
+                ],
             )
             self.assertEqual(trace_rows[1][0], "snapshot")
             self.assertEqual(trace_rows[1][2], "capture_001.bmp")
@@ -115,6 +132,7 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertEqual(trace_rows[1][2], saved_path.name)
             self.assertEqual(trace_rows[1][4], "123456")
             self.assertTrue(trace_rows[1][5])
+            self.assertEqual(trace_rows[1][6:], ["", "", "", "", "", "", "", ""])
 
     def test_save_snapshot_reuses_trace_log_when_context_matches(self) -> None:
         fake_driver = MagicMock()
@@ -173,6 +191,108 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertEqual(trace_lines.count("# run.start"), 2)
             self.assertIn("# run.file_stem: capture_001", trace_lines)
             self.assertIn("# run.file_stem: capture_002", trace_lines)
+
+    def test_record_snapshot_trace_writes_optional_analysis_and_focus_metadata(self) -> None:
+        frame = CapturedFrame(
+            raw_frame=_FakeRawFrame(bytes([0, 127, 200, 255])),
+            width=2,
+            height=2,
+            frame_id=7,
+            camera_timestamp=123456,
+            pixel_format="Mono8",
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            request = SnapshotRequest(
+                save_directory=Path(temp_dir),
+                file_stem="capture_001",
+                file_extension=".png",
+                camera_id="CAM_001",
+            )
+            saved_path = Path(temp_dir) / "capture_001.png"
+            saved_path.write_bytes(b"placeholder")
+
+            artifact_metadata = build_trace_artifact_metadata(
+                analysis_roi=RoiDefinition(
+                    roi_id="roi-analysis",
+                    shape="rectangle",
+                    points=((1, 2), (30, 40)),
+                ),
+                focus_method="laplace",
+                focus_value_mean=0.75,
+                focus_value_stddev=0.05,
+                focus_roi=RoiDefinition(
+                    roi_id="roi-focus",
+                    shape="ellipse",
+                    points=((10, 20), (25, 35)),
+                ),
+            )
+
+            record_snapshot_trace(
+                saved_path=saved_path,
+                request=request,
+                frame=frame,
+                configuration=CameraConfiguration(pixel_format="Mono8"),
+                artifact_metadata=artifact_metadata,
+            )
+
+            trace_rows = list(
+                csv.reader(
+                    line
+                    for line in (Path(temp_dir) / "saved_artifact_traceability.csv").read_text(encoding="utf-8").splitlines()
+                    if line and not line.startswith("# ")
+                )
+            )
+            self.assertEqual(trace_rows[1][6], "roi-analysis")
+            self.assertEqual(trace_rows[1][7], "rectangle")
+            self.assertEqual(trace_rows[1][8], "rectangle(1,2,30,40)")
+            self.assertEqual(trace_rows[1][9], "laplace")
+            self.assertEqual(trace_rows[1][10], "0.75")
+            self.assertEqual(trace_rows[1][11], "0.05")
+            self.assertEqual(trace_rows[1][12], "ellipse")
+            self.assertEqual(trace_rows[1][13], "ellipse(10,20,25,35)")
+
+    def test_record_snapshot_trace_reuses_log_when_only_artifact_metadata_changes(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            request = SnapshotRequest(
+                save_directory=Path(temp_dir),
+                file_stem="capture",
+                file_extension=".png",
+                camera_id="CAM_001",
+            )
+            configuration = CameraConfiguration(pixel_format="Mono8")
+
+            first_path = Path(temp_dir) / "capture_001.png"
+            first_path.write_bytes(b"first")
+            second_path = Path(temp_dir) / "capture_002.png"
+            second_path.write_bytes(b"second")
+
+            record_snapshot_trace(
+                saved_path=first_path,
+                request=request,
+                frame=CapturedFrame(raw_frame=b"\x00", width=1, height=1, frame_id=1, pixel_format="Mono8"),
+                configuration=configuration,
+                artifact_metadata=build_trace_artifact_metadata(
+                    analysis_roi=RoiDefinition(roi_id="roi-a", shape="rectangle", points=((1, 2), (3, 4))),
+                ),
+            )
+            record_snapshot_trace(
+                saved_path=second_path,
+                request=request,
+                frame=CapturedFrame(raw_frame=b"\x00", width=1, height=1, frame_id=2, pixel_format="Mono8"),
+                configuration=configuration,
+                artifact_metadata=build_trace_artifact_metadata(
+                    analysis_roi=RoiDefinition(roi_id="roi-b", shape="freehand", points=((1, 1), (2, 2), (3, 3))),
+                    focus_method="tenengrad",
+                    focus_value_mean=1.25,
+                ),
+            )
+
+            trace_path = Path(temp_dir) / "saved_artifact_traceability.csv"
+            self.assertTrue(trace_path.exists())
+            self.assertFalse((Path(temp_dir) / "saved_artifact_traceability_001.csv").exists())
+            trace_lines = trace_path.read_text(encoding="utf-8").splitlines()
+            self.assertEqual(trace_lines.count("# run.start"), 2)
 
     def test_save_snapshot_logs_and_reraises_writer_errors(self) -> None:
         fake_driver = MagicMock()

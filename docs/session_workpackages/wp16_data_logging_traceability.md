@@ -8,6 +8,8 @@ Its purpose is to move `Data And Logging Closure` from "saved artifacts exist in
 
 The narrow goal is to add one stable, deterministic traceability baseline for saved snapshot and bounded recording artifacts without reopening the broader storage architecture or forcing a brand-new log file for every bounded run.
 
+When analysis-related artifact metadata is already available during save handling, this slice may also carry it in the traceability structure, but only in a narrow artifact-level form that does not redefine log identity. This includes focus-related metadata and analysis-oriented ROI metadata when those are available at save time.
+
 ## Branch
 
 - intended branch: `feature/data-logging-traceability-manifest`
@@ -23,6 +25,7 @@ Included:
   - bounded recording save
 - make the record suitable for experiment traceability and later offline consumption
 - keep the metadata path deterministic and filesystem-local
+- allow optional analysis-related artifact metadata when available, without turning this package into a broader focus-analysis, ROI-analysis, or reporting redesign
 - add focused tests for metadata record creation and key-field population
 - update docs so `Data And Logging Closure` is no longer interpreted mainly as a visible-format lane
 
@@ -31,7 +34,7 @@ Selected slice for this package:
 - folder-local traceability log shared by snapshot and bounded recording with:
   - one stable context header for log reuse decisions
   - one or more run/session blocks inside the same log
-  - one per-image row for each saved artifact
+  - one per-image row for each saved artifact, with optional artifact-level analysis metadata when available
 - snapshot run/session block fields with at least:
   - run start timestamp
   - run end timestamp
@@ -52,6 +55,15 @@ Selected slice for this package:
   - gain where available
   - ROI / offsets where present and treated as experiment-relevant
   - marker that this log belongs to saved-artifact traceability
+- optional per-image fields may also include, when available:
+  - `analysis_roi_id`
+  - `analysis_roi_type`
+  - `analysis_roi_data`
+  - `focus_method` / `focus_art`
+  - `focus_value_mean`
+  - `focus_value_stddev`
+  - `focus_roi_type`
+  - `focus_roi_data`
 
 Why this slice:
 
@@ -96,10 +108,18 @@ The immediate remaining gap is:
 - bounded-recording log reuse is based on stable context match, not on run start time alone
 - snapshot saves in the same folder also reuse that existing log when stable context still matches
 - changes in run/session fields such as start time, end time, duration, frame limit, or target frame rate should create a new run block inside the existing log, not necessarily a new log file
+- stable acquisition/log-context fields determine log reuse; run/session fields may vary without forcing a new log file; per-image/artifact metadata may vary per saved image without affecting log identity
 - a new log file is only required when the stable context no longer matches cleanly
 - prefer one deterministic local metadata path per save mode over multiple competing outputs
 - this package does not replace the existing CSV path; it adds one narrower host-/experiment-readable traceability baseline beside it
 - the traceability log should make stable context, run/session values, per-image rows, and regular-vs-failed completion understandable without turning this slice into a broad lifecycle redesign
+- analysis-oriented ROI metadata belongs primarily to the per-image/artifact level for this slice, not to the stable context header by default
+- focus metadata belongs primarily to the per-image/artifact level for this slice, not to the stable context header
+- changing analysis ROI metadata must not force a new log file
+- changing analysis ROI metadata must not automatically force a new stable context header
+- changing focus values must not force a new log file
+- changing focus ROI must not automatically force a new stable context header
+- if a later slice wants to mirror constant analysis-configuration settings at run level, including focus or ROI-related configuration, that remains follow-up work and is not required here
 - metadata fields may be omitted when unavailable, but the record shape itself should stay stable
 - the result must stay usable by later offline/reporting slices without requiring a transport layer
 
@@ -119,19 +139,33 @@ The immediate remaining gap is:
    - stable context header
    - run/session block fields
    - per-image rows
-4. Implement snapshot traceability through the same folder-local log path used for repeated saved artifacts in that folder.
-5. Decide and freeze the stable context field set used for log reuse.
-6. Decide and freeze the run/session field set that may vary inside one reused log.
-7. Implement traceability append/reuse behavior based on stable context match.
-8. Keep field population explicit and deterministic, with clear handling for unavailable values.
-9. Add targeted tests for:
+4. Decide and freeze which fields belong to:
+   - stable acquisition/log-context identity
+   - run/session variation
+   - per-image/artifact metadata
+5. Decide and freeze a deterministic narrow serialization shape for optional analysis-related artifact fields when available.
+   - keep analysis ROI metadata at the per-image level by default
+   - keep focus values and focus ROI at the per-image level by default
+   - do not treat analysis ROI metadata as stable-header identity
+   - do not treat focus values or focus ROI as stable-header identity
+   - do not require run-block splitting solely because analysis-related artifact fields differ
+6. Implement snapshot traceability through the same folder-local log path used for repeated saved artifacts in that folder.
+7. Decide and freeze the stable context field set used for log reuse.
+8. Decide and freeze the run/session field set that may vary inside one reused log.
+9. Implement traceability append/reuse behavior based on stable context match.
+10. Keep field population explicit and deterministic, with clear handling for unavailable values.
+11. Add targeted tests for:
    - snapshot log creation and key fields
    - snapshot log reuse when stable context still matches
    - bounded-recording log reuse when stable context still matches
    - creation of a new run/session block when only run/session fields differ
    - creation of a new log only when stable context changes
    - deterministic markers distinguishing snapshot vs. bounded recording records
-10. Update docs once the traceability path is real.
+   - optional analysis ROI metadata can be present on per-image rows without forcing new-log creation
+   - changing analysis ROI metadata does not by itself break stable-context log reuse
+   - optional focus metadata can be present on per-image rows without forcing new-log creation
+   - changing focus metadata does not by itself break stable-context log reuse
+12. Update docs once the traceability path is real.
 
 ## Validation
 
@@ -151,11 +185,16 @@ Manual review points:
 
 - snapshot and bounded recording both write into one folder-local appendable log model
 - stable context and run/session information are clearly separated in the shared log path
+- per-image/artifact metadata is also clearly separated from stable context and run/session values
 - a repeated run in the same folder reuses the existing log when stable context still matches
 - a repeated run creates a new run/session block when only run fields differ
 - a new log file is only created when the stable context no longer matches
 - bounded recording start, end, and regular-vs-failed completion are understandable from the log structure
 - snapshot saves are also understandable as explicit run blocks in that same log structure
+- optional analysis ROI metadata can be present on per-image rows without causing unnecessary log splitting
+- analysis ROI metadata is not treated as stable-header identity by default
+- optional focus metadata can be present on per-image rows without causing unnecessary log splitting
+- focus values and focus ROI are not treated as stable-header identity by default
 - key fields are understandable from an experiment and host-logging perspective
 - missing camera-side fields degrade clearly instead of silently inventing values
 
@@ -180,8 +219,11 @@ Before this work package is considered complete, update:
 - the slice remains narrow and centered on artifact traceability
 - snapshot and bounded recording stay on one deterministic local traceability path without forcing a broad metadata redesign
 - bounded recording remains append-friendly for repeated experiment use in one folder
+- optional analysis ROI metadata can be included without turning ROI shape or ROI payload into stable-header identity
+- optional focus-related artifact metadata can be included without turning focus values or focus ROI into stable-header identity
 - targeted tests pass locally
 - no unrelated transport, UI, or broad storage redesign is bundled
+- no broad focus-analysis, ROI-analysis, or reporting redesign is bundled
 - docs clearly state that this is a narrow append-friendly traceability baseline inside `Data And Logging Closure`, not closure of the whole lane
 
 ## Recovery Note

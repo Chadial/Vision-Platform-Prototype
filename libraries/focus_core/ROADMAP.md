@@ -11,6 +11,8 @@
 - add metric comparison support
 - add ROI-first edge/detail analysis as a second-stage metric family
 - add local/global aggregation helpers
+- document one narrow artifact-metadata mapping baseline for focus results without widening this module into storage or reporting ownership
+- if artifact metadata carries `focus_value_mean` and `focus_value_stddev`, freeze them against an explicit moving-window field such as `focus_score_frame_interval` before downstream consumers depend on them
 
 ## Deferred
 
