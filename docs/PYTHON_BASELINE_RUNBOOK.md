@@ -69,6 +69,7 @@ Assumptions for real-hardware work:
 - the camera is physically attached
 - the intended camera id is known
 - or the repo-local alias file `configs/camera_aliases.json` contains the intended hardware alias
+- and, when profile-based hardware reuse matters, `configs/camera_configuration_profiles.json` contains the intended camera-class-first `default` profile
 
 When these assumptions are not confirmed, prefer simulator-first execution.
 
@@ -169,7 +170,7 @@ Preferred bounded hardware commands on tested path:
 
 ```powershell
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-alias tested_camera
-.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-alias tested_camera --base-directory .\captures\hardware_smoke --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-alias tested_camera --configuration-profile default --base-directory .\captures\hardware_smoke --file-extension .bmp
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --frame-limit 5
 ```
 

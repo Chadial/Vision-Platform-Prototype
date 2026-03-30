@@ -27,7 +27,7 @@ The narrow goal is to support camera-class-first configuration profiles, startin
 ## Branch
 
 - intended branch: `feature/stored-camera-configuration-profiles-baseline`
-- activation state: current next
+- activation state: landed
 
 ## Scope
 
@@ -72,6 +72,14 @@ Target outcome for implementation:
 - the first justified entry point can resolve and apply a `default` profile for a known camera class
 - loaded profile data still passes through the current request/configuration validation path instead of bypassing capability-aware checks
 - no property-store abstraction, alias system, or profile-management surface is introduced incidentally
+
+Landed outcome:
+
+- `configs/camera_configuration_profiles.json` now provides the bounded repo-local profile file for the current baseline, starting with a `default` profile for the tested camera class
+- the current CLI now supports `--configuration-profile`, with optional `--profile-camera-class` override and automatic fallback to a normalized hardware `camera_model` when available
+- profile data merges with explicit CLI configuration overrides and still applies only through the existing `ApplyConfigurationRequest` path
+- snapshot and bounded-recording requests now also carry resolved profile identity into the existing traceability context through the already landed `WP47` additive fields
+- March 31, 2026 hardware validation on `tested_camera -> DEV_1AB22C046D81` confirmed alias-backed `status`, `snapshot(.bmp)`, and bounded `recording(.bmp)` runs with the repo-local `default` profile and profile-aware traceability headers
 
 ## Execution Plan
 
