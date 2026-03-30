@@ -21,9 +21,14 @@ Für den detaillierten verifizierten Implementierungsstand bleibt `docs/STATUS.m
 
 ## Kurzfazit
 
-Der aktuelle Stand ist am besten als **geschlossene Extended-MVP-Phase mit anschliessender Post-Closure-Python-Baseline** zu lesen.
+Der aktuelle Stand ist am besten als **geschlossene Extended-MVP-Phase mit anschließender stabiler Post-Closure-Python-Baseline** zu lesen.
 
-Die Python-basierte Kamera- und Host-Steuerungsbasis ist jetzt als bounded, host-orientierte, hardware-validierte Arbeitsbasis auf dem getesteten Kamerapfad zu verstehen. Die verbleibenden Aufgaben sind nicht mehr "MVP schliessen", sondern:
+Die Python-basierte Kamera-, Host-, Logging- und Offline-Basis ist jetzt als bounded, host-orientierte, hardware-validierte Arbeitsbasis auf dem getesteten Kamerapfad zu verstehen. Mit den zuletzt gelandeten Slices `WP38` und `WP44` ist auch die erste bewusst gewählte Selective-Expansion-Folge abgeschlossen:
+
+- der Offline-Pfad hat einen kleinen additiven Nutzwert-Slice erhalten
+- die adapter-facing Command-Envelope-Familie ist jetzt nicht mehr nur implizit in der CLI, sondern transport-neutral in `api_service` verankert
+
+Die verbleibenden Aufgaben sind nicht mehr "MVP schließen", sondern:
 
 - Hardening und operative Restpolitur
 - Operational Readiness der Python-Basis
@@ -53,9 +58,8 @@ Begründung:
 
 Offen:
 
-- kein zweites Desktop-Frontend
 - keine produktionsreife UI
-- frische Hardware-Revalidierung des aktuellen Gesamtstands steht noch aus
+- kein zweites Desktop-Frontend
 
 ### 2. Single-Image Snapshot Saving
 
@@ -73,9 +77,9 @@ Begründung:
 
 Offen:
 
-- nur weitere Hardware-Bestätigung des neuesten Gesamtstands
+- keine grundlegende funktionale Lücke im aktuellen Baseline-Scope
 
-### 3. Image-Series oder Video-ähnliche Acquisition
+### 3. Image-Series oder videoähnliche Acquisition
 
 Status:
 
@@ -91,7 +95,7 @@ Begründung:
 Offen:
 
 - kein trigger-basiertes Recording
-- aktuelle integrierte Basis sollte erneut mit echter Hardware nachgezogen werden
+- keine breite Continuous-/Stress-Validierung
 
 ### 4. Extern steuerbare Save-Pfade und Dateinamen
 
@@ -103,7 +107,7 @@ Begründung:
 
 - Save-Directory-Steuerung ist im Command-Layer vorhanden
 - Snapshot- und Recording-Requests arbeiten mit expliziten Pfaden und Dateiform-Informationen
-- Host-seitig gibt es bestätigte `confirmed_settings` für die relevante Baseline
+- host-seitig gibt es bestätigte `confirmed_settings` für die relevante Baseline
 
 Offen:
 
@@ -125,7 +129,7 @@ Begründung:
 Offen:
 
 - kein breiter API-/IPC-Transport
-- Host-Control-Lane ist funktional stark, aber nicht als vollständige Produkt-Contract-Fläche zu lesen
+- Host-Control ist funktional stark, aber nicht als vollständige Produkt-Contract-Fläche zu lesen
 
 ### 6. Spätere Migration Richtung C#/.NET
 
@@ -143,7 +147,6 @@ Begründung:
 Offen:
 
 - noch kein C#-Code
-- physische Migration aus `camera_app` ist nicht überall vollständig
 - echte Handover-Härtung bleibt ein später eigener Schritt
 
 ### 7. Einbettbarkeit in größere Host-Anwendung
@@ -162,7 +165,6 @@ Begründung:
 Offen:
 
 - breite Host-Integration über echten Transport ist noch nicht gebaut
-- Packaging und Betriebsintegration sind noch nicht Ziel des aktuellen Closure-Abschnitts
 
 ### 8. Zukunftsfähigkeit für Web-/API-fähige Architektur
 
@@ -173,7 +175,7 @@ Status:
 Begründung:
 
 - die Trennung von Kernlogik, Host-Surface und UI ist deutlich besser geworden
-- erste transport-neutrale Payload-Familien existieren
+- transport-neutrale Status- und Command-Envelope-Payload-Familien existieren
 - die Architektur blockiert spätere API-/Web-Wege nicht
 
 Offen:
@@ -195,8 +197,9 @@ Aktueller Stand:
 - strukturierte Commands
 - typed Results
 - additive Polling-Sicht für aktive Läufe
-- confirmed-settings subset
+- confirmed-settings subsets
 - deterministische `run_id`-Linkage
+- transport-neutrale Status- und Envelope-Payloads
 
 Offen:
 
@@ -206,17 +209,18 @@ Offen:
 
 Status:
 
-- **weitgehend erfüllt auf Simulator-/Integrationsniveau**
+- **weitgehend erfüllt auf Simulator-/Integrationsniveau und bounded Hardware-Niveau**
 
 Aktueller Stand:
 
 - Recovery nach Writer-Fehler ist integriert getestet
 - wiederholte Stop-Aufrufe und Neustart auf derselben Subsystem-Instanz sind belegt
-- reale Hardwareläufe existieren historisch für die getestete Kamera-Basis
+- reale Hardwareläufe existieren für die getestete Kamera-Basis
+- die wichtigsten Lifecycle- und Enumerations-Restthemen wurden bereits eingegrenzt
 
 Offen:
 
-- `WP26` als frische bounded Hardware-Revalidierung auf dem aktuellen Integrationsstand
+- keine breite Stress-/Matrix-Validierung
 
 ### Data And Logging Closure
 
@@ -240,13 +244,14 @@ Offen:
 
 Status:
 
-- **teilweise bis weitgehend erfüllt**
+- **weitgehend erfüllt für die aktuelle schmale Baseline**
 
 Aktueller Stand:
 
 - Offline-Focus-Report existiert
 - Metadaten-Join ist vorhanden
 - kompakter stable-context aus Traceability-Headers ist vorhanden
+- ein additiver Summary-Block gibt jetzt schnellen Überblick über Einträge, Join-Abdeckung und bestes Bild
 
 Offen:
 
@@ -256,7 +261,10 @@ Offen:
 
 ## Jüngst abgeschlossene Post-Closure-Arbeiten
 
-Die zuletzt abgeschlossenen Arbeiten waren kein neuer Breiten-Ausbau, sondern ein zusammenhängender Post-Closure-Block zur Betriebs-, Start- und Handover-Klarheit der bestehenden Python-Basis.
+Die jüngst abgeschlossenen Arbeiten waren zwei zusammenhängende Blöcke:
+
+- ein Post-Closure-Klarheitsblock für Betrieb, Start, Host-Boundaries und Packaging-/Environment-Guardrails
+- danach zwei bewusst schmale Selective-Expansion-Slices für Offline-Nutzen und adapter-facing Payload-Ownership
 
 ### WP31: Python Baseline Operations Runbook
 
@@ -290,7 +298,6 @@ Nutzen:
 
 - weniger Startpfad-Verwirrung
 - klarere Weitergabe an andere Entwickler oder Agenten
-- kein stilles Durcheinander zwischen Modulstart und Launcher-Skripten
 
 ### WP33: Host Contract Stability And Deferred Surface Clarification
 
@@ -300,7 +307,7 @@ Status:
 
 Ergebnis:
 
-- mit `docs/HOST_CONTRACT_BASELINE.md` ist der aktuelle Host-Surface jetzt explizit in `stable now` und `deferred later` getrennt
+- mit `docs/HOST_CONTRACT_BASELINE.md` ist der aktuelle Host-Surface explizit in `stable now` und `deferred later` getrennt
 - stabil dokumentiert sind die Command-Terme, die bounded CLI-Envelope-Struktur, die additive Polling-Sicht, der enge confirmed-settings-Slice und die `run_id`-Linkage
 - explizit deferred bleiben breitere DTO-/Transportflächen, Query-Surfaces, detached multi-invocation lifecycle control und breitere IPC-/Frontend-spezifische Contracts
 
@@ -309,25 +316,77 @@ Nutzen:
 - spätere Handover- oder Integrationsarbeit startet nicht mehr aus Interpretation
 - die aktuelle Host-Basis ist bewusst schmal, aber belastbar dokumentiert
 
+### WP43: Python Baseline Packaging Manifest And Environment Guardrails
+
+Status:
+
+- **abgeschlossen**
+
+Ergebnis:
+
+- die bounded lokale Installations- und Environment-Basis ist jetzt explizit dokumentiert
+- `pyproject.toml` exponiert den Console-Entrypoint `vision-platform-cli`
+- `scripts/bootstrap.ps1` gibt klarere Guardrails zu OpenCV und `VmbPy`
+- mit `docs/PYTHON_BASELINE_ENVIRONMENT.md` gibt es jetzt einen kompakten Install-/Environment-Vertrag
+
+Nutzen:
+
+- weniger Setup-Rediscovery
+- klarere Trennung zwischen Core-Setup, OpenCV-Zusatz und Hardware-Add-on
+
+### WP38: Selective Offline Follow-Up
+
+Status:
+
+- **abgeschlossen**
+
+Ergebnis:
+
+- der bestehende Offline-Focus-Report hat einen additiven Summary-Block erhalten
+- dieser meldet kompakt Eintragszahl, Traceability-Abdeckung und das aktuell höchstbewertete Bild
+- der bisherige per-image Report-Pfad blieb unverändert nutzbar
+
+Nutzen:
+
+- etwas mehr praktischer Offline-Nutzen ohne Explorer-, Export- oder Workbench-Scope zu öffnen
+
+### WP44: Bounded API Adapter Command Surface
+
+Status:
+
+- **abgeschlossen**
+
+Ergebnis:
+
+- `vision_platform.services.api_service` besitzt jetzt neben der Status-Payload-Familie auch eine bounded Command-Envelope-Payload-Familie
+- die CLI nutzt diese adapter-facing Success-/Error-Envelope-Builder jetzt wiederverwendbar statt eine isolierte Envelope-Ownership zu behalten
+- es wurde bewusst kein HTTP-, IPC- oder Framework-Scope geöffnet
+
+Nutzen:
+
+- klarere Ownership der aktuellen adapter-facing Payloads
+- bessere Basis für spätere Transport-Arbeit, ohne jetzt schon eine Transport-Plattform zu bauen
+
 ### Wirkung dieses Blocks
 
-Mit `WP31` bis `WP33` ist der unmittelbare Post-Closure-Dokumentationsblock abgeschlossen:
+Mit `WP31` bis `WP44` ist der erste größere Post-Closure-Konsolidierungsblock abgeschlossen:
 
 - Betrieb ist dokumentiert
 - Startpfade sind geklärt
 - Host-Vertrag ist abgegrenzt
+- Packaging-/Environment-Guardrails sind klarer
+- ein kleiner Offline-Nutzwert-Slice ist gelandet
+- die bounded adapter-facing Payload-Ownership ist sauberer verankert
 
-Der aktuelle nächste vorbereitete Folgeblock liegt jetzt bei:
+Aktueller Planungsstand:
 
-- `WP34` als `current next`
-- `WP35` als hardware-gebundene `active lane`
-- `WP36` und `WP37` als `queued`
-- `WP38` als `conditional`
+- es gibt **keinen künstlich gepinnten Pflicht-Nächsten-Schritt**
+- weitere Arbeit sollte jetzt aus echten Residuals oder einer bewusst gewählten neuen Expansionsrichtung kommen
 
 ## Wichtigste verbleibende Lücken
 
 - verbleibende Hardening-Themen wie Lifecycle-Restbeobachtungen, Diagnostik und operative Kanten
-- breitere externe Transport-/API-Fläche nur bei echtem Bedarf
+- breitere externe Transport-/API-Fläche nur bei echtem Bedarf über die jetzt vorhandene bounded Payload-Basis hinaus
 - zusätzliche Frontends nicht als aktueller Default
 - Tracking, größere Offline-Werkzeuge und eigentliche C#-Umsetzung bleiben spätere Phasen
 
@@ -339,6 +398,6 @@ Für die ursprünglichen Projektziele ist der Stand heute:
 - **weitgehend erfüllt** bei Preview, Recording, externer Steuerbarkeit, Host-Einbettbarkeit und C#-Vorbereitung
 - **teilweise erfüllt** bei Web-/API-Zukunftsfähigkeit und breiter Offline-/Measurement-Nutzung
 
-Damit ist die Plattform **kein früher Prototyp mehr**, sondern eine belastbare Python-basierte Arbeitsbasis mit klarer Host-, Daten- und Analyseorientierung.
+Damit ist die Plattform **kein früher Prototyp mehr**, sondern eine belastbare Python-basierte Arbeitsbasis mit klarer Host-, Daten-, Analyse- und Adapterorientierung.
 
-Die Extended-MVP-Phase hat damit ihren Zweck erfüllt. Der nächste Reifeschritt ist jetzt nicht "weitere MVP-Schliessung", sondern **post-closure Hardening, operative Reife und gezielte nächste Ausbauentscheidungen**.
+Die Extended-MVP-Phase hat damit ihren Zweck erfüllt. Der nächste Reifeschritt ist jetzt nicht "weitere MVP-Schließung", sondern **post-closure Hardening, operative Reife und gezielte nächste Ausbauentscheidungen**.
