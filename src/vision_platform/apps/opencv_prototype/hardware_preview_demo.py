@@ -5,7 +5,7 @@ from pathlib import Path
 from time import sleep
 
 from camera_app.logging.log_service import configure_logging
-from camera_app.smoke.demo_result import DemoRunResult
+from vision_platform.apps.opencv_prototype.demo_result import DemoRunResult
 from vision_platform.apps.opencv_prototype.preview_snapshot import PreviewSnapshotSaver
 from vision_platform.imaging.opencv_preview import OpenCvPreviewWindow
 from vision_platform.integrations.camera import VimbaXCameraDriver

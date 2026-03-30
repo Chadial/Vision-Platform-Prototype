@@ -5,7 +5,7 @@ from pathlib import Path
 from time import sleep
 
 from camera_app.logging.log_service import configure_logging
-from camera_app.smoke.demo_result import DemoRunResult
+from vision_platform.apps.opencv_prototype.demo_result import DemoRunResult
 from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.libraries.common_models import DisplayOverlayPayload, RoiDefinition
 from vision_platform.services.display_service import OverlayCompositionService

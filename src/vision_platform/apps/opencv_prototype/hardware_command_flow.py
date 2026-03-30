@@ -5,7 +5,7 @@ from pathlib import Path
 from time import monotonic, sleep
 
 from camera_app.logging.log_service import configure_logging
-from camera_app.smoke.demo_result import DemoRunResult
+from vision_platform.apps.opencv_prototype.demo_result import DemoRunResult
 from vision_platform.bootstrap import CameraSubsystem, build_camera_subsystem
 from vision_platform.integrations.camera import VimbaXCameraDriver
 from vision_platform.models import (
