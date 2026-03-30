@@ -449,3 +449,15 @@ These items are intentionally recorded as future-facing profile-system considera
 - consider operator-session runbook refinement when repeated real usage patterns stabilize, so known good startup / preview / save / recovery flows become easier to hand over and repeat without expanding the core command surface
 - consider a more explicit desktop-ready warning and error surface later, especially if hardware residuals, startup warnings, or capability failures need to be presented to operators more clearly than the current JSON/terminal path
 - consider a dedicated preview-plus-control split validation slice later, where one frontend shows live preview while a separate bounded controller/emulator changes settings and triggers capture, to prove that the current separation also behaves well under more realistic operator-plus-host use
+- evaluate future interaction slices explicitly by deployment mode before implementation:
+  - `host-embedded`, where an external host owns workflow and the camera subsystem should behave as a component
+  - `standalone operator`, where a local app owns preview, status, and controls directly
+  - `hybrid companion`, where preview and host-style control coexist and stress the current separation more realistically
+- consider a later host-notification model beyond polling:
+  - goal: let the camera/control side actively report warnings, failures, and important state changes instead of relying only on a host-side polling loop
+  - important design questions: who subscribes, how subscriptions are registered, what event ownership and delivery guarantees exist, how missed listeners behave, and when polling remains the fallback
+  - especially valuable for non-regular events such as startup degradation, capability-probe warnings, unexpected stop conditions, snapshot/recording failures, and warning-state changes
+- consider a later non-regular run audit log above the current traceability baseline:
+  - goal: preserve irregular cases for measurement audits, debugging, and recovery analysis after the run
+  - likely first scope: warnings, failures, aborted runs, recovery cases, and unusual timing or hardware states rather than broad session browsing
+  - keep this distinct from a full history explorer; the first useful slice is audit/debug evidence for exceptional cases, not a generic run browser

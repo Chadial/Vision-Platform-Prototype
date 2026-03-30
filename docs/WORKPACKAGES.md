@@ -560,6 +560,9 @@ Deferred future-facing bucket list for the profile system:
 - consider a later host-emulator companion flow that can drive commands and status changes while a live preview remains visible, so host/control and frontend/display separation can be exercised under more realistic operator conditions before any broader transport work
 - consider operator-session runbook refinement and desktop-ready warning/error surfacing as later operational-readiness steps if repeated real usage reveals that the current terminal/JSON path is no longer enough for human operators
 - consider a dedicated preview-plus-control split validation slice later to prove that live preview plus bounded external control remain coherent without reopening the architecture
+- evaluate future interaction-oriented slices by deployment mode first: `host-embedded`, `standalone operator`, and `hybrid companion` do not necessarily want the same status, event, control, or history model
+- consider a later host-notification model beyond polling, where the camera/control side can actively report warnings, failures, and state changes to a subscribing host; keep subscription, delivery, fallback, and listener-absence semantics explicit if this is ever activated
+- consider a later non-regular run audit log above the current traceability baseline, aimed first at warnings, failures, recovery cases, aborted runs, and unusual timing/hardware states for measurement audits and debugging rather than broad history browsing
 
 ## Fresh Agent Decision Rule
 
