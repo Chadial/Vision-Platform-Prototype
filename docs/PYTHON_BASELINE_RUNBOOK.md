@@ -25,6 +25,7 @@ It does not define:
 - current baseline: usable Python working baseline with bounded host-oriented and hardware-validated evidence on tested camera path `DEV_1AB22C046D81`
 - preferred interpreter: `.\.venv\Scripts\python.exe`
 - preferred command entry point: `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli`
+- installed console entry point: `vision-platform-cli`
 - preferred launcher fallback: `.\scripts\launchers\run_camera_cli.py`
 - preferred local convenience helper: `.\scripts\run_python_baseline.ps1`
 - preferred integrated real-hardware evidence path: `.\scripts\launchers\run_hardware_command_flow.py`
@@ -70,6 +71,10 @@ Assumptions for real-hardware work:
 
 When these assumptions are not confirmed, prefer simulator-first execution.
 
+For the bounded local install contract behind these assumptions, use:
+
+- `docs/PYTHON_BASELINE_ENVIRONMENT.md`
+
 ## Known-Good Entry Points
 
 For the launch-priority rules behind these paths, use:
@@ -97,6 +102,7 @@ Preferred hardware integration runner:
 
 Useful secondary launchers:
 
+- `vision-platform-cli`
 - `.\scripts\run_python_baseline.ps1`
 - `.\scripts\launchers\run_camera_cli.py`
 - `.\scripts\launchers\run_snapshot_smoke.py`
@@ -107,6 +113,7 @@ Useful secondary launchers:
 Current practical rule:
 
 - prefer `python -m vision_platform.apps.camera_cli` when the project interpreter and repository root are already explicit
+- use `vision-platform-cli` when the editable install is already trusted and a shorter local command is useful
 - use `run_python_baseline.ps1` as the bounded local convenience wrapper when repeated shell use matters more than keeping the full interpreter command visible
 - use `run_camera_cli.py` for bounded host-surface checks when a repo-local launcher is more practical
 - use `run_hardware_command_flow.py` for integrated real-device confidence passes
