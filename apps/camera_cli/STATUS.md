@@ -19,4 +19,4 @@
 - partial: `recording` in this host-control slice is explicitly bounded and in-process; detached multi-invocation recording lifecycle control remains deferred for later deliberate expansion work
 - partial: successful real-device CLI runs currently still emit a `vmbpyLog <VmbError.NotAvailable: -30>` line even when the command itself succeeds; this is a residual hardware observation rather than a proven command-surface failure
 - risk: preview-only concerns remain intentionally outside this module, so the CLI does not replace the OpenCV preview path for inspection-driven workflows
-- next step: keep the exposed `run_id` narrow and linkage-oriented, preserve the bounded in-process recording meaning documented in `docs/RECORDING_LIFECYCLE_BOUNDARY.md`, investigate the residual `NotAvailable` startup log only if it proves user-visible, and only extend beyond `Capture`, `Camera`, and `Storage` when that can be done without inventing CLI-only business logic
+- local direction: keep the surface bounded to `Capture`, `Camera`, and `Storage`, preserve the in-process recording boundary, and only extend when the service layer already owns the behavior

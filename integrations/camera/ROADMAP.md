@@ -2,15 +2,15 @@
 
 ## Next
 
-- keep the current drivers stable during repository reorganization
-- add adapter tests against the new `vision_platform.integrations.camera` namespace
-- validate real hardware behavior against the restructured repository
+- keep camera selection, capability probing, and status identity stable on the tested hardware path
+- narrow remaining SDK-level residuals only when they become user-visible or affect host-readable status
+- keep future integration work local to camera-driver concerns rather than transport or host-surface planning
 
 ## Later
 
-- add explicit transport-layer or actuator integrations only when required
-- factor camera capability probing into a dedicated compatibility helper
+- add non-Allied-Vision driver work only when a real hardware target justifies it
+- add extra compatibility helpers only if repeated SDK quirks justify the extra layer
 
 ## Deferred
 
-- non-Allied-Vision hardware drivers
+- transport-facing or actuator-facing expansion

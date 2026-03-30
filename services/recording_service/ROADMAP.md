@@ -2,10 +2,9 @@
 
 ## Next
 
-- keep legacy snapshot and recording behavior stable during module restructuring
-- add tests that import through `vision_platform.services.recording_service`
-- document one canonical save-directory and file-stem policy for downstream modules
-- decide whether snapshot focus captures should feed later overlay/export paths directly or remain an internal analysis helper
+- keep snapshot, bounded recording, interval capture, and traceability behavior stable on the current baseline
+- keep local storage, naming, and metadata policy explicit without reopening broader PM scope
+- only extend recording-local behavior when a real stop-condition, metadata, or persistence need appears
 
 ## Later
 

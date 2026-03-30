@@ -8,4 +8,4 @@
 - working now: the first Host Control Closure slices now reuse this status mapper in the camera CLI envelope, so host polling for the selected command slices already consumes the adapter-facing status payload family
 - partial: only the status payload family is prepared so far; command-result DTOs, feeds, and framework wiring remain open
 - known issues: serialization ownership is only partially unified so far; the CLI now reuses the status payload family for polling, but command-result DTOs still remain adapter-specific follow-up work
-- next use: keep status and command-result identities narrow and aligned, then use `WP25` for recovery validation instead of widening this module into broader transport or history behavior
+- local direction: keep status shaping narrow and adapter-facing; only add more payload families when a concrete transport or host need exists
