@@ -83,6 +83,25 @@ class CameraCliTests(unittest.TestCase):
         self.assertEqual(result.operation, "status")
         self.assertEqual(result.status.camera.camera_id, "DEV_1AB22C046D81")
 
+    def test_status_command_applies_named_configuration_profile(self) -> None:
+        result = run_cli(
+            [
+                "status",
+                "--camera-id",
+                "sim-cli",
+                "--configuration-profile",
+                "default",
+                "--profile-camera-class",
+                "alvium_1800_u_1240m",
+            ]
+        )
+
+        self.assertEqual(result.status.configuration.pixel_format, "Mono8")
+        self.assertEqual(result.status.configuration.exposure_time_us, 10031.291)
+        self.assertEqual(result.status.configuration.gain, 3.0)
+        self.assertEqual(result.status.configuration.roi_width, 2000)
+        self.assertEqual(result.status.configuration.roi_height, 1500)
+
     def test_snapshot_command_uses_new_subdirectory_save_mode(self) -> None:
         with TemporaryDirectory() as temp_dir:
             result = run_cli(
@@ -374,6 +393,99 @@ class CameraCliTests(unittest.TestCase):
         self.assertEqual(payload["error"]["details"]["stage"], "apply_configuration")
         self.assertIn("roi_width=2001", payload["error"]["message"])
         camera_service.initialize.assert_called_once_with(camera_id="CAM-001")
+        camera_service.shutdown.assert_called_once_with()
+
+    @patch("vision_platform.apps.camera_cli.camera_cli._build_subsystem_for_args")
+    def test_snapshot_command_merges_named_profile_and_passes_profile_identity(
+        self,
+        build_subsystem_mock,
+    ) -> None:
+        camera_service = MagicMock()
+        camera_service.initialize.return_value = SimpleNamespace(
+            is_initialized=True,
+            camera_id="CAM-001",
+            camera_model="Alvium 1800 U-1240m",
+        )
+        command_controller = MagicMock()
+        command_controller.set_save_directory.return_value = SimpleNamespace(selected_directory=Path("captures/profile"))
+        command_controller.save_snapshot.return_value = SimpleNamespace(saved_path=Path("captures/profile/image.bmp"))
+        command_controller.get_status.return_value = SimpleNamespace(
+            camera=SimpleNamespace(camera_id="CAM-001"),
+            configuration=SimpleNamespace(pixel_format="Mono8", exposure_time_us=10031.291),
+        )
+        build_subsystem_mock.return_value = SimpleNamespace(
+            camera_service=camera_service,
+            command_controller=command_controller,
+        )
+
+        run_cli(
+            [
+                "snapshot",
+                "--source",
+                "hardware",
+                "--camera-id",
+                "CAM-001",
+                "--base-directory",
+                "captures",
+                "--file-extension",
+                ".bmp",
+                "--configuration-profile",
+                "default",
+                "--gain",
+                "5.0",
+            ]
+        )
+
+        applied_request = command_controller.apply_configuration.call_args.args[0]
+        snapshot_request = command_controller.save_snapshot.call_args.args[0]
+        self.assertEqual(applied_request.pixel_format, "Mono8")
+        self.assertEqual(applied_request.exposure_time_us, 10031.291)
+        self.assertEqual(applied_request.gain, 5.0)
+        self.assertEqual(applied_request.roi_width, 2000)
+        self.assertEqual(snapshot_request.configuration_profile_id, "default")
+        self.assertEqual(snapshot_request.configuration_profile_camera_class, "alvium_1800_u_1240m")
+
+    @patch("vision_platform.apps.camera_cli.camera_cli._build_subsystem_for_args")
+    def test_main_prints_configuration_error_for_unknown_configuration_profile_class(
+        self,
+        build_subsystem_mock,
+    ) -> None:
+        camera_service = MagicMock()
+        camera_service.initialize.return_value = SimpleNamespace(
+            is_initialized=True,
+            camera_id="CAM-001",
+            camera_model="Unknown Camera",
+        )
+        command_controller = MagicMock()
+        build_subsystem_mock.return_value = SimpleNamespace(
+            camera_service=camera_service,
+            command_controller=command_controller,
+        )
+
+        stdout = StringIO()
+        stderr = StringIO()
+
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            exit_code = main(
+                [
+                    "status",
+                    "--source",
+                    "hardware",
+                    "--camera-id",
+                    "CAM-001",
+                    "--configuration-profile",
+                    "default",
+                    "--profile-camera-class",
+                    "missing_class",
+                ]
+            )
+
+        payload = json.loads(stderr.getvalue())
+        self.assertEqual(exit_code, 1)
+        self.assertFalse(payload["success"])
+        self.assertEqual(payload["error"]["code"], "configuration_error")
+        self.assertEqual(payload["error"]["details"]["stage"], "load_configuration_profile")
+        self.assertEqual(payload["error"]["details"]["camera_class"], "missing_class")
         camera_service.shutdown.assert_called_once_with()
 
 

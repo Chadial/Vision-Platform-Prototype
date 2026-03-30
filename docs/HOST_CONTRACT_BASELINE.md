@@ -72,6 +72,7 @@ Current request-context note:
 
 - the current snapshot and bounded-recording request terms can now also carry a small additive traceability control-context subset such as `camera_alias` and optional profile identity
 - this should be read as traceability-context passthrough, not as a broader host-surface expansion or inventory model
+- the current CLI can now also resolve one bounded repo-local `camera_class -> configuration profile` selection before applying the existing host-neutral configuration request; this should be read as local operational convenience rather than as a broad profile-management contract
 
 ### Stable command surface
 

@@ -1,0 +1,22 @@
+{
+  "camera_classes": {
+    "1800_u_1240m": {
+      "default": {
+        "pixel_format": "Mono8",
+        "exposure_time_us": 10031.291,
+        "gain": 3.0,
+        "roi_width": 2000,
+        "roi_height": 1500
+      }
+    },
+    "alvium_1800_u_1240m": {
+      "default": {
+        "pixel_format": "Mono8",
+        "exposure_time_us": 10031.291,
+        "gain": 3.0,
+        "roi_width": 2000,
+        "roi_height": 1500
+      }
+    }
+  }
+}

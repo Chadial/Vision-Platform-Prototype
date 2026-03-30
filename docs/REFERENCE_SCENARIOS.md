@@ -22,6 +22,7 @@ They are command-centered reference runs over the current baseline.
 - use simulator-backed commands by default for reproducibility
 - substitute `--source hardware --camera-id DEV_1AB22C046D81` only when a real-device confidence rerun is the actual goal
 - when the repo-local alias file is present, `--camera-alias tested_camera` is the current bounded convenience form for the tested hardware path
+- when the repo-local profile file is present, `--configuration-profile default` is the current bounded convenience form for the tested hardware profile baseline
 
 ## 1. Snapshot Reference Scenario
 
@@ -69,7 +70,7 @@ Preferred bounded reference run:
 Real-device substitution when explicitly needed:
 
 ```powershell
-.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-alias tested_camera --base-directory .\captures\reference_snapshot --file-stem reference_snapshot --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-alias tested_camera --configuration-profile default --base-directory .\captures\reference_snapshot --file-stem reference_snapshot --file-extension .bmp
 ```
 
 ### Expected Output Directory
@@ -140,7 +141,7 @@ Preferred bounded reference run:
 Real-device substitution when explicitly needed:
 
 ```powershell
-.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-alias tested_camera --base-directory .\captures\reference_recording --file-stem reference_recording --file-extension .bmp --frame-limit 5
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-alias tested_camera --configuration-profile default --base-directory .\captures\reference_recording --file-stem reference_recording --file-extension .bmp --frame-limit 5
 ```
 
 ### Expected Output Directory

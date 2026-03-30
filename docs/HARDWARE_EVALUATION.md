@@ -405,6 +405,7 @@ Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 
 Additional March 31, 2026 bounded follow-up:
 
 - alias-backed hardware `snapshot` and bounded `recording` runs through `tested_camera -> DEV_1AB22C046D81` also wrote `camera_alias=tested_camera` into the folder-level stable traceability context while preserving the resolved `camera_id`
+- alias-backed hardware `status`, `snapshot`, and bounded `recording` runs through `tested_camera -> DEV_1AB22C046D81` now also resolve and apply the repo-local `default` configuration profile, with traceability headers preserving `configuration_profile_id=default` and resolved `configuration_profile_camera_class=1800_u_1240m`
 | Camera-Specific Capability Rerun | PASS with correction | March 30 reruns refreshed the documented `Mono8`, `Mono10`, acquisition-frame-rate, and ROI behavior for `DEV_1AB22C046D81`, and corrected the earlier assumption that ROI offsets were effectively fixed to `0` |
 
 ## 1. Initialization And Shutdown
