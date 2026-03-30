@@ -112,6 +112,11 @@ The current CLI host envelope ownership should be treated as stable for the boun
 
 The exact breadth of nested payloads remains intentionally narrow.
 
+Current adapter-facing ownership note:
+
+- the bounded current command envelope family now also has one transport-neutral home in `vision_platform.services.api_service`
+- this should be read as payload ownership reuse, not as a new transport/runtime layer
+
 ### Stable status baseline
 
 The stable current host-readable status baseline includes:

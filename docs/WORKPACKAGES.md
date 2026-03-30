@@ -302,7 +302,7 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 41 | Vision Platform Storage Physical Migration | move storage and persistence helpers behind the preferred `src/vision_platform` boundary while preserving current behavior | active lane | landed second architecture-convergence slice; storage-facing legacy services now import platform-owned file-naming and frame-writer helpers directly while `camera_app.storage` remains the compatibility shim layer | `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md` |
 | 42 | Vision Platform Namespace Coverage And Compatibility Audit | tighten trust in the preferred `vision_platform` import surface while keeping remaining compatibility shims explicit | active lane | landed trust-and-shim audit slice; current remaining `camera_app` dependencies are now bounded, tested, and documented as intentional compatibility seams rather than silent drift | `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md` |
 | 43 | Python Baseline Packaging Manifest And Environment Guardrails | make the bounded local Python baseline easier to set up and re-enter without pretending to solve full product packaging | active lane | landed operational-readiness follow-up; the package manifest now exposes `vision-platform-cli`, bootstrap output carries clearer install guardrails, and the bounded local install contract now lives in `docs/PYTHON_BASELINE_ENVIRONMENT.md` | `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md` |
-| 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | conditional | selective-expansion option above the current stable host-neutral controller | `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
+| 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | active lane | landed selective-expansion slice; `api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without introducing framework or transport runtime scope | `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
 
 ## Immediate PM Backlog
 
@@ -314,7 +314,7 @@ These are the work-package groups PM should treat as the current actionable post
 
 Current prepared post-closure sequence:
 
-1. `WP44 Bounded API Adapter Command Surface`
+No forced next package is currently pinned.
 
 Most recently landed detailed packages:
 
@@ -528,7 +528,7 @@ The current coarse PM order should be:
 20. treat `WP41` as the landed storage/persistence follow-up; legacy storage import paths now consume platform-owned helpers while `camera_app.storage` remains the compatibility shim layer
 21. treat `WP42` as the landed trust-and-shim audit; remaining `camera_app` dependencies inside `vision_platform` are now tested and documented as explicit compatibility seams
 22. treat `WP43` as landed; the bounded package-manifest and environment-contract guardrails are now explicit through `vision-platform-cli`, bootstrap output, and `docs/PYTHON_BASELINE_ENVIRONMENT.md`
-23. treat `WP38` as landed selective offline follow-up and `WP44` as the remaining conditional adapter-facing selective-expansion option
+23. treat `WP38` and `WP44` as landed selective-expansion slices rather than as open default lanes
 24. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
@@ -537,8 +537,7 @@ There is currently no forced default next detailed package.
 
 If the user does not explicitly redirect the session after this:
 
-- choose between the remaining conditional expansion lane or a fresh residual-driven hardening slice
-- activate `WP44` only when a real adapter-facing consumer need is actually chosen
+- choose a fresh residual-driven hardening slice or explicitly define the next selective-expansion need
 
 Reason:
 
@@ -553,6 +552,7 @@ Reason:
 - the trust-and-shim audit is now landed through `WP42`
 - the bounded packaging/environment guardrail slice is now also landed through `WP43`
 - the narrow selective offline follow-up is now also landed through `WP38`
+- the bounded adapter-facing command-envelope slice is now also landed through `WP44`
 - the next justified step should therefore come from a concrete residual or an explicitly chosen selective-expansion need rather than from a forced generic default
 
 ## Fresh Agent Decision Rule
@@ -654,7 +654,7 @@ Current explicit activation:
 - `Vision Platform Storage Physical Migration` now has its landed execution-ready file at `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md`
 - `Vision Platform Namespace Coverage And Compatibility Audit` now has its landed execution-ready file at `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
 - `Python Baseline Packaging Manifest And Environment Guardrails` now has its landed execution-ready file at `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
-- `Bounded API Adapter Command Surface` now has its prepared execution-ready file at `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
+- `Bounded API Adapter Command Surface` now has its landed execution-ready file at `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
 
 ## PM Refinement Rule
 

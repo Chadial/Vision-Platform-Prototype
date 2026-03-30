@@ -25,7 +25,7 @@ There is now one new prepared post-closure follow-up sequence.
 
 Current prepared order:
 
-1. `WP44 Bounded API Adapter Command Surface` only when a concrete adapter-facing consumer need is chosen
+No forced prepared next package is currently pinned.
 
 This sequence should be read as:
 
@@ -44,7 +44,7 @@ This sequence should be read as:
   - `WP41` landed as the direct storage/persistence follow-up
   - `WP42` landed as the namespace trust / compatibility-audit follow-up
   - `WP43` landed as a bounded operational-readiness guardrail slice
-  - `WP44` prepared as a conditional adapter-facing selective-expansion slice
+  - `WP44` landed as a bounded adapter-facing selective-expansion slice
 
 The active post-closure phase should now be read in four work types:
 
@@ -414,5 +414,5 @@ The repository currently provides a structured Python prototype for the vision p
 13. Treat `WP41` as landed: storage-facing legacy service imports now point at platform-owned file-naming and frame-writer helpers directly, while `camera_app.storage` remains the compatibility shim layer.
 14. Treat `WP42` as landed: remaining `camera_app` dependencies inside `vision_platform` are now bounded, tested, and documented as intentional compatibility seams rather than silent drift.
 15. Treat `WP43` as landed: the bounded package-manifest and environment-contract guardrails are now explicit through `vision-platform-cli`, clearer bootstrap output, and `docs/PYTHON_BASELINE_ENVIRONMENT.md`.
-16. Treat `WP44` as a conditional adapter-facing selective-expansion option, not as an always-on next step.
+16. Treat `WP44` as landed: `vision_platform.services.api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without implying any framework runtime.
 17. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.

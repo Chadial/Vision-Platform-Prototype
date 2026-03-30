@@ -17,7 +17,7 @@ Its purpose is to expose one narrow API-adapter command surface on top of the al
 ## Branch
 
 - intended branch: `feature/bounded-api-adapter-command-surface`
-- activation state: conditional
+- activation state: landed
 
 ## Scope
 
@@ -38,6 +38,12 @@ Excluded:
 ## Session Goal
 
 Leave the repository with one deliberately narrow adapter-facing API slice only if an actual integration consumer needs it.
+
+Landed outcome:
+
+- `vision_platform.services.api_service` now owns one bounded transport-neutral command-envelope payload family in addition to the existing status payload family
+- the camera CLI now reuses those adapter-facing success/error envelope builders instead of owning its command-envelope payload shape alone
+- no HTTP framework, feed, authentication, or detached lifecycle scope was introduced
 
 ## Validation
 
