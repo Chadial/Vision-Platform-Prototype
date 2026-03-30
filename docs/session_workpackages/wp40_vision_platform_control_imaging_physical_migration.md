@@ -25,7 +25,7 @@ Working discipline:
 ## Branch
 
 - intended branch: `refactor/vision-platform-control-imaging-migration`
-- activation state: current next
+- activation state: landed
 
 ## Scope
 
@@ -60,6 +60,13 @@ Excluded:
 Leave the repository with the preferred `vision_platform` boundary owning control and optional imaging implementation physically, while `camera_app` remains only a compatibility bridge where still needed.
 
 This package should not leave the repository half-migrated across unrelated storage or persistence areas.
+
+Landed outcome:
+
+- `vision_platform.bootstrap` now owns the bootstrap implementation directly
+- `camera_app.bootstrap` is now a compatibility shim to that platform-owned implementation
+- `camera_app.control` and `camera_app.imaging` now expose package-level compatibility reexports in addition to the existing submodule shims
+- focused regression coverage now proves those compatibility edges explicitly
 
 ## Execution Plan
 
