@@ -6,7 +6,7 @@ from tests import _path_setup
 from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.models import CapturedFrame
 from vision_platform.services.recording_service import FrameWriter
-from vision_platform.apps.postprocess_tool import format_focus_report, run_focus_report
+from vision_platform.apps.postprocess_tool import format_focus_report, format_focus_report_bundle, run_focus_report, run_focus_report_bundle
 from vision_platform.services.recording_service.traceability import build_trace_artifact_metadata, record_snapshot_trace
 from vision_platform.models import CameraConfiguration, SnapshotRequest
 
@@ -141,6 +141,57 @@ class PostprocessToolTests(unittest.TestCase):
         self.assertIn("focus_method=laplace", report)
         self.assertIn("focus_score_frame_interval=7", report)
 
+    def test_run_focus_report_bundle_exposes_stable_context_when_traceability_exists(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            sample_dir = Path(temp_dir)
+            writer = FrameWriter()
+            target_path = sample_dir / "frame_a.bmp"
+            frame = CapturedFrame(
+                raw_frame=_FakeRawFrame(bytes([0, 64, 128, 255, 128, 64, 0, 64, 128])),
+                width=3,
+                height=3,
+                frame_id=21,
+                camera_timestamp=4242,
+                pixel_format="Mono8",
+            )
+            writer.write_frame(frame, target_path)
+            record_snapshot_trace(
+                saved_path=target_path,
+                request=SnapshotRequest(
+                    save_directory=sample_dir,
+                    file_stem="frame_a",
+                    file_extension=".bmp",
+                    camera_id="CAM_001",
+                ),
+                frame=frame,
+                configuration=CameraConfiguration(
+                    pixel_format="Mono8",
+                    exposure_time_us=2500.0,
+                    gain=1.5,
+                    roi_offset_x=11,
+                    roi_offset_y=22,
+                    roi_width=333,
+                    roi_height=222,
+                ),
+            )
+
+            report = run_focus_report_bundle(sample_dir, method="laplace")
+            formatted = format_focus_report_bundle(report)
+
+        self.assertIsNotNone(report.stable_context)
+        self.assertEqual(report.stable_context.camera_id, "CAM_001")
+        self.assertEqual(report.stable_context.pixel_format, "Mono8")
+        self.assertEqual(report.stable_context.exposure_time_us, "2500.0")
+        self.assertEqual(report.stable_context.gain, "1.5")
+        self.assertEqual(report.stable_context.roi_x, "11")
+        self.assertEqual(report.stable_context.roi_y, "22")
+        self.assertEqual(report.stable_context.roi_width, "333")
+        self.assertEqual(report.stable_context.roi_height, "222")
+        self.assertIn("context: record_kind=saved_artifact_folder_log", formatted)
+        self.assertIn("camera_id=CAM_001", formatted)
+        self.assertIn("pixel_format=Mono8", formatted)
+        self.assertIn("roi=(11,22,333,222)", formatted)
+
     def test_run_focus_report_degrades_when_only_some_images_have_trace_rows(self) -> None:
         with TemporaryDirectory() as temp_dir:
             sample_dir = Path(temp_dir)
@@ -186,6 +237,18 @@ class PostprocessToolTests(unittest.TestCase):
         self.assertEqual(entries[0].analysis_roi_type, "freehand")
         self.assertIsNone(entries[1].artifact_kind)
         self.assertIsNone(entries[1].analysis_roi_type)
+
+    def test_run_focus_report_bundle_omits_stable_context_when_traceability_is_missing(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            sample_dir = Path(temp_dir)
+            (sample_dir / "frame_a.pgm").write_bytes(b"P5\n3 3\n255\n\x00\x40\x80\xff\x80\x40\x00\x40\x80")
+
+            report = run_focus_report_bundle(sample_dir)
+            formatted = format_focus_report_bundle(report)
+
+        self.assertIsNone(report.stable_context)
+        self.assertNotIn("context:", formatted)
+        self.assertIn("frame_a.pgm: method=laplace", formatted)
 
     def test_format_focus_report_renders_compact_lines(self) -> None:
         with TemporaryDirectory() as temp_dir:
