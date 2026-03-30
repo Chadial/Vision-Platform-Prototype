@@ -95,9 +95,11 @@ Read these for every new session:
   - `docs/HARDWARE_EVALUATION.md`
   - `docs/HARDWARE_CAPABILITIES.md`
   - `docs/PYTHON_BASELINE_RUNBOOK.md`
+  - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
   - `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
 - For operational or launch-readiness questions:
   - `docs/PYTHON_BASELINE_RUNBOOK.md`
+  - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
 - For the next OpenCV UI/operator work:
   - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - For camera-oriented command-surface work:
@@ -112,6 +114,7 @@ Read these for every new session:
 - `docs/STATUS.md` is the current implementation truth.
 - `docs/WORKPACKAGES.md` is the central queue for the next concrete work slice.
 - `docs/PYTHON_BASELINE_RUNBOOK.md` is the compact operating reference for the current post-closure Python baseline.
+- `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` is the compact startup-surface reference for the preferred current entry points.
 - `docs/module_doc_audit.md` is the current reference for how module-local docs should be used and trimmed.
 - `docs/root_category_audit.md` is the current reference for how `apps/`, `integrations/`, `services/`, and `libraries/` are meant to be used.
 - `docs/ROADMAP.md` is the repository delivery sequence.

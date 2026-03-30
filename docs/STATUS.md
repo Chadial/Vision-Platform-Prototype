@@ -23,14 +23,13 @@ Each status update should state progress and gaps against both roadmaps.
 
 The current prepared post-closure follow-up sequence is now:
 
-1. `WP32 Entry-Point And Launch Readiness Baseline`
-2. `WP33 Host Contract Stability And Deferred Surface Clarification`
+1. `WP33 Host Contract Stability And Deferred Surface Clarification`
 
 This sequence should be read as:
 
 - first landed residual-driven hardening / diagnostics slices through `WP30`
 - then one landed operational-readiness runbook slice through `WP31`
-- then one further operational-readiness slice
+- then one landed startup-surface slice through `WP32`
 - then one later-handover/productization clarification slice
 
 The active post-closure phase should now be read in four work types:
@@ -62,6 +61,7 @@ The current active phase is therefore not "close the MVP", but "operate and impr
 The compact operating reference for that baseline now lives at:
 
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
+- `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
 
 The repository currently provides a structured Python prototype for the vision platform with:
 
@@ -385,6 +385,7 @@ The repository currently provides a structured Python prototype for the vision p
 1. Treat `WP12` through `WP26` as the closed Extended MVP foundation that established the current Python working baseline.
 2. Treat `WP27` and `WP28` as landed post-closure hardening slices rather than as proof that the baseline is still unfinished.
 3. Treat `WP31` as landed and use `docs/PYTHON_BASELINE_RUNBOOK.md` as the compact operating reference for the current Python baseline.
-4. Use `WP32` and `WP33` as the next explicit post-closure sequence unless a more urgent user-driven residual overrides them.
-5. Prefer the prepared operational-readiness slices over broad new breadth by default.
-6. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+4. Treat `WP32` as landed and use `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` as the compact startup-surface reference for the preferred current entry points.
+5. Use `WP33` as the next explicit post-closure sequence unless a more urgent user-driven residual overrides it.
+6. Prefer the prepared operational-readiness slices over broad new breadth by default.
+7. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
