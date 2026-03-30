@@ -195,6 +195,7 @@ class RecordingServiceTests(unittest.TestCase):
                     "analysis_roi_type",
                     "analysis_roi_data",
                     "focus_method",
+                    "focus_score_frame_interval",
                     "focus_value_mean",
                     "focus_value_stddev",
                     "focus_roi_type",
@@ -204,7 +205,7 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertEqual(trace_rows[1][0], "bounded_recording")
             self.assertEqual(trace_rows[1][2], "series_000000.raw")
             self.assertEqual(trace_rows[3][2], "series_000002.raw")
-            self.assertEqual(trace_rows[1][6:], ["", "", "", "", "", "", "", ""])
+            self.assertEqual(trace_rows[1][6:], ["", "", "", "", "", "", "", "", ""])
 
     def test_stop_recording_stops_active_recording(self) -> None:
         frames = [

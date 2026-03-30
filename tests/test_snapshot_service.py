@@ -60,6 +60,7 @@ class SnapshotServiceTests(unittest.TestCase):
                     "analysis_roi_type",
                     "analysis_roi_data",
                     "focus_method",
+                    "focus_score_frame_interval",
                     "focus_value_mean",
                     "focus_value_stddev",
                     "focus_roi_type",
@@ -132,7 +133,7 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertEqual(trace_rows[1][2], saved_path.name)
             self.assertEqual(trace_rows[1][4], "123456")
             self.assertTrue(trace_rows[1][5])
-            self.assertEqual(trace_rows[1][6:], ["", "", "", "", "", "", "", ""])
+            self.assertEqual(trace_rows[1][6:], ["", "", "", "", "", "", "", "", ""])
 
     def test_save_snapshot_reuses_trace_log_when_context_matches(self) -> None:
         fake_driver = MagicMock()
@@ -219,6 +220,7 @@ class SnapshotServiceTests(unittest.TestCase):
                     points=((1, 2), (30, 40)),
                 ),
                 focus_method="laplace",
+                focus_score_frame_interval=7,
                 focus_value_mean=0.75,
                 focus_value_stddev=0.05,
                 focus_roi=RoiDefinition(
@@ -247,10 +249,11 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertEqual(trace_rows[1][7], "rectangle")
             self.assertEqual(trace_rows[1][8], "rectangle(1,2,30,40)")
             self.assertEqual(trace_rows[1][9], "laplace")
-            self.assertEqual(trace_rows[1][10], "0.75")
-            self.assertEqual(trace_rows[1][11], "0.05")
-            self.assertEqual(trace_rows[1][12], "ellipse")
-            self.assertEqual(trace_rows[1][13], "ellipse(10,20,25,35)")
+            self.assertEqual(trace_rows[1][10], "7")
+            self.assertEqual(trace_rows[1][11], "0.75")
+            self.assertEqual(trace_rows[1][12], "0.05")
+            self.assertEqual(trace_rows[1][13], "ellipse")
+            self.assertEqual(trace_rows[1][14], "ellipse(10,20,25,35)")
 
     def test_record_snapshot_trace_reuses_log_when_only_artifact_metadata_changes(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -284,6 +287,7 @@ class SnapshotServiceTests(unittest.TestCase):
                 artifact_metadata=build_trace_artifact_metadata(
                     analysis_roi=RoiDefinition(roi_id="roi-b", shape="freehand", points=((1, 1), (2, 2), (3, 3))),
                     focus_method="tenengrad",
+                    focus_score_frame_interval=5,
                     focus_value_mean=1.25,
                 ),
             )
@@ -293,6 +297,13 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertFalse((Path(temp_dir) / "saved_artifact_traceability_001.csv").exists())
             trace_lines = trace_path.read_text(encoding="utf-8").splitlines()
             self.assertEqual(trace_lines.count("# run.start"), 2)
+
+    def test_build_trace_artifact_metadata_requires_aggregation_basis_for_focus_summary_fields(self) -> None:
+        with self.assertRaisesRegex(ValueError, "aggregation basis"):
+            build_trace_artifact_metadata(
+                focus_method="laplace",
+                focus_value_mean=0.75,
+            )
 
     def test_save_snapshot_logs_and_reraises_writer_errors(self) -> None:
         fake_driver = MagicMock()
