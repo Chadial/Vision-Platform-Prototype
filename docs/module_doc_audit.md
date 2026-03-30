@@ -99,6 +99,21 @@ The next cleanup pass should focus on:
 2. keeping prepared-only module docs short and explicit
 3. removing cross-document ambiguity, not deleting files aggressively
 
+## Post-WP39 Direction
+
+Current trust-and-shrink guidance after the first bounded pass:
+
+- active-module `ROADMAP.md` files should stay only when they still contain real local future intent
+- active-module `STATUS.md` files should prefer local implemented reality, residuals, and limitations over `next step` prose
+- prepared-only modules should remain intentionally small rather than being expanded into speculative mini-manuals
+- `README.md` should keep purpose and boundaries, not local PM history
+
+Observed outcome from the pass:
+
+- several stale reorganization and already-landed transition notes were removed or tightened
+- multiple active-module `ROADMAP.md` files were shrunk so they no longer compete as shadow PM surfaces
+- prepared-only module docs remain in place, but continue to be treated as intentionally lightweight
+
 ## Explicit Non-Goal
 
 This audit does not recommend turning module-local docs into another PM stack.

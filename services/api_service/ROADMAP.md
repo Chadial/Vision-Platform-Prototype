@@ -1,6 +1,5 @@
 # Roadmap
 
-- consume the clarified host-neutral command surface before introducing any transport-facing API contract
-- extend the first status payload family only after the adapter-DTO boundary is proven stable enough
-- decide whether local API, IPC, or embedded host integration comes first
-- defer framework choice and streaming/feed transport work until more than one payload family is ready
+- keep the current status payload family narrow and stable
+- add command-result DTOs only when an actual adapter or transport path needs them
+- defer framework choice and feed/stream transport work until there is more than one real payload family to support

@@ -34,4 +34,4 @@ Prefer the `vision_platform.integrations.camera` namespace.
 ## Implementation Location
 
 - current platform-owned driver implementations live under `src/vision_platform/integrations/camera`
-- legacy compatibility imports may still bridge through `src/camera_app` in some paths during the migration period
+- legacy compatibility imports may still bridge through `src/camera_app` in some paths

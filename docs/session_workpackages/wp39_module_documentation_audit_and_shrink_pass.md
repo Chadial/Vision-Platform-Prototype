@@ -119,3 +119,26 @@ To activate this work package later:
 5. Read `docs/module_doc_audit.md`
 6. Read `docs/WORKPACKAGES.md`
 7. Create the intended branch before substantive edits
+
+## Landed Outcome
+
+Observed result on March 30, 2026:
+
+- multiple active-module `ROADMAP.md` files still carried stale reorganization or already-landed transition wording
+- several module-local `STATUS.md` files still ended with broad `next step` or outdated local planning prose instead of current module reality
+- prepared-only modules were already small, but their role benefited from more explicit wording
+
+Implemented narrowing:
+
+- active-module `ROADMAP.md` files were shrunk toward real local future intent instead of central PM repetition
+- stale reorganization wording was removed from module-local docs where the transition was already complete
+- selected `STATUS.md` files were tightened toward implemented reality, residuals, and local direction instead of broad planning
+- prepared-only module docs stayed intentionally short
+- `docs/module_doc_audit.md` now records the post-pass trust-and-shrink guidance explicitly
+
+Current interpretation after landing:
+
+- module-local docs remain useful and should stay
+- `README.md` is the local purpose/boundary surface
+- `STATUS.md` is the local implemented-reality surface
+- `ROADMAP.md` should stay only where local future intent still adds value and should otherwise remain very small

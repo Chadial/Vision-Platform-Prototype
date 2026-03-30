@@ -10,4 +10,4 @@
 - known issues: no feature-status marker exists inside the model types themselves, so support level must currently be documented in module status and roadmap files
 - technical debt: duplicate concepts exist intentionally during transition
 - risk: model divergence if future changes are applied to only one side
-- next: keep future platform-facing contracts aligned to `common_models`, explicitly mark prepared-vs-implemented contract surface in docs, and defer freehand/polygon ROI behavior until a later ROI-core phase
+- local direction: keep platform-facing contracts aligned here and document prepared-vs-implemented surface explicitly when contract shapes run ahead of downstream behavior
