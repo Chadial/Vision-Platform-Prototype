@@ -184,6 +184,7 @@ Notes:
 - `target_frame_rate` is a pacing target for recording acquisition.
 - `target_frame_rate` does not replace camera-side acquisition settings; it is part of recording control.
 - `save_directory` may be omitted if a default save directory was set earlier.
+- On the current stable baseline, this request belongs to bounded in-process recording, not detached multi-invocation recording control.
 
 Examples:
 
@@ -227,6 +228,11 @@ StopRecordingRequest(
     reason="external_request",
 )
 ```
+
+Boundary note:
+
+- on the current stable baseline, this request is meaningful against the same live subsystem ownership boundary that started the recording
+- it should not currently be read as a promise of detached stop control across separate CLI or process invocations
 
 ### `StartIntervalCaptureRequest`
 
@@ -426,7 +432,11 @@ What this does not mean:
 
 - every current transport-facing nested payload is fully frozen
 - broader API or IPC DTO families are already defined
-- detached multi-invocation lifecycle control is already part of the stable current host baseline
+- detached multi-invocation lifecycle control is not already part of the stable current host baseline
+
+For the current bounded-recording versus detached-later decision boundary, use:
+
+- `docs/RECORDING_LIFECYCLE_BOUNDARY.md`
 
 For the stable-now versus deferred-later split of the broader host-facing surface, use:
 

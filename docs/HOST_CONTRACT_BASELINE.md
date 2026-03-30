@@ -43,6 +43,10 @@ The deferred-later area includes:
 - detached long-running remote control semantics
 - broader frontend- or IPC-specific contract layers
 
+For the current bounded recording meaning versus detached-later scope, use:
+
+- `docs/RECORDING_LIFECYCLE_BOUNDARY.md`
+
 ## Stable Now
 
 ### Command terms
@@ -79,6 +83,11 @@ Current meaning:
 - `snapshot` is a short-running save command with a stable success/error envelope
 - `recording` means bounded in-process recording that starts and completes within one invocation
 - `interval-capture` means bounded in-process timed capture that starts and completes within one invocation and now returns the same bounded result-ownership style as the other host-oriented commands
+
+Recording boundary note:
+
+- `recording` is stable now only in that bounded in-process sense
+- detached multi-invocation recording lifecycle control remains intentionally deferred rather than partially promised
 
 ### Stable error envelope
 
