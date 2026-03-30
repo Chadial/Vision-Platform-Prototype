@@ -62,6 +62,42 @@ DEFAULT_FEATURE_NAMES = (
 )
 
 
+def _normalized_identity_value(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text or text.upper() == "N/A":
+        return ""
+    return text
+
+
+def _camera_identity_score(camera) -> tuple[int, int, int, int]:
+    serial = _normalized_identity_value(getattr(camera, "get_serial", lambda: None)())
+    name = _normalized_identity_value(getattr(camera, "get_name", lambda: None)())
+    model = _normalized_identity_value(getattr(camera, "get_model", lambda: None)())
+    interface_id = _normalized_identity_value(getattr(camera, "get_interface_id", lambda: None)())
+    return (
+        1 if serial else 0,
+        1 if name else 0,
+        1 if model else 0,
+        1 if interface_id else 0,
+    )
+
+
+def _select_preferred_camera(cameras: list[Any]):
+    if not cameras:
+        raise RuntimeError("No camera detected by Vimba X.")
+    return max(cameras, key=_camera_identity_score)
+
+
+def select_camera_from_system(vmb, camera_id: str | None = None):
+    cameras = list(vmb.get_all_cameras())
+    if camera_id:
+        matching_cameras = [camera for camera in cameras if camera.get_id() == camera_id]
+        if matching_cameras:
+            return _select_preferred_camera(matching_cameras)
+        return vmb.get_camera_by_id(camera_id)
+    return _select_preferred_camera(cameras)
+
+
 def _package_version(name: str) -> str | None:
     try:
         return version(name)
@@ -155,7 +191,7 @@ def probe_camera_capabilities(
     feature_names: tuple[str, ...] = DEFAULT_FEATURE_NAMES,
 ) -> dict[str, Any]:
     with VmbSystem.get_instance() as vmb:
-        camera = vmb.get_camera_by_id(camera_id) if camera_id else vmb.get_all_cameras()[0]
+        camera = select_camera_from_system(vmb, camera_id=camera_id)
         with camera:
             return _serialize_camera_payload(camera, feature_names=feature_names)
 
@@ -175,5 +211,6 @@ __all__ = [
     "DEFAULT_FEATURE_NAMES",
     "probe_camera_capabilities",
     "probe_open_camera_capabilities",
+    "select_camera_from_system",
     "write_camera_capabilities_json",
 ]

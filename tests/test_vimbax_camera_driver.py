@@ -77,6 +77,74 @@ class VimbaXCameraDriverTests(unittest.TestCase):
         fake_vmb_system.get_camera_by_id.assert_called_once_with("CAM-123")
 
     @patch("vision_platform.integrations.camera.vimbax_camera_driver.VmbSystem")
+    def test_initialize_prefers_richer_duplicate_camera_entry_for_explicit_id(self, vmb_system_type: MagicMock) -> None:
+        richer_camera = MagicMock()
+        richer_camera.get_id.return_value = "CAM-123"
+        richer_camera.get_name.return_value = "NamedCam"
+        richer_camera.get_model.return_value = "ModelB"
+        richer_camera.get_serial.return_value = "SER-123"
+        richer_camera.get_interface_id.return_value = "IF-123"
+
+        duplicate_camera = MagicMock()
+        duplicate_camera.get_id.return_value = "CAM-123"
+        duplicate_camera.get_name.return_value = "NamedCam"
+        duplicate_camera.get_model.return_value = "ModelB"
+        duplicate_camera.get_serial.return_value = "N/A"
+        duplicate_camera.get_interface_id.return_value = "IF-123"
+
+        fake_rate_feature = MagicMock()
+        fake_rate_feature.is_readable.return_value = True
+        fake_rate_feature.get.return_value = 8.0
+        fake_rate_enable_feature = MagicMock()
+        fake_rate_enable_feature.is_readable.return_value = True
+        fake_rate_enable_feature.get.return_value = False
+        richer_camera.get_feature_by_name.side_effect = lambda name: {
+            "AcquisitionFrameRate": fake_rate_feature,
+            "AcquisitionFrameRateEnable": fake_rate_enable_feature,
+        }[name]
+
+        fake_vmb_system = MagicMock()
+        fake_vmb_system.get_all_cameras.return_value = [duplicate_camera, richer_camera]
+        vmb_system_type.get_instance.return_value = fake_vmb_system
+
+        driver = VimbaXCameraDriver()
+
+        status = driver.initialize(camera_id="CAM-123")
+
+        self.assertEqual(status.camera_serial, "SER-123")
+        fake_vmb_system.get_camera_by_id.assert_not_called()
+
+    @patch("vision_platform.integrations.camera.vimbax_camera_driver.VmbSystem")
+    def test_initialize_preserves_pre_open_identity_when_open_camera_reports_na(self, vmb_system_type: MagicMock) -> None:
+        fake_camera = MagicMock()
+        fake_camera.get_id.return_value = "CAM-123"
+        fake_camera.get_name.side_effect = ["NamedCam", "NamedCam", "NamedCam", "NamedCam"]
+        fake_camera.get_model.side_effect = ["ModelB", "ModelB", "ModelB", "ModelB"]
+        fake_camera.get_serial.side_effect = ["SER-123", "SER-123", "N/A", "N/A"]
+        fake_camera.get_interface_id.side_effect = ["IF-123", "IF-123", "IF-123", "IF-123"]
+
+        fake_rate_feature = MagicMock()
+        fake_rate_feature.is_readable.return_value = True
+        fake_rate_feature.get.return_value = 8.0
+        fake_rate_enable_feature = MagicMock()
+        fake_rate_enable_feature.is_readable.return_value = True
+        fake_rate_enable_feature.get.return_value = False
+        fake_camera.get_feature_by_name.side_effect = lambda name: {
+            "AcquisitionFrameRate": fake_rate_feature,
+            "AcquisitionFrameRateEnable": fake_rate_enable_feature,
+        }[name]
+
+        fake_vmb_system = MagicMock()
+        fake_vmb_system.get_all_cameras.return_value = [fake_camera]
+        vmb_system_type.get_instance.return_value = fake_vmb_system
+
+        driver = VimbaXCameraDriver()
+
+        status = driver.initialize(camera_id="CAM-123")
+
+        self.assertEqual(status.camera_serial, "SER-123")
+
+    @patch("vision_platform.integrations.camera.vimbax_camera_driver.VmbSystem")
     def test_shutdown_closes_camera_and_system(self, vmb_system_type: MagicMock) -> None:
         fake_camera = MagicMock()
         fake_camera.get_id.return_value = "CAM-001"

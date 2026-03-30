@@ -25,7 +25,7 @@ Current repository note:
 ## Current Hardware Verdict
 
 - current hardware baseline: prototype-level validated on the tested camera path `DEV_1AB22C046D81`
-- residual observations: `vmbpyLog <VmbError.NotAvailable: -30>`, duplicate SDK visibility for the tested camera id, bounded interval jitter, and timing-sensitive back-to-back CLI reuse observations
+- residual observations: `vmbpyLog <VmbError.NotAvailable: -30>`, raw duplicate SDK visibility for the tested camera id, bounded interval jitter, and timing-sensitive back-to-back CLI reuse observations
 - next likely hardware follow-up: only residual-driven narrowing such as remaining lifecycle timing observations or further diagnostics around host-visible device constraints, not broad new hardware exploration
 
 ## Current Verified Hardware Status
@@ -46,7 +46,7 @@ Current repository position after the March 27 and March 30, 2026 runs:
 The main residuals still under observation are:
 
 - `vmbpyLog <VmbError.NotAvailable: -30>` during otherwise successful runs
-- duplicate SDK-visible entries for `DEV_1AB22C046D81`
+- duplicate SDK-visible entries for `DEV_1AB22C046D81` at raw Vimba X enumeration level
 - bounded but not perfectly stable interval timing
 - remaining timing-sensitive device-reuse observations when separate real-device CLI invocations are fired back-to-back too aggressively
 
@@ -280,6 +280,26 @@ Current interpretation after WP29:
 - it is not currently evidenced as a capability-probe failure surfaced through the repository status model
 - it should therefore remain documented as residual noise under observation, not as proof that startup is failing
 
+Latest WP35 enumeration / startup residual rerun on March 30, 2026:
+
+- raw Vimba X enumeration was rerun on `DEV_1AB22C046D81`
+- the SDK still exposed two entries with the same camera id:
+  - one entry with serial `067WH`
+  - one entry with serial `N/A`
+- direct CLI `status` rerun on the same hardware path remained successful and still emitted `vmbpyLog <VmbError.NotAvailable: -30>` on stderr
+- an additional direct open-camera probe showed that the richer enumerated camera entry can degrade from serial `067WH` to `N/A` after the SDK camera object is opened
+
+Implemented narrowing after WP35:
+
+- the repository now resolves duplicate SDK-visible entries by camera id and prefers the richer identity candidate during hardware camera selection
+- the hardware driver now preserves the richer pre-open identity for host-visible status fields when the opened camera object degrades identity fields such as `camera_serial`
+
+Observed result after WP35:
+
+- hardware-backed CLI `status` on `DEV_1AB22C046D81` now again reports the richer serial `067WH` through the repository status surface
+- the duplicate SDK visibility remains a raw SDK-level residual under observation rather than a current host-surface identity defect
+- the `NotAvailable: -30` line still remains non-blocking SDK / logging residual on the successful tested path
+
 Latest WP30 interval timing and polling rerun on March 30, 2026:
 
 - one bounded real-device interval-capture rerun with active polling was executed on `DEV_1AB22C046D81`
@@ -373,7 +393,7 @@ Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 
 | Area | Result | Notes |
 | --- | --- | --- |
 | Initialization / Shutdown | PASS with narrower reuse confidence | Integrated hardware runs completed cleanly, and the March 30 WP27 serial `status -> status`, `snapshot -> status`, and `recording -> status` proofs no longer reproduced `camera already in use`; successful commands may still emit a `vmbpyLog <VmbError.NotAvailable: -30>` line that remains under observation |
-| Explicit Camera Selection | PASS with residual note | Hardware runs used explicit camera id `DEV_1AB22C046D81`; enumeration currently shows duplicate SDK-visible entries for that same id |
+| Explicit Camera Selection | PASS with narrowed residual note | Hardware runs used explicit camera id `DEV_1AB22C046D81`; raw Vimba X enumeration still shows duplicate SDK-visible entries for that same id, but the repository now prefers the richer identity candidate and preserves serial `067WH` on the current host-visible status path |
 | Configuration Application | PASS | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; camera-side frame-rate control also works when `AcquisitionFrameRateEnable` is enabled first |
 | Snapshot Save | PASS | `Mono8`, `Mono10`, and hardware-backed `BMP` snapshot paths produced plausible files |
 | Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow and in the in-process bounded rerun |
