@@ -12,6 +12,7 @@ It should not become a second analytics core separate from the shared libraries 
 - stored-image focus report over saved `.bmp` artifacts produced by the dependency-free writer baseline
 - reuse of the simulator-backed sample-image ingestion path plus a narrow saved-`BMP` loader above `focus_core`
 - compact metadata-aware offline reuse of saved artifacts when a folder-local traceability log is present, with deterministic join by saved image name
+- when focus-summary metadata is present in that traceability log, the compact report now also surfaces its explicit aggregation-basis field instead of treating summary values as standalone
 
 ## Not This Module Yet
 
