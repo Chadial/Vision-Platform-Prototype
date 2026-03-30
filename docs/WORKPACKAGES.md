@@ -556,6 +556,10 @@ Deferred future-facing bucket list for the profile system:
 - keep merge precedence explicit if that later happens: repo reference profile, then local override, then explicit CLI args
 - prefer narrow `show` / `list` inspection before any broad profile-management UI or command surface
 - keep `save current as profile`, richer metadata, and any `camera_id` / `camera_alias` override layer as later optional steps rather than current queued obligations
+- consider a later desktop operator window baseline that reuses proven OpenCV-prototype interactions inside a clearer desktop shell with menu/command area and status bar, but keep it separate from the current CLI and from profile-baseline work
+- consider a later host-emulator companion flow that can drive commands and status changes while a live preview remains visible, so host/control and frontend/display separation can be exercised under more realistic operator conditions before any broader transport work
+- consider operator-session runbook refinement and desktop-ready warning/error surfacing as later operational-readiness steps if repeated real usage reveals that the current terminal/JSON path is no longer enough for human operators
+- consider a dedicated preview-plus-control split validation slice later to prove that live preview plus bounded external control remain coherent without reopening the architecture
 
 ## Fresh Agent Decision Rule
 
