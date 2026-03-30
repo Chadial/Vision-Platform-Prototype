@@ -8,6 +8,7 @@ from tests import _path_setup
 from vision_platform.integrations.camera.capability_probe import (
     probe_camera_capabilities,
     probe_open_camera_capabilities,
+    select_camera_from_system,
     write_camera_capabilities_json,
 )
 
@@ -105,6 +106,29 @@ class CapabilityProbeTests(unittest.TestCase):
             payload = json.loads(target.read_text(encoding="utf-8"))
             self.assertEqual(payload["camera"]["model"], "ModelA")
             self.assertEqual(payload["features"]["DeviceVendorName"]["value"], "Allied Vision")
+
+    def test_select_camera_from_system_prefers_richer_duplicate_identity(self) -> None:
+        richer_camera = MagicMock()
+        richer_camera.get_id.return_value = "CAM-123"
+        richer_camera.get_serial.return_value = "SER-123"
+        richer_camera.get_name.return_value = "NamedCam"
+        richer_camera.get_model.return_value = "ModelB"
+        richer_camera.get_interface_id.return_value = "IF-123"
+
+        duplicate_camera = MagicMock()
+        duplicate_camera.get_id.return_value = "CAM-123"
+        duplicate_camera.get_serial.return_value = "N/A"
+        duplicate_camera.get_name.return_value = "NamedCam"
+        duplicate_camera.get_model.return_value = "ModelB"
+        duplicate_camera.get_interface_id.return_value = "IF-123"
+
+        fake_vmb_system = MagicMock()
+        fake_vmb_system.get_all_cameras.return_value = [duplicate_camera, richer_camera]
+
+        selected_camera = select_camera_from_system(fake_vmb_system, camera_id="CAM-123")
+
+        self.assertIs(selected_camera, richer_camera)
+        fake_vmb_system.get_camera_by_id.assert_not_called()
 
 
 if __name__ == "__main__":

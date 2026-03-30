@@ -58,3 +58,24 @@ Leave the repository with one more explicit answer about whether the remaining s
 - bounded real-hardware reruns on the tested camera path
 - update `docs/HARDWARE_EVALUATION.md` if the interpretation changes
 
+## Landed Outcome
+
+Observed result on March 30, 2026:
+
+- raw Vimba X enumeration still exposed duplicate SDK-visible entries for `DEV_1AB22C046D81`
+- the duplicate pair remained:
+  - one entry with serial `067WH`
+  - one entry with serial `N/A`
+- direct real-hardware CLI `status` reruns still emitted `vmbpyLog <VmbError.NotAvailable: -30>` on stderr without failing startup
+
+Implemented narrowing:
+
+- the repository now resolves duplicate SDK-visible entries by camera id and prefers the richer identity candidate during camera selection
+- the hardware driver now preserves that richer pre-open camera identity for host-visible status fields when the opened camera object degrades fields such as `camera_serial` to `N/A`
+
+Current interpretation after landing:
+
+- duplicate SDK visibility remains an SDK-level residual under observation
+- the repository no longer needs to surface that duplicate ambiguity as degraded host-visible camera identity on the tested path
+- the `NotAvailable: -30` line remains classified as non-blocking SDK / logging residual unless later evidence ties it to actual startup or capability degradation
+

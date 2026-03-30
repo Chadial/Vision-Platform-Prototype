@@ -9,6 +9,7 @@ from vision_platform.integrations.camera.camera_driver import CameraDriver
 from vision_platform.integrations.camera.capability_probe import (
     DEFAULT_FEATURE_NAMES,
     probe_open_camera_capabilities,
+    select_camera_from_system,
 )
 from vision_platform.models import CameraConfiguration, CameraStatus, CapturedFrame
 
@@ -22,6 +23,31 @@ class VimbaXCameraDriver(CameraDriver):
         self._camera: Optional[Camera] = None
         self._latest_frame: Optional[CapturedFrame] = None
         self._snapshot_timeout_ms = snapshot_timeout_ms
+        self._selected_camera_identity: dict[str, str | None] | None = None
+
+    @staticmethod
+    def _normalize_identity_value(value: str | None) -> str | None:
+        text = (value or "").strip()
+        if not text or text.upper() == "N/A":
+            return None
+        return text
+
+    def _capture_camera_identity(self, camera: Camera) -> dict[str, str | None]:
+        return {
+            "camera_id": camera.get_id(),
+            "camera_name": self._normalize_identity_value(camera.get_name()),
+            "camera_model": self._normalize_identity_value(camera.get_model()),
+            "camera_serial": self._normalize_identity_value(camera.get_serial()),
+            "interface_id": self._normalize_identity_value(camera.get_interface_id()),
+        }
+
+    def _prefer_identity_value(self, current: str | None, fallback_key: str) -> str | None:
+        normalized_current = self._normalize_identity_value(current)
+        if normalized_current is not None:
+            return normalized_current
+        if self._selected_camera_identity is None:
+            return current
+        return self._selected_camera_identity.get(fallback_key) or current
 
     def _build_camera_status(self, camera: Camera) -> CameraStatus:
         return CameraStatus(
@@ -30,23 +56,17 @@ class VimbaXCameraDriver(CameraDriver):
             source_kind="hardware",
             driver_name=self.__class__.__name__,
             camera_id=camera.get_id(),
-            camera_name=camera.get_name(),
-            camera_model=camera.get_model(),
-            camera_serial=camera.get_serial(),
-            interface_id=camera.get_interface_id(),
+            camera_name=self._prefer_identity_value(camera.get_name(), "camera_name"),
+            camera_model=self._prefer_identity_value(camera.get_model(), "camera_model"),
+            camera_serial=self._prefer_identity_value(camera.get_serial(), "camera_serial"),
+            interface_id=self._prefer_identity_value(camera.get_interface_id(), "interface_id"),
             reported_acquisition_frame_rate=self._try_read_feature_value("AcquisitionFrameRate"),
             acquisition_frame_rate_enabled=self._try_read_feature_value("AcquisitionFrameRateEnable"),
         )
 
     def _select_camera(self, camera_id: Optional[str]) -> Camera:
         assert self._vmb_system is not None
-        if camera_id:
-            return self._vmb_system.get_camera_by_id(camera_id)
-
-        cameras = self._vmb_system.get_all_cameras()
-        if not cameras:
-            raise RuntimeError("No camera detected by Vimba X.")
-        return cameras[0]
+        return select_camera_from_system(self._vmb_system, camera_id=camera_id)
 
     def _require_camera(self) -> Camera:
         if self._camera is None:
@@ -153,6 +173,7 @@ class VimbaXCameraDriver(CameraDriver):
             self._vmb_system = VmbSystem.get_instance()
             self._vmb_system.__enter__()
             self._camera = self._select_camera(camera_id)
+            self._selected_camera_identity = self._capture_camera_identity(self._camera)
             self._camera.__enter__()
             return self._refresh_status()
         except Exception as exc:
@@ -180,6 +201,7 @@ class VimbaXCameraDriver(CameraDriver):
                 self._vmb_system = None
 
         self._latest_frame = None
+        self._selected_camera_identity = None
         self._status = CameraStatus()
 
     def apply_configuration(self, config: CameraConfiguration) -> None:
