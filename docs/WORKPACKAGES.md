@@ -305,6 +305,7 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | active lane | landed selective-expansion slice; `api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without introducing framework or transport runtime scope | `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
 | 45 | Stored Camera Configuration Profiles Baseline | introduce one bounded named profile baseline over the current host-neutral `CameraConfiguration` path | current next | prepared post-closure operational-readiness / selective-expansion slice; camera-class-first named profiles should begin with a `default` profile and continue to reuse the existing capability-aware configuration path | `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md` |
 | 46 | Camera Alias And ID Resolution Baseline | introduce one bounded alias-to-camera-id resolution layer above the current explicit camera-selection path | active lane | landed post-closure operational-readiness slice; the camera CLI now supports repo-local alias resolution through `configs/camera_aliases.json`, including the tested example alias `tested_camera`, while preserving direct explicit `camera_id` support and avoiding device-inventory scope | `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md` |
+| 47 | Traceability Control Context Extension | carry additive alias and profile-selection context into the existing snapshot and bounded-recording traceability path | active lane | landed post-closure data/logging follow-up; snapshot and bounded recording now preserve `camera_alias` and optional profile identity in stable traceability context when the current request path provides them, while the offline stable-context consumer exposes those fields additively | `docs/session_workpackages/wp47_traceability_control_context_extension.md` |
 
 ## Immediate PM Backlog
 
@@ -533,7 +534,8 @@ The current coarse PM order should be:
 23. treat `WP38` and `WP44` as landed selective-expansion slices rather than as open default lanes
 24. treat `WP45` as the current next bounded profile-baseline slice over the existing `CameraConfiguration` path rather than as a property-store or alias-system expansion
 25. treat `WP46` as the landed bounded alias-to-camera-id convenience slice rather than as a discovery or inventory lane
-26. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+26. treat `WP47` as the landed additive traceability follow-up for alias and profile-selection context rather than as a broader host-contract or inventory expansion
+27. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
 
@@ -609,6 +611,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
 - `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
 - `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md`
+- `docs/session_workpackages/wp47_traceability_control_context_extension.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
@@ -651,6 +654,7 @@ Current explicit activation:
 - `Bounded API Adapter Command Surface` now has its landed execution-ready file at `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
 - `Stored Camera Configuration Profiles Baseline` now has its prepared execution-ready file at `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
 - `Camera Alias And ID Resolution Baseline` now has its landed execution-ready file at `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md`
+- `Traceability Control Context Extension` now has its landed execution-ready file at `docs/session_workpackages/wp47_traceability_control_context_extension.md`
 
 ## PM Refinement Rule
 

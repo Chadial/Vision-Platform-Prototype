@@ -35,6 +35,7 @@ Traceability note:
 
 - snapshot saving and bounded recording now both write into one folder-local appendable traceability log with stable context header, run/session blocks, and per-image rows
 - snapshot saving and bounded recording now also reuse deterministic `run_id` rules that can be surfaced again in the current host-facing command path for narrow trace linkage
+- that stable context can now also carry additive control-context fields such as `camera_alias`, `configuration_profile_id`, and `configuration_profile_camera_class` when the current request path provides them
 - per-image traceability rows now also support optional focus-summary aggregation metadata, with an explicit aggregation-basis field and `focus_method` required when summary fields such as `focus_value_mean` or `focus_value_stddev` are stored
 - the current shared `focus_score_frame_interval` aggregation basis is intentionally validated as a positive integer count, and `focus_value_stddev` must be numeric and non-negative when present
 - normal snapshot and bounded-recording save flows can now emit that focus metadata through an explicit producer wiring path when the subsystem or service composition enables it
