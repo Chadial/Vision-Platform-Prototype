@@ -253,6 +253,27 @@ Observed result from the WP27 serial hardware proof:
   - `captures/hardware_smoke/wp27_recording_reuse_check`
 - the residual `vmbpyLog <VmbError.NotAvailable: -30>` line was not the target of this slice and may still appear independently of the narrowed reuse result
 
+WP28 capability-aware ROI reporting follow-up on March 30, 2026:
+
+- the current CLI host surface now returns configuration failures during apply-configuration as `configuration_error` instead of only generic `command_error`
+- capability-backed ROI width/offset failures now include:
+  - requested value
+  - camera feature name
+  - allowed range
+  - required increment and base
+  - nearest valid values where practical
+
+Observed result from the WP28 hardware spot-check:
+
+- invalid width request on `DEV_1AB22C046D81`:
+  - `roi_width=2001`
+  - returned `configuration_error`
+  - message included `Width`, range `8..4008`, increment `8`, base `8`, nearest valid values `2000, 2008`
+- invalid offset request on `DEV_1AB22C046D81`:
+  - `roi_offset_x=17`
+  - returned `configuration_error`
+  - message included `OffsetX`, range `0..2024`, increment `2`, base `0`, nearest valid values `16, 18`
+
 Additional camera-specific rerun on March 30, 2026 against `docs/HARDWARE_CAPABILITIES.md`:
 
 - integrated `Mono8` command-flow rerun with `exposure_time_us=10031.291`, `gain=3.0`, `roi_width=2000`, `roi_height=1500`

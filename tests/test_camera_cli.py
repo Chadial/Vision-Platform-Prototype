@@ -4,6 +4,8 @@ from tempfile import TemporaryDirectory
 import contextlib
 import json
 import unittest
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 from tests import _path_setup
 from vision_platform.apps.camera_cli import CameraCliError, main, run_cli
@@ -224,6 +226,48 @@ class CameraCliTests(unittest.TestCase):
         self.assertIsNone(payload["status"])
         self.assertEqual(payload["error"]["code"], "argument_error")
         self.assertIn("--frame-limit", payload["error"]["message"])
+
+    @patch("vision_platform.apps.camera_cli.camera_cli._build_subsystem_for_args")
+    def test_main_prints_configuration_error_envelope_for_invalid_roi_configuration(
+        self,
+        build_subsystem_mock,
+    ) -> None:
+        camera_service = MagicMock()
+        command_controller = MagicMock()
+        command_controller.apply_configuration.side_effect = ValueError(
+            "CameraConfiguration.roi_width=2001 is invalid for camera feature 'Width': "
+            "value must align to increment 8 from base 8; allowed range 8..4024; nearest valid values: 2000, 2008."
+        )
+        build_subsystem_mock.return_value = SimpleNamespace(
+            camera_service=camera_service,
+            command_controller=command_controller,
+        )
+
+        stdout = StringIO()
+        stderr = StringIO()
+
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+            exit_code = main(
+                [
+                    "status",
+                    "--source",
+                    "hardware",
+                    "--camera-id",
+                    "CAM-001",
+                    "--roi-width",
+                    "2001",
+                ]
+            )
+
+        payload = json.loads(stderr.getvalue())
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertFalse(payload["success"])
+        self.assertEqual(payload["error"]["code"], "configuration_error")
+        self.assertEqual(payload["error"]["details"]["stage"], "apply_configuration")
+        self.assertIn("roi_width=2001", payload["error"]["message"])
+        camera_service.initialize.assert_called_once_with(camera_id="CAM-001")
+        camera_service.shutdown.assert_called_once_with()
 
 
 def _as_serializable_api_status(status):
