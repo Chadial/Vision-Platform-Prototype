@@ -184,11 +184,27 @@ class RecordingServiceTests(unittest.TestCase):
             trace_rows = list(csv.reader(line for line in trace_lines if line and not line.startswith("# ")))
             self.assertEqual(
                 trace_rows[0],
-                ["artifact_kind", "run_id", "image_name", "frame_id", "camera_timestamp", "system_timestamp_utc"],
+                [
+                    "artifact_kind",
+                    "run_id",
+                    "image_name",
+                    "frame_id",
+                    "camera_timestamp",
+                    "system_timestamp_utc",
+                    "analysis_roi_id",
+                    "analysis_roi_type",
+                    "analysis_roi_data",
+                    "focus_method",
+                    "focus_value_mean",
+                    "focus_value_stddev",
+                    "focus_roi_type",
+                    "focus_roi_data",
+                ],
             )
             self.assertEqual(trace_rows[1][0], "bounded_recording")
             self.assertEqual(trace_rows[1][2], "series_000000.raw")
             self.assertEqual(trace_rows[3][2], "series_000002.raw")
+            self.assertEqual(trace_rows[1][6:], ["", "", "", "", "", "", "", ""])
 
     def test_stop_recording_stops_active_recording(self) -> None:
         frames = [
