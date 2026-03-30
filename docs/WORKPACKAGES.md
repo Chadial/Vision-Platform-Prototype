@@ -240,6 +240,7 @@ The newly added Extended MVP packages define the next tactical planning lane wit
 | 16 | Data And Logging Traceability Extension | add one stable artifact-level metadata traceability path for saved snapshot and bounded recording outputs | active lane | first post-`WP14` extension slice; landed through `WP16` with one shared folder-local appendable trace log for snapshot and bounded recording | `docs/session_workpackages/wp16_data_logging_traceability.md` |
 | 17 | Offline And Measurement Metadata Extension | reuse saved artifact metadata in the offline report path so artifact context and focus results stay linked | current next | likely follow-up after `WP16`; narrow metadata-aware offline slice now prepared for activation | `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md` |
 | 18 | Focus Metadata Artifact Extension | define one narrow reusable artifact-level focus and analysis-ROI metadata baseline above the traceability path | active lane | landed narrow extension after `WP16`; focus summary metadata now requires an explicit aggregation basis, while exact defaults/bounds still need later testing and definition | `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md` |
+| 19 | Focus Metadata Producer Wiring | wire the artifact-level focus metadata producer into normal save flows without freezing broader statistics policy | active lane | landed narrow follow-up after `WP18`; snapshot and bounded-recording flows can now emit focus metadata when explicitly configured | `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md` |
 
 ## Immediate PM Backlog
 
@@ -262,6 +263,7 @@ Current explicitly activated detailed package:
 - detailed activation file now exists as `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
 - `Focus Metadata Artifact Extension` is now landed as a narrow follow-up and should not be folded back into `WP16`
 - `WP18` now also carries one explicit reminder for later agents: aggregation-policy details for focus summary metadata are not finalized yet and must be tested and defined later instead of being assumed silently
+- `WP19` is now also landed as the producer-wiring follow-up, but its composition stays explicit; repository-wide mandatory defaults for focus-summary policy remain later work
 
 These are important but should not be treated as the main always-on stream:
 
@@ -351,6 +353,7 @@ Current activation note:
 - `WP16` is now landed and extends `Data And Logging Closure` at the traceability level with one shared folder-local appendable traceability log for snapshot and bounded recording
 - `WP17` is now the active next extension package and should consume that new traceability baseline from the offline/reporting side
 - `WP18` is now landed behind that and makes optional focus/analysis ROI artifact metadata more explicit without silently finalizing focus-summary aggregation defaults or bounds
+- `WP19` is now landed behind `WP18` and wires that metadata into normal snapshot and bounded-recording save paths when explicitly configured
 - the remaining closure lanes stay at PM-lane level until a later concrete slice is selected
 
 ### Layer 4: Later Breadth Expansion
@@ -424,6 +427,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp16_data_logging_traceability.md`
 - `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
 - `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
+- `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
 
 The new Extended MVP closure lanes are intentionally introduced first at the PM level.
 
@@ -438,6 +442,7 @@ Current explicit activation:
 - `Data And Logging Traceability Extension` now has its first landed implementation-oriented package at `docs/session_workpackages/wp16_data_logging_traceability.md`
 - `Offline And Measurement Metadata Extension` now has its prepared execution-ready file at `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
 - `Focus Metadata Artifact Extension` now has its landed execution-ready file at `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
+- `Focus Metadata Producer Wiring` now has its landed execution-ready file at `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
 
 ## PM Refinement Rule
 
