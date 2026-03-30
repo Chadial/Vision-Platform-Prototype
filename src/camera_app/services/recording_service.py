@@ -17,6 +17,7 @@ from camera_app.services.shared_frame_source import SharedFrameSource
 from camera_app.storage.file_naming import build_recording_frame_path, build_recording_log_path
 from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_recording_request
+from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
 from vision_platform.services.recording_service.traceability import (
     append_trace_image_row,
     append_trace_run_end,
@@ -35,12 +36,14 @@ class RecordingService:
         poll_interval_seconds: float = 0.01,
         configuration_provider: Callable[[], CameraConfiguration | None] | None = None,
         shared_frame_source: SharedFrameSource | None = None,
+        artifact_focus_metadata_producer: ArtifactFocusMetadataProducer | None = None,
     ) -> None:
         self._driver = driver
         self._frame_writer = frame_writer or FrameWriter()
         self._poll_interval_seconds = poll_interval_seconds
         self._configuration_provider = configuration_provider
         self._shared_frame_source = shared_frame_source
+        self._artifact_focus_metadata_producer = artifact_focus_metadata_producer
         self._logger = logging.getLogger(__name__)
         self._status_lock = Lock()
         self._status = RecordingStatus()
@@ -81,6 +84,8 @@ class RecordingService:
                 monotonic() + request.duration_seconds if request.duration_seconds is not None else None
             )
             self._next_frame_due_at = monotonic()
+            if self._artifact_focus_metadata_producer is not None:
+                self._artifact_focus_metadata_producer.reset()
             self._open_recording_log(request)
             self._open_traceability_log(request)
             if self._shared_frame_source is not None:
@@ -342,6 +347,11 @@ class RecordingService:
             self._trace_run_id,
             image_name,
             frame,
+            artifact_metadata=(
+                self._artifact_focus_metadata_producer.build_metadata(frame)
+                if self._artifact_focus_metadata_producer is not None
+                else None
+            ),
         )
 
     @staticmethod

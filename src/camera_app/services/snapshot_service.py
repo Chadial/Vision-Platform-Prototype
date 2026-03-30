@@ -8,6 +8,7 @@ from camera_app.models.snapshot_request import SnapshotRequest
 from camera_app.storage.file_naming import build_snapshot_path
 from camera_app.storage.frame_writer import FrameWriter
 from camera_app.validation.request_validation import validate_snapshot_request
+from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
 from vision_platform.services.recording_service.traceability import record_snapshot_trace
 
 
@@ -17,10 +18,12 @@ class SnapshotService:
         driver: CameraDriver,
         frame_writer: FrameWriter | None = None,
         configuration_provider: Callable[[], CameraConfiguration | None] | None = None,
+        artifact_focus_metadata_producer: ArtifactFocusMetadataProducer | None = None,
     ) -> None:
         self._driver = driver
         self._frame_writer = frame_writer or FrameWriter()
         self._configuration_provider = configuration_provider
+        self._artifact_focus_metadata_producer = artifact_focus_metadata_producer
         self._logger = logging.getLogger(__name__)
 
     def save_snapshot(self, request: SnapshotRequest) -> Path:
@@ -36,7 +39,12 @@ class SnapshotService:
                 create_directories=request.create_directories,
             )
             configuration = self._configuration_provider() if self._configuration_provider is not None else None
-            record_snapshot_trace(saved_path, request, frame, configuration)
+            artifact_metadata = (
+                self._artifact_focus_metadata_producer.build_metadata(frame)
+                if self._artifact_focus_metadata_producer is not None
+                else None
+            )
+            record_snapshot_trace(saved_path, request, frame, configuration, artifact_metadata=artifact_metadata)
         except Exception:
             self._logger.exception("Snapshot save failed for '%s'.", target_path)
             raise
