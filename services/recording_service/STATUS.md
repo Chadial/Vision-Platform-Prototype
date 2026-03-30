@@ -12,6 +12,7 @@
 - implemented: snapshot and bounded-recording save flows now support an explicit reusable focus-metadata producer path, and bootstrap composition can opt into that producer wiring
 - working now: simulator-backed snapshot/recording/interval flows and root smoke scripts
 - working now: bounded recording can now complete, start again, and recover on the same service path after a selected writer-side failure without requiring a process restart, backed by targeted simulator-first tests
+- working now: the simulator-first recovery proof now also reaches the integrated bootstrap / command-controller path, including repeated stop calls after writer-side failure and successful restart on the same subsystem instance
 - working now: snapshot-side focus evaluation can reuse the shared ROI state path without moving ROI ownership into snapshot save logic
 - partial: trigger-based recording and full hardware validation are still open
 - partial: producer wiring is now available, but focus metadata emission still depends on explicit service/bootstrap configuration rather than a repository-wide mandatory default

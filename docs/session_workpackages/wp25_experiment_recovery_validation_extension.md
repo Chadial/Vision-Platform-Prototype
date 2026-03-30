@@ -23,7 +23,7 @@ The narrow goal is to validate one bounded recovery matrix more tightly, not to 
 ## Branch
 
 - intended branch: `test/experiment-recovery-validation-extension`
-- activation state: prepared queued follow-up after `WP24`
+- activation state: landed narrow follow-up after `WP24`; use `WP26` only when the real camera path is attached again
 
 ## Scope
 
@@ -41,6 +41,9 @@ Selected slice for this package:
   - host-visible status recovery after failure
   - repeated stop/restart idempotence around the affected flow
 - keep the slice simulator-first by design so it can prove behavior tightly before any later hardware-backed confirmation work
+- landed implementation note:
+  - the integrated bootstrap / command-controller path now proves writer-side recording failure, repeated post-failure stop calls, and successful restart on the same subsystem instance
+  - no production runtime redesign was required for this slice; the package landed as validation-first evidence
 
 Excluded:
 

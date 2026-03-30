@@ -1,5 +1,6 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import sleep
 import unittest
 
 from tests import _path_setup
@@ -8,10 +9,26 @@ from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.models import (
     ApplyConfigurationCommandResult,
     ApplyConfigurationRequest,
+    RecordingCommandResult,
     SaveSnapshotRequest,
     SetSaveDirectoryRequest,
+    StartRecordingRequest,
+    StopRecordingRequest,
     StartIntervalCaptureRequest,
 )
+from vision_platform.services.recording_service import FrameWriter
+
+
+class _FailingOnceFrameWriter:
+    def __init__(self) -> None:
+        self._has_failed = False
+
+    def write_frame(self, frame, target_path: Path, create_directories: bool = True) -> None:
+        if not self._has_failed:
+            self._has_failed = True
+            raise RuntimeError("frame write failed")
+
+        FrameWriter().write_frame(frame, target_path, create_directories=create_directories)
 
 
 class BootstrapTests(unittest.TestCase):
@@ -89,6 +106,85 @@ class BootstrapTests(unittest.TestCase):
                     self.assertTrue((Path(temp_dir) / "run_001" / "interval_000000.raw").exists())
                 finally:
                     subsystem.stream_service.stop_preview()
+            finally:
+                subsystem.camera_service.shutdown()
+
+    def test_build_simulated_camera_subsystem_recovers_after_recording_write_failure(self) -> None:
+        subsystem = build_simulated_camera_subsystem()
+        subsystem.recording_service._frame_writer = _FailingOnceFrameWriter()
+
+        with TemporaryDirectory() as temp_dir:
+            subsystem.camera_service.initialize(camera_id="sim-bootstrap")
+            try:
+                subsystem.command_controller.set_save_directory(
+                    SetSaveDirectoryRequest(
+                        base_directory=Path(temp_dir),
+                        mode="append",
+                    )
+                )
+
+                start_result = subsystem.command_controller.start_recording(
+                    StartRecordingRequest(
+                        file_stem="broken",
+                        file_extension=".raw",
+                        max_frame_count=2,
+                    )
+                )
+                self.assertIsInstance(start_result, RecordingCommandResult)
+                self.assertTrue(start_result.status.is_recording)
+
+                for _ in range(200):
+                    failed_status = subsystem.command_controller.get_status()
+                    if not failed_status.recording.is_recording and failed_status.recording.last_error is not None:
+                        break
+                    sleep(0.01)
+
+                failed_status = subsystem.command_controller.get_status()
+                self.assertFalse(failed_status.recording.is_recording)
+                self.assertIn("Recording write failed", failed_status.recording.last_error or "")
+                self.assertTrue(failed_status.can_start_recording)
+                self.assertFalse(failed_status.can_stop_recording)
+
+                stop_after_failure = subsystem.command_controller.stop_recording(
+                    StopRecordingRequest(reason="post_failure_cleanup")
+                )
+                second_stop_after_failure = subsystem.command_controller.stop_recording(
+                    StopRecordingRequest(reason="duplicate_cleanup")
+                )
+                self.assertEqual(stop_after_failure.stop_reason, "post_failure_cleanup")
+                self.assertEqual(second_stop_after_failure.stop_reason, "duplicate_cleanup")
+                self.assertFalse(stop_after_failure.status.is_recording)
+                self.assertFalse(second_stop_after_failure.status.is_recording)
+
+                retry_result = subsystem.command_controller.start_recording(
+                    StartRecordingRequest(
+                        file_stem="recovered",
+                        file_extension=".raw",
+                        max_frame_count=2,
+                    )
+                )
+                self.assertTrue(retry_result.status.is_recording)
+
+                for _ in range(200):
+                    status = subsystem.command_controller.get_status()
+                    if not status.recording.is_recording and status.recording.frames_written == 2:
+                        break
+                    sleep(0.01)
+
+                stop_after_recovery = subsystem.command_controller.stop_recording(
+                    StopRecordingRequest(reason="bounded_completion")
+                )
+                final_status = subsystem.command_controller.get_status()
+
+                self.assertFalse(stop_after_recovery.status.is_recording)
+                self.assertIsNotNone(stop_after_recovery.status.run_id)
+                self.assertEqual(stop_after_recovery.stop_reason, "bounded_completion")
+                self.assertFalse(final_status.recording.is_recording)
+                self.assertEqual(final_status.recording.frames_written, 2)
+                self.assertIsNone(final_status.recording.last_error)
+                self.assertTrue(final_status.can_start_recording)
+                self.assertFalse(final_status.can_stop_recording)
+                self.assertTrue((Path(temp_dir) / "recovered_000000.raw").exists())
             finally:
                 subsystem.camera_service.shutdown()
 
