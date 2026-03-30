@@ -21,6 +21,7 @@ _TRACE_ROW_HEADER = [
     "analysis_roi_type",
     "analysis_roi_data",
     "focus_method",
+    "focus_score_frame_interval",
     "focus_value_mean",
     "focus_value_stddev",
     "focus_roi_type",
@@ -34,6 +35,7 @@ class TraceArtifactMetadata:
     analysis_roi_type: str | None = None
     analysis_roi_data: str | None = None
     focus_method: str | None = None
+    focus_score_frame_interval: str | None = None
     focus_value_mean: str | None = None
     focus_value_stddev: str | None = None
     focus_roi_type: str | None = None
@@ -159,6 +161,7 @@ def append_trace_image_row(
     artifact_metadata: TraceArtifactMetadata | None = None,
 ) -> None:
     metadata = artifact_metadata or TraceArtifactMetadata()
+    _validate_focus_metadata(metadata)
     writer.writerow(
         [
             artifact_kind,
@@ -171,6 +174,7 @@ def append_trace_image_row(
             _string_value(metadata.analysis_roi_type),
             _string_value(metadata.analysis_roi_data),
             _string_value(metadata.focus_method),
+            _string_value(metadata.focus_score_frame_interval),
             _string_value(metadata.focus_value_mean),
             _string_value(metadata.focus_value_stddev),
             _string_value(metadata.focus_roi_type),
@@ -281,6 +285,7 @@ def load_trace_log(path: Path) -> TraceLogData:
                 analysis_roi_type=_optional_string(row.get("analysis_roi_type")),
                 analysis_roi_data=_optional_string(row.get("analysis_roi_data")),
                 focus_method=_optional_string(row.get("focus_method")),
+                focus_score_frame_interval=_optional_string(row.get("focus_score_frame_interval")),
                 focus_value_mean=_optional_string(row.get("focus_value_mean")),
                 focus_value_stddev=_optional_string(row.get("focus_value_stddev")),
                 focus_roi_type=_optional_string(row.get("focus_roi_type")),
@@ -305,22 +310,26 @@ def build_trace_artifact_metadata(
     *,
     analysis_roi: RoiDefinition | None = None,
     focus_method: str | None = None,
+    focus_score_frame_interval: int | str | None = None,
     focus_value_mean: float | str | None = None,
     focus_value_stddev: float | str | None = None,
     focus_roi: RoiDefinition | None = None,
 ) -> TraceArtifactMetadata:
     analysis_roi_type, analysis_roi_data = _serialize_roi(analysis_roi)
     focus_roi_type, focus_roi_data = _serialize_roi(focus_roi, default_type="global" if focus_method else None)
-    return TraceArtifactMetadata(
+    metadata = TraceArtifactMetadata(
         analysis_roi_id=analysis_roi.roi_id if analysis_roi is not None else None,
         analysis_roi_type=analysis_roi_type,
         analysis_roi_data=analysis_roi_data,
         focus_method=focus_method,
+        focus_score_frame_interval=_string_value(focus_score_frame_interval) if focus_score_frame_interval is not None else None,
         focus_value_mean=_string_value(focus_value_mean) if focus_value_mean is not None else None,
         focus_value_stddev=_string_value(focus_value_stddev) if focus_value_stddev is not None else None,
         focus_roi_type=focus_roi_type,
         focus_roi_data=focus_roi_data,
     )
+    _validate_focus_metadata(metadata)
+    return metadata
 
 
 def _read_stable_context(path: Path) -> dict[str, str]:
@@ -377,6 +386,14 @@ def _serialize_roi(
         return roi.shape, f"{roi.shape}({serialized_points})"
 
     return roi.shape, roi.shape
+
+
+def _validate_focus_metadata(metadata: TraceArtifactMetadata) -> None:
+    has_summary_values = metadata.focus_value_mean is not None or metadata.focus_value_stddev is not None
+    if has_summary_values and metadata.focus_score_frame_interval is None:
+        raise ValueError(
+            "focus_value_mean and focus_value_stddev require an explicit aggregation basis such as focus_score_frame_interval."
+        )
 
 
 def _format_coordinate(value: float) -> str:
