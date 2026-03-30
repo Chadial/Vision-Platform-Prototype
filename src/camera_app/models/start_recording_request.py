@@ -16,6 +16,9 @@ class StartRecordingRequest:
     queue_size: int = 128
     create_directories: bool = True
     camera_id: Optional[str] = None
+    camera_alias: Optional[str] = None
+    configuration_profile_id: Optional[str] = None
+    configuration_profile_camera_class: Optional[str] = None
 
     @classmethod
     def from_recording_request(cls, request: RecordingRequest) -> "StartRecordingRequest":
@@ -29,6 +32,9 @@ class StartRecordingRequest:
             queue_size=request.queue_size,
             create_directories=request.create_directories,
             camera_id=request.camera_id,
+            camera_alias=request.camera_alias,
+            configuration_profile_id=request.configuration_profile_id,
+            configuration_profile_camera_class=request.configuration_profile_camera_class,
         )
 
     def to_recording_request(self) -> RecordingRequest:
@@ -42,4 +48,7 @@ class StartRecordingRequest:
             queue_size=self.queue_size,
             create_directories=self.create_directories,
             camera_id=self.camera_id,
+            camera_alias=self.camera_alias,
+            configuration_profile_id=self.configuration_profile_id,
+            configuration_profile_camera_class=self.configuration_profile_camera_class,
         )

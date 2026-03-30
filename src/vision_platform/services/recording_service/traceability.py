@@ -83,7 +83,7 @@ def build_snapshot_stable_context(
     request: SnapshotRequest,
     configuration: CameraConfiguration | None,
 ) -> dict[str, str]:
-    return {
+    context = {
         "record_kind": "saved_artifact_folder_log",
         "save_directory": str(request.save_directory),
         "camera_id": _string_value(request.camera_id),
@@ -95,13 +95,21 @@ def build_snapshot_stable_context(
         "roi_width": _string_value(_configuration_value(configuration, "roi_width")),
         "roi_height": _string_value(_configuration_value(configuration, "roi_height")),
     }
+    _add_optional_context_value(context, "camera_alias", request.camera_alias)
+    _add_optional_context_value(context, "configuration_profile_id", request.configuration_profile_id)
+    _add_optional_context_value(
+        context,
+        "configuration_profile_camera_class",
+        request.configuration_profile_camera_class,
+    )
+    return context
 
 
 def build_recording_stable_context(
     request: RecordingRequest,
     configuration: CameraConfiguration | None,
 ) -> dict[str, str]:
-    return {
+    context = {
         "record_kind": "saved_artifact_folder_log",
         "save_directory": str(request.save_directory),
         "camera_id": _string_value(request.camera_id),
@@ -113,6 +121,14 @@ def build_recording_stable_context(
         "roi_width": _string_value(_configuration_value(configuration, "roi_width")),
         "roi_height": _string_value(_configuration_value(configuration, "roi_height")),
     }
+    _add_optional_context_value(context, "camera_alias", request.camera_alias)
+    _add_optional_context_value(context, "configuration_profile_id", request.configuration_profile_id)
+    _add_optional_context_value(
+        context,
+        "configuration_profile_camera_class",
+        request.configuration_profile_camera_class,
+    )
+    return context
 
 
 def open_trace_log(
@@ -357,6 +373,14 @@ def _configuration_value(configuration: CameraConfiguration | None, field_name: 
     if configuration is None:
         return None
     return getattr(configuration, field_name)
+
+
+def _add_optional_context_value(context: dict[str, str], key: str, value: str | None) -> None:
+    if value is None:
+        return
+    stripped = value.strip()
+    if stripped:
+        context[key] = stripped
 
 
 def _string_value(value) -> str:

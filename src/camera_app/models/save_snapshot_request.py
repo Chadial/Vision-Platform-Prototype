@@ -12,6 +12,9 @@ class SaveSnapshotRequest:
     save_directory: Optional[Path] = None
     create_directories: bool = True
     camera_id: Optional[str] = None
+    camera_alias: Optional[str] = None
+    configuration_profile_id: Optional[str] = None
+    configuration_profile_camera_class: Optional[str] = None
 
     @classmethod
     def from_snapshot_request(cls, request: SnapshotRequest) -> "SaveSnapshotRequest":
@@ -21,6 +24,9 @@ class SaveSnapshotRequest:
             save_directory=request.save_directory,
             create_directories=request.create_directories,
             camera_id=request.camera_id,
+            camera_alias=request.camera_alias,
+            configuration_profile_id=request.configuration_profile_id,
+            configuration_profile_camera_class=request.configuration_profile_camera_class,
         )
 
     def to_snapshot_request(self) -> SnapshotRequest:
@@ -30,4 +36,7 @@ class SaveSnapshotRequest:
             file_extension=self.file_extension,
             create_directories=self.create_directories,
             camera_id=self.camera_id,
+            camera_alias=self.camera_alias,
+            configuration_profile_id=self.configuration_profile_id,
+            configuration_profile_camera_class=self.configuration_profile_camera_class,
         )

@@ -39,6 +39,7 @@ class PostprocessFocusReportEntry:
 class PostprocessFocusReportContext:
     record_kind: str | None = None
     camera_id: str | None = None
+    camera_alias: str | None = None
     pixel_format: str | None = None
     exposure_time_us: str | None = None
     gain: str | None = None
@@ -46,6 +47,8 @@ class PostprocessFocusReportContext:
     roi_y: str | None = None
     roi_width: str | None = None
     roi_height: str | None = None
+    configuration_profile_id: str | None = None
+    configuration_profile_camera_class: str | None = None
 
 
 @dataclass(slots=True)
@@ -237,6 +240,7 @@ def _build_report_context(stable_context: dict[str, str]) -> PostprocessFocusRep
     context = PostprocessFocusReportContext(
         record_kind=_context_value(stable_context, "record_kind"),
         camera_id=_context_value(stable_context, "camera_id"),
+        camera_alias=_context_value(stable_context, "camera_alias"),
         pixel_format=_context_value(stable_context, "pixel_format"),
         exposure_time_us=_context_value(stable_context, "exposure_time_us"),
         gain=_context_value(stable_context, "gain"),
@@ -244,11 +248,14 @@ def _build_report_context(stable_context: dict[str, str]) -> PostprocessFocusRep
         roi_y=_context_value(stable_context, "roi_y"),
         roi_width=_context_value(stable_context, "roi_width"),
         roi_height=_context_value(stable_context, "roi_height"),
+        configuration_profile_id=_context_value(stable_context, "configuration_profile_id"),
+        configuration_profile_camera_class=_context_value(stable_context, "configuration_profile_camera_class"),
     )
     if not any(
         (
             context.record_kind,
             context.camera_id,
+            context.camera_alias,
             context.pixel_format,
             context.exposure_time_us,
             context.gain,
@@ -256,6 +263,8 @@ def _build_report_context(stable_context: dict[str, str]) -> PostprocessFocusRep
             context.roi_y,
             context.roi_width,
             context.roi_height,
+            context.configuration_profile_id,
+            context.configuration_profile_camera_class,
         )
     ):
         return None
@@ -305,12 +314,19 @@ def _format_stable_context(context: PostprocessFocusReportContext | None) -> str
         parts.append(f"record_kind={context.record_kind}")
     if context.camera_id:
         parts.append(f"camera_id={context.camera_id}")
+    if context.camera_alias:
+        parts.append(f"camera_alias={context.camera_alias}")
     if context.pixel_format:
         parts.append(f"pixel_format={context.pixel_format}")
     if context.exposure_time_us:
         parts.append(f"exposure_time_us={context.exposure_time_us}")
     if context.gain:
         parts.append(f"gain={context.gain}")
+    if context.configuration_profile_id:
+        profile_text = f"profile_id={context.configuration_profile_id}"
+        if context.configuration_profile_camera_class:
+            profile_text += f" profile_camera_class={context.configuration_profile_camera_class}"
+        parts.append(profile_text)
     if any((context.roi_x, context.roi_y, context.roi_width, context.roi_height)):
         parts.append(
             "roi="

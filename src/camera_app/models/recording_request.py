@@ -14,3 +14,6 @@ class RecordingRequest:
     queue_size: int = 128
     create_directories: bool = True
     camera_id: Optional[str] = None
+    camera_alias: Optional[str] = None
+    configuration_profile_id: Optional[str] = None
+    configuration_profile_camera_class: Optional[str] = None

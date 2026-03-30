@@ -10,3 +10,6 @@ class SnapshotRequest:
     file_extension: str = ".png"
     create_directories: bool = True
     camera_id: Optional[str] = None
+    camera_alias: Optional[str] = None
+    configuration_profile_id: Optional[str] = None
+    configuration_profile_camera_class: Optional[str] = None
