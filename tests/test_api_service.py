@@ -5,7 +5,10 @@ import unittest
 from tests import _path_setup
 from vision_platform.models import CameraConfiguration, CameraStatus, IntervalCaptureStatus, RecordingStatus, SubsystemStatus
 from vision_platform.services.api_service import (
+    ApiCommandEnvelopePayload,
     ApiSubsystemStatusPayload,
+    build_error_command_payload,
+    build_success_command_payload,
     map_subsystem_status_to_api_payload,
 )
 
@@ -136,6 +139,45 @@ class ApiServiceTests(unittest.TestCase):
         self.assertIsNone(payload_dict["default_save_directory"])
         self.assertIsNone(payload_dict["active_run"])
         self.assertFalse(payload_dict["can_save_snapshot"])
+
+    def test_build_success_command_payload_reuses_status_mapper(self) -> None:
+        status = SubsystemStatus(
+            camera=CameraStatus(camera_id="sim-api"),
+            configuration=None,
+            recording=RecordingStatus(),
+            interval_capture=IntervalCaptureStatus(),
+        )
+
+        payload = build_success_command_payload(
+            command="status",
+            source="simulated",
+            result={"status_source": "poll"},
+            status=status,
+        )
+
+        self.assertIsInstance(payload, ApiCommandEnvelopePayload)
+        self.assertTrue(payload.success)
+        self.assertEqual(payload.command, "status")
+        self.assertEqual(payload.source, "simulated")
+        self.assertEqual(payload.result["status_source"], "poll")
+        self.assertEqual(payload.status.camera.camera_id, "sim-api")
+        self.assertIsNone(payload.error)
+
+    def test_build_error_command_payload_returns_bounded_error_envelope(self) -> None:
+        payload = build_error_command_payload(
+            code="configuration_error",
+            message="roi_width invalid",
+            details={"stage": "apply_configuration"},
+        )
+
+        self.assertFalse(payload.success)
+        self.assertIsNone(payload.command)
+        self.assertIsNone(payload.source)
+        self.assertIsNone(payload.result)
+        self.assertIsNone(payload.status)
+        self.assertEqual(payload.error.code, "configuration_error")
+        self.assertEqual(payload.error.message, "roi_width invalid")
+        self.assertEqual(payload.error.details["stage"], "apply_configuration")
 
 
 if __name__ == "__main__":
