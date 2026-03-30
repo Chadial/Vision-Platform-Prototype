@@ -304,6 +304,7 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 43 | Python Baseline Packaging Manifest And Environment Guardrails | make the bounded local Python baseline easier to set up and re-enter without pretending to solve full product packaging | active lane | landed operational-readiness follow-up; the package manifest now exposes `vision-platform-cli`, bootstrap output carries clearer install guardrails, and the bounded local install contract now lives in `docs/PYTHON_BASELINE_ENVIRONMENT.md` | `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md` |
 | 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | active lane | landed selective-expansion slice; `api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without introducing framework or transport runtime scope | `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
 | 45 | Stored Camera Configuration Profiles Baseline | introduce one bounded named profile baseline over the current host-neutral `CameraConfiguration` path | current next | prepared post-closure operational-readiness / selective-expansion slice; camera-class-first named profiles should begin with a `default` profile and continue to reuse the existing capability-aware configuration path | `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md` |
+| 46 | Camera Alias And ID Resolution Baseline | introduce one bounded alias-to-camera-id resolution layer above the current explicit camera-selection path | active lane | prepared post-closure operational-readiness slice; repo-local camera aliases should reduce repeated long ids while preserving direct explicit `camera_id` support and avoiding device-inventory scope | `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md` |
 
 ## Immediate PM Backlog
 
@@ -531,7 +532,8 @@ The current coarse PM order should be:
 22. treat `WP43` as landed; the bounded package-manifest and environment-contract guardrails are now explicit through `vision-platform-cli`, bootstrap output, and `docs/PYTHON_BASELINE_ENVIRONMENT.md`
 23. treat `WP38` and `WP44` as landed selective-expansion slices rather than as open default lanes
 24. treat `WP45` as the current next bounded profile-baseline slice over the existing `CameraConfiguration` path rather than as a property-store or alias-system expansion
-25. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+25. treat `WP46` as the prepared follow-up convenience slice for bounded alias-to-camera-id resolution rather than as a discovery or inventory lane
+26. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
 
@@ -606,6 +608,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
 - `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
 - `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
+- `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
@@ -647,6 +650,7 @@ Current explicit activation:
 - `Python Baseline Packaging Manifest And Environment Guardrails` now has its landed execution-ready file at `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
 - `Bounded API Adapter Command Surface` now has its landed execution-ready file at `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
 - `Stored Camera Configuration Profiles Baseline` now has its prepared execution-ready file at `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
+- `Camera Alias And ID Resolution Baseline` now has its prepared execution-ready file at `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md`
 
 ## PM Refinement Rule
 
