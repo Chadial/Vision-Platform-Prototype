@@ -10,6 +10,7 @@ from typing import Any, Sequence
 
 from camera_app.logging.log_service import configure_logging
 from vision_platform.bootstrap import build_camera_subsystem, build_simulated_camera_subsystem
+from vision_platform.apps.camera_cli.camera_aliases import CameraAliasResolutionError, resolve_camera_id
 from vision_platform.models import (
     ApplyConfigurationRequest,
     SaveSnapshotRequest,
@@ -105,12 +106,13 @@ def run_cli(argv: Sequence[str] | None = None) -> CameraCliResult:
     parser = build_argument_parser()
     args = parser.parse_args(list(argv) if argv is not None else None)
     _validate_argument_combinations(parser, args)
+    resolved_camera_id = _resolve_camera_id(args)
     subsystem = _build_subsystem_for_args(args)
     controller = subsystem.command_controller
     camera_service = subsystem.camera_service
 
     try:
-        camera_service.initialize(camera_id=args.camera_id)
+        camera_service.initialize(camera_id=resolved_camera_id)
         try:
             _apply_configuration_if_requested(controller, args)
         except ValueError as exc:
@@ -303,6 +305,20 @@ def _collect_sample_paths(sample_dir: Path | None) -> list[Path] | None:
     return sorted([*sample_dir.glob("*.pgm"), *sample_dir.glob("*.ppm")])
 
 
+def _resolve_camera_id(args: argparse.Namespace) -> str | None:
+    try:
+        return resolve_camera_id(
+            camera_id=args.camera_id,
+            camera_alias=args.camera_alias,
+        )
+    except CameraAliasResolutionError as exc:
+        raise CameraCliError(
+            error_type="camera_selection_error",
+            message=str(exc),
+            details=exc.details,
+        ) from exc
+
+
 def _apply_configuration_if_requested(controller, args: argparse.Namespace) -> None:
     if not _has_configuration_overrides(args):
         return
@@ -479,6 +495,11 @@ def _add_common_camera_arguments(parser: argparse.ArgumentParser) -> None:
         help="Choose the simulator-backed or hardware-backed camera path.",
     )
     parser.add_argument("--camera-id", default=None, help="Explicit camera id to initialize.")
+    parser.add_argument(
+        "--camera-alias",
+        default=None,
+        help="Repo-local camera alias resolved through configs/camera_aliases.json.",
+    )
     parser.add_argument(
         "--sample-dir",
         type=Path,
