@@ -92,6 +92,38 @@ class CameraCliTests(unittest.TestCase):
             self.assertEqual(result.status.default_save_directory, target_directory)
             self.assertTrue(result.status.can_save_snapshot)
 
+    def test_snapshot_command_prints_confirmed_result_subset(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            stdout = StringIO()
+            with contextlib.redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "snapshot",
+                        "--base-directory",
+                        temp_dir,
+                        "--file-stem",
+                        "capture",
+                        "--file-extension",
+                        ".bmp",
+                        "--camera-id",
+                        "sim-confirm",
+                        "--pixel-format",
+                        "Mono8",
+                        "--exposure-time-us",
+                        "1500",
+                    ]
+                )
+
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(exit_code, 0)
+            self.assertTrue(payload["success"])
+            self.assertEqual(payload["result"]["confirmed_settings"]["camera_id"], "sim-confirm")
+            self.assertEqual(payload["result"]["confirmed_settings"]["pixel_format"], "Mono8")
+            self.assertEqual(payload["result"]["confirmed_settings"]["exposure_time_us"], 1500.0)
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_save_directory"], temp_dir)
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_file_stem"], "capture")
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_file_extension"], ".bmp")
+
     def test_interval_capture_command_writes_bounded_frames(self) -> None:
         with TemporaryDirectory() as temp_dir:
             result = run_cli(
@@ -143,6 +175,12 @@ class CameraCliTests(unittest.TestCase):
             self.assertIsNone(payload["result"]["recording_bounds"]["duration_seconds"])
             self.assertEqual(payload["result"]["recording_bounds"]["target_frame_rate"], 8.0)
             self.assertEqual(payload["result"]["confirmed_settings"]["camera_id"], "simulated-camera")
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_save_directory"], temp_dir)
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_file_stem"], "recording")
+            self.assertEqual(payload["result"]["confirmed_settings"]["resolved_file_extension"], ".raw")
+            self.assertEqual(payload["result"]["confirmed_settings"]["accepted_frame_limit"], 2)
+            self.assertIsNone(payload["result"]["confirmed_settings"]["accepted_duration_seconds"])
+            self.assertEqual(payload["result"]["confirmed_settings"]["accepted_target_frame_rate"], 8.0)
             self.assertEqual(payload["status"]["recording"]["frames_written"], 2)
             self.assertFalse(payload["status"]["recording"]["is_recording"])
             self.assertTrue((Path(temp_dir) / "recording_000000.raw").exists())

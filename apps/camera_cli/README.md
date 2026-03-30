@@ -33,7 +33,7 @@ Provides a camera-oriented command-line app surface for exercising the existing 
 - `snapshot` returns a short-running command result with saved-path confirmation
 - `recording` currently means bounded in-process recording that starts and completes within one invocation and then returns a final structured result
 - the first host-oriented error shape is intentionally minimal: `code`, `message`, `details`
-- command results now also include a small confirmed-settings subset for experiment traceability, such as camera id, pixel format, exposure, save target/path, and recording bounds where relevant
+- command results now also include a small confirmed-settings subset for experiment traceability, such as camera id, pixel format, exposure, resolved save directory, resolved file stem / extension, and accepted recording bounds where relevant
 
 ## Dependencies
 

@@ -23,7 +23,7 @@ The narrow goal is to harden explicit post-command confirmation, not to widen ru
 ## Branch
 
 - intended branch: `feature/host-command-confirmation-hardening`
-- activation state: prepared follow-up after `WP22`
+- activation state: landed narrow follow-up after `WP22`; use `WP24` as the next default follow-up
 
 ## Scope
 
@@ -41,6 +41,9 @@ Selected slice for this package:
   - resolved file stem / extension where applicable
   - accepted frame limit / duration / target frame rate where applicable
 - keep this slice explicitly on the command-result side after host calls rather than on the polling side during active work
+- landed implementation note:
+  - the current CLI host surface now exposes that narrow confirmed subset for `snapshot` and bounded `recording`
+  - the status polling payload remains unchanged by this slice so `WP22` and `WP23` stay distinct
 
 Excluded:
 
@@ -68,7 +71,7 @@ This package should be read as:
 ## Validation
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_command_controller tests.test_request_models tests.test_bootstrap
+.\.venv\Scripts\python.exe -m unittest tests.test_camera_cli tests.test_command_controller tests.test_request_models tests.test_bootstrap
 ```
 
 ## Merge Gate
