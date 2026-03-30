@@ -165,12 +165,20 @@ The active planning lens is now:
 
 **Post-Closure Python Baseline = stable Python working reference baseline for hardening, operational readiness, controlled productization, and selective expansion**
 
-This phase should optimize for:
+This phase should optimize for four work types:
 
-1. baseline hardening and operational polish
-2. practical usability and handover readiness of the Python baseline
-3. selective next-scope expansion only when justified by concrete need
-4. preserving the current modular Python baseline as the reference surface for later transport growth, frontend growth, or C# handover
+1. `Hardening`
+   - smooth the last real friction points in the current baseline
+   - continue lifecycle / cleanup follow-ups, host-readable diagnostics, bounded reliability polish, and small real-use rough-edge removal
+2. `Operational readiness`
+   - make the Python baseline easier to run, document, operate, and hand over
+   - improve docs, packaging / startup paths, clearer stable contracts, and explicit activation / operating rules when needed
+3. `Selective expansion`
+   - open the next surface only when there is a concrete reason
+   - allow broader host / transport, offline / measurement, or UI / frontend follow-ups only when justified by actual need
+4. `Later product / handover preparation`
+   - keep the next larger horizon visible without treating it as the default immediate lane
+   - preserve C# handover, broader productization, additional frontends, and wider hardware / deployment coverage as later post-closure directions
 
 This phase should **not** be treated as:
 
@@ -430,12 +438,19 @@ Goal:
 - prioritize hardening, operational readiness, controlled productization, and selective expansion
 - only open new technical slices when they are justified by concrete residuals, operational friction, or a deliberate new scope decision
 
-Typical post-closure work types:
+Primary work types in this layer:
 
-- remaining lifecycle or diagnostics hardening
-- clearer host-facing operational behavior
-- bounded packaging or readiness improvements when needed
-- selective API, offline, frontend, or handover expansion only when there is a concrete reason
+1. `Hardening`
+   - remaining lifecycle or diagnostics hardening
+   - bounded reliability polish
+   - real-use friction removal without broad redesign
+2. `Operational readiness`
+   - clearer docs, startup paths, packaging, and operating rules
+   - clearer stable contracts and activation boundaries
+3. `Selective expansion`
+   - selective API, offline, frontend, or measurement follow-up only when justified
+4. `Later product / handover preparation`
+   - preserve broader C# handover, productization, additional frontend work, and wider hardware / deployment scope as the next larger horizon rather than the default immediate stream
 ### Layer 5: Later Breadth Expansion
 
 Goal:

@@ -26,8 +26,16 @@ Der aktuelle Stand ist am besten als **geschlossene Extended-MVP-Phase mit ansch
 Die Python-basierte Kamera- und Host-Steuerungsbasis ist jetzt als bounded, host-orientierte, hardware-validierte Arbeitsbasis auf dem getesteten Kamerapfad zu verstehen. Die verbleibenden Aufgaben sind nicht mehr "MVP schliessen", sondern:
 
 - Hardening und operative Restpolitur
-- kontrollierte Produktisierung der Python-Basis
+- Operational Readiness der Python-Basis
 - selektive Erweiterung nur bei echtem Bedarf
+- spätere Produkt-/Handover-Vorbereitung als nächster größerer Horizont
+
+Die neue Phase `Post-Closure Python Baseline` ist damit am besten in vier Arbeitsarten zu lesen:
+
+1. `Hardening`
+2. `Operational Readiness`
+3. `Selective Expansion`
+4. `Later Product / Handover Preparation`
 
 ## Zielbewertung Ampel
 
