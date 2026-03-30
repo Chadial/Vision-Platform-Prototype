@@ -300,8 +300,8 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 39 | Module Documentation Audit And Shrink Pass | refresh module-local docs, shrink stale local roadmaps, and reduce drift between local module docs and the post-closure baseline | active lane | landed bounded meta-documentation cleanup slice; active-module roadmaps were shrunk, stale transition wording reduced, and module-local doc roles clarified without central PM rewrite | `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md` |
 | 40 | Vision Platform Control And Imaging Physical Migration | move current control and optional imaging implementation behind the preferred `src/vision_platform` boundary while preserving compatibility imports | active lane | landed first post-closure architecture-convergence slice; `vision_platform` now owns bootstrap/control/imaging implementation directly while `camera_app` remains the compatibility shim layer | `docs/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md` |
 | 41 | Vision Platform Storage Physical Migration | move storage and persistence helpers behind the preferred `src/vision_platform` boundary while preserving current behavior | active lane | landed second architecture-convergence slice; storage-facing legacy services now import platform-owned file-naming and frame-writer helpers directly while `camera_app.storage` remains the compatibility shim layer | `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md` |
-| 42 | Vision Platform Namespace Coverage And Compatibility Audit | tighten trust in the preferred `vision_platform` import surface while keeping remaining compatibility shims explicit | current next | validation and shim-audit follow-up after the landed physical migration slices | `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md` |
-| 43 | Python Baseline Packaging Manifest And Environment Guardrails | make the bounded local Python baseline easier to set up and re-enter without pretending to solve full product packaging | queued | operational-readiness follow-up after the current runbook and launcher baseline | `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md` |
+| 42 | Vision Platform Namespace Coverage And Compatibility Audit | tighten trust in the preferred `vision_platform` import surface while keeping remaining compatibility shims explicit | active lane | landed trust-and-shim audit slice; current remaining `camera_app` dependencies are now bounded, tested, and documented as intentional compatibility seams rather than silent drift | `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md` |
+| 43 | Python Baseline Packaging Manifest And Environment Guardrails | make the bounded local Python baseline easier to set up and re-enter without pretending to solve full product packaging | current next | operational-readiness follow-up after the current runbook, launcher, and namespace-clarity baseline | `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md` |
 | 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | conditional | selective-expansion option above the current stable host-neutral controller | `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
 
 ## Immediate PM Backlog
@@ -526,8 +526,8 @@ The current coarse PM order should be:
 18. treat `WP39` as the landed module-doc governance / shrink slice
 19. treat `WP40` as the landed first architecture-convergence slice; `vision_platform.bootstrap`, `vision_platform.control`, and `vision_platform.imaging` now own the implementation while `camera_app` paths stay as compatibility shims
 20. treat `WP41` as the landed storage/persistence follow-up; legacy storage import paths now consume platform-owned helpers while `camera_app.storage` remains the compatibility shim layer
-21. treat `WP42` as the current next trust-and-shim audit after those migration slices
-22. treat `WP43` as the next small operational-readiness candidate once namespace convergence is clearer
+21. treat `WP42` as the landed trust-and-shim audit; remaining `camera_app` dependencies inside `vision_platform` are now tested and documented as explicit compatibility seams
+22. treat `WP43` as the current next small operational-readiness candidate once namespace convergence is clearer
 23. treat `WP44` and `WP38` as conditional selective-expansion options rather than automatic next work
 24. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
@@ -535,12 +535,12 @@ The current coarse PM order should be:
 
 The current default PM-recommended next detailed package is:
 
-1. `WP42 Vision Platform Namespace Coverage And Compatibility Audit`
+1. `WP43 Python Baseline Packaging Manifest And Environment Guardrails`
 
 If the user does not explicitly redirect the session after that:
 
-- follow `WP42` as the trust-and-shim follow-up after landed `WP40` and `WP41`
-- then choose between `WP43` operational-readiness work and one conditional expansion lane
+- follow `WP43` as the next bounded operational-readiness slice after landed `WP42`
+- then choose between one conditional expansion lane or a fresh residual-driven hardening slice
 - activate `WP38` or `WP44` only when a real offline or adapter-facing consumer need is actually chosen
 
 Reason:
@@ -553,7 +553,8 @@ Reason:
 - `WP39` has already handled the first bounded trust-and-shrink pass for module-local docs
 - the first justified architecture-convergence slice is now landed through `WP40`
 - the second justified architecture-convergence slice is now landed through `WP41`
-- the next justified lane continuation is therefore `WP42` trust-and-shim validation rather than broader feature growth
+- the trust-and-shim audit is now landed through `WP42`
+- the next justified lane continuation is therefore one bounded operational-readiness slice through `WP43` rather than broader feature growth
 
 ## Fresh Agent Decision Rule
 
@@ -652,7 +653,7 @@ Current explicit activation:
 - `Module Documentation Audit And Shrink Pass` now has its landed execution-ready file at `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
 - `Vision Platform Control And Imaging Physical Migration` now has its landed execution-ready file at `docs/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md`
 - `Vision Platform Storage Physical Migration` now has its landed execution-ready file at `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md`
-- `Vision Platform Namespace Coverage And Compatibility Audit` now has its prepared execution-ready file at `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
+- `Vision Platform Namespace Coverage And Compatibility Audit` now has its landed execution-ready file at `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
 - `Python Baseline Packaging Manifest And Environment Guardrails` now has its prepared execution-ready file at `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
 - `Bounded API Adapter Command Surface` now has its prepared execution-ready file at `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
 

@@ -23,7 +23,7 @@ Working discipline:
 ## Branch
 
 - intended branch: `test/vision-platform-namespace-coverage`
-- activation state: queued
+- activation state: landed
 
 ## Scope
 
@@ -55,6 +55,13 @@ Excluded:
 Leave the repository with clearer evidence that `vision_platform` is the preferred import surface and that any remaining `camera_app` usage is a deliberate compatibility bridge rather than drift.
 
 This package should not be used to continue `WP40` or `WP41` by another name.
+
+Landed outcome:
+
+- namespace audit tests now bound the remaining `camera_app` imports inside `vision_platform` to an explicit allowlist of compatibility seams
+- test-side `camera_app` imports are now also bounded to explicit compatibility-check files
+- OpenCV prototype demos now own `DemoRunResult` inside the `vision_platform` app namespace instead of importing it from `camera_app.smoke`
+- the remaining legacy logging usage in platform app entry points is now documented as an intentional residual rather than silent drift
 
 ## Validation
 
