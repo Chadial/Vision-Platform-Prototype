@@ -282,6 +282,7 @@ The repository currently provides a structured Python prototype for the vision p
 - additional March 27, 2026 runs now verify duration-only recording, target-frame-rate recording, `Mono10` raw snapshot capture, and explicit hardware-side failures for invalid camera id, unsupported pixel format `Mono16`, and invalid ROI width increment values
 - the tested camera reports `AcquisitionFrameRate` as present and read-only by default, but the driver now enables `AcquisitionFrameRateEnable` automatically before setting a requested rate and exposes the read-back state through `CameraStatus`
 - capability-aware configuration validation now consumes live or stored `CameraCapabilityProfile` data in the service/control layer, while failed hardware capability probes only disable the extra device-specific validation instead of failing camera initialization
+- the March 30, 2026 camera-specific rerun against `DEV_1AB22C046D81` now also refreshes the documented capability-backed control paths for combined `Mono8` + exposure + gain + ROI, `target_frame_rate=5.0`, `Mono10` snapshot save to `.raw`, explicit `Mono16` and invalid-ROI-width failures, and one non-zero ROI-offset snapshot through the current CLI host path
 
 ### Preview
 
@@ -349,4 +350,4 @@ The repository currently provides a structured Python prototype for the vision p
 3. Treat `WP18`, `WP19`, `WP20`, and `WP21` as the landed artifact-metadata clarification, producer-wiring, policy-hardening, and stable-context exposure follow-ups for the current metadata-aware offline/reporting baseline.
 4. Treat `WP22`, `WP23`, and `WP24` as the landed host-readable polling, command-confirmation, and run-identity linkage slices for the current host-control and traceability baseline.
 5. Treat `WP25` as the landed simulator-first recovery-validation slice for the current experiment-reliability baseline.
-6. Treat `WP26` as landed bounded hardware evidence for the current integrated baseline and keep any further real-device work narrowly focused on concrete residual observations rather than reopening broad hardware exploration.
+6. Treat `WP26` as landed bounded hardware evidence for the current integrated baseline; the March 30, 2026 camera-specific rerun for `DEV_1AB22C046D81` should be read as a narrow device-capability refresh, not as broad new hardware exploration.
