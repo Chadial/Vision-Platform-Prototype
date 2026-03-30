@@ -16,6 +16,12 @@ Its purpose is to move the current control and optional imaging implementation b
 
 This slice is about physical ownership convergence, not feature expansion.
 
+Working discipline:
+
+- keep this slice strictly limited to `control` and optional `imaging`
+- do not treat this package as the start of a broader namespace sweep
+- when in doubt, defer remaining migration work to `WP41` or later
+
 ## Branch
 
 - intended branch: `refactor/vision-platform-control-imaging-migration`
@@ -31,16 +37,29 @@ Included:
 - keep launcher and test paths working
 - update the smallest affected module and central docs
 
+Explicitly included and no more:
+
+- control-layer implementation ownership
+- optional imaging/OpenCV adapter ownership
+- the minimum compatibility-shim adjustments required by that move
+
 Excluded:
 
 - storage migration
+- file naming migration
+- frame writer migration
+- traceability helper migration
 - recording-service redesign
 - transport/API expansion
 - OpenCV feature widening
+- broad import cleanup outside the directly touched control/imaging path
+- namespace-wide shim reduction
 
 ## Session Goal
 
 Leave the repository with the preferred `vision_platform` boundary owning control and optional imaging implementation physically, while `camera_app` remains only a compatibility bridge where still needed.
+
+This package should not leave the repository half-migrated across unrelated storage or persistence areas.
 
 ## Execution Plan
 
@@ -48,8 +67,9 @@ Leave the repository with the preferred `vision_platform` boundary owning contro
 2. Move control implementation behind `src/vision_platform` while preserving compatibility imports.
 3. Move imaging/OpenCV implementation behind `src/vision_platform` while preserving compatibility imports.
 4. Update imports and launcher paths only as needed.
-5. Run focused regression tests.
-6. Update local and central docs.
+5. Stop and defer any storage/persistence ownership drift encountered beyond the narrow touched seam.
+6. Run focused regression tests.
+7. Update local and central docs.
 
 ## Validation
 
@@ -78,6 +98,8 @@ Required:
 - compatibility imports still work
 - touched tests pass
 - no unrelated storage or service redesign is bundled
+- no storage/persistence migration is bundled "because the files were nearby"
+- no broad namespace cleanup is bundled beyond the directly required control/imaging seam
 - docs reflect the new physical ownership cleanly
 
 ## Recovery Note
