@@ -100,6 +100,9 @@ Read these for every new session:
 - For operational or launch-readiness questions:
   - `docs/PYTHON_BASELINE_RUNBOOK.md`
   - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
+- For host-contract or handover-boundary questions:
+  - `docs/HOST_CONTRACT_BASELINE.md`
+  - `docs/COMMANDS.md`
 - For the next OpenCV UI/operator work:
   - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
 - For camera-oriented command-surface work:
@@ -115,6 +118,7 @@ Read these for every new session:
 - `docs/WORKPACKAGES.md` is the central queue for the next concrete work slice.
 - `docs/PYTHON_BASELINE_RUNBOOK.md` is the compact operating reference for the current post-closure Python baseline.
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` is the compact startup-surface reference for the preferred current entry points.
+- `docs/HOST_CONTRACT_BASELINE.md` is the compact stable-now / deferred-later reference for the bounded current host surface.
 - `docs/module_doc_audit.md` is the current reference for how module-local docs should be used and trimmed.
 - `docs/root_category_audit.md` is the current reference for how `apps/`, `integrations/`, `services/`, and `libraries/` are meant to be used.
 - `docs/ROADMAP.md` is the repository delivery sequence.
