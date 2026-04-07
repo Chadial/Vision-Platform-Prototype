@@ -547,6 +547,41 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertIn("camera_fps=16.0", prefix)
         self.assertIn("ui_fps=30.0", prefix)
 
+    def test_status_prefix_includes_recording_fps_when_recording_is_configured(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(is_preview_running=True),
+        )
+        shell._ui_refresh_fps = None
+        shell._recording_target_frame_rate_value = 12.5
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertIn("recording_fps=12.5", prefix)
+
+    def test_recording_summary_formats_bounded_and_unbounded_progress(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        status = SimpleNamespace(recording=SimpleNamespace(is_recording=True, frames_written=3))
+
+        shell._recording_active_frame_limit = 10
+        bounded_summary = shell._build_recording_summary(status)
+
+        shell._recording_active_frame_limit = None
+        unbounded_summary = shell._build_recording_summary(status)
+
+        self.assertEqual(bounded_summary, "3/10")
+        self.assertEqual(unbounded_summary, "3/n")
+
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:
             session = build_local_shell_session(

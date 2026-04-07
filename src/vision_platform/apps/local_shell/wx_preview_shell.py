@@ -8,6 +8,7 @@ from time import monotonic
 from camera_app.logging.log_service import configure_logging
 from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.models import SaveSnapshotRequest
+from vision_platform.models import StartRecordingRequest, StopRecordingRequest
 from vision_platform.services.display_service import PreviewInteractionCommand, format_focus_score
 
 from vision_platform.apps.local_shell.preview_shell_state import PreviewShellPresenter, PreviewShellViewModel
@@ -219,6 +220,8 @@ class WxLocalPreviewShell(wx.Frame):
         self._last_ui_refresh_sample_time: float | None = None
         self._ui_refresh_fps: float | None = None
         self._refresh_scheduled = False
+        self._recording_active_frame_limit: int | None = None
+        self._recording_target_frame_rate_value: float | None = None
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
 
@@ -238,6 +241,20 @@ class WxLocalPreviewShell(wx.Frame):
         self._add_button(panel, controls, "Ellipse ROI", lambda event: self._run_roi_toggle("ellipse"))
 
         root_sizer.Add(controls, 0, wx.EXPAND | wx.ALL, 8)
+        recording_controls = wx.BoxSizer(wx.HORIZONTAL)
+        self._add_label(panel, recording_controls, "Max Frames")
+        self._recording_max_frames = wx.TextCtrl(panel, value="0", size=(72, -1))
+        recording_controls.Add(self._recording_max_frames, 0, wx.RIGHT, 8)
+        self._add_label(panel, recording_controls, "Recording FPS")
+        self._recording_target_frame_rate_input = wx.TextCtrl(panel, value="", size=(72, -1))
+        recording_controls.Add(self._recording_target_frame_rate_input, 0, wx.RIGHT, 8)
+        self._start_recording_button = wx.Button(panel, label="Start Recording")
+        self._start_recording_button.Bind(wx.EVT_BUTTON, self._on_start_recording)
+        recording_controls.Add(self._start_recording_button, 0, wx.RIGHT, 6)
+        self._stop_recording_button = wx.Button(panel, label="Stop Recording")
+        self._stop_recording_button.Bind(wx.EVT_BUTTON, self._on_stop_recording)
+        recording_controls.Add(self._stop_recording_button, 0, wx.RIGHT, 6)
+        root_sizer.Add(recording_controls, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         root_sizer.Add(self._canvas, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         root_sizer.Add(self._status, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         panel.SetSizer(root_sizer)
@@ -282,10 +299,14 @@ class WxLocalPreviewShell(wx.Frame):
         focus_summary = self._build_focus_summary(focus_state)
         if focus_summary is not None:
             prefix.append(f"focus={focus_summary}")
+        recording_summary = self._build_recording_summary(status)
+        if recording_summary is not None:
+            prefix.append(f"recording={recording_summary}")
         self._status_lines = [" | ".join(prefix)] + view_model.status_lines
         status_text = "\n".join(self._status_lines)
         if self._status.GetValue() != status_text:
             self._status.ChangeValue(status_text)
+        self._update_recording_controls(status)
 
     def _on_timer(self, event) -> None:
         self.request_refresh()
@@ -315,6 +336,54 @@ class WxLocalPreviewShell(wx.Frame):
 
     def _run_roi_toggle(self, roi_mode: str) -> None:
         self._presenter.apply_command(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode=roi_mode))
+        self.request_refresh()
+
+    def _on_start_recording(self, event) -> None:
+        try:
+            frame_limit = self._parse_optional_positive_int(self._recording_max_frames.GetValue())
+            target_frame_rate = self._parse_optional_positive_float(self._recording_target_frame_rate_input.GetValue())
+            save_directory = self._get_recording_save_directory()
+            if save_directory is None:
+                self._set_transient_status_message("Recording failed: no save directory configured")
+                self.request_refresh()
+                return
+            result = self._session.subsystem.command_controller.start_recording(
+                StartRecordingRequest(
+                    file_stem="wx_recording",
+                    file_extension=".raw",
+                    save_directory=save_directory,
+                    max_frame_count=frame_limit,
+                    target_frame_rate=target_frame_rate,
+                    camera_id=self._session.resolved_camera_id,
+                    configuration_profile_id=self._session.configuration_profile_id,
+                    configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+                )
+            )
+        except Exception as exc:
+            self._set_transient_status_message(f"Recording failed: {exc}")
+            self.request_refresh()
+            return
+        self._recording_active_frame_limit = frame_limit
+        self._recording_target_frame_rate_value = target_frame_rate
+        self._set_transient_status_message(
+            f"Recording started: {result.status.active_file_stem or 'wx_recording'}"
+        )
+        self.request_refresh()
+
+    def _on_stop_recording(self, event) -> None:
+        try:
+            result = self._session.subsystem.command_controller.stop_recording(
+                StopRecordingRequest(reason="wx_shell_button")
+            )
+        except Exception as exc:
+            self._set_transient_status_message(f"Recording stop failed: {exc}")
+            self.request_refresh()
+            return
+        self._recording_active_frame_limit = None
+        self._recording_target_frame_rate_value = None
+        self._set_transient_status_message(
+            f"Recording stopped: {result.status.frames_written} frames"
+        )
         self.request_refresh()
 
     def _on_close(self, event) -> None:
@@ -355,6 +424,10 @@ class WxLocalPreviewShell(wx.Frame):
             self._cached_status = self._subsystem.command_controller.get_status()
             self._last_status_refresh_time = now
         return self._cached_status
+
+    @staticmethod
+    def _add_label(parent: wx.Window, sizer: wx.BoxSizer, text: str) -> None:
+        sizer.Add(wx.StaticText(parent, label=text), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
 
     def _update_ui_refresh_rate(self, now: float) -> None:
         if self._last_ui_refresh_sample_time is None:
@@ -460,11 +533,56 @@ class WxLocalPreviewShell(wx.Frame):
             prefix.append(f"ui_fps={self._ui_refresh_fps:.1f}")
         else:
             prefix.append("ui_fps=waiting")
+        recording_target_frame_rate = getattr(self, "_recording_target_frame_rate_value", None)
+        if recording_target_frame_rate is not None:
+            prefix.append(f"recording_fps={recording_target_frame_rate:.1f}")
+        elif getattr(status, "recording", None) is not None and status.recording.is_recording:
+            prefix.append("recording_fps=auto")
         if status.default_save_directory is not None:
             prefix.append(f"save={status.default_save_directory}")
         if self._session.configuration_profile_id is not None:
             prefix.append(f"profile={self._session.configuration_profile_id}")
         return prefix
+
+    def _build_recording_summary(self, status) -> str | None:
+        if self._recording_active_frame_limit is None and not status.recording.is_recording:
+            return None
+        written = status.recording.frames_written
+        if self._recording_active_frame_limit is None:
+            return f"{written}/n"
+        return f"{written}/{self._recording_active_frame_limit}"
+
+    def _update_recording_controls(self, status) -> None:
+        if hasattr(self, "_start_recording_button"):
+            self._start_recording_button.Enable(status.can_start_recording)
+        if hasattr(self, "_stop_recording_button"):
+            self._stop_recording_button.Enable(status.can_stop_recording)
+
+    def _get_recording_save_directory(self) -> Path | None:
+        status = self._get_status()
+        if status.default_save_directory is not None:
+            return status.default_save_directory
+        return self._session.selected_save_directory
+
+    @staticmethod
+    def _parse_optional_positive_int(value: str) -> int | None:
+        stripped = value.strip()
+        if not stripped:
+            return None
+        parsed = int(stripped)
+        if parsed < 0:
+            raise ValueError("value must be zero or greater")
+        return None if parsed == 0 else parsed
+
+    @staticmethod
+    def _parse_optional_positive_float(value: str) -> float | None:
+        stripped = value.strip()
+        if not stripped:
+            return None
+        parsed = float(stripped)
+        if parsed <= 0:
+            raise ValueError("value must be positive")
+        return parsed
 
 
 def run_wx_preview_shell(

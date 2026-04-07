@@ -15,6 +15,8 @@
 - working now: clicking and dragging the ROI body now pans the whole ROI without distortion, and `Shift` constrains that body move to the dominant axis
 - working now: active ROI frame feedback now stays operator-visible in the wx shell, with green as the normal state, blue on hover, and red during drag
 - working now: very small active ROIs now expose an invisible enlarged body-hit target so hover and body-drag remain usable even when the visible frame is tiny
+- working now: the wx shell now exposes bounded recording controls for start/stop, max-frame input, and recording-FPS input on the same operator surface
+- working now: the wx shell status header now shows bounded recording progress and the current recording-FPS setting when recording is active
 - working now: rectangle ROI editing now also exposes side-midpoint handles so one box edge can be moved without changing the other axis
 - working now: `Shift` during ROI body drag now behaves as a live projection toggle, so pressing it constrains to the dominant axis and releasing it returns to the unconstrained cursor position
 - working now: `Esc` during active point or ROI drag now cancels that edit and restores the drag-start geometry
