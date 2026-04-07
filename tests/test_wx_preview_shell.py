@@ -9,6 +9,7 @@ from vision_platform.apps.local_shell import PreviewShellPresenter
 from vision_platform.apps.local_shell.wx_preview_shell import (
     WxLocalPreviewShell,
     _is_copy_shortcut,
+    _normalize_wx_camera_pixel_format,
     _normalize_wx_recording_file_extension,
 )
 from vision_platform.apps.local_shell.preview_shell_state import render_viewport_image
@@ -573,6 +574,38 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertIn("recording_fps=12.5", prefix)
 
+    def test_status_prefix_includes_camera_configuration_summary(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(is_preview_running=True),
+        )
+        shell._ui_refresh_fps = None
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+            configuration=SimpleNamespace(
+                exposure_time_us=1500.0,
+                gain=3.0,
+                pixel_format="Mono8",
+                acquisition_frame_rate=12.5,
+                roi_offset_x=10,
+                roi_offset_y=20,
+                roi_width=300,
+                roi_height=200,
+            ),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertTrue(any(entry.startswith("config=") for entry in prefix))
+        self.assertIn("config=exp=1500us gain=3 fmt=Mono8 fps=12.5 roi=x=10,y=20,w=300,h=200", prefix)
+
     def test_status_prefix_falls_back_when_recording_fps_state_is_not_numeric(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         shell._session = SimpleNamespace(
@@ -665,6 +698,44 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(_normalize_wx_recording_file_extension(".bmp"), ".bmp")
         self.assertEqual(_normalize_wx_recording_file_extension(".RAW"), ".raw")
 
+    def test_normalize_wx_camera_pixel_format_accepts_unchanged_and_supported_values(self) -> None:
+        self.assertIsNone(_normalize_wx_camera_pixel_format("<unchanged>"))
+        self.assertEqual(_normalize_wx_camera_pixel_format("Mono8"), "Mono8")
+
+    def test_normalize_wx_camera_pixel_format_rejects_unsupported_values(self) -> None:
+        with self.assertRaises(ValueError):
+            _normalize_wx_camera_pixel_format("Jpeg")
+
+    def test_build_camera_settings_request_maps_camera_fields(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+
+        request = shell._build_camera_settings_request(
+            exposure_time_us="1500.5",
+            gain="3.0",
+            pixel_format="Mono10",
+            acquisition_frame_rate="12.5",
+            roi_offset_x="10",
+            roi_offset_y="20",
+            roi_width="300",
+            roi_height="200",
+        )
+
+        self.assertEqual(request.exposure_time_us, 1500.5)
+        self.assertEqual(request.gain, 3.0)
+        self.assertEqual(request.pixel_format, "Mono10")
+        self.assertEqual(request.acquisition_frame_rate, 12.5)
+        self.assertEqual(request.roi_offset_x, 10)
+        self.assertEqual(request.roi_offset_y, 20)
+        self.assertEqual(request.roi_width, 300)
+        self.assertEqual(request.roi_height, 200)
+
+    def test_shortcut_reference_text_includes_camera_settings_and_recording_shortcuts(self) -> None:
+        text = WxLocalPreviewShell._build_shortcut_reference_text()
+
+        self.assertIn("Ctrl+Shift+C=camera settings", text)
+        self.assertIn("Ctrl+Enter=start recording", text)
+        self.assertIn("Ctrl+Shift+Enter=stop recording", text)
+
     def test_recording_settings_dialog_uses_choice_string_selection(self) -> None:
         dialog = SimpleNamespace(
             _file_stem=_StubTextControl("series"),
@@ -681,6 +752,26 @@ class WxPreviewShellTests(unittest.TestCase):
         }
 
         self.assertEqual(values["file_extension"], ".png")
+
+    def test_camera_settings_dialog_uses_choice_string_selection(self) -> None:
+        dialog = SimpleNamespace(
+            _exposure_time_us=_StubTextControl("1500"),
+            _gain=_StubTextControl("3"),
+            _pixel_format=_StubChoiceControl("Mono8"),
+            _acquisition_frame_rate=_StubTextControl("12.5"),
+            _roi_offset_x=_StubTextControl("10"),
+            _roi_offset_y=_StubTextControl("20"),
+            _roi_width=_StubTextControl("300"),
+            _roi_height=_StubTextControl("200"),
+        )
+
+        values = {
+            "pixel_format": _normalize_wx_camera_pixel_format(dialog._pixel_format.GetStringSelection()) or "",
+            "gain": dialog._gain.GetValue(),
+        }
+
+        self.assertEqual(values["pixel_format"], "Mono8")
+        self.assertEqual(values["gain"], "3")
 
     def test_wx_shell_default_recording_extension_is_bmp(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
