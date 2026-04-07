@@ -8,7 +8,7 @@ from time import monotonic
 from camera_app.logging.log_service import configure_logging
 from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.models import SaveSnapshotRequest
-from vision_platform.services.display_service import PreviewInteractionCommand
+from vision_platform.services.display_service import PreviewInteractionCommand, format_focus_score
 
 from vision_platform.apps.local_shell.preview_shell_state import PreviewShellPresenter, PreviewShellViewModel
 from vision_platform.apps.local_shell.startup import (
@@ -252,6 +252,9 @@ class WxLocalPreviewShell(wx.Frame):
             prefix.append(f"save={status.default_save_directory}")
         if self._session.configuration_profile_id is not None:
             prefix.append(f"profile={self._session.configuration_profile_id}")
+        focus_summary = self._build_focus_summary(focus_state)
+        if focus_summary is not None:
+            prefix.append(f"focus={focus_summary}")
         self._status_lines = [" | ".join(prefix)] + view_model.status_lines
         status_text = "\n".join(self._status_lines)
         if self._status.GetValue() != status_text:
@@ -385,6 +388,17 @@ class WxLocalPreviewShell(wx.Frame):
             self._presenter.state.interaction_state.last_status_message = None
             return
         self._presenter.state.interaction_state.last_status_message = self._transient_status_message
+
+    def _build_focus_summary(self, focus_state) -> str | None:
+        if self._focus_preview_service is None:
+            return None
+        if not self._presenter.state.interaction_state.focus_status_visible:
+            return "hidden"
+        if focus_state is None:
+            return "waiting"
+        if not focus_state.result.is_valid:
+            return "invalid"
+        return format_focus_score(focus_state.result.score)
 
 
 def run_wx_preview_shell(

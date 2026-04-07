@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from tests import _path_setup
 from vision_platform.apps.local_shell import PreviewShellPresenter
-from vision_platform.apps.local_shell.wx_preview_shell import _is_copy_shortcut
+from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShell, _is_copy_shortcut
 from vision_platform.apps.local_shell.preview_shell_state import render_viewport_image
 from vision_platform.apps.local_shell.startup import (
     LocalShellLaunchOptions,
@@ -130,6 +130,25 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertTrue(_is_copy_shortcut(_StubKeyEvent(ord("C"), control_down=True)))
         self.assertFalse(_is_copy_shortcut(_StubKeyEvent(ord("C"), control_down=False)))
 
+    def test_focus_summary_helper_formats_valid_focus_for_top_status_line(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._focus_preview_service = object()
+        shell._presenter = _StubPresenter(focus_status_visible=True)
+        focus_state = FocusPreviewState(
+            result=FocusResult(method="laplace", score=0.01234, is_valid=True),
+            overlay=FocusOverlayData(
+                score=0.01234,
+                metric_name="laplace",
+                anchor_x=1.0,
+                anchor_y=1.0,
+                is_valid=True,
+            ),
+        )
+
+        summary = shell._build_focus_summary(focus_state)
+
+        self.assertEqual(summary, "1.234e-02")
+
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:
             session = build_local_shell_session(
@@ -228,3 +247,12 @@ class _StubKeyEvent:
 
     def CmdDown(self) -> bool:
         return False
+
+
+class _StubPresenter:
+    def __init__(self, *, focus_status_visible: bool) -> None:
+        self.state = type(
+            "State",
+            (),
+            {"interaction_state": type("InteractionState", (), {"focus_status_visible": focus_status_visible})()},
+        )()
