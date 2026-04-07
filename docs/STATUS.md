@@ -21,7 +21,7 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Next
 
-- `WP68 Unified Artifact Recording Log Append Baseline`
+- no package is currently marked `current next`; derive the next slice from concrete residuals or explicit user direction
 
 ## Immediate Priorities
 

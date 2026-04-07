@@ -19,7 +19,7 @@ Use one deterministic `recording_log.csv` per save directory as the shared appen
 ## Branch
 
 - intended branch: `feature/recording-log-unified-append`
-- activation state: prepared
+- activation state: landed
 
 ## Scope
 
@@ -43,3 +43,4 @@ Excluded:
 - subsequent recording appends to the same `recording_log.csv`
 - repeated recording sessions do not create stem-suffixed recording-log files
 - local unit tests cover the unified recording-log path
+- validated with `.\.venv\Scripts\python.exe -m unittest tests.test_file_naming tests.test_recording_service tests.test_snapshot_service`
