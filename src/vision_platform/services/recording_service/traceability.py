@@ -203,6 +203,17 @@ def append_trace_image_row(
     handle.flush()
 
 
+def append_trace_first_frame_anchor(
+    handle: TextIO,
+    *,
+    camera_timestamp: str | int | None,
+    system_timestamp_utc: str | None,
+) -> None:
+    handle.write(f"# run.first_frame_camera_timestamp: {_string_value(camera_timestamp)}\n")
+    handle.write(f"# run.first_frame_system_timestamp_utc: {_string_value(system_timestamp_utc)}\n")
+    handle.flush()
+
+
 def append_trace_run_end(
     handle: TextIO,
     artifact_kind: str,

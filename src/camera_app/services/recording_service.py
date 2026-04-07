@@ -4,6 +4,7 @@ import csv
 from dataclasses import replace
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 from queue import Empty, Full, Queue
 from threading import current_thread, Event, Lock, Thread
 from time import monotonic, sleep
@@ -24,6 +25,7 @@ from vision_platform.services.recording_service.file_naming import (
 )
 from vision_platform.services.recording_service.frame_writer import FrameWriter
 from vision_platform.services.recording_service.traceability import (
+    append_trace_first_frame_anchor,
     append_trace_image_row,
     append_trace_run_end,
     append_trace_run_start,
@@ -68,6 +70,10 @@ class RecordingService:
         self._recording_log_writer: csv.writer | None = None
         self._recording_session_started_utc: str | None = None
         self._start_frame_index: int = 0
+        self._first_frame_camera_timestamp: str | int | None = None
+        self._first_frame_system_timestamp_utc: str | None = None
+        self._first_frame_anchor_written_to_recording_log = False
+        self._first_frame_anchor_written_to_trace_log = False
         self._trace_log_path: Path | None = None
         self._trace_log_stable_context: dict[str, str] | None = None
         self._trace_run_id: str | None = None
@@ -95,6 +101,10 @@ class RecordingService:
                 file_stem=request.file_stem,
                 file_extension=request.file_extension,
             )
+            self._first_frame_camera_timestamp = None
+            self._first_frame_system_timestamp_utc = None
+            self._first_frame_anchor_written_to_recording_log = False
+            self._first_frame_anchor_written_to_trace_log = False
             self._next_frame_due_at = monotonic()
             if self._artifact_focus_metadata_producer is not None:
                 self._artifact_focus_metadata_producer.reset()
@@ -359,6 +369,9 @@ class RecordingService:
         if self._recording_log_writer is None or self._recording_log_handle is None:
             raise RuntimeError("Recording log is not initialized.")
 
+        self._capture_first_frame_anchor(frame)
+        self._write_first_frame_anchor_to_recording_log_if_needed()
+
         self._recording_log_writer.writerow(
             [
                 image_name,
@@ -372,6 +385,7 @@ class RecordingService:
     def _write_traceability_entry(self, image_name: str, frame: CapturedFrame) -> None:
         if self._trace_log_path is None or self._trace_log_stable_context is None or self._trace_run_id is None:
             raise RuntimeError("Recording traceability log is not initialized.")
+        self._capture_first_frame_anchor(frame)
         with trace_write_lock():
             handle, writer = open_trace_log(
                 self._trace_log_path,
@@ -379,6 +393,7 @@ class RecordingService:
                 reused_existing_log=True,
             )
             try:
+                self._write_first_frame_anchor_to_trace_log_if_needed(handle)
                 append_trace_image_row(
                     writer,
                     handle,
@@ -459,6 +474,10 @@ class RecordingService:
             self._active_request = None
             self._recording_session_started_utc = None
             self._start_frame_index = 0
+            self._first_frame_camera_timestamp = None
+            self._first_frame_system_timestamp_utc = None
+            self._first_frame_anchor_written_to_recording_log = False
+            self._first_frame_anchor_written_to_trace_log = False
             self._recording_deadline = None
             self._next_frame_due_at = None
             self._acquisition_started = False
@@ -480,3 +499,35 @@ class RecordingService:
                 raise stop_error
             if traceability_error is not None and not suppress_errors:
                 raise traceability_error
+
+    def _capture_first_frame_anchor(self, frame: CapturedFrame) -> None:
+        if self._first_frame_system_timestamp_utc is not None:
+            return
+        self._first_frame_camera_timestamp = frame.camera_timestamp
+        self._first_frame_system_timestamp_utc = frame.timestamp_utc.isoformat()
+
+    def _write_first_frame_anchor_to_recording_log_if_needed(self) -> None:
+        if (
+            self._recording_log_handle is None
+            or self._first_frame_system_timestamp_utc is None
+            or self._first_frame_anchor_written_to_recording_log
+        ):
+            return
+        self._recording_log_handle.write(
+            f"# first_frame_camera_timestamp: {'' if self._first_frame_camera_timestamp is None else self._first_frame_camera_timestamp}\n"
+        )
+        self._recording_log_handle.write(
+            f"# first_frame_system_timestamp_utc: {self._first_frame_system_timestamp_utc}\n"
+        )
+        self._recording_log_handle.flush()
+        self._first_frame_anchor_written_to_recording_log = True
+
+    def _write_first_frame_anchor_to_trace_log_if_needed(self, handle: TextIO) -> None:
+        if self._first_frame_system_timestamp_utc is None or self._first_frame_anchor_written_to_trace_log:
+            return
+        append_trace_first_frame_anchor(
+            handle,
+            camera_timestamp=self._first_frame_camera_timestamp,
+            system_timestamp_utc=self._first_frame_system_timestamp_utc,
+        )
+        self._first_frame_anchor_written_to_trace_log = True

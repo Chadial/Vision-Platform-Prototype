@@ -166,6 +166,11 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# roi_y: ", log_lines)
             self.assertIn("# roi_width: ", log_lines)
             self.assertIn("# roi_height: ", log_lines)
+            self.assertIn("# first_frame_camera_timestamp: 1000", log_lines)
+            self.assertEqual(
+                len([line for line in log_lines if line.startswith("# first_frame_system_timestamp_utc: ")]),
+                1,
+            )
             data_rows = list(csv.reader(line for line in log_lines if not line.startswith("# ")))
             self.assertEqual(data_rows[0], ["image_name", "frame_id", "camera_timestamp", "system_timestamp_utc"])
             self.assertEqual(data_rows[1][0], "series_000000.raw")
@@ -183,6 +188,11 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# run.artifact_kind: bounded_recording", trace_lines)
             self.assertIn("# run.file_stem: series", trace_lines)
             self.assertIn("# run.frame_limit: 3", trace_lines)
+            self.assertIn("# run.first_frame_camera_timestamp: 1000", trace_lines)
+            self.assertEqual(
+                len([line for line in trace_lines if line.startswith("# run.first_frame_system_timestamp_utc: ")]),
+                1,
+            )
             self.assertIn("# run.end", trace_lines)
             self.assertIn("# run.end_state: completed", trace_lines)
             run_id_lines = [line for line in trace_lines if line.startswith("# run.run_id: ")]
@@ -426,6 +436,11 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# roi_y: 22", log_lines)
             self.assertIn("# roi_width: 333", log_lines)
             self.assertIn("# roi_height: 222", log_lines)
+            self.assertIn("# first_frame_camera_timestamp: 1000", log_lines)
+            self.assertEqual(
+                len([line for line in log_lines if line.startswith("# first_frame_system_timestamp_utc: ")]),
+                1,
+            )
 
     def test_stop_recording_is_idempotent_when_idle(self) -> None:
         driver = _FakeRecordingDriver([])
@@ -695,6 +710,14 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# run.frame_limit: 2", trace_lines)
             self.assertIn("# run.frame_limit: 3", trace_lines)
             self.assertIn("# run.duration_seconds: 0.05", trace_lines)
+            self.assertEqual(
+                len([line for line in trace_lines if line.startswith("# run.first_frame_camera_timestamp: ")]),
+                2,
+            )
+            self.assertEqual(
+                len([line for line in trace_lines if line.startswith("# run.first_frame_system_timestamp_utc: ")]),
+                2,
+            )
 
     def test_recording_continues_frame_sequence_for_reused_directory_and_same_stem(self) -> None:
         driver = _StreamingRecordingDriver()
