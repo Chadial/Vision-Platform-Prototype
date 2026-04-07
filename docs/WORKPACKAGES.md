@@ -345,7 +345,8 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 64 | wx Menu And Settings Dialog Baseline | add one bounded menu/settings popup surface to the wx shell above the shared controller/configuration path | active lane | landed local-usability slice; wx shell now exposes working save-directory and recording-settings dialogs over the existing controller path | `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md` |
 | 65 | wx Recording Settings Guardrails And Format Picker | tighten the bounded recording-settings dialog with guided format selection instead of free-form extension typing | active lane | landed wx usability hardening; the recording-settings dialog now constrains format selection through a picker and aligns default recording output with `.bmp` | `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md` |
 | 66 | Recording Timestamp Anchor Alignment | add one explicit first-frame camera/system timestamp anchor per recording session while preserving per-image timing rows | active lane | landed logging-semantics hardening; recording and traceability logs now persist a first-frame camera/system anchor while keeping per-image timing rows | `docs/session_workpackages/wp66_recording_timestamp_anchor_alignment.md` |
-| 67 | Recording Log Policy Alignment | define and implement the intended recording-log reuse versus per-run split policy for repeated sessions in one save directory | active lane | landed log-usability hardening; repeated recording now appends to one deterministic recording log per `save_directory + file_stem` with explicit run boundaries | `docs/session_workpackages/wp67_recording_log_policy_alignment.md` |
+| 67 | Recording Log Policy Alignment | define and implement the intended recording-log reuse versus per-run split policy for repeated sessions in one save directory | active lane | landed log-usability hardening; repeated recording now appends to one deterministic recording log per save directory with explicit run boundaries | `docs/session_workpackages/wp67_recording_log_policy_alignment.md` |
+| 68 | Unified Artifact Recording Log Append Baseline | make snapshot and recording save into one directory-scoped `recording_log.csv` append stream | current next | next logging-continuity slice so snapshots and recordings share the same append base for later resume logic | `docs/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md` |
 
 ## Immediate PM Backlog
 
@@ -371,6 +372,7 @@ Current prepared usable-subsystem sequence:
 - `WP65 wx Recording Settings Guardrails And Format Picker` is now landed
 - `WP66 Recording Timestamp Anchor Alignment` is now landed
 - `WP67 Recording Log Policy Alignment` is now landed
+- `WP68 Unified Artifact Recording Log Append Baseline` is now the current next slice
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 
 Most recently landed detailed packages:
@@ -607,13 +609,13 @@ The current coarse PM order should be:
 41. treat `WP64` as landed; the wx shell now has bounded menu/settings dialogs validated on hardware
 42. treat `WP65` as landed; the wx recording-settings dialog now constrains output format through a picker and aligns default recording output with `.bmp`
 43. treat `WP66` as landed; recording and traceability logs now persist one explicit first-frame camera/system anchor per run while keeping per-image timing rows
-44. treat `WP67` as landed; repeated recording now appends to one deterministic recording log per `save_directory + file_stem`
+44. treat `WP67` as landed; repeated recording now appends to one deterministic recording log per save directory
 45. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 46. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
-No package is currently marked `current next`.
+`WP68 Unified Artifact Recording Log Append Baseline`
 
 Reason:
 
@@ -761,6 +763,7 @@ Current explicit activation:
 - `wx Recording Settings Guardrails And Format Picker` is now implemented through `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
 - `Recording Timestamp Anchor Alignment` is now implemented through `docs/session_workpackages/wp66_recording_timestamp_anchor_alignment.md`
 - `Recording Log Policy Alignment` is now implemented through `docs/session_workpackages/wp67_recording_log_policy_alignment.md`
+- `Unified Artifact Recording Log Append Baseline` is now the current next slice at `docs/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md`
 
 ## PM Refinement Rule
 
@@ -780,3 +783,7 @@ When a session work package is completed:
 - move it to `docs/archive/session_workpackages/`
 - update this PM file if that changes the current recommended order
 - update `docs/STATUS.md` if the repository baseline changed
+
+
+
+
