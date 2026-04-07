@@ -19,7 +19,7 @@ Add a bounded menu and settings-dialog surface to the wx shell so the current wo
 ## Branch
 
 - intended branch: `feature/wx-menu-settings-baseline`
-- activation state: current next
+- activation state: landed
 
 ## Scope
 
@@ -50,7 +50,14 @@ Implemented on `feature/wx-menu-settings-baseline` as a bounded local-usability 
 - `Start Recording` now reuses the configured recording settings values
 - targeted wx-shell tests for recording-settings application and start-recording request wiring
 
-Current checkpoint:
+Validation evidence:
 
-- unit validation is passing
-- one manual shell smoke pass is still required before marking this package as landed in central status docs
+- unit validation passed for wx-shell, snapshot-service, recording-service, and live-command-sync coverage
+- manual hardware verification on April 7, 2026 confirmed:
+  - `File` / `Settings` menu visibility
+  - working save-directory dialog path
+  - working recording-settings dialog path
+  - visible `recording_fps` status update
+  - bounded recording start/stop from menu-configured values
+  - visible retained recording progress summary after auto stop
+  - snapshot success after recording without shared trace-log permission failure
