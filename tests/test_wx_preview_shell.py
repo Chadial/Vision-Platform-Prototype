@@ -12,6 +12,7 @@ from vision_platform.apps.local_shell.startup import (
     build_local_shell_session,
 )
 from vision_platform.integrations.camera import SimulatedCameraDriver
+from vision_platform.libraries.common_models import FocusOverlayData, FocusPreviewState, FocusResult
 from vision_platform.models import CapturedFrame
 from vision_platform.services.display_service import PreviewInteractionCommand
 
@@ -52,6 +53,36 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertIn("ZOOM", view.status_lines[0])
         self.assertIn("ROI active: rectangle", view.status_lines[1])
 
+    def test_presenter_formats_focus_status_and_shortcut_hint_when_focus_state_is_available(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes(range(16)),
+            width=4,
+            height=4,
+            pixel_format="Mono8",
+        )
+        focus_state = FocusPreviewState(
+            result=FocusResult(method="laplace", score=12.5, is_valid=True),
+            overlay=FocusOverlayData(
+                score=12.5,
+                metric_name="laplace",
+                anchor_x=1.0,
+                anchor_y=1.0,
+                is_valid=True,
+            ),
+        )
+
+        view = presenter.build_view(
+            frame,
+            viewport_width=4,
+            viewport_height=4,
+            focus_state=focus_state,
+            has_focus_toggle=True,
+        )
+
+        self.assertTrue(any(line.startswith("Focus: laplace=") for line in view.status_lines))
+        self.assertIn("y=focus", view.status_lines[-1])
+
     def test_wx_shell_module_import_path_stays_available(self) -> None:
         from vision_platform.apps.local_shell import run_wx_preview_shell
 
@@ -72,10 +103,30 @@ class WxPreviewShellTests(unittest.TestCase):
 
                 self.assertEqual(session.source, "simulated")
                 self.assertEqual(session.selected_save_directory, Path(temp_dir))
+                self.assertIsNotNone(session.focus_preview_service)
                 self.assertTrue(status.camera.is_initialized)
                 self.assertEqual(status.default_save_directory, Path(temp_dir))
                 self.assertEqual(status.configuration.pixel_format, "Mono8")
                 self.assertEqual(status.configuration.exposure_time_us, 1200.0)
+            finally:
+                session.subsystem.driver.shutdown()
+
+    def test_local_shell_focus_preview_service_refreshes_from_shared_preview_path(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = build_local_shell_session(
+                LocalShellLaunchOptions(
+                    source="simulated",
+                    snapshot_directory=Path(temp_dir),
+                )
+            )
+            try:
+                session.subsystem.stream_service.start_preview()
+                try:
+                    focus_state = session.focus_preview_service.refresh_once()
+                    self.assertIsNotNone(focus_state)
+                    self.assertTrue(focus_state.result.is_valid)
+                finally:
+                    session.subsystem.stream_service.stop_preview()
             finally:
                 session.subsystem.driver.shutdown()
 
@@ -100,6 +151,7 @@ class WxPreviewShellTests(unittest.TestCase):
                 self.assertEqual(session.source, "hardware")
                 self.assertEqual(session.resolved_camera_id, "DEV_1AB22C046D81")
                 self.assertEqual(session.configuration_profile_id, "default")
+                self.assertIsNotNone(session.focus_preview_service)
                 self.assertEqual(status.configuration.pixel_format, "Mono8")
                 self.assertEqual(status.configuration.gain, 3.0)
                 self.assertEqual(status.configuration.roi_width, 2000)

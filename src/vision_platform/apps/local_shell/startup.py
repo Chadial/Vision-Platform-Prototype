@@ -12,7 +12,9 @@ from vision_platform.apps.camera_cli.camera_configuration_profiles import (
     normalize_camera_class_name,
     resolve_camera_configuration_profile,
 )
+from vision_platform.libraries.common_models import FocusMethod
 from vision_platform.models import ApplyConfigurationRequest, CameraStatus, SetSaveDirectoryRequest
+from vision_platform.services.stream_service import FocusPreviewService
 
 
 @dataclass(slots=True)
@@ -31,6 +33,7 @@ class LocalShellLaunchOptions:
     roi_offset_y: int | None = None
     roi_width: int | None = None
     roi_height: int | None = None
+    focus_method: FocusMethod | None = "laplace"
     snapshot_directory: Path = Path("captures/wx_shell_snapshot")
     poll_interval_seconds: float = 0.03
 
@@ -41,6 +44,7 @@ class LocalShellSession:
     source: str
     selected_save_directory: Path
     resolved_camera_id: str | None
+    focus_preview_service: FocusPreviewService | None = None
     configuration_profile_id: str | None = None
     configuration_profile_camera_class: str | None = None
 
@@ -66,6 +70,7 @@ def build_local_shell_session(
             options,
             initialized_status,
         )
+        focus_preview_service = subsystem.stream_service.create_focus_preview_service(focus_method=options.focus_method)
         selected_save_directory = subsystem.command_controller.set_save_directory(
             SetSaveDirectoryRequest(
                 base_directory=options.snapshot_directory,
@@ -77,6 +82,7 @@ def build_local_shell_session(
             source=options.source,
             selected_save_directory=selected_save_directory,
             resolved_camera_id=resolved_camera_id,
+            focus_preview_service=focus_preview_service,
             configuration_profile_id=profile_identity[0] if profile_identity is not None else None,
             configuration_profile_camera_class=profile_identity[1] if profile_identity is not None else None,
         )

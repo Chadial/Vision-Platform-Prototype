@@ -124,6 +124,7 @@ class WxLocalPreviewShell(wx.Frame):
         super().__init__(None, title="Vision Platform wx Shell", size=(920, 720))
         self._session = session
         self._subsystem = session.subsystem
+        self._focus_preview_service = session.focus_preview_service
         self._subsystem.stream_service.start_preview()
         self._presenter = PreviewShellPresenter(roi_state_service=self._subsystem.stream_service.get_roi_state_service())
         self._timer = wx.Timer(self)
@@ -142,6 +143,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._add_button(panel, controls, "Zoom Out", lambda event: self._run_action("zoom_out"))
         self._add_button(panel, controls, "Fit", lambda event: self._run_action("enable_fit"))
         self._add_button(panel, controls, "Crosshair", lambda event: self._run_action("toggle_crosshair"))
+        self._add_button(panel, controls, "Focus", lambda event: self._run_action("toggle_focus"))
         self._add_button(panel, controls, "Rect ROI", lambda event: self._run_roi_toggle("rectangle"))
         self._add_button(panel, controls, "Ellipse ROI", lambda event: self._run_roi_toggle("ellipse"))
 
@@ -159,11 +161,18 @@ class WxLocalPreviewShell(wx.Frame):
         frame = self._subsystem.stream_service.get_latest_frame()
         if frame is None:
             return
+        focus_state = None
+        if self._focus_preview_service is not None:
+            focus_state = self._focus_preview_service.refresh_once(
+                roi=self._subsystem.stream_service.get_roi_state_service().get_active_roi()
+            )
         canvas_size = self._canvas.GetClientSize()
         view_model = self._presenter.build_view(
             frame,
             viewport_width=max(1, canvas_size.GetWidth()),
             viewport_height=max(1, canvas_size.GetHeight()),
+            focus_state=focus_state,
+            has_focus_toggle=self._focus_preview_service is not None,
         )
         self._canvas.update_view(view_model)
         status = self._subsystem.command_controller.get_status()
@@ -200,7 +209,10 @@ class WxLocalPreviewShell(wx.Frame):
         self.request_refresh()
 
     def _run_action(self, action: str) -> None:
-        self._presenter.apply_command(PreviewInteractionCommand(action=action))
+        self._presenter.apply_command(
+            PreviewInteractionCommand(action=action),
+            has_focus_provider=self._focus_preview_service is not None,
+        )
         self.request_refresh()
 
     def _run_roi_toggle(self, roi_mode: str) -> None:
