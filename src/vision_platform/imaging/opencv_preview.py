@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 from time import monotonic
@@ -11,26 +10,9 @@ from vision_platform.imaging.opencv_adapter import OpenCvFrameAdapter
 from vision_platform.libraries.common_models import FocusPreviewState
 from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.libraries.roi_core import roi_bounds
-from vision_platform.services.display_service import CoordinateExportService
+from vision_platform.services.display_service import CoordinateExportService, DisplayGeometryService, ZoomPanState
 from vision_platform.services.stream_service.preview_service import PreviewService
 from vision_platform.services.stream_service.roi_state_service import RoiStateService
-
-
-@dataclass(frozen=True, slots=True)
-class _ViewportMapping:
-    source_width: int
-    source_height: int
-    viewport_width: int
-    viewport_height: int
-    display_scale: float
-    scaled_width: int
-    scaled_height: int
-    src_x: int
-    src_y: int
-    dst_x: int
-    dst_y: int
-    copy_width: int
-    copy_height: int
 
 
 class OpenCvPreviewWindow:
@@ -50,6 +32,7 @@ class OpenCvPreviewWindow:
         snapshot_callback: Callable[[], Path] | None = None,
         clipboard_copy_callback: Callable[[str], None] | None = None,
         coordinate_export_service: CoordinateExportService | None = None,
+        geometry_service: DisplayGeometryService | None = None,
         zoom_step: float = 1.5,
         min_zoom_scale: float = 0.05,
         max_zoom_scale: float = 8.0,
@@ -64,14 +47,14 @@ class OpenCvPreviewWindow:
         self._snapshot_callback = snapshot_callback
         self._clipboard_copy_callback = clipboard_copy_callback or self._copy_text_to_clipboard
         self._coordinate_export_service = coordinate_export_service or CoordinateExportService()
+        self._geometry_service = geometry_service or DisplayGeometryService()
         self._zoom_step = zoom_step
         self._min_zoom_scale = min_zoom_scale
         self._max_zoom_scale = max_zoom_scale
         self._time_provider = time_provider or monotonic
-        self._fit_to_window = True
-        self._manual_zoom_scale: float | None = None
+        self._geometry_state = ZoomPanState()
         self._last_display_scale = 1.0
-        self._last_viewport_mapping: _ViewportMapping | None = None
+        self._last_viewport_mapping = None
         self._selected_point: tuple[int, int] | None = None
         self._last_status_message: str | None = None
         self._frame_render_timestamps: deque[float] = deque(maxlen=30)
@@ -82,9 +65,6 @@ class OpenCvPreviewWindow:
         self._roi_anchor_point: tuple[int, int] | None = None
         self._roi_preview_point: tuple[int, int] | None = None
         self._last_cursor_viewport_point: tuple[int, int] | None = None
-        self._viewport_origin_scaled: tuple[int, int] = (0, 0)
-        self._pan_anchor_viewport_point: tuple[int, int] | None = None
-        self._pan_anchor_origin_scaled: tuple[int, int] | None = None
         self._window_created = False
 
     def render_latest_frame(self, delay_ms: int = 1) -> bool:
@@ -106,21 +86,29 @@ class OpenCvPreviewWindow:
         status_band_height = self._calculate_status_band_height(status_lines)
         viewport_width = window_size[0]
         viewport_height = max(1, window_size[1] - status_band_height)
-        display_scale = self._resolve_display_scale(frame.width, frame.height, viewport_width, viewport_height)
-        self._last_display_scale = display_scale
-        viewport_origin = self._resolve_viewport_origin(
-            frame_width=frame.width,
-            frame_height=frame.height,
-            viewport_width=viewport_width,
-            viewport_height=viewport_height,
-            display_scale=display_scale,
+        display_scale = self._geometry_service.resolve_display_scale(
+            frame.width,
+            frame.height,
+            viewport_width,
+            viewport_height,
+            self._geometry_state,
+            min_zoom_scale=self._min_zoom_scale,
         )
-        self._last_viewport_mapping = self._build_viewport_mapping(
-            frame_width=frame.width,
-            frame_height=frame.height,
-            viewport_width=viewport_width,
-            viewport_height=viewport_height,
-            display_scale=display_scale,
+        self._last_display_scale = display_scale
+        viewport_origin = self._geometry_service.resolve_viewport_origin(
+            frame.width,
+            frame.height,
+            viewport_width,
+            viewport_height,
+            display_scale,
+            self._geometry_state,
+        )
+        self._last_viewport_mapping = self._geometry_service.build_viewport_mapping(
+            frame.width,
+            frame.height,
+            viewport_width,
+            viewport_height,
+            display_scale,
             src_x=viewport_origin[0],
             src_y=viewport_origin[1],
         )
@@ -151,30 +139,78 @@ class OpenCvPreviewWindow:
 
     @property
     def is_fit_to_window_enabled(self) -> bool:
-        return self._fit_to_window
+        return self._geometry_state.fit_to_window
+
+    @property
+    def _fit_to_window(self) -> bool:
+        return self._geometry_state.fit_to_window
+
+    @_fit_to_window.setter
+    def _fit_to_window(self, value: bool) -> None:
+        self._geometry_state.fit_to_window = value
 
     @property
     def manual_zoom_scale(self) -> float | None:
-        return self._manual_zoom_scale
+        return self._geometry_state.manual_zoom_scale
 
     def zoom_in(self) -> None:
-        base_scale = self._last_display_scale if self._fit_to_window or self._manual_zoom_scale is None else self._manual_zoom_scale
+        base_scale = (
+            self._last_display_scale
+            if self._geometry_state.fit_to_window or self._geometry_state.manual_zoom_scale is None
+            else self._geometry_state.manual_zoom_scale
+        )
         new_scale = min(base_scale * self._zoom_step, self._max_zoom_scale)
         self._update_zoom_state(new_scale, previous_scale=base_scale)
-        self._fit_to_window = False
+        self._geometry_state.fit_to_window = False
 
     def zoom_out(self) -> None:
-        base_scale = self._last_display_scale if self._fit_to_window or self._manual_zoom_scale is None else self._manual_zoom_scale
+        base_scale = (
+            self._last_display_scale
+            if self._geometry_state.fit_to_window or self._geometry_state.manual_zoom_scale is None
+            else self._geometry_state.manual_zoom_scale
+        )
         new_scale = max(base_scale / self._zoom_step, self._min_zoom_scale)
         self._update_zoom_state(new_scale, previous_scale=base_scale)
-        self._fit_to_window = False
+        self._geometry_state.fit_to_window = False
 
     def enable_fit_to_window(self) -> None:
-        self._fit_to_window = True
-        self._manual_zoom_scale = None
-        self._viewport_origin_scaled = (0, 0)
-        self._pan_anchor_viewport_point = None
-        self._pan_anchor_origin_scaled = None
+        self._geometry_state.fit_to_window = True
+        self._geometry_state.manual_zoom_scale = None
+        self._geometry_state.viewport_origin_scaled = (0, 0)
+        self._geometry_state.pan_anchor_viewport_point = None
+        self._geometry_state.pan_anchor_origin_scaled = None
+
+    @property
+    def _manual_zoom_scale(self) -> float | None:
+        return self._geometry_state.manual_zoom_scale
+
+    @_manual_zoom_scale.setter
+    def _manual_zoom_scale(self, value: float | None) -> None:
+        self._geometry_state.manual_zoom_scale = value
+
+    @property
+    def _viewport_origin_scaled(self) -> tuple[int, int]:
+        return self._geometry_state.viewport_origin_scaled
+
+    @_viewport_origin_scaled.setter
+    def _viewport_origin_scaled(self, value: tuple[int, int]) -> None:
+        self._geometry_state.viewport_origin_scaled = value
+
+    @property
+    def _pan_anchor_viewport_point(self) -> tuple[int, int] | None:
+        return self._geometry_state.pan_anchor_viewport_point
+
+    @_pan_anchor_viewport_point.setter
+    def _pan_anchor_viewport_point(self, value: tuple[int, int] | None) -> None:
+        self._geometry_state.pan_anchor_viewport_point = value
+
+    @property
+    def _pan_anchor_origin_scaled(self) -> tuple[int, int] | None:
+        return self._geometry_state.pan_anchor_origin_scaled
+
+    @_pan_anchor_origin_scaled.setter
+    def _pan_anchor_origin_scaled(self, value: tuple[int, int] | None) -> None:
+        self._geometry_state.pan_anchor_origin_scaled = value
 
     def close(self) -> None:
         if self._window_created:
@@ -193,69 +229,29 @@ class OpenCvPreviewWindow:
         self._frame_adapter.set_mouse_callback(self._window_name, self._handle_mouse_event)
         self._window_created = True
 
-    def _resolve_display_scale(self, frame_width: int, frame_height: int, viewport_width: int, viewport_height: int) -> float:
-        if self._fit_to_window:
-            return max(min(viewport_width / frame_width, viewport_height / frame_height), self._min_zoom_scale)
-
-        assert self._manual_zoom_scale is not None
-        return self._manual_zoom_scale
-
-    def _resolve_viewport_origin(
-        self,
-        frame_width: int,
-        frame_height: int,
-        viewport_width: int,
-        viewport_height: int,
-        display_scale: float,
-    ) -> tuple[int, int]:
-        if self._fit_to_window:
-            self._viewport_origin_scaled = (0, 0)
-            return self._viewport_origin_scaled
-
-        scaled_width = max(1, int(round(frame_width * display_scale)))
-        scaled_height = max(1, int(round(frame_height * display_scale)))
-        max_src_x = max(0, scaled_width - viewport_width)
-        max_src_y = max(0, scaled_height - viewport_height)
-        origin_x = min(max(0, self._viewport_origin_scaled[0]), max_src_x)
-        origin_y = min(max(0, self._viewport_origin_scaled[1]), max_src_y)
-        self._viewport_origin_scaled = (origin_x, origin_y)
-        return self._viewport_origin_scaled
-
     def _update_zoom_state(self, new_scale: float, previous_scale: float) -> None:
-        self._manual_zoom_scale = new_scale
+        self._geometry_state.manual_zoom_scale = new_scale
         if self._last_viewport_mapping is None:
             return
 
-        anchored_origin = self._build_cursor_anchored_origin(new_scale)
+        anchored_origin = self._geometry_service.build_cursor_anchored_origin(
+            self._last_viewport_mapping,
+            self._last_cursor_viewport_point,
+            new_scale,
+        )
         if anchored_origin is not None:
-            self._viewport_origin_scaled = anchored_origin
+            self._geometry_state.viewport_origin_scaled = anchored_origin
             return
 
         top_left_source_x = self._last_viewport_mapping.src_x / max(previous_scale, 1e-9)
         top_left_source_y = self._last_viewport_mapping.src_y / max(previous_scale, 1e-9)
-        self._viewport_origin_scaled = (
+        self._geometry_state.viewport_origin_scaled = (
             int(round(top_left_source_x * new_scale)),
             int(round(top_left_source_y * new_scale)),
         )
 
-    def _build_cursor_anchored_origin(self, new_scale: float) -> tuple[int, int] | None:
-        if self._last_viewport_mapping is None or self._last_cursor_viewport_point is None:
-            return None
-
-        cursor_source_point = self._map_viewport_point_to_source(
-            self._last_cursor_viewport_point[0],
-            self._last_cursor_viewport_point[1],
-        )
-        if cursor_source_point is None:
-            return None
-
-        return (
-            int(round(cursor_source_point[0] * new_scale - self._last_cursor_viewport_point[0])),
-            int(round(cursor_source_point[1] * new_scale - self._last_cursor_viewport_point[1])),
-        )
-
     def _build_status_lines(self) -> list[str]:
-        mode = "FIT" if self._fit_to_window else "ZOOM"
+        mode = "FIT" if self._geometry_state.fit_to_window else "ZOOM"
         primary_parts = [f"{mode} {self._last_display_scale:.2f}x"]
         viewport_text = self._build_viewport_status_text()
         if viewport_text:
@@ -322,9 +318,10 @@ class OpenCvPreviewWindow:
         return f"FPS {fps:.1f}"
 
     def _build_viewport_status_text(self) -> str | None:
-        if self._fit_to_window:
+        if self._geometry_state.fit_to_window:
             return None
-        return f"view={self._viewport_origin_scaled[0]},{self._viewport_origin_scaled[1]}"
+        origin = self._geometry_state.viewport_origin_scaled
+        return f"view={origin[0]},{origin[1]}"
 
     def _build_focus_status_line(self) -> str | None:
         if not self._focus_status_visible or self._focus_state_provider is None:
@@ -442,31 +439,34 @@ class OpenCvPreviewWindow:
             self.zoom_out()
 
     def _start_pan(self, viewport_point: tuple[int, int]) -> None:
-        if self._fit_to_window:
+        if self._geometry_state.fit_to_window:
             self._last_status_message = "Pan unavailable in fit mode"
-            self._pan_anchor_viewport_point = None
-            self._pan_anchor_origin_scaled = None
+            self._geometry_state.pan_anchor_viewport_point = None
+            self._geometry_state.pan_anchor_origin_scaled = None
             return
-        self._pan_anchor_viewport_point = viewport_point
-        self._pan_anchor_origin_scaled = self._viewport_origin_scaled
+        self._geometry_state.pan_anchor_viewport_point = viewport_point
+        self._geometry_state.pan_anchor_origin_scaled = self._geometry_state.viewport_origin_scaled
         self._last_status_message = "Panning"
 
     def _stop_pan(self) -> None:
-        if self._pan_anchor_viewport_point is None:
+        if self._geometry_state.pan_anchor_viewport_point is None:
             return
-        self._pan_anchor_viewport_point = None
-        self._pan_anchor_origin_scaled = None
+        self._geometry_state.pan_anchor_viewport_point = None
+        self._geometry_state.pan_anchor_origin_scaled = None
         self._last_status_message = "Pan complete"
 
     def _update_pan(self, viewport_point: tuple[int, int]) -> bool:
-        if self._pan_anchor_viewport_point is None or self._pan_anchor_origin_scaled is None:
+        if (
+            self._geometry_state.pan_anchor_viewport_point is None
+            or self._geometry_state.pan_anchor_origin_scaled is None
+        ):
             return False
 
-        delta_x = viewport_point[0] - self._pan_anchor_viewport_point[0]
-        delta_y = viewport_point[1] - self._pan_anchor_viewport_point[1]
-        self._viewport_origin_scaled = (
-            self._pan_anchor_origin_scaled[0] - delta_x,
-            self._pan_anchor_origin_scaled[1] - delta_y,
+        delta_x = viewport_point[0] - self._geometry_state.pan_anchor_viewport_point[0]
+        delta_y = viewport_point[1] - self._geometry_state.pan_anchor_viewport_point[1]
+        self._geometry_state.viewport_origin_scaled = (
+            self._geometry_state.pan_anchor_origin_scaled[0] - delta_x,
+            self._geometry_state.pan_anchor_origin_scaled[1] - delta_y,
         )
         self._last_status_message = "Panning"
         return True
@@ -615,66 +615,22 @@ class OpenCvPreviewWindow:
         display_scale: float,
         src_x: int = 0,
         src_y: int = 0,
-    ) -> _ViewportMapping:
-        scaled_width = max(1, int(round(frame_width * display_scale)))
-        scaled_height = max(1, int(round(frame_height * display_scale)))
-        max_src_x = max(0, scaled_width - viewport_width)
-        max_src_y = max(0, scaled_height - viewport_height)
-        src_x = min(max(0, src_x), max_src_x)
-        src_y = min(max(0, src_y), max_src_y)
-        dst_x = 0
-        dst_y = 0
-        copy_width = min(scaled_width - src_x, viewport_width)
-        copy_height = min(scaled_height - src_y, viewport_height)
-        return _ViewportMapping(
-            source_width=frame_width,
-            source_height=frame_height,
-            viewport_width=viewport_width,
-            viewport_height=viewport_height,
-            display_scale=display_scale,
-            scaled_width=scaled_width,
-            scaled_height=scaled_height,
+    ):
+        return self._geometry_service.build_viewport_mapping(
+            frame_width,
+            frame_height,
+            viewport_width,
+            viewport_height,
+            display_scale,
             src_x=src_x,
             src_y=src_y,
-            dst_x=dst_x,
-            dst_y=dst_y,
-            copy_width=copy_width,
-            copy_height=copy_height,
         )
 
     def _map_viewport_point_to_source(self, x: int, y: int) -> tuple[int, int] | None:
-        mapping = self._last_viewport_mapping
-        if mapping is None:
-            return None
-        if not (
-            mapping.dst_x <= x < mapping.dst_x + mapping.copy_width
-            and mapping.dst_y <= y < mapping.dst_y + mapping.copy_height
-        ):
-            return None
-
-        scaled_x = mapping.src_x + (x - mapping.dst_x)
-        scaled_y = mapping.src_y + (y - mapping.dst_y)
-        source_x = int(scaled_x / mapping.display_scale)
-        source_y = int(scaled_y / mapping.display_scale)
-        source_x = min(max(source_x, 0), mapping.source_width - 1)
-        source_y = min(max(source_y, 0), mapping.source_height - 1)
-        return source_x, source_y
+        return self._geometry_service.map_viewport_point_to_source(self._last_viewport_mapping, x, y)
 
     def _map_source_point_to_viewport(self, point: tuple[int, int] | None) -> tuple[int, int] | None:
-        mapping = self._last_viewport_mapping
-        if mapping is None or point is None:
-            return None
-
-        scaled_x = int(round(point[0] * mapping.display_scale))
-        scaled_y = int(round(point[1] * mapping.display_scale))
-        viewport_x = mapping.dst_x + scaled_x - mapping.src_x
-        viewport_y = mapping.dst_y + scaled_y - mapping.src_y
-        if not (
-            mapping.dst_x <= viewport_x < mapping.dst_x + mapping.copy_width
-            and mapping.dst_y <= viewport_y < mapping.dst_y + mapping.copy_height
-        ):
-            return None
-        return viewport_x, viewport_y
+        return self._geometry_service.map_source_point_to_viewport(self._last_viewport_mapping, point)
 
 
 __all__ = ["OpenCvPreviewWindow"]
