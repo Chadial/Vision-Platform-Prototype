@@ -35,6 +35,9 @@ except ImportError as exc:  # pragma: no cover - installation is validated separ
     raise RuntimeError("wxPython is not installed in the project environment.") from exc
 
 
+_WX_RECORDING_FILE_EXTENSIONS = (".raw", ".bmp", ".png", ".tiff")
+
+
 class PreviewCanvas(wx.Panel):
     def __init__(self, parent: wx.Window, presenter: PreviewShellPresenter, refresh_callback) -> None:
         super().__init__(parent, size=(640, 480))
@@ -725,9 +728,7 @@ class WxLocalPreviewShell(wx.Frame):
         normalized_stem = file_stem.strip()
         if not normalized_stem:
             raise ValueError("file stem must not be empty")
-        normalized_extension = file_extension.strip()
-        if not normalized_extension.startswith(".") or len(normalized_extension) < 2:
-            raise ValueError("file extension must start with '.'")
+        normalized_extension = _normalize_wx_recording_file_extension(file_extension)
         self._parse_optional_positive_int(max_frames)
         parsed_recording_fps = self._parse_optional_positive_float(recording_fps)
         self._recording_file_stem = normalized_stem
@@ -1057,7 +1058,8 @@ class _RecordingSettingsDialog(wx.Dialog):
         grid.Add(self._file_stem, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="File Extension"), 0, wx.ALIGN_CENTER_VERTICAL)
-        self._file_extension = wx.TextCtrl(panel, value=file_extension)
+        self._file_extension = wx.Choice(panel, choices=list(_WX_RECORDING_FILE_EXTENSIONS))
+        self._file_extension.SetStringSelection(_normalize_wx_recording_file_extension(file_extension))
         grid.Add(self._file_extension, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="Max Frames (0=unbounded)"), 0, wx.ALIGN_CENTER_VERTICAL)
@@ -1102,3 +1104,11 @@ def _copy_text_to_clipboard(text: str) -> None:
             raise RuntimeError("clipboard write failed")
     finally:
         wx.TheClipboard.Close()
+
+
+def _normalize_wx_recording_file_extension(file_extension: str) -> str:
+    normalized_extension = file_extension.strip().lower()
+    if normalized_extension not in _WX_RECORDING_FILE_EXTENSIONS:
+        allowed_extensions = ", ".join(_WX_RECORDING_FILE_EXTENSIONS)
+        raise ValueError(f"file extension must be one of: {allowed_extensions}")
+    return normalized_extension

@@ -43,6 +43,20 @@ Excluded:
 - select one valid format, start recording, and confirm the chosen format is used
 - confirm invalid-extension typing is no longer needed for the common path
 
+## Implementation Status
+
+Implemented on `feature/wx-recording-settings-guardrails` as a bounded wx-only guardrail slice:
+
+- the recording file-extension field in the wx dialog is now a bounded picker
+- the current picker options are `.raw`, `.bmp`, `.png`, and `.tiff`
+- wx-side settings application now validates against the same bounded option set instead of free-form extension text
+- targeted wx-shell tests cover supported/unsupported extension normalization and the existing start-recording wiring
+
+Current checkpoint:
+
+- unit validation is passing
+- one short manual shell check is still useful before marking this package as landed in central status docs
+
 ## Headless Follow-Up Note
 
 - this slice is UI-local guardrail work only
