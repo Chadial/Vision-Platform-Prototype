@@ -18,6 +18,8 @@ Scope level:
 
 Its purpose is to surface recording or interval progress through the existing controller/status models so operators can see how many frames have been written without making the wx shell a new workflow owner.
 
+The same slice also keeps the header honest about live cadence by showing the current camera acquisition FPS and the measured wx UI refresh FPS.
+
 ## Branch
 
 - intended branch: `feature/wx-recording-progress-status`

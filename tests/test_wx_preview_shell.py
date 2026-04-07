@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from types import SimpleNamespace
 
 from tests import _path_setup
 from vision_platform.apps.local_shell import PreviewShellPresenter
@@ -53,6 +54,19 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertFalse(presenter.state.geometry_state.fit_to_window)
         self.assertIn("ZOOM", view.status_lines[0])
         self.assertIn("ROI active: rectangle", view.status_lines[1])
+
+    def test_presenter_includes_render_fps_in_primary_status_line(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes(range(16)),
+            width=4,
+            height=4,
+            pixel_format="Mono8",
+        )
+
+        view = presenter.build_view(frame, viewport_width=4, viewport_height=4, fps=24.0)
+
+        self.assertIn("FPS 24.0", view.status_lines[0])
 
     def test_presenter_formats_focus_status_and_shortcut_hint_when_focus_state_is_available(self) -> None:
         presenter = PreviewShellPresenter()
@@ -510,6 +524,28 @@ class WxPreviewShellTests(unittest.TestCase):
         summary = shell._build_focus_summary(focus_state)
 
         self.assertEqual(summary, "1.234e-02")
+
+    def test_status_prefix_includes_camera_and_ui_fps(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(is_preview_running=True),
+        )
+        shell._ui_refresh_fps = 29.97
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertIn("camera_fps=16.0", prefix)
+        self.assertIn("ui_fps=30.0", prefix)
 
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:

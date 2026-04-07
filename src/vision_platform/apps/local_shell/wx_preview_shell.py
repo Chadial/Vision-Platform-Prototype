@@ -216,6 +216,8 @@ class WxLocalPreviewShell(wx.Frame):
         self._focus_refresh_future: Future | None = None
         self._focus_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="WxShellFocus")
         self._last_render_time = 0.0
+        self._last_ui_refresh_sample_time: float | None = None
+        self._ui_refresh_fps: float | None = None
         self._refresh_scheduled = False
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
@@ -261,6 +263,7 @@ class WxLocalPreviewShell(wx.Frame):
             return
         self._refresh_scheduled = False
         self._last_render_time = now
+        self._update_ui_refresh_rate(now)
         self._consume_interaction_status_message()
         self._sync_transient_status_message(now)
         focus_state = self._get_focus_state()
@@ -269,22 +272,13 @@ class WxLocalPreviewShell(wx.Frame):
             frame,
             viewport_width=max(1, canvas_size.GetWidth()),
             viewport_height=max(1, canvas_size.GetHeight()),
+            fps=self._ui_refresh_fps,
             focus_state=focus_state,
             has_focus_toggle=self._focus_preview_service is not None,
         )
         self._canvas.update_view(view_model)
         status = self._get_status()
-        prefix = [
-            f"source={self._session.source}",
-            f"camera={'ready' if status.camera.is_initialized else 'offline'}",
-            f"preview={'running' if self._subsystem.stream_service.is_preview_running else 'stopped'}",
-        ]
-        if self._session.resolved_camera_id is not None:
-            prefix.append(f"camera_id={self._session.resolved_camera_id}")
-        if status.default_save_directory is not None:
-            prefix.append(f"save={status.default_save_directory}")
-        if self._session.configuration_profile_id is not None:
-            prefix.append(f"profile={self._session.configuration_profile_id}")
+        prefix = self._build_status_prefix(status)
         focus_summary = self._build_focus_summary(focus_state)
         if focus_summary is not None:
             prefix.append(f"focus={focus_summary}")
@@ -362,6 +356,20 @@ class WxLocalPreviewShell(wx.Frame):
             self._last_status_refresh_time = now
         return self._cached_status
 
+    def _update_ui_refresh_rate(self, now: float) -> None:
+        if self._last_ui_refresh_sample_time is None:
+            self._last_ui_refresh_sample_time = now
+            return
+        delta = now - self._last_ui_refresh_sample_time
+        self._last_ui_refresh_sample_time = now
+        if delta <= 0:
+            return
+        sample_fps = 1.0 / delta
+        if self._ui_refresh_fps is None:
+            self._ui_refresh_fps = sample_fps
+            return
+        self._ui_refresh_fps = (self._ui_refresh_fps * 0.8) + (sample_fps * 0.2)
+
     def _get_focus_state(self):
         if self._focus_preview_service is None:
             return None
@@ -435,6 +443,28 @@ class WxLocalPreviewShell(wx.Frame):
         if not focus_state.result.is_valid:
             return "invalid"
         return format_focus_score(focus_state.result.score)
+
+    def _build_status_prefix(self, status) -> list[str]:
+        prefix = [
+            f"source={self._session.source}",
+            f"camera={'ready' if status.camera.is_initialized else 'offline'}",
+            f"preview={'running' if self._subsystem.stream_service.is_preview_running else 'stopped'}",
+        ]
+        if self._session.resolved_camera_id is not None:
+            prefix.append(f"camera_id={self._session.resolved_camera_id}")
+        if status.camera.reported_acquisition_frame_rate is not None:
+            prefix.append(f"camera_fps={status.camera.reported_acquisition_frame_rate:.1f}")
+        else:
+            prefix.append("camera_fps=n/a")
+        if self._ui_refresh_fps is not None:
+            prefix.append(f"ui_fps={self._ui_refresh_fps:.1f}")
+        else:
+            prefix.append("ui_fps=waiting")
+        if status.default_save_directory is not None:
+            prefix.append(f"save={status.default_save_directory}")
+        if self._session.configuration_profile_id is not None:
+            prefix.append(f"profile={self._session.configuration_profile_id}")
+        return prefix
 
 
 def run_wx_preview_shell(
