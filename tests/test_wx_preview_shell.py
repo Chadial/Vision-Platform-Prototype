@@ -614,6 +614,66 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertEqual(shell._build_recording_summary(status), "17/n")
 
+    def test_apply_recording_settings_updates_internal_state_and_controls(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._recording_max_frames = _StubTextControl("0")
+        shell._recording_target_frame_rate_input = _StubTextControl("")
+
+        shell._apply_recording_settings_values(
+            file_stem="custom_run",
+            file_extension=".bmp",
+            max_frames="12",
+            recording_fps="8.5",
+        )
+
+        self.assertEqual(shell._recording_file_stem, "custom_run")
+        self.assertEqual(shell._recording_file_extension, ".bmp")
+        self.assertEqual(shell._recording_max_frames.GetValue(), "12")
+        self.assertEqual(shell._recording_target_frame_rate_input.GetValue(), "8.5")
+
+    def test_apply_recording_settings_rejects_invalid_extension(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._recording_max_frames = _StubTextControl("0")
+        shell._recording_target_frame_rate_input = _StubTextControl("")
+
+        with self.assertRaises(ValueError):
+            shell._apply_recording_settings_values(
+                file_stem="custom_run",
+                file_extension="bmp",
+                max_frames="0",
+                recording_fps="",
+            )
+
+    def test_start_recording_uses_configured_recording_file_stem_and_extension(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        started_requests: list = []
+
+        def _start_recording(request):
+            started_requests.append(request)
+            return SimpleNamespace(status=SimpleNamespace(active_file_stem=request.file_stem))
+
+        shell._recording_max_frames = _StubTextControl("0")
+        shell._recording_target_frame_rate_input = _StubTextControl("")
+        shell._recording_file_stem = "menu_stem"
+        shell._recording_file_extension = ".bmp"
+        shell._session = SimpleNamespace(
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="1800_u_1240m",
+            subsystem=SimpleNamespace(
+                command_controller=SimpleNamespace(start_recording=_start_recording),
+            ),
+        )
+        shell._get_recording_save_directory = lambda: Path("captures/wx_shell_snapshot")
+        shell._set_transient_status_message = lambda _message: None
+        shell.request_refresh = lambda: None
+
+        shell._on_start_recording(None)
+
+        self.assertEqual(len(started_requests), 1)
+        self.assertEqual(started_requests[0].file_stem, "menu_stem")
+        self.assertEqual(started_requests[0].file_extension, ".bmp")
+
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:
             session = build_local_shell_session(
@@ -721,3 +781,14 @@ class _StubPresenter:
             (),
             {"interaction_state": type("InteractionState", (), {"focus_status_visible": focus_status_visible})()},
         )()
+
+
+class _StubTextControl:
+    def __init__(self, value: str) -> None:
+        self._value = value
+
+    def GetValue(self) -> str:
+        return self._value
+
+    def ChangeValue(self, value: str) -> None:
+        self._value = value
