@@ -234,6 +234,8 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_active_frame_limit: int | None = None
         self._recording_target_frame_rate_value: float | None = None
         self._recording_last_summary: str | None = None
+        self._recording_file_stem = "wx_recording"
+        self._recording_file_extension = ".raw"
         self._live_sync_processed_count = 0
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
@@ -271,6 +273,7 @@ class WxLocalPreviewShell(wx.Frame):
         root_sizer.Add(self._canvas, 1, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         root_sizer.Add(self._status, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         panel.SetSizer(root_sizer)
+        self.SetMenuBar(self._build_menu_bar())
 
         self.Bind(wx.EVT_TIMER, self._on_timer, self._timer)
         self.Bind(wx.EVT_CLOSE, self._on_close)
@@ -364,8 +367,8 @@ class WxLocalPreviewShell(wx.Frame):
                 return
             result = self._session.subsystem.command_controller.start_recording(
                 StartRecordingRequest(
-                    file_stem="wx_recording",
-                    file_extension=".raw",
+                    file_stem=self._recording_file_stem,
+                    file_extension=self._recording_file_extension,
                     save_directory=save_directory,
                     max_frame_count=frame_limit,
                     target_frame_rate=target_frame_rate,
@@ -382,7 +385,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_target_frame_rate_value = target_frame_rate
         self._recording_last_summary = None
         self._set_transient_status_message(
-            f"Recording started: {result.status.active_file_stem or 'wx_recording'}"
+            f"Recording started: {result.status.active_file_stem or self._recording_file_stem}"
         )
         self.request_refresh()
 
@@ -418,6 +421,88 @@ class WxLocalPreviewShell(wx.Frame):
             self.request_refresh()
             return
         event.Skip()
+
+    def _build_menu_bar(self) -> wx.MenuBar:
+        menu_bar = wx.MenuBar()
+
+        file_menu = wx.Menu()
+        self._menu_set_save_directory = file_menu.Append(
+            wx.ID_ANY,
+            "Set Save Directory...\tCtrl+Shift+S",
+            "Choose the base directory for snapshots and recordings.",
+        )
+        self.Bind(wx.EVT_MENU, self._on_menu_set_save_directory, self._menu_set_save_directory)
+        file_menu.AppendSeparator()
+        exit_item = file_menu.Append(wx.ID_EXIT, "Exit\tCtrl+Q", "Close the local shell.")
+        self.Bind(wx.EVT_MENU, lambda _event: self.Close(), exit_item)
+        menu_bar.Append(file_menu, "&File")
+
+        settings_menu = wx.Menu()
+        self._menu_recording_settings = settings_menu.Append(
+            wx.ID_ANY,
+            "Recording Settings...\tCtrl+R",
+            "Edit bounded recording settings used by Start Recording.",
+        )
+        self.Bind(wx.EVT_MENU, self._on_menu_recording_settings, self._menu_recording_settings)
+        menu_bar.Append(settings_menu, "&Settings")
+
+        return menu_bar
+
+    def _on_menu_set_save_directory(self, event) -> None:
+        current_directory = self._get_recording_save_directory()
+        default_path = str(current_directory) if current_directory is not None else str(Path.cwd())
+        dialog = wx.DirDialog(
+            self,
+            "Select save directory",
+            defaultPath=default_path,
+            style=wx.DD_DEFAULT_STYLE | wx.DD_DIR_MUST_EXIST,
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            selected_path = Path(dialog.GetPath())
+            result = self._session.subsystem.command_controller.set_save_directory(
+                SetSaveDirectoryRequest(
+                    base_directory=selected_path,
+                    mode="append",
+                )
+            )
+            self._session.selected_save_directory = result.selected_directory
+            self._cached_status = None
+            self._last_status_refresh_time = 0.0
+            self._set_transient_status_message(f"Save directory: {result.selected_directory}")
+            self.request_refresh()
+        except Exception as exc:
+            self._set_transient_status_message(f"Save directory failed: {exc}")
+            self.request_refresh()
+        finally:
+            dialog.Destroy()
+
+    def _on_menu_recording_settings(self, event) -> None:
+        dialog = _RecordingSettingsDialog(
+            self,
+            file_stem=self._recording_file_stem,
+            file_extension=self._recording_file_extension,
+            max_frames=self._recording_max_frames.GetValue(),
+            recording_fps=self._recording_target_frame_rate_input.GetValue(),
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            values = dialog.get_values()
+            self._apply_recording_settings_values(
+                file_stem=values["file_stem"],
+                file_extension=values["file_extension"],
+                max_frames=values["max_frames"],
+                recording_fps=values["recording_fps"],
+            )
+            self._set_transient_status_message("Recording settings updated")
+            self.request_refresh()
+        except Exception as exc:
+            self._set_transient_status_message(f"Recording settings failed: {exc}")
+            self.request_refresh()
+        finally:
+            dialog.Destroy()
 
     @staticmethod
     def _add_button(parent: wx.Window, sizer: wx.BoxSizer, label: str, handler) -> None:
@@ -614,6 +699,27 @@ class WxLocalPreviewShell(wx.Frame):
         if parsed <= 0:
             raise ValueError("value must be positive")
         return parsed
+
+    def _apply_recording_settings_values(
+        self,
+        *,
+        file_stem: str,
+        file_extension: str,
+        max_frames: str,
+        recording_fps: str,
+    ) -> None:
+        normalized_stem = file_stem.strip()
+        if not normalized_stem:
+            raise ValueError("file stem must not be empty")
+        normalized_extension = file_extension.strip()
+        if not normalized_extension.startswith(".") or len(normalized_extension) < 2:
+            raise ValueError("file extension must start with '.'")
+        self._parse_optional_positive_int(max_frames)
+        self._parse_optional_positive_float(recording_fps)
+        self._recording_file_stem = normalized_stem
+        self._recording_file_extension = normalized_extension
+        self._recording_max_frames.ChangeValue(max_frames.strip())
+        self._recording_target_frame_rate_input.ChangeValue(recording_fps.strip())
 
     def _poll_live_commands(self) -> None:
         live_sync_session = self._session.live_sync_session
@@ -913,6 +1019,56 @@ def _resolve_active_roi_colour(emphasis: str) -> wx.Colour:
     if emphasis == "hover":
         return wx.Colour(60, 120, 255)
     return wx.Colour(0, 255, 0)
+
+
+class _RecordingSettingsDialog(wx.Dialog):
+    def __init__(
+        self,
+        parent: wx.Window,
+        *,
+        file_stem: str,
+        file_extension: str,
+        max_frames: str,
+        recording_fps: str,
+    ) -> None:
+        super().__init__(parent, title="Recording Settings", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        panel = wx.Panel(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(cols=2, vgap=8, hgap=8)
+        grid.AddGrowableCol(1, 1)
+
+        grid.Add(wx.StaticText(panel, label="File Stem"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._file_stem = wx.TextCtrl(panel, value=file_stem)
+        grid.Add(self._file_stem, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="File Extension"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._file_extension = wx.TextCtrl(panel, value=file_extension)
+        grid.Add(self._file_extension, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="Max Frames (0=unbounded)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._max_frames = wx.TextCtrl(panel, value=max_frames)
+        grid.Add(self._max_frames, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="Recording FPS (blank=auto)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._recording_fps = wx.TextCtrl(panel, value=recording_fps)
+        grid.Add(self._recording_fps, 1, wx.EXPAND)
+
+        sizer.Add(grid, 1, wx.EXPAND | wx.ALL, 10)
+        buttons = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL)
+        if buttons is not None:
+            sizer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        panel.SetSizer(sizer)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(panel, 1, wx.EXPAND)
+        self.SetSizerAndFit(root)
+
+    def get_values(self) -> dict[str, str]:
+        return {
+            "file_stem": self._file_stem.GetValue(),
+            "file_extension": self._file_extension.GetValue(),
+            "max_frames": self._max_frames.GetValue(),
+            "recording_fps": self._recording_fps.GetValue(),
+        }
 
 
 __all__ = ["WxLocalPreviewShell", "main", "run_wx_preview_shell"]
