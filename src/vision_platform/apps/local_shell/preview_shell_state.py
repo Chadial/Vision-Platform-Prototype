@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from importlib import import_module
+from importlib.util import find_spec
 
 from vision_platform.libraries.common_models import FocusPreviewState, RoiDefinition
 from vision_platform.models import CapturedFrame
@@ -39,6 +41,10 @@ class RenderedViewportImage:
     def to_rgb_buffer(self) -> bytearray:
         if self.mime_family == "ppm":
             return bytearray(self.payload)
+        if _is_numpy_available():
+            numpy_module = _require_numpy()
+            values = numpy_module.frombuffer(self.payload, dtype=numpy_module.uint8)
+            return bytearray(numpy_module.repeat(values, 3).tobytes())
         rgb_payload = bytearray(self.width * self.height * 3)
         target_index = 0
         for value in self.payload:
@@ -308,7 +314,7 @@ def render_viewport_image(frame: CapturedFrame, mapping: ViewportMapping) -> Ren
             ),
         )
     if pixel_format == "mono16":
-        mono8_bytes = source_bytes[1::2]
+        mono8_bytes = _convert_mono16_to_mono8(source_bytes, frame.width, frame.height)
         return RenderedViewportImage(
             width=mapping.viewport_width,
             height=mapping.viewport_height,
@@ -343,6 +349,13 @@ def _render_mono8_payload(
     source_height: int,
     mapping: ViewportMapping,
 ) -> bytes:
+    if _is_numpy_available():
+        return _render_mono8_payload_numpy(
+            source_bytes,
+            source_width=source_width,
+            source_height=source_height,
+            mapping=mapping,
+        )
     payload = bytearray(mapping.viewport_width * mapping.viewport_height)
     for viewport_y in range(mapping.copy_height):
         for viewport_x in range(mapping.copy_width):
@@ -364,6 +377,14 @@ def _render_rgb_payload(
     mapping: ViewportMapping,
     source_format: str,
 ) -> bytes:
+    if _is_numpy_available():
+        return _render_rgb_payload_numpy(
+            source_bytes,
+            source_width=source_width,
+            source_height=source_height,
+            mapping=mapping,
+            source_format=source_format,
+        )
     payload = bytearray(mapping.viewport_width * mapping.viewport_height * 3)
     for viewport_y in range(mapping.copy_height):
         for viewport_x in range(mapping.copy_width):
@@ -379,6 +400,96 @@ def _render_rgb_payload(
             else:
                 payload[target_index : target_index + 3] = pixel
     return bytes(payload)
+
+
+def _render_mono8_payload_numpy(
+    source_bytes: bytes,
+    *,
+    source_width: int,
+    source_height: int,
+    mapping: ViewportMapping,
+) -> bytes:
+    numpy_module = _require_numpy()
+    expected_size = source_width * source_height
+    if len(source_bytes) < expected_size:
+        raise RuntimeError("Frame buffer is too small for Mono8 viewport rendering.")
+
+    source_image = numpy_module.frombuffer(source_bytes, dtype=numpy_module.uint8, count=expected_size).reshape(
+        (source_height, source_width)
+    )
+    source_x, source_y = _build_source_indices_numpy(mapping, source_width, source_height, numpy_module)
+    sampled = source_image[source_y[:, None], source_x[None, :]]
+
+    viewport = numpy_module.zeros((mapping.viewport_height, mapping.viewport_width), dtype=numpy_module.uint8)
+    viewport[
+        mapping.dst_y : mapping.dst_y + mapping.copy_height,
+        mapping.dst_x : mapping.dst_x + mapping.copy_width,
+    ] = sampled
+    return viewport.tobytes()
+
+
+def _render_rgb_payload_numpy(
+    source_bytes: bytes,
+    *,
+    source_width: int,
+    source_height: int,
+    mapping: ViewportMapping,
+    source_format: str,
+) -> bytes:
+    numpy_module = _require_numpy()
+    expected_size = source_width * source_height * 3
+    if len(source_bytes) < expected_size:
+        raise RuntimeError("Frame buffer is too small for RGB viewport rendering.")
+
+    source_image = numpy_module.frombuffer(source_bytes, dtype=numpy_module.uint8, count=expected_size).reshape(
+        (source_height, source_width, 3)
+    )
+    source_x, source_y = _build_source_indices_numpy(mapping, source_width, source_height, numpy_module)
+    sampled = source_image[source_y[:, None], source_x[None, :]]
+    if source_format == "bgr8":
+        sampled = sampled[:, :, ::-1]
+
+    viewport = numpy_module.zeros((mapping.viewport_height, mapping.viewport_width, 3), dtype=numpy_module.uint8)
+    viewport[
+        mapping.dst_y : mapping.dst_y + mapping.copy_height,
+        mapping.dst_x : mapping.dst_x + mapping.copy_width,
+        :,
+    ] = sampled
+    return viewport.tobytes()
+
+
+def _build_source_indices_numpy(mapping: ViewportMapping, source_width: int, source_height: int, numpy_module):
+    x_scaled = mapping.src_x + numpy_module.arange(mapping.copy_width)
+    y_scaled = mapping.src_y + numpy_module.arange(mapping.copy_height)
+    x_source = numpy_module.clip((x_scaled / mapping.display_scale).astype(numpy_module.int32), 0, source_width - 1)
+    y_source = numpy_module.clip((y_scaled / mapping.display_scale).astype(numpy_module.int32), 0, source_height - 1)
+    return x_source, y_source
+
+
+_NUMPY_MODULE = None
+_HAS_NUMPY = find_spec("numpy") is not None
+
+
+def _is_numpy_available() -> bool:
+    return _HAS_NUMPY
+
+
+def _require_numpy():
+    global _NUMPY_MODULE
+    if _NUMPY_MODULE is None:
+        _NUMPY_MODULE = import_module("numpy")
+    return _NUMPY_MODULE
+
+
+def _convert_mono16_to_mono8(source_bytes: bytes, width: int, height: int) -> bytes:
+    expected_size = width * height * 2
+    if len(source_bytes) < expected_size:
+        raise RuntimeError("Frame buffer is too small for Mono16 viewport rendering.")
+    if _is_numpy_available():
+        numpy_module = _require_numpy()
+        values = numpy_module.frombuffer(source_bytes, dtype=numpy_module.uint16, count=width * height)
+        return (values >> 8).astype(numpy_module.uint8).tobytes()
+    return source_bytes[1:expected_size:2]
 
 
 __all__ = [
