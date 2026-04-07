@@ -7,7 +7,7 @@ from typing import Optional
 class RecordingRequest:
     save_directory: Optional[Path]
     file_stem: str
-    file_extension: str = ".png"
+    file_extension: str = ".bmp"
     frame_limit: Optional[int] = None
     duration_seconds: Optional[float] = None
     target_frame_rate: Optional[float] = None

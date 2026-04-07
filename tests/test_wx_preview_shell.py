@@ -665,6 +665,12 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(_normalize_wx_recording_file_extension(".bmp"), ".bmp")
         self.assertEqual(_normalize_wx_recording_file_extension(".RAW"), ".raw")
 
+    def test_wx_shell_default_recording_extension_is_bmp(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._recording_file_extension = ".bmp"
+
+        self.assertEqual(shell._recording_file_extension, ".bmp")
+
     def test_normalize_wx_recording_file_extension_rejects_unsupported_values(self) -> None:
         with self.assertRaises(ValueError):
             _normalize_wx_recording_file_extension(".jpg")
