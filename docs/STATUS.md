@@ -15,6 +15,29 @@ Each status update should state progress and gaps against both roadmaps.
 - `main` as the latest integrated baseline
 - short-lived topic branches are created per active work package and merged back after local validation
 
+## Current Phase
+
+- `Usable Camera Subsystem / Pre-Product Baseline`
+
+## Current Next
+
+- `WP62 wx Live Command Sync For Open Shell`
+
+## Immediate Priorities
+
+- local usability
+- host-side usability
+- official reference scenarios
+- then headless-kernel preparation
+
+## Not Current Priorities
+
+- broad transport or platform expansion by default
+- broad MCP work
+- broad product packaging
+- broad additional frontend expansion
+- full C# handover work
+
 ## Roadmap Position
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation is no longer only simulator-backed: the March 27, 2026 hardware passes now cover an integrated command-flow baseline for snapshot save, preview readiness, interval capture from the shared preview stream, frame-limit recording, duration-only recording, target-frame-rate recording, supported alternate pixel format capture (`Mono10` as `.raw`), and explicit hardware-side failures for invalid camera id, unsupported pixel format, and invalid ROI increment choices on the Allied Vision `1800 U-1240m`. Phase 9 can therefore be treated as prototype-level hardware-validated for the current camera baseline, with remaining work limited to edge-case expansion rather than baseline viability. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes, and this branch now adds a first unified camera-oriented CLI baseline on top of the existing controller and service layer.

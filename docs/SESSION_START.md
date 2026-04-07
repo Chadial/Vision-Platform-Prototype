@@ -22,11 +22,18 @@ Read this first to get from zero context to a workable repository overview witho
 
 ## Current Baseline
 
-- The repository now operates from a post-closure Python working baseline, not from an open Extended MVP closure phase.
+- The repository now operates from `Usable Camera Subsystem / Pre-Product Baseline`, not from an open Extended MVP closure phase.
 - The preferred platform-facing implementation surface is `src/vision_platform`, with `src/camera_app` retained as a compatibility bridge while physical migration stays incremental.
 - The bounded baseline already covers snapshot, preview, bounded recording, bounded interval capture, simulation, host-style command flow, traceability, and bounded offline reuse.
 - The tested hardware path has bounded real-device evidence on `DEV_1AB22C046D81`; broader hardware matrix coverage is still intentionally out of scope.
 - The OpenCV prototype remains an optional frontend/prototype path rather than the platform core.
+
+## Historical vs Current
+
+- historical context: repository reorganization and Extended MVP closure built the current baseline
+- current active phase: `Usable Camera Subsystem / Pre-Product Baseline`
+- immediate priorities: local usability, host-side usability, official reference scenarios, then headless-kernel preparation
+- later but not current: broad transport/platform work, broad MCP expansion, broad packaging, full C# handover
 
 ## Current Truth Map
 

@@ -162,6 +162,12 @@ What the closure result now means:
 - future work should no longer default to "what is still needed to prove the MVP is real?"
 - future work should now default to "what is the next justified hardening, productization, or selective expansion step on top of the closed Python baseline?"
 
+## Historical Context
+
+- `Extended MVP Closure` remains useful as historical build-up context
+- the older closure packages remain visible for continuity
+- they are no longer the default slice-selection lens for near-term work
+
 ## Usable Camera Subsystem / Pre-Product Baseline Lens
 
 The active planning lens is now:
@@ -198,6 +204,13 @@ This phase should also be read as the practical camera-project contribution to t
 - first practically usable camera/acquisition subsystem
 - first reference module for a later assisted measurement system
 - larger assisted-measurement concerns stay visible, but secondary to the near-term subsystem-usage priorities above
+
+## Immediate Priorities
+
+1. local usability
+2. host-side usability
+3. official reference scenarios
+4. then headless preparation
 
 ## Closed Extended MVP Axes
 

@@ -57,6 +57,19 @@ This active phase is not primarily about:
 - broad offline workstation expansion
 - reopening the old MVP-closure logic
 
+## Current Near-Term Priorities
+
+1. local usability
+2. host-side usability
+3. official reference scenarios
+4. then headless-kernel preparation
+
+## Historical Platform-Building Structure
+
+The numbered master phases below remain useful as structural and historical context.
+
+They are not the default day-to-day planning lens anymore. Near-term prioritization should instead follow the current active phase above.
+
 ## Master Phases
 
 | Phase | Focus | Outcome |
