@@ -10,7 +10,14 @@ from vision_platform.imaging.opencv_adapter import OpenCvFrameAdapter
 from vision_platform.libraries.common_models import FocusPreviewState
 from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.libraries.roi_core import roi_bounds
-from vision_platform.services.display_service import CoordinateExportService, DisplayGeometryService, ZoomPanState
+from vision_platform.services.display_service import (
+    CoordinateExportService,
+    DisplayGeometryService,
+    PreviewInteractionCommand,
+    PreviewInteractionService,
+    PreviewInteractionState,
+    ZoomPanState,
+)
 from vision_platform.services.stream_service.preview_service import PreviewService
 from vision_platform.services.stream_service.roi_state_service import RoiStateService
 
@@ -33,6 +40,7 @@ class OpenCvPreviewWindow:
         clipboard_copy_callback: Callable[[str], None] | None = None,
         coordinate_export_service: CoordinateExportService | None = None,
         geometry_service: DisplayGeometryService | None = None,
+        interaction_service: PreviewInteractionService | None = None,
         zoom_step: float = 1.5,
         min_zoom_scale: float = 0.05,
         max_zoom_scale: float = 8.0,
@@ -48,6 +56,7 @@ class OpenCvPreviewWindow:
         self._clipboard_copy_callback = clipboard_copy_callback or self._copy_text_to_clipboard
         self._coordinate_export_service = coordinate_export_service or CoordinateExportService()
         self._geometry_service = geometry_service or DisplayGeometryService()
+        self._interaction_service = interaction_service or PreviewInteractionService(self._geometry_service)
         self._zoom_step = zoom_step
         self._min_zoom_scale = min_zoom_scale
         self._max_zoom_scale = max_zoom_scale
@@ -55,16 +64,9 @@ class OpenCvPreviewWindow:
         self._geometry_state = ZoomPanState()
         self._last_display_scale = 1.0
         self._last_viewport_mapping = None
-        self._selected_point: tuple[int, int] | None = None
-        self._last_status_message: str | None = None
+        self._interaction_state = PreviewInteractionState()
         self._frame_render_timestamps: deque[float] = deque(maxlen=30)
-        self._crosshair_visible = True
-        self._focus_status_visible = True
-        self._roi_mode: str | None = None
         self._fallback_active_roi: RoiDefinition | None = None
-        self._roi_anchor_point: tuple[int, int] | None = None
-        self._roi_preview_point: tuple[int, int] | None = None
-        self._last_cursor_viewport_point: tuple[int, int] | None = None
         self._window_created = False
 
     def render_latest_frame(self, delay_ms: int = 1) -> bool:
@@ -150,35 +152,81 @@ class OpenCvPreviewWindow:
         self._geometry_state.fit_to_window = value
 
     @property
+    def _selected_point(self) -> tuple[int, int] | None:
+        return self._interaction_state.selected_point
+
+    @_selected_point.setter
+    def _selected_point(self, value: tuple[int, int] | None) -> None:
+        self._interaction_state.selected_point = value
+
+    @property
+    def _last_status_message(self) -> str | None:
+        return self._interaction_state.last_status_message
+
+    @_last_status_message.setter
+    def _last_status_message(self, value: str | None) -> None:
+        self._interaction_state.last_status_message = value
+
+    @property
+    def _crosshair_visible(self) -> bool:
+        return self._interaction_state.crosshair_visible
+
+    @_crosshair_visible.setter
+    def _crosshair_visible(self, value: bool) -> None:
+        self._interaction_state.crosshair_visible = value
+
+    @property
+    def _focus_status_visible(self) -> bool:
+        return self._interaction_state.focus_status_visible
+
+    @_focus_status_visible.setter
+    def _focus_status_visible(self, value: bool) -> None:
+        self._interaction_state.focus_status_visible = value
+
+    @property
+    def _roi_mode(self) -> str | None:
+        return self._interaction_state.roi_mode
+
+    @_roi_mode.setter
+    def _roi_mode(self, value: str | None) -> None:
+        self._interaction_state.roi_mode = value
+
+    @property
+    def _roi_anchor_point(self) -> tuple[int, int] | None:
+        return self._interaction_state.roi_anchor_point
+
+    @_roi_anchor_point.setter
+    def _roi_anchor_point(self, value: tuple[int, int] | None) -> None:
+        self._interaction_state.roi_anchor_point = value
+
+    @property
+    def _roi_preview_point(self) -> tuple[int, int] | None:
+        return self._interaction_state.roi_preview_point
+
+    @_roi_preview_point.setter
+    def _roi_preview_point(self, value: tuple[int, int] | None) -> None:
+        self._interaction_state.roi_preview_point = value
+
+    @property
+    def _last_cursor_viewport_point(self) -> tuple[int, int] | None:
+        return self._interaction_state.last_cursor_viewport_point
+
+    @_last_cursor_viewport_point.setter
+    def _last_cursor_viewport_point(self, value: tuple[int, int] | None) -> None:
+        self._interaction_state.last_cursor_viewport_point = value
+
+    @property
     def manual_zoom_scale(self) -> float | None:
         return self._geometry_state.manual_zoom_scale
 
     def zoom_in(self) -> None:
-        base_scale = (
-            self._last_display_scale
-            if self._geometry_state.fit_to_window or self._geometry_state.manual_zoom_scale is None
-            else self._geometry_state.manual_zoom_scale
-        )
-        new_scale = min(base_scale * self._zoom_step, self._max_zoom_scale)
-        self._update_zoom_state(new_scale, previous_scale=base_scale)
-        self._geometry_state.fit_to_window = False
+        self._apply_interaction_command(PreviewInteractionCommand(action="zoom_in"))
 
     def zoom_out(self) -> None:
-        base_scale = (
-            self._last_display_scale
-            if self._geometry_state.fit_to_window or self._geometry_state.manual_zoom_scale is None
-            else self._geometry_state.manual_zoom_scale
-        )
-        new_scale = max(base_scale / self._zoom_step, self._min_zoom_scale)
-        self._update_zoom_state(new_scale, previous_scale=base_scale)
-        self._geometry_state.fit_to_window = False
+        self._apply_interaction_command(PreviewInteractionCommand(action="zoom_out"))
 
     def enable_fit_to_window(self) -> None:
-        self._geometry_state.fit_to_window = True
-        self._geometry_state.manual_zoom_scale = None
-        self._geometry_state.viewport_origin_scaled = (0, 0)
-        self._geometry_state.pan_anchor_viewport_point = None
-        self._geometry_state.pan_anchor_origin_scaled = None
+        self._apply_interaction_command(PreviewInteractionCommand(action="enable_fit"))
 
     @property
     def _manual_zoom_scale(self) -> float | None:
@@ -228,27 +276,6 @@ class OpenCvPreviewWindow:
         self._frame_adapter.create_window(self._window_name)
         self._frame_adapter.set_mouse_callback(self._window_name, self._handle_mouse_event)
         self._window_created = True
-
-    def _update_zoom_state(self, new_scale: float, previous_scale: float) -> None:
-        self._geometry_state.manual_zoom_scale = new_scale
-        if self._last_viewport_mapping is None:
-            return
-
-        anchored_origin = self._geometry_service.build_cursor_anchored_origin(
-            self._last_viewport_mapping,
-            self._last_cursor_viewport_point,
-            new_scale,
-        )
-        if anchored_origin is not None:
-            self._geometry_state.viewport_origin_scaled = anchored_origin
-            return
-
-        top_left_source_x = self._last_viewport_mapping.src_x / max(previous_scale, 1e-9)
-        top_left_source_y = self._last_viewport_mapping.src_y / max(previous_scale, 1e-9)
-        self._geometry_state.viewport_origin_scaled = (
-            int(round(top_left_source_x * new_scale)),
-            int(round(top_left_source_y * new_scale)),
-        )
 
     def _build_status_lines(self) -> list[str]:
         mode = "FIT" if self._geometry_state.fit_to_window else "ZOOM"
@@ -355,40 +382,23 @@ class OpenCvPreviewWindow:
     def _handle_shortcuts(self, pressed_key: int) -> None:
         normalized_key = pressed_key & 0xFF
         if normalized_key in (ord("i"), ord("I")):
-            self.zoom_in()
+            self._apply_interaction_command(PreviewInteractionCommand(action="zoom_in"))
         elif normalized_key in (ord("o"), ord("O")):
-            self.zoom_out()
+            self._apply_interaction_command(PreviewInteractionCommand(action="zoom_out"))
         elif normalized_key in (ord("f"), ord("F")):
-            self.enable_fit_to_window()
+            self._apply_interaction_command(PreviewInteractionCommand(action="enable_fit"))
         elif normalized_key in (ord("x"), ord("X")):
-            self._crosshair_visible = not self._crosshair_visible
-            self._last_status_message = "Crosshair shown" if self._crosshair_visible else "Crosshair hidden"
+            self._apply_interaction_command(PreviewInteractionCommand(action="toggle_crosshair"))
         elif normalized_key in (ord("y"), ord("Y")):
-            if self._focus_state_provider is None:
-                self._last_status_message = "Focus display unavailable"
-                return
-            self._focus_status_visible = not self._focus_status_visible
-            self._last_status_message = "Focus shown" if self._focus_status_visible else "Focus hidden"
+            self._apply_interaction_command(PreviewInteractionCommand(action="toggle_focus"))
         elif normalized_key in (ord("r"), ord("R")):
-            self._toggle_roi_mode("rectangle")
+            self._apply_interaction_command(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode="rectangle"))
         elif normalized_key in (ord("e"), ord("E")):
-            self._toggle_roi_mode("ellipse")
+            self._apply_interaction_command(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode="ellipse"))
         elif normalized_key in (ord("+"), ord("=")):
-            self._save_preview_snapshot()
+            self._apply_interaction_command(PreviewInteractionCommand(action="request_snapshot"))
         elif normalized_key in (ord("c"), ord("C")):
-            self._copy_selected_point()
-
-    def _toggle_roi_mode(self, roi_mode: str) -> None:
-        if self._roi_mode == roi_mode:
-            self._roi_mode = None
-            self._roi_anchor_point = None
-            self._roi_preview_point = None
-            self._last_status_message = "ROI mode cleared"
-            return
-        self._roi_mode = roi_mode
-        self._roi_anchor_point = None
-        self._roi_preview_point = None
-        self._last_status_message = f"ROI mode set to {roi_mode}"
+            self._apply_interaction_command(PreviewInteractionCommand(action="request_copy"))
 
     def _handle_mouse_event(self, event: int, x: int, y: int, flags: int | None = None, param=None) -> None:
         left_button_down = self._frame_adapter.get_left_button_down_event()
@@ -396,19 +406,26 @@ class OpenCvPreviewWindow:
         middle_button_up = self._frame_adapter.get_middle_button_up_event()
         mouse_move = self._frame_adapter.get_mouse_move_event()
         mouse_wheel = self._frame_adapter.get_mouse_wheel_event()
-        self._last_cursor_viewport_point = (x, y)
+        self._apply_interaction_command(
+            PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y)),
+            apply_outcome=False,
+        )
         selected_point = self._map_viewport_point_to_source(x, y)
         if middle_button_down is not None and event == middle_button_down:
-            self._start_pan((x, y))
+            self._apply_interaction_command(PreviewInteractionCommand(action="start_pan", viewport_point=(x, y)))
             return
         if middle_button_up is not None and event == middle_button_up:
-            self._stop_pan()
+            self._apply_interaction_command(PreviewInteractionCommand(action="stop_pan"))
             return
         if mouse_wheel is not None and event == mouse_wheel:
             self._handle_mouse_wheel(flags, selected_point)
             return
         if mouse_move is not None and event == mouse_move:
-            if self._update_pan((x, y)):
+            outcome = self._apply_interaction_command(
+                PreviewInteractionCommand(action="update_pan", viewport_point=(x, y)),
+                apply_outcome=False,
+            )
+            if outcome.handled:
                 return
             self._handle_roi_mouse_move(selected_point)
             return
@@ -419,75 +436,27 @@ class OpenCvPreviewWindow:
         if selected_point is None:
             return
 
-        if self._roi_mode is not None:
-            self._handle_roi_click(selected_point)
-            return
-
-        self._selected_point = selected_point
-        self._last_status_message = f"Selected {self._coordinate_export_service.format_point(*selected_point)}"
+        self._apply_interaction_command(
+            PreviewInteractionCommand(action="select_source_point", source_point=selected_point)
+        )
 
     def _handle_mouse_wheel(self, flags: int | None, selected_point: tuple[int, int] | None) -> None:
         delta = self._frame_adapter.get_mouse_wheel_delta(flags)
-        if delta == 0:
-            return
-        if selected_point is None:
-            self._last_status_message = "Wheel zoom ignored outside image"
-            return
-        if delta > 0:
-            self.zoom_in()
-        else:
-            self.zoom_out()
-
-    def _start_pan(self, viewport_point: tuple[int, int]) -> None:
-        if self._geometry_state.fit_to_window:
-            self._last_status_message = "Pan unavailable in fit mode"
-            self._geometry_state.pan_anchor_viewport_point = None
-            self._geometry_state.pan_anchor_origin_scaled = None
-            return
-        self._geometry_state.pan_anchor_viewport_point = viewport_point
-        self._geometry_state.pan_anchor_origin_scaled = self._geometry_state.viewport_origin_scaled
-        self._last_status_message = "Panning"
-
-    def _stop_pan(self) -> None:
-        if self._geometry_state.pan_anchor_viewport_point is None:
-            return
-        self._geometry_state.pan_anchor_viewport_point = None
-        self._geometry_state.pan_anchor_origin_scaled = None
-        self._last_status_message = "Pan complete"
-
-    def _update_pan(self, viewport_point: tuple[int, int]) -> bool:
-        if (
-            self._geometry_state.pan_anchor_viewport_point is None
-            or self._geometry_state.pan_anchor_origin_scaled is None
-        ):
-            return False
-
-        delta_x = viewport_point[0] - self._geometry_state.pan_anchor_viewport_point[0]
-        delta_y = viewport_point[1] - self._geometry_state.pan_anchor_viewport_point[1]
-        self._geometry_state.viewport_origin_scaled = (
-            self._geometry_state.pan_anchor_origin_scaled[0] - delta_x,
-            self._geometry_state.pan_anchor_origin_scaled[1] - delta_y,
+        self._apply_interaction_command(
+            PreviewInteractionCommand(action="wheel_zoom", source_point=selected_point, wheel_delta=delta)
         )
-        self._last_status_message = "Panning"
-        return True
-
-    def _handle_roi_click(self, selected_point: tuple[int, int]) -> None:
-        if self._roi_anchor_point is None:
-            self._roi_anchor_point = selected_point
-            self._roi_preview_point = None
-            self._last_status_message = f"ROI anchor set to {self._coordinate_export_service.format_point(*selected_point)}"
-            return
-
-        roi = self._build_roi_definition(self._roi_mode, self._roi_anchor_point, selected_point)
-        self._set_active_roi(roi)
-        self._roi_anchor_point = None
-        self._roi_preview_point = None
-        self._last_status_message = f"ROI saved as {roi.shape}"
 
     def _handle_roi_mouse_move(self, selected_point: tuple[int, int] | None) -> None:
         if self._roi_anchor_point is None:
             return
         self._roi_preview_point = selected_point
+
+    def _update_pan(self, viewport_point: tuple[int, int]) -> bool:
+        outcome = self._apply_interaction_command(
+            PreviewInteractionCommand(action="update_pan", viewport_point=viewport_point),
+            apply_outcome=False,
+        )
+        return outcome.handled
 
     def _build_roi_definition(
         self,
@@ -605,6 +574,45 @@ class OpenCvPreviewWindow:
         if completed.returncode != 0:
             error_text = completed.stderr.strip() or completed.stdout.strip() or "clipboard command failed"
             raise RuntimeError(error_text)
+
+    def _apply_interaction_command(
+        self,
+        command: PreviewInteractionCommand,
+        *,
+        apply_outcome: bool = True,
+    ):
+        outcome = self._interaction_service.apply_command(
+            command,
+            self._interaction_state,
+            self._geometry_state,
+            last_display_scale=self._last_display_scale,
+            last_viewport_mapping=self._last_viewport_mapping,
+            zoom_step=self._zoom_step,
+            min_zoom_scale=self._min_zoom_scale,
+            max_zoom_scale=self._max_zoom_scale,
+            has_focus_provider=self._focus_state_provider is not None,
+            has_snapshot_callback=self._snapshot_callback is not None,
+            coordinate_formatter=self._coordinate_export_service.format_point,
+            roi_builder=self._build_roi_definition,
+        )
+        if apply_outcome:
+            self._apply_interaction_outcome(outcome)
+        return outcome
+
+    def _apply_interaction_outcome(self, outcome: PreviewInteractionOutcome) -> None:
+        if outcome.committed_roi is not None:
+            self._set_active_roi(outcome.committed_roi)
+
+        if outcome.snapshot_requested:
+            self._save_preview_snapshot()
+
+        if outcome.copy_text is not None:
+            try:
+                self._clipboard_copy_callback(outcome.copy_text)
+            except Exception as exc:
+                self._last_status_message = f"Copy failed: {exc}"
+            else:
+                self._last_status_message = outcome.copy_success_message
 
     def _build_viewport_mapping(
         self,
