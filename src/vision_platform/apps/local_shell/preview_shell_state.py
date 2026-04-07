@@ -295,18 +295,10 @@ class PreviewShellPresenter:
 
     def _build_anchor_handles(self, active_roi: RoiDefinition | None) -> tuple[PreviewAnchorHandle, ...]:
         handles: list[PreviewAnchorHandle] = []
-        selected_point = self._state.interaction_state.selected_point
-        if selected_point is not None:
-            handles.append(
-                PreviewAnchorHandle(
-                    anchor_id="selected_point",
-                    point=selected_point,
-                    role="point",
-                    is_hovered=self._state.interaction_state.hovered_anchor_id == "selected_point",
-                    is_active=self._state.interaction_state.active_anchor_drag_id == "selected_point",
-                )
-            )
         if active_roi is None:
+            return tuple(handles)
+        show_roi_handles = self._should_show_roi_handles(active_roi)
+        if not show_roi_handles:
             return tuple(handles)
         bounds = roi_bounds(active_roi)
         if bounds is None:
@@ -332,13 +324,28 @@ class PreviewShellPresenter:
             )
         return tuple(handles)
 
+    def _should_show_roi_handles(self, active_roi: RoiDefinition) -> bool:
+        hovered_anchor_id = self._state.interaction_state.hovered_anchor_id
+        active_anchor_drag_id = self._state.interaction_state.active_anchor_drag_id
+        if hovered_anchor_id is not None and hovered_anchor_id.startswith("roi_"):
+            return True
+        if active_anchor_drag_id is not None and active_anchor_drag_id.startswith("roi_"):
+            return True
+        cursor_point = self._state.interaction_state.last_cursor_source_point
+        if cursor_point is None:
+            return False
+        bounds = roi_bounds(active_roi)
+        if bounds is None:
+            return False
+        return bounds[0] <= cursor_point[0] <= bounds[2] and bounds[1] <= cursor_point[1] <= bounds[3]
+
     def _resolve_hovered_anchor_id(self, viewport_x: int, viewport_y: int) -> str | None:
         best_anchor_id = None
         best_distance_sq = (self._anchor_hit_radius_pixels + 1) ** 2
-        for handle in self._build_anchor_handles(self._roi_state_service.get_active_roi()):
+        for anchor_id, point in self._iter_anchor_hit_targets():
             viewport_point = self._geometry_service.map_source_point_to_viewport(
                 self._state.last_viewport_mapping,
-                handle.point,
+                point,
             )
             if viewport_point is None:
                 continue
@@ -346,9 +353,34 @@ class PreviewShellPresenter:
             delta_y = viewport_y - viewport_point[1]
             distance_sq = delta_x * delta_x + delta_y * delta_y
             if distance_sq <= self._anchor_hit_radius_pixels * self._anchor_hit_radius_pixels and distance_sq < best_distance_sq:
-                best_anchor_id = handle.anchor_id
+                best_anchor_id = anchor_id
                 best_distance_sq = distance_sq
         return best_anchor_id
+
+    def _iter_anchor_hit_targets(self) -> tuple[tuple[str, tuple[int, int]], ...]:
+        targets: list[tuple[str, tuple[int, int]]] = []
+        selected_point = self._state.interaction_state.selected_point
+        if selected_point is not None:
+            targets.append(("selected_point", selected_point))
+        active_roi = self._roi_state_service.get_active_roi()
+        if active_roi is None:
+            return tuple(targets)
+        bounds = roi_bounds(active_roi)
+        if bounds is None:
+            return tuple(targets)
+        left = int(round(bounds[0]))
+        top = int(round(bounds[1]))
+        right = int(round(bounds[2]))
+        bottom = int(round(bounds[3]))
+        targets.extend(
+            (
+                ("roi_top_left", (left, top)),
+                ("roi_top_right", (right, top)),
+                ("roi_bottom_left", (left, bottom)),
+                ("roi_bottom_right", (right, bottom)),
+            )
+        )
+        return tuple(targets)
 
     def _start_anchor_drag_if_hit(self, viewport_x: int, viewport_y: int) -> bool:
         if self._state.interaction_state.roi_mode is not None:
@@ -404,6 +436,12 @@ class PreviewShellPresenter:
         opposite = opposite_points.get(anchor_id)
         if opposite is None:
             return None
+        if active_roi.shape == "ellipse":
+            left = min(opposite[0], source_point[0])
+            top = min(opposite[1], source_point[1])
+            right = max(opposite[0], source_point[0])
+            bottom = max(opposite[1], source_point[1])
+            return RoiDefinition(roi_id=active_roi.roi_id, shape="ellipse", points=((left, top), (right, bottom)))
         return self._build_roi_definition(active_roi.shape, opposite, source_point)
 
     @staticmethod

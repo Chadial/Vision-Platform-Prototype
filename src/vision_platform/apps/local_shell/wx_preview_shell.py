@@ -127,8 +127,6 @@ class PreviewCanvas(wx.Panel):
                 colour = wx.Colour(255, 140, 0)
             elif handle.is_hovered:
                 colour = wx.Colour(255, 255, 255)
-            elif handle.role == "point":
-                colour = wx.Colour(255, 255, 0)
             else:
                 colour = wx.Colour(0, 255, 0)
             dc.SetPen(wx.Pen(colour, width=2))

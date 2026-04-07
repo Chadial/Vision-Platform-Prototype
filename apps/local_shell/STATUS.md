@@ -9,7 +9,8 @@
 - working now: the wx shell now evaluates focus through the shared focus-preview service on a bounded downsampled work frame so the existing headless evaluator remains reusable on large live frames
 - working now: the wx canvas now renders one visible focus marker/label at the shared focus anchor instead of relying only on status text
 - working now: selected-point and copy feedback now use concise non-duplicative status text, and `Ctrl+C` now follows the current OpenCV-style point-copy baseline
-- working now: the wx canvas now renders visible anchor handles for the selected point and active ROI corners, including bounded hover/highlight state and first drag behavior for fixed-point and ROI-corner updates
+- working now: the wx canvas now renders ROI corner handles only on hover / active drag, while the fixed point remains drag-capable without a permanently visible anchor marker
+- working now: active ellipse ROI corner dragging now follows bounding-box semantics instead of expanding unexpectedly from a center-anchor interpretation
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite
