@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from threading import Lock
 from typing import Optional
 
 from vmbpy import Camera, VmbSystem
@@ -24,6 +25,7 @@ class VimbaXCameraDriver(CameraDriver):
         self._latest_frame: Optional[CapturedFrame] = None
         self._snapshot_timeout_ms = snapshot_timeout_ms
         self._selected_camera_identity: dict[str, str | None] | None = None
+        self._capture_lock = Lock()
 
     @staticmethod
     def _normalize_identity_value(value: str | None) -> str | None:
@@ -236,15 +238,16 @@ class VimbaXCameraDriver(CameraDriver):
     def capture_snapshot(self) -> CapturedFrame:
         camera = self._require_camera()
 
-        try:
-            frame = camera.get_frame(timeout_ms=self._snapshot_timeout_ms)
-        except Exception as exc:
-            error_text = str(exc).lower()
-            if "timeout" in error_text:
-                raise RuntimeError("Timed out while waiting for a camera frame.") from exc
-            if "disconnect" in error_text or "disconnected" in error_text:
-                raise RuntimeError("Camera disconnected during snapshot acquisition.") from exc
-            raise RuntimeError(f"Failed to capture camera frame: {exc}") from exc
+        with self._capture_lock:
+            try:
+                frame = camera.get_frame(timeout_ms=self._snapshot_timeout_ms)
+            except Exception as exc:
+                error_text = str(exc).lower()
+                if "timeout" in error_text:
+                    raise RuntimeError("Timed out while waiting for a camera frame.") from exc
+                if "disconnect" in error_text or "disconnected" in error_text:
+                    raise RuntimeError("Camera disconnected during snapshot acquisition.") from exc
+                raise RuntimeError(f"Failed to capture camera frame: {exc}") from exc
 
         captured_frame = self._build_captured_frame(frame)
         self._latest_frame = captured_frame

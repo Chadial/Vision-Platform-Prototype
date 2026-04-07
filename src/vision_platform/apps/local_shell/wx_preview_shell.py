@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from time import monotonic
 
 from camera_app.logging.log_service import configure_logging
 from vision_platform.libraries.roi_core import roi_bounds
@@ -115,6 +116,9 @@ class PreviewCanvas(wx.Panel):
 
 
 class WxLocalPreviewShell(wx.Frame):
+    _STATUS_REFRESH_INTERVAL_SECONDS = 0.5
+    _FOCUS_REFRESH_INTERVAL_SECONDS = 0.25
+
     def __init__(
         self,
         *,
@@ -131,6 +135,12 @@ class WxLocalPreviewShell(wx.Frame):
         self._status_lines: list[str] = []
         self._last_snapshot_name: str | None = None
         self._is_closed = False
+        self._cached_status = None
+        self._last_status_refresh_time = 0.0
+        self._cached_focus_state = None
+        self._last_focus_refresh_time = 0.0
+        # Focus starts hidden to avoid heavy per-frame computation by default.
+        self._presenter.state.interaction_state.focus_status_visible = False
 
         panel = wx.Panel(self)
         root_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -154,18 +164,14 @@ class WxLocalPreviewShell(wx.Frame):
 
         self.Bind(wx.EVT_TIMER, self._on_timer, self._timer)
         self.Bind(wx.EVT_CLOSE, self._on_close)
-        self._timer.Start(max(15, int(poll_interval_seconds * 1000)))
+        self._timer.Start(max(75, int(poll_interval_seconds * 1000)))
         self.request_refresh()
 
     def request_refresh(self) -> None:
         frame = self._subsystem.stream_service.get_latest_frame()
         if frame is None:
             return
-        focus_state = None
-        if self._focus_preview_service is not None:
-            focus_state = self._focus_preview_service.refresh_once(
-                roi=self._subsystem.stream_service.get_roi_state_service().get_active_roi()
-            )
+        focus_state = self._get_focus_state()
         canvas_size = self._canvas.GetClientSize()
         view_model = self._presenter.build_view(
             frame,
@@ -175,7 +181,7 @@ class WxLocalPreviewShell(wx.Frame):
             has_focus_toggle=self._focus_preview_service is not None,
         )
         self._canvas.update_view(view_model)
-        status = self._subsystem.command_controller.get_status()
+        status = self._get_status()
         prefix = [
             f"source={self._session.source}",
             f"camera={'ready' if status.camera.is_initialized else 'offline'}",
@@ -239,6 +245,27 @@ class WxLocalPreviewShell(wx.Frame):
                 self._subsystem.stream_service.stop_preview()
         finally:
             self._subsystem.driver.shutdown()
+
+    def _get_status(self):
+        now = monotonic()
+        if self._cached_status is None or now - self._last_status_refresh_time >= self._STATUS_REFRESH_INTERVAL_SECONDS:
+            self._cached_status = self._subsystem.command_controller.get_status()
+            self._last_status_refresh_time = now
+        return self._cached_status
+
+    def _get_focus_state(self):
+        if self._focus_preview_service is None:
+            return None
+        if not self._presenter.state.interaction_state.focus_status_visible:
+            return None
+        now = monotonic()
+        if now - self._last_focus_refresh_time < self._FOCUS_REFRESH_INTERVAL_SECONDS:
+            return self._cached_focus_state
+        self._cached_focus_state = self._focus_preview_service.refresh_once(
+            roi=self._subsystem.stream_service.get_roi_state_service().get_active_roi()
+        )
+        self._last_focus_refresh_time = now
+        return self._cached_focus_state
 
 
 def run_wx_preview_shell(
