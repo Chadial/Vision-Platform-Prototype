@@ -6,7 +6,11 @@ from types import SimpleNamespace
 
 from tests import _path_setup
 from vision_platform.apps.local_shell import PreviewShellPresenter
-from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShell, _is_copy_shortcut
+from vision_platform.apps.local_shell.wx_preview_shell import (
+    WxLocalPreviewShell,
+    _is_copy_shortcut,
+    _normalize_wx_recording_file_extension,
+)
 from vision_platform.apps.local_shell.preview_shell_state import render_viewport_image
 from vision_platform.apps.local_shell.startup import (
     LocalShellLaunchOptions,
@@ -656,6 +660,14 @@ class WxPreviewShellTests(unittest.TestCase):
                 max_frames="0",
                 recording_fps="",
             )
+
+    def test_normalize_wx_recording_file_extension_accepts_supported_values(self) -> None:
+        self.assertEqual(_normalize_wx_recording_file_extension(".bmp"), ".bmp")
+        self.assertEqual(_normalize_wx_recording_file_extension(".RAW"), ".raw")
+
+    def test_normalize_wx_recording_file_extension_rejects_unsupported_values(self) -> None:
+        with self.assertRaises(ValueError):
+            _normalize_wx_recording_file_extension(".jpg")
 
     def test_start_recording_uses_configured_recording_file_stem_and_extension(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
