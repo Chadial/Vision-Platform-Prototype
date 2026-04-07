@@ -29,6 +29,7 @@ class PreviewCanvas(wx.Panel):
         self._refresh_callback = refresh_callback
         self._view_model: PreviewShellViewModel | None = None
         self._bitmap: wx.Bitmap | None = None
+        self._bitmap_rgb_buffer: bytearray | None = None
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.Bind(wx.EVT_PAINT, self._on_paint)
         self.Bind(wx.EVT_LEFT_DOWN, self._on_left_down)
@@ -39,9 +40,22 @@ class PreviewCanvas(wx.Panel):
 
     def update_view(self, view_model: PreviewShellViewModel) -> None:
         self._view_model = view_model
-        image = wx.Image(view_model.image.width, view_model.image.height)
-        image.SetData(view_model.image.to_rgb_bytes())
-        self._bitmap = wx.Bitmap(image)
+        rgb_buffer = view_model.image.to_rgb_buffer()
+        if (
+            self._bitmap is None
+            or self._bitmap.GetWidth() != view_model.image.width
+            or self._bitmap.GetHeight() != view_model.image.height
+        ):
+            self._bitmap_rgb_buffer = rgb_buffer
+            self._bitmap = wx.Bitmap.FromBuffer(
+                view_model.image.width,
+                view_model.image.height,
+                self._bitmap_rgb_buffer,
+            )
+        else:
+            assert self._bitmap is not None
+            self._bitmap_rgb_buffer = rgb_buffer
+            self._bitmap.CopyFromBuffer(self._bitmap_rgb_buffer)
         self.Refresh(False)
 
     def _on_paint(self, event) -> None:

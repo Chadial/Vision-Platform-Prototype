@@ -34,7 +34,17 @@ class RenderedViewportImage:
     def to_rgb_bytes(self) -> bytes:
         if self.mime_family == "ppm":
             return self.payload
-        return bytes(component for value in self.payload for component in (value, value, value))
+        return bytes(self.to_rgb_buffer())
+
+    def to_rgb_buffer(self) -> bytearray:
+        if self.mime_family == "ppm":
+            return bytearray(self.payload)
+        rgb_payload = bytearray(self.width * self.height * 3)
+        target_index = 0
+        for value in self.payload:
+            rgb_payload[target_index : target_index + 3] = bytes((value, value, value))
+            target_index += 3
+        return rgb_payload
 
 
 @dataclass(frozen=True, slots=True)
