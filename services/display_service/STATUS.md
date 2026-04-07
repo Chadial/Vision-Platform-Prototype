@@ -13,6 +13,8 @@
 - working now: the current wx shell now also consumes the geometry service as its bounded non-OpenCV viewport baseline
 - working now: the current wx shell now also consumes the shared interaction layer for zoom, pan, ROI entry, point-copy semantics, and bounded anchor hover/drag state
 - working now: the current wx shell now also consumes the shared preview-status / overlay model layer, while app-local rendering still decides how those models are drawn
+- working now: the shared preview overlay contract now also carries bounded active-ROI emphasis (`normal` / `hover` / `drag`) so non-OpenCV frontends can render stateful frame feedback without owning separate ROI-mode semantics
+- working now: the current wx shell now also reuses shared interaction state to keep ROI body panning usable on very small selections through effective hit bounds and no-jump `Shift` axis locking
 - known issues: payload currently carries focus overlays and active ROI only, not future tracking or annotation layers
 - technical debt: preview and snapshot focus states still reuse the preview-oriented `FocusPreviewState` name
 - risk: future overlay growth may require a small layer model instead of flat fields only; the new bounded anchor-handle model should stay narrow unless later frontends genuinely need richer editing semantics

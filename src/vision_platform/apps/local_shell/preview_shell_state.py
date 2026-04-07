@@ -183,6 +183,7 @@ class PreviewShellPresenter:
             crosshair_point=overlay_model.crosshair_point,
             draft_roi=overlay_model.draft_roi,
             active_roi=overlay_model.active_roi,
+            active_roi_emphasis=self._resolve_active_roi_emphasis(active_roi),
             focus_anchor_point=overlay_model.focus_anchor_point,
             focus_label=overlay_model.focus_label,
             show_viewport_outline=overlay_model.show_viewport_outline,
@@ -292,6 +293,7 @@ class PreviewShellPresenter:
             self._state.interaction_state.hovered_anchor_id = active_anchor_drag_id
             if self._state.interaction_state.active_anchor_drag_mode == "pending" and left_button_down:
                 self._state.interaction_state.active_anchor_drag_mode = "hold"
+            self._sync_active_drag_modifier_state(source_point, shift_down=shift_down)
             if source_point is not None and self._state.interaction_state.active_anchor_drag_mode in {"hold", "locked"}:
                 self._update_anchor_drag(source_point, shift_down=shift_down)
             return
@@ -355,7 +357,8 @@ class PreviewShellPresenter:
         bounds = roi_bounds(active_roi)
         if bounds is None:
             return False
-        return bounds[0] <= cursor_point[0] <= bounds[2] and bounds[1] <= cursor_point[1] <= bounds[3]
+        hit_bounds = self._resolve_effective_roi_drag_bounds(active_roi)
+        return hit_bounds[0] <= cursor_point[0] <= hit_bounds[2] and hit_bounds[1] <= cursor_point[1] <= hit_bounds[3]
 
     def _resolve_hovered_anchor_id(self, viewport_x: int, viewport_y: int) -> str | None:
         best_anchor_id = None
@@ -418,6 +421,8 @@ class PreviewShellPresenter:
             viewport_y,
         )
         self._state.interaction_state.active_drag_initial_roi = self._roi_state_service.get_active_roi()
+        self._state.interaction_state.active_drag_shift_down = False
+        self._state.interaction_state.active_drag_locked_axis = None
         if anchor_id == "selected_point":
             self._state.interaction_state.last_status_message = "Dragging point"
         else:
@@ -437,6 +442,8 @@ class PreviewShellPresenter:
         self._state.interaction_state.active_anchor_drag_mode = "pending"
         self._state.interaction_state.active_drag_origin_source_point = source_point
         self._state.interaction_state.active_drag_initial_roi = active_roi
+        self._state.interaction_state.active_drag_shift_down = False
+        self._state.interaction_state.active_drag_locked_axis = None
         self._state.interaction_state.last_status_message = "Dragging ROI"
         return True
 
@@ -528,7 +535,11 @@ class PreviewShellPresenter:
         delta_x = source_point[0] - origin_point[0]
         delta_y = source_point[1] - origin_point[1]
         if shift_down:
-            if abs(delta_x) >= abs(delta_y):
+            locked_axis = self._state.interaction_state.active_drag_locked_axis
+            if locked_axis is None:
+                locked_axis = "x" if abs(delta_x) >= abs(delta_y) else "y"
+                self._state.interaction_state.active_drag_locked_axis = locked_axis
+            if locked_axis == "x":
                 delta_y = 0
             else:
                 delta_x = 0
@@ -542,18 +553,70 @@ class PreviewShellPresenter:
             metadata=dict(active_roi.metadata),
         )
 
-    @staticmethod
-    def _is_point_inside_roi_bounds(active_roi: RoiDefinition, point: tuple[int, int]) -> bool:
+    def _is_point_inside_roi_bounds(self, active_roi: RoiDefinition, point: tuple[int, int]) -> bool:
+        bounds = self._resolve_effective_roi_drag_bounds(active_roi)
+        return bounds[0] <= point[0] <= bounds[2] and bounds[1] <= point[1] <= bounds[3]
+
+    def _resolve_effective_roi_drag_bounds(self, active_roi: RoiDefinition) -> tuple[float, float, float, float]:
         bounds = roi_bounds(active_roi)
         if bounds is None:
-            return False
-        return bounds[0] <= point[0] <= bounds[2] and bounds[1] <= point[1] <= bounds[3]
+            return (0.0, 0.0, 0.0, 0.0)
+        width = bounds[2] - bounds[0]
+        height = bounds[3] - bounds[1]
+        minimum_hit_size_source = max(1.0, 20.0 / max(self._state.last_display_scale, 1e-9))
+        pad_x = max(0.0, (minimum_hit_size_source - width) / 2.0)
+        pad_y = max(0.0, (minimum_hit_size_source - height) / 2.0)
+        return (
+            bounds[0] - pad_x,
+            bounds[1] - pad_y,
+            bounds[2] + pad_x,
+            bounds[3] + pad_y,
+        )
+
+    def _sync_active_drag_modifier_state(self, source_point: tuple[int, int] | None, *, shift_down: bool) -> None:
+        if self._state.interaction_state.active_anchor_drag_id != "roi_body":
+            return
+        if source_point is None:
+            return
+        if shift_down == self._state.interaction_state.active_drag_shift_down:
+            return
+        current_roi = self._roi_state_service.get_active_roi()
+        initial_roi = self._state.interaction_state.active_drag_initial_roi
+        if (
+            current_roi is not None
+            and initial_roi is not None
+            and current_roi.points != initial_roi.points
+        ):
+            self._state.interaction_state.active_drag_initial_roi = current_roi
+            self._state.interaction_state.active_drag_origin_source_point = source_point
+        self._state.interaction_state.active_drag_shift_down = shift_down
+        self._state.interaction_state.active_drag_locked_axis = None
+
+    def _resolve_active_roi_emphasis(self, active_roi: RoiDefinition | None) -> str:
+        if active_roi is None:
+            return "normal"
+        active_anchor_drag_id = self._state.interaction_state.active_anchor_drag_id
+        if active_anchor_drag_id is not None and active_anchor_drag_id.startswith("roi_"):
+            return "drag"
+        if active_anchor_drag_id == "roi_body":
+            return "drag"
+        hovered_anchor_id = self._state.interaction_state.hovered_anchor_id
+        if hovered_anchor_id is not None and hovered_anchor_id.startswith("roi_"):
+            return "hover"
+        cursor_point = self._state.interaction_state.last_cursor_source_point
+        if cursor_point is not None:
+            bounds = self._resolve_effective_roi_drag_bounds(active_roi)
+            if bounds[0] <= cursor_point[0] <= bounds[2] and bounds[1] <= cursor_point[1] <= bounds[3]:
+                return "hover"
+        return "normal"
 
     def _clear_active_drag_state(self) -> None:
         self._state.interaction_state.active_anchor_drag_id = None
         self._state.interaction_state.active_anchor_drag_mode = None
         self._state.interaction_state.active_drag_origin_source_point = None
         self._state.interaction_state.active_drag_initial_roi = None
+        self._state.interaction_state.active_drag_shift_down = False
+        self._state.interaction_state.active_drag_locked_axis = None
 
     @staticmethod
     def _resolve_focus_anchor_point(

@@ -68,6 +68,7 @@ class PreviewOverlayModel:
     crosshair_point: tuple[int, int] | None = None
     draft_roi: RoiDefinition | None = None
     active_roi: RoiDefinition | None = None
+    active_roi_emphasis: Literal["normal", "hover", "drag"] = "normal"
     focus_anchor_point: tuple[int, int] | None = None
     focus_label: str | None = None
     show_viewport_outline: bool = False

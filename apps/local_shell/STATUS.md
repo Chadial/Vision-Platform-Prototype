@@ -13,6 +13,9 @@
 - working now: active ellipse ROI corner dragging now follows bounding-box semantics instead of expanding unexpectedly from a center-anchor interpretation
 - working now: anchor dragging now supports both hold-drag-release and click-to-lock-drag-click-to-release interaction on the same bounded point/ROI path
 - working now: clicking and dragging the ROI body now pans the whole ROI without distortion, and `Shift` constrains that body move to the dominant axis
+- working now: active ROI frame feedback now stays operator-visible in the wx shell, with green as the normal state, blue on hover, and red during drag
+- working now: very small active ROIs now expose an invisible enlarged body-hit target so hover and body-drag remain usable even when the visible frame is tiny
+- working now: toggling `Shift` during ROI body drag now re-bases the active move instead of snapping the ROI between free and axis-constrained positions
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite

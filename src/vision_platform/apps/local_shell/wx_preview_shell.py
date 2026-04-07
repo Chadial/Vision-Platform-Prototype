@@ -94,7 +94,7 @@ class PreviewCanvas(wx.Panel):
 
         for roi, colour in (
             (view_model.overlay_model.draft_roi, wx.Colour(0, 200, 255)),
-            (view_model.overlay_model.active_roi, wx.Colour(0, 255, 0)),
+            (view_model.overlay_model.active_roi, _resolve_active_roi_colour(view_model.overlay_model.active_roi_emphasis)),
         ):
             if roi is None:
                 continue
@@ -589,6 +589,14 @@ def _map_source_point_to_viewport(
     ):
         return None
     return viewport_x, viewport_y
+
+
+def _resolve_active_roi_colour(emphasis: str) -> wx.Colour:
+    if emphasis == "drag":
+        return wx.Colour(220, 60, 60)
+    if emphasis == "hover":
+        return wx.Colour(60, 120, 255)
+    return wx.Colour(0, 255, 0)
 
 
 __all__ = ["WxLocalPreviewShell", "main", "run_wx_preview_shell"]
