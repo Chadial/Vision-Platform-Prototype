@@ -19,7 +19,12 @@ Expose the existing host-neutral camera configuration surface from the bounded w
 ## Branch
 
 - intended branch: `feature/wx-camera-menu-shortcuts`
-- activation state: prepared
+- activation state: landed
+
+## Result
+
+- implemented and merged as the wx camera-settings menu and shortcut baseline
+- the bounded wx shell now exposes the camera settings dialog, shortcut map, and camera configuration summary through the existing controller path
 
 ## Scope
 
@@ -46,4 +51,3 @@ Excluded:
 - status updates reflect the current camera configuration summary
 - menu items and shortcut labels cover the currently supported shell actions
 - local unit tests cover the dialog parsing and the status summary
-
