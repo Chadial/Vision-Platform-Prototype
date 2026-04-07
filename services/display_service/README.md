@@ -2,22 +2,24 @@
 
 ## Purpose
 
-Composes UI-free display payloads from existing preview, snapshot, focus, and ROI state without binding the platform to a concrete window toolkit.
+Composes UI-free display payloads and owns headless preview-geometry logic without binding the platform to a concrete window toolkit.
 
 ## Responsibility
 
 - compose display-ready payloads from preview focus, snapshot focus, and active ROI
+- own reusable viewport geometry, zoom, pan, and coordinate mapping rules outside concrete preview windows
 - keep display composition separate from UI rendering classes
 - reuse existing overlay-ready focus payloads instead of duplicating focus logic
 
 ## Functions
 
+- `DisplayGeometryService`
 - `OverlayCompositionService`
 
 ## Inputs / Outputs
 
-- inputs: preview focus state, snapshot focus state or capture, active ROI or ROI state service
-- outputs: shared display payload with active ROI plus preview and snapshot focus overlays
+- inputs: frame size, viewport size, zoom/pan state, preview focus state, snapshot focus state or capture, active ROI or ROI state service
+- outputs: viewport mappings and coordinate transforms, plus shared display payload with active ROI and focus overlays
 
 ## Dependencies
 
