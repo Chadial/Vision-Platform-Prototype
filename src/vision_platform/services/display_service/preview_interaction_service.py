@@ -38,6 +38,8 @@ class PreviewInteractionState:
     hovered_anchor_id: str | None = None
     active_anchor_drag_id: str | None = None
     active_anchor_drag_mode: Literal["pending", "hold", "locked"] | None = None
+    active_drag_origin_source_point: tuple[int, int] | None = None
+    active_drag_initial_roi: RoiDefinition | None = None
 
 
 @dataclass(frozen=True, slots=True)

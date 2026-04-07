@@ -154,7 +154,7 @@ class PreviewCanvas(wx.Panel):
         self._refresh_callback(interactive=True)
 
     def _on_left_up(self, event) -> None:
-        self._presenter.handle_left_release(event.GetX(), event.GetY())
+        self._presenter.handle_left_release(event.GetX(), event.GetY(), shift_down=event.ShiftDown())
         self._refresh_callback(interactive=True)
 
     def _on_middle_down(self, event) -> None:
@@ -166,7 +166,12 @@ class PreviewCanvas(wx.Panel):
         self._refresh_callback(interactive=True)
 
     def _on_motion(self, event) -> None:
-        self._presenter.handle_pointer_move(event.GetX(), event.GetY(), left_button_down=event.LeftIsDown())
+        self._presenter.handle_pointer_move(
+            event.GetX(),
+            event.GetY(),
+            left_button_down=event.LeftIsDown(),
+            shift_down=event.ShiftDown(),
+        )
         if event.MiddleIsDown():
             self._presenter.handle_pan_move(event.GetX(), event.GetY())
         self._refresh_callback(interactive=True)

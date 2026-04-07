@@ -227,17 +227,19 @@ class PreviewShellPresenter:
             return PreviewInteractionOutcome()
         if self._start_anchor_drag_if_hit(x, y):
             return PreviewInteractionOutcome()
+        if self._start_roi_body_drag_if_hit(x, y):
+            return PreviewInteractionOutcome()
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         return self.apply_command(
             PreviewInteractionCommand(action="select_source_point", source_point=source_point),
         )
 
-    def handle_left_release(self, x: int, y: int) -> PreviewInteractionOutcome:
+    def handle_left_release(self, x: int, y: int, *, shift_down: bool = False) -> PreviewInteractionOutcome:
         if self._state.interaction_state.active_anchor_drag_id is None:
             return PreviewInteractionOutcome(handled=False)
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         if source_point is not None:
-            self._update_anchor_drag(source_point)
+            self._update_anchor_drag(source_point, shift_down=shift_down)
         drag_mode = self._state.interaction_state.active_anchor_drag_mode
         if drag_mode == "pending":
             anchor_id = self._state.interaction_state.active_anchor_drag_id
@@ -251,8 +253,7 @@ class PreviewShellPresenter:
         if drag_mode == "locked":
             return PreviewInteractionOutcome()
         anchor_id = self._state.interaction_state.active_anchor_drag_id
-        self._state.interaction_state.active_anchor_drag_id = None
-        self._state.interaction_state.active_anchor_drag_mode = None
+        self._clear_active_drag_state()
         self._state.interaction_state.hovered_anchor_id = anchor_id
         if anchor_id == "selected_point":
             self._state.interaction_state.last_status_message = "Point moved"
@@ -281,7 +282,7 @@ class PreviewShellPresenter:
     def handle_pan_stop(self) -> PreviewInteractionOutcome:
         return self.apply_command(PreviewInteractionCommand(action="stop_pan"))
 
-    def handle_pointer_move(self, x: int, y: int, *, left_button_down: bool = False) -> None:
+    def handle_pointer_move(self, x: int, y: int, *, left_button_down: bool = False, shift_down: bool = False) -> None:
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         self.apply_command(
             PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y), source_point=source_point),
@@ -292,7 +293,7 @@ class PreviewShellPresenter:
             if self._state.interaction_state.active_anchor_drag_mode == "pending" and left_button_down:
                 self._state.interaction_state.active_anchor_drag_mode = "hold"
             if source_point is not None and self._state.interaction_state.active_anchor_drag_mode in {"hold", "locked"}:
-                self._update_anchor_drag(source_point)
+                self._update_anchor_drag(source_point, shift_down=shift_down)
             return
         self._state.interaction_state.hovered_anchor_id = self._resolve_hovered_anchor_id(x, y)
         if self._state.interaction_state.roi_anchor_point is None:
@@ -411,10 +412,32 @@ class PreviewShellPresenter:
         self._state.interaction_state.active_anchor_drag_id = anchor_id
         self._state.interaction_state.active_anchor_drag_mode = "pending"
         self._state.interaction_state.hovered_anchor_id = anchor_id
+        self._state.interaction_state.active_drag_origin_source_point = self._geometry_service.map_viewport_point_to_source(
+            self._state.last_viewport_mapping,
+            viewport_x,
+            viewport_y,
+        )
+        self._state.interaction_state.active_drag_initial_roi = self._roi_state_service.get_active_roi()
         if anchor_id == "selected_point":
             self._state.interaction_state.last_status_message = "Dragging point"
         else:
             self._state.interaction_state.last_status_message = "Dragging ROI"
+        return True
+
+    def _start_roi_body_drag_if_hit(self, viewport_x: int, viewport_y: int) -> bool:
+        if self._state.interaction_state.roi_anchor_point is not None:
+            return False
+        active_roi = self._roi_state_service.get_active_roi()
+        if active_roi is None:
+            return False
+        source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, viewport_x, viewport_y)
+        if source_point is None or not self._is_point_inside_roi_bounds(active_roi, source_point):
+            return False
+        self._state.interaction_state.active_anchor_drag_id = "roi_body"
+        self._state.interaction_state.active_anchor_drag_mode = "pending"
+        self._state.interaction_state.active_drag_origin_source_point = source_point
+        self._state.interaction_state.active_drag_initial_roi = active_roi
+        self._state.interaction_state.last_status_message = "Dragging ROI"
         return True
 
     def _toggle_locked_anchor_drag_if_active(self, viewport_x: int, viewport_y: int) -> bool:
@@ -424,10 +447,9 @@ class PreviewShellPresenter:
             return False
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, viewport_x, viewport_y)
         if source_point is not None:
-            self._update_anchor_drag(source_point)
+            self._update_anchor_drag(source_point, shift_down=False)
         anchor_id = self._state.interaction_state.active_anchor_drag_id
-        self._state.interaction_state.active_anchor_drag_id = None
-        self._state.interaction_state.active_anchor_drag_mode = None
+        self._clear_active_drag_state()
         self._state.interaction_state.hovered_anchor_id = anchor_id
         if anchor_id == "selected_point":
             self._state.interaction_state.last_status_message = "Point moved"
@@ -435,12 +457,26 @@ class PreviewShellPresenter:
             self._state.interaction_state.last_status_message = "ROI updated"
         return True
 
-    def _update_anchor_drag(self, source_point: tuple[int, int]) -> None:
+    def _update_anchor_drag(self, source_point: tuple[int, int], *, shift_down: bool) -> None:
         anchor_id = self._state.interaction_state.active_anchor_drag_id
         if anchor_id is None:
             return
         if anchor_id == "selected_point":
             self._state.interaction_state.selected_point = source_point
+            return
+        if anchor_id == "roi_body":
+            active_roi = self._state.interaction_state.active_drag_initial_roi
+            origin_point = self._state.interaction_state.active_drag_origin_source_point
+            if active_roi is None or origin_point is None:
+                return
+            translated_roi = self._build_translated_roi(
+                active_roi,
+                origin_point,
+                source_point,
+                shift_down=shift_down,
+            )
+            if translated_roi is not None:
+                self._roi_state_service.set_active_roi(translated_roi)
             return
         active_roi = self._roi_state_service.get_active_roi()
         if active_roi is None:
@@ -449,6 +485,7 @@ class PreviewShellPresenter:
         if updated_roi is None:
             return
         self._roi_state_service.set_active_roi(updated_roi)
+        self._state.interaction_state.active_drag_initial_roi = updated_roi
 
     def _build_dragged_roi(
         self,
@@ -479,6 +516,44 @@ class PreviewShellPresenter:
             bottom = max(opposite[1], source_point[1])
             return RoiDefinition(roi_id=active_roi.roi_id, shape="ellipse", points=((left, top), (right, bottom)))
         return self._build_roi_definition(active_roi.shape, opposite, source_point)
+
+    def _build_translated_roi(
+        self,
+        active_roi: RoiDefinition,
+        origin_point: tuple[int, int],
+        source_point: tuple[int, int],
+        *,
+        shift_down: bool,
+    ) -> RoiDefinition | None:
+        delta_x = source_point[0] - origin_point[0]
+        delta_y = source_point[1] - origin_point[1]
+        if shift_down:
+            if abs(delta_x) >= abs(delta_y):
+                delta_y = 0
+            else:
+                delta_x = 0
+        translated_points = tuple((point[0] + delta_x, point[1] + delta_y) for point in active_roi.points)
+        return RoiDefinition(
+            roi_id=active_roi.roi_id,
+            shape=active_roi.shape,
+            points=translated_points,
+            label=active_roi.label,
+            enabled=active_roi.enabled,
+            metadata=dict(active_roi.metadata),
+        )
+
+    @staticmethod
+    def _is_point_inside_roi_bounds(active_roi: RoiDefinition, point: tuple[int, int]) -> bool:
+        bounds = roi_bounds(active_roi)
+        if bounds is None:
+            return False
+        return bounds[0] <= point[0] <= bounds[2] and bounds[1] <= point[1] <= bounds[3]
+
+    def _clear_active_drag_state(self) -> None:
+        self._state.interaction_state.active_anchor_drag_id = None
+        self._state.interaction_state.active_anchor_drag_mode = None
+        self._state.interaction_state.active_drag_origin_source_point = None
+        self._state.interaction_state.active_drag_initial_roi = None
 
     @staticmethod
     def _resolve_focus_anchor_point(

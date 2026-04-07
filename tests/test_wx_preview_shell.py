@@ -286,6 +286,81 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertIsNone(presenter.state.interaction_state.active_anchor_drag_mode)
         self.assertEqual(presenter.state.interaction_state.last_status_message, "ROI updated")
 
+    def test_presenter_pans_roi_body_without_distortion(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes((index % 256 for index in range(32 * 32))),
+            width=32,
+            height=32,
+            pixel_format="Mono8",
+        )
+
+        presenter.build_view(frame, viewport_width=32, viewport_height=32)
+        presenter.apply_command(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode="rectangle"))
+        presenter.handle_canvas_click(4, 4)
+        presenter.handle_pointer_move(20, 20)
+        presenter.handle_canvas_click(20, 20)
+
+        presenter.handle_canvas_click(12, 12)
+        presenter.handle_pointer_move(14, 15, left_button_down=True)
+        presenter.handle_left_release(14, 15)
+
+        view = presenter.build_view(frame, viewport_width=32, viewport_height=32)
+        self.assertEqual(view.overlay_model.active_roi.points, ((6, 7), (22, 23)))
+        self.assertEqual(presenter.state.interaction_state.last_status_message, "ROI updated")
+
+    def test_presenter_pans_roi_body_with_shift_axis_lock(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes((index % 256 for index in range(32 * 32))),
+            width=32,
+            height=32,
+            pixel_format="Mono8",
+        )
+
+        presenter.build_view(frame, viewport_width=32, viewport_height=32)
+        presenter.apply_command(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode="rectangle"))
+        presenter.handle_canvas_click(4, 4)
+        presenter.handle_pointer_move(20, 20)
+        presenter.handle_canvas_click(20, 20)
+
+        presenter.handle_canvas_click(12, 12)
+        presenter.handle_pointer_move(16, 13, left_button_down=True, shift_down=True)
+        presenter.handle_left_release(16, 13, shift_down=True)
+
+        view = presenter.build_view(frame, viewport_width=32, viewport_height=32)
+        self.assertEqual(view.overlay_model.active_roi.points, ((8, 4), (24, 20)))
+
+    def test_presenter_locks_roi_body_drag_and_releases_on_second_click(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes((index % 256 for index in range(32 * 32))),
+            width=32,
+            height=32,
+            pixel_format="Mono8",
+        )
+
+        presenter.build_view(frame, viewport_width=32, viewport_height=32)
+        presenter.apply_command(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode="rectangle"))
+        presenter.handle_canvas_click(4, 4)
+        presenter.handle_pointer_move(20, 20)
+        presenter.handle_canvas_click(20, 20)
+
+        presenter.handle_canvas_click(12, 12)
+        presenter.handle_left_release(12, 12)
+
+        self.assertEqual(presenter.state.interaction_state.active_anchor_drag_id, "roi_body")
+        self.assertEqual(presenter.state.interaction_state.active_anchor_drag_mode, "locked")
+        self.assertEqual(presenter.state.interaction_state.last_status_message, "ROI drag locked")
+
+        presenter.handle_pointer_move(14, 15)
+        presenter.handle_canvas_click(14, 15)
+
+        view = presenter.build_view(frame, viewport_width=32, viewport_height=32)
+        self.assertEqual(view.overlay_model.active_roi.points, ((6, 7), (22, 23)))
+        self.assertIsNone(presenter.state.interaction_state.active_anchor_drag_id)
+        self.assertIsNone(presenter.state.interaction_state.active_anchor_drag_mode)
+
     def test_wx_shell_module_import_path_stays_available(self) -> None:
         from vision_platform.apps.local_shell import run_wx_preview_shell
 
