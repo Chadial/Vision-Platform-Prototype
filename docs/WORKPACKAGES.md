@@ -552,20 +552,24 @@ The current coarse PM order should be:
 29. treat `WP52` as implemented; shared preview-status and overlay models now sit above OpenCV formatting and drawing
 30. treat `WP53` as implemented; one bounded wxPython local shell now exercises the shared controller/preview/display stack while OpenCV remains the fallback/reference path
 31. treat `WP54` as implemented; the wx shell now has a bounded real-hardware startup path without introducing UI-private bootstrap logic
-32. make `WP55` the current next slice before opening CLI-help polish
-33. defer `WP56` unless a concrete help/documentation defect outranks the hardware-facing slices above it
-34. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+32. treat `WP55` as queued while the current user-directed wx-shell operator lane remains active
+33. treat `WP56` as queued unless a concrete help/documentation defect outranks the active wx-shell follow-ups
+34. treat `WP57` as implemented; focus visibility and ROI ownership now render visibly in the wx shell while reusing the shared focus/ROI/display stack
+35. treat `WP58` as implemented; wx clipboard and point-selection semantics now align more closely with the current OpenCV baseline
+36. make `WP59` the current next slice for visible anchor hover/drag follow-up once the new focus/copy semantics are stable
+37. keep `WP60` queued behind that for recording/interval progress display
+38. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
 
-`WP55 Hardware Audit & Incident Logging Baseline`
+`WP59 wx Anchor Drag Follow-Up`
 
 Reason:
 
-- the bounded wx shell can now start against the tested hardware path, so the next justified residual is no longer shell bootstrapping
-- the next narrower operational gap is structured audit evidence for extraordinary hardware warnings, failures, and degraded startup states
-- `WP55` now follows naturally from the April 7, 2026 manual reruns, which still show non-blocking SDK noise and access-mode warnings worth classifying and preserving more explicitly
-- delaying `WP55` would keep those extraordinary cases spread across ad-hoc terminal logs instead of one bounded append-only audit path
+- the newest manual wx-shell feedback no longer points first at startup wiring, but at operator-level anchor affordances after focus visibility and clipboard semantics were tightened
+- `WP57` and `WP58` already addressed visible focus ownership and point-copy semantics without opening a larger editing framework
+- the next narrow residual in the same frontend lane is visible anchor hover/drag for ROI and fixed-point interaction
+- keeping `WP59` next preserves momentum in one coherent wx-shell interaction lane before switching back to queued hardware audit or CLI-help work
 
 ## Fresh Agent Decision Rule
 
@@ -637,6 +641,10 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md`
 - `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
 - `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
+- `docs/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
+- `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
+- `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
+- `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
@@ -685,8 +693,12 @@ Current explicit activation:
 - `Overlay And Preview Status Model Definition` is now implemented on the architecture baseline through `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md`
 - `Local Working UI Shell Baseline` is now implemented through `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md`
 - `wx Shell Hardware Enablement` is now implemented through `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md`
-- `Hardware Audit And Incident Logging Baseline` is now the current next execution-ready file at `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
+- `Hardware Audit And Incident Logging Baseline` remains queued at `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
 - `CLI Help And Command Documentation` remains queued at `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
+- `wx Focus Visibility And ROI Ownership` is now implemented through `docs/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
+- `wx Clipboard And Anchor Semantics Baseline` is now implemented through `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
+- `wx Anchor Drag Follow-Up` is now the current next execution-ready file at `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
+- `wx Recording Progress Status Baseline` is now queued at `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
 
 ## PM Refinement Rule
 

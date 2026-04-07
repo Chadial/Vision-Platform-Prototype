@@ -18,7 +18,9 @@ It exists to offer a more practical daily-use local frontend than the current Op
 - snapshot trigger through the existing command-controller path
 - shared status-line display derived from the extracted preview-status model
 - focus status visibility and toggle using the shared focus-preview service
+- visible in-image focus marker / label above the shared focus-preview output
 - fit/zoom, crosshair, and rectangle/ellipse ROI entry through the shared display-service layers
+- `Ctrl+C` point-copy behavior aligned with the current OpenCV operator path
 - reuse of the same alias, configuration-profile, and configuration-override semantics already used by the camera CLI
 
 ## Dependencies
@@ -59,5 +61,6 @@ Bounded hardware-backed example on the tested path:
 - this shell is optional and local-only
 - it does not replace the host-neutral controller/core
 - it now reuses the same headless startup semantics as the CLI for `source`, alias resolution, configuration profiles, and explicit configuration overrides
+- current point-copy and focus-visibility behavior intentionally follow the already proven OpenCV prototype semantics where practical
 - it does not yet provide full configuration or recording UI
 - the OpenCV prototype remains the fallback/reference frontend
