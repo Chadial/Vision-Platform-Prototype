@@ -41,7 +41,7 @@ class SnapshotServiceTests(unittest.TestCase):
 
             saved_path = SnapshotService(fake_driver).save_snapshot(request)
 
-            self.assertEqual(saved_path, Path(temp_dir) / "capture_001.bmp")
+            self.assertEqual(saved_path, Path(temp_dir) / "capture_001_000000.bmp")
             self.assertTrue(saved_path.exists())
             self.assertEqual(saved_path.read_bytes()[:2], b"BM")
             fake_driver.capture_snapshot.assert_called_once_with()
@@ -70,7 +70,7 @@ class SnapshotServiceTests(unittest.TestCase):
                 ],
             )
             self.assertEqual(trace_rows[1][0], "snapshot")
-            self.assertEqual(trace_rows[1][2], "capture_001.bmp")
+            self.assertEqual(trace_rows[1][2], "capture_001_000000.bmp")
 
     def test_save_snapshot_captures_frame_and_writes_to_explicit_path(self) -> None:
         fake_driver = MagicMock()
@@ -91,7 +91,7 @@ class SnapshotServiceTests(unittest.TestCase):
 
             saved_path = SnapshotService(fake_driver).save_snapshot(request)
 
-            self.assertEqual(saved_path, Path(temp_dir) / "capture_001.png")
+            self.assertEqual(saved_path, Path(temp_dir) / "capture_001_000000.png")
             self.assertTrue(saved_path.exists())
             fake_driver.capture_snapshot.assert_called_once_with()
 
@@ -130,7 +130,7 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertIn("# context.pixel_format: Mono8", trace_lines)
             self.assertIn("# context.exposure_time_us: 2500.0", trace_lines)
             self.assertIn("# context.gain: 1.5", trace_lines)
-            self.assertIn("# run.file_stem: capture_001", trace_lines)
+            self.assertIn("# run.file_stem: capture_001_000000", trace_lines)
             trace_rows = list(csv.reader(line for line in trace_lines if line and not line.startswith("# ")))
             self.assertEqual(trace_rows[1][2], saved_path.name)
             self.assertEqual(trace_rows[1][4], "123456")
@@ -192,8 +192,8 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertFalse((Path(temp_dir) / "saved_artifact_traceability_001.csv").exists())
             trace_lines = trace_path.read_text(encoding="utf-8").splitlines()
             self.assertEqual(trace_lines.count("# run.start"), 2)
-            self.assertIn("# run.file_stem: capture_001", trace_lines)
-            self.assertIn("# run.file_stem: capture_002", trace_lines)
+            self.assertIn("# run.file_stem: capture_001_000000", trace_lines)
+            self.assertIn("# run.file_stem: capture_002_000000", trace_lines)
 
     def test_save_snapshot_continues_naming_for_reused_directory_and_same_stem(self) -> None:
         fake_driver = MagicMock()
@@ -219,7 +219,7 @@ class SnapshotServiceTests(unittest.TestCase):
                 )
             )
 
-            self.assertEqual(first_path.name, "snapshot.bmp")
+            self.assertEqual(first_path.name, "snapshot_000000.bmp")
             self.assertEqual(second_path.name, "snapshot_000001.bmp")
             self.assertTrue(first_path.exists())
             self.assertTrue(second_path.exists())

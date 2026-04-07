@@ -665,6 +665,23 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(_normalize_wx_recording_file_extension(".bmp"), ".bmp")
         self.assertEqual(_normalize_wx_recording_file_extension(".RAW"), ".raw")
 
+    def test_recording_settings_dialog_uses_choice_string_selection(self) -> None:
+        dialog = SimpleNamespace(
+            _file_stem=_StubTextControl("series"),
+            _file_extension=_StubChoiceControl(".png"),
+            _max_frames=_StubTextControl("12"),
+            _recording_fps=_StubTextControl("8.5"),
+        )
+
+        values = {
+            "file_stem": dialog._file_stem.GetValue(),
+            "file_extension": dialog._file_extension.GetStringSelection(),
+            "max_frames": dialog._max_frames.GetValue(),
+            "recording_fps": dialog._recording_fps.GetValue(),
+        }
+
+        self.assertEqual(values["file_extension"], ".png")
+
     def test_wx_shell_default_recording_extension_is_bmp(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         shell._recording_file_extension = ".bmp"
@@ -823,3 +840,11 @@ class _StubTextControl:
 
     def ChangeValue(self, value: str) -> None:
         self._value = value
+
+
+class _StubChoiceControl:
+    def __init__(self, value: str) -> None:
+        self._value = value
+
+    def GetStringSelection(self) -> str:
+        return self._value
