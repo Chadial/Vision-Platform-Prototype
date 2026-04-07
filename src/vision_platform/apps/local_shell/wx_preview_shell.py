@@ -1082,7 +1082,7 @@ class _RecordingSettingsDialog(wx.Dialog):
     def get_values(self) -> dict[str, str]:
         return {
             "file_stem": self._file_stem.GetValue(),
-            "file_extension": self._file_extension.GetValue(),
+            "file_extension": self._file_extension.GetStringSelection(),
             "max_frames": self._max_frames.GetValue(),
             "recording_fps": self._recording_fps.GetValue(),
         }

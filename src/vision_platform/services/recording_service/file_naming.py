@@ -33,8 +33,6 @@ def build_next_snapshot_path(request: SnapshotRequest) -> Path:
         file_stem=request.file_stem,
         file_extension=extension,
     )
-    if next_index == 0:
-        return request.save_directory / f"{request.file_stem}{extension}"
     return request.save_directory / f"{request.file_stem}_{next_index:06d}{extension}"
 
 

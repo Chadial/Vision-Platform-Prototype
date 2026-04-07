@@ -75,6 +75,19 @@ class FileNamingTests(unittest.TestCase):
             )
             self.assertEqual(next_index, 2)
 
+    def test_build_next_snapshot_path_starts_with_zero_padded_suffix(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            save_directory = Path(temp_dir)
+            request = SnapshotRequest(
+                save_directory=save_directory,
+                file_stem="snapshot",
+                file_extension=".bmp",
+            )
+            self.assertEqual(
+                build_next_snapshot_path(request),
+                save_directory / "snapshot_000000.bmp",
+            )
+
     def test_build_next_snapshot_path_adds_suffix_when_base_file_exists(self) -> None:
         with TemporaryDirectory() as temp_dir:
             save_directory = Path(temp_dir)
