@@ -4,13 +4,13 @@
 
 This work package captures the next hardware-backed revalidation slice after the archived Phase 9 baseline.
 
-Its role is not to reopen broad hardware-validation work continuously, but to provide a ready place for targeted follow-up checks whenever camera hardware is attached again and new behavior needs real-device evidence.
+Its role is not to reopen broad hardware-validation work continuously, but to provide a ready recurring place for targeted follow-up checks whenever camera hardware is attached again and new behavior needs real-device evidence.
 
 ## Branch
 
 - intended branch: `feature/hardware-revalidation-follow-up`
 - predecessor context: `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
-- activation state: dormant until suitable hardware is attached again or a hardware-specific regression must be checked
+- activation state: conditional recurring slice; activate whenever suitable hardware is attached and a recent implementation group needs real-device evidence
 
 ## Scope
 
@@ -65,6 +65,24 @@ This package should therefore start from:
 - revalidation of specific later changes
 - new device-backed evidence for still-open edge cases
 - concise documentation updates tied to actual runs
+
+Latest recurring slice on April 7, 2026:
+
+- target: bounded hardware revalidation after `WP50` and `WP51`
+- question answered:
+  - does the tested hardware path still behave correctly after extracting headless display geometry and shared preview-interaction ownership?
+- executed checks:
+  - serial hardware CLI `status` through `tested_camera`
+  - hardware CLI `snapshot` through `tested_camera` plus `default` profile to `.bmp`
+  - integrated hardware command flow through `run_hardware_command_flow.py`
+  - bounded real-hardware OpenCV preview smoke through `run_hardware_preview_demo.py --frame-limit 5`
+- observed result:
+  - serial hardware `status` succeeded and still reported serial `067WH`
+  - hardware `snapshot` succeeded and wrote `captures\hardware_smoke\wp04_revalidation_snapshot\snapshot.bmp`
+  - integrated hardware command flow succeeded on `DEV_1AB22C046D81`
+  - OpenCV hardware preview rendered 5 frames successfully at `2000x1500 Mono8`
+  - `vmbpyLog <VmbError.NotAvailable: -30>` remained non-blocking residual noise
+  - an intentionally parallel start of multiple hardware processes reproduced `camera already in use`, confirming that hardware validation commands must remain serial
 
 ## Execution Plan
 

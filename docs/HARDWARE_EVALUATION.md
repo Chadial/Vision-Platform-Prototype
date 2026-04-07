@@ -396,7 +396,7 @@ Current baseline for camera `DEV_1AB22C046D81` after the March 27 and March 30, 
 | Explicit Camera Selection | PASS with narrowed residual note | Hardware runs used explicit camera id `DEV_1AB22C046D81`; raw Vimba X enumeration still shows duplicate SDK-visible entries for that same id, but the repository now prefers the richer identity candidate and preserves serial `067WH` on the current host-visible status path |
 | Configuration Application | PASS | Exposure, gain, ROI size, `Mono8`, and `Mono10` behaved plausibly; camera-side frame-rate control also works when `AcquisitionFrameRateEnable` is enabled first |
 | Snapshot Save | PASS | `Mono8`, `Mono10`, and hardware-backed `BMP` snapshot paths produced plausible files |
-| Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow and in the in-process bounded rerun |
+| Preview Flow | PASS | Preview readiness succeeded in the integrated hardware flow and in the in-process bounded rerun; the April 7, 2026 bounded OpenCV hardware preview smoke after `WP50` and `WP51` also rendered 5 frames successfully at `2000x1500 Mono8` |
 | Recording Flow | PASS | Frame-limit, duration-only, and target-frame-rate recording paths completed on hardware; March 30 also revalidated bounded recording plus active polling on the current host-oriented baseline |
 | Interval Capture / Active Polling | PASS with clearer timing semantics | Interval capture completed on hardware, active polling now surfaces non-fatal timing warnings during skipped intervals, and the latest bounded rerun completed with `frames_written=3` and final summary `completed with skipped_intervals=7` |
 | Traceability / Offline Reuse | PASS | Traceability logs, recording logs, run linkage, and offline BMP reuse behaved plausibly on hardware-generated output |
@@ -407,6 +407,20 @@ Additional March 31, 2026 bounded follow-up:
 - alias-backed hardware `snapshot` and bounded `recording` runs through `tested_camera -> DEV_1AB22C046D81` also wrote `camera_alias=tested_camera` into the folder-level stable traceability context while preserving the resolved `camera_id`
 - alias-backed hardware `status`, `snapshot`, and bounded `recording` runs through `tested_camera -> DEV_1AB22C046D81` now also resolve and apply the repo-local `default` configuration profile, with traceability headers preserving `configuration_profile_id=default` and resolved `configuration_profile_camera_class=1800_u_1240m`
 | Camera-Specific Capability Rerun | PASS with correction | March 30 reruns refreshed the documented `Mono8`, `Mono10`, acquisition-frame-rate, and ROI behavior for `DEV_1AB22C046D81`, and corrected the earlier assumption that ROI offsets were effectively fixed to `0` |
+
+Additional April 7, 2026 bounded architecture revalidation:
+
+- target: real-device confidence after `WP50` display-geometry extraction and `WP51` shared preview-interaction extraction
+- serial hardware CLI `status` through `tested_camera -> DEV_1AB22C046D81` succeeded and still reported serial `067WH`
+- hardware CLI `snapshot` through `tested_camera` plus profile `default` succeeded and wrote:
+  - `captures\hardware_smoke\wp04_revalidation_snapshot\snapshot.bmp`
+- integrated hardware command flow succeeded through:
+  - `captures\hardware_smoke\wp04_revalidation_run_001`
+- bounded OpenCV hardware preview smoke succeeded through:
+  - `.\scripts\launchers\run_hardware_preview_demo.py --camera-id DEV_1AB22C046D81 --poll-interval-seconds 0.03 --frame-limit 5`
+  - observed result: `Rendered 5 frames.` and final frame info `2000x1500 Mono8`
+- `vmbpyLog <VmbError.NotAvailable: -30>` still appeared as non-blocking SDK/logging residual during successful runs
+- a parallel start of multiple hardware processes reproduced `camera already in use`, so current hardware validation and CLI checks should continue to run serially on the tested device path
 
 ## 1. Initialization And Shutdown
 
