@@ -142,6 +142,15 @@ When the work changes repository state:
 - update relevant module `STATUS.md` when module reality changed
 - update `docs/MODULE_INDEX.md` only if module visibility or purpose changed
 
+Context-window checkpoint rule:
+
+- if discussion or implementation detail becomes dense enough that future sessions could lose decisions, assumptions, architecture boundaries, or deferred-policy notes, trigger a documentation checkpoint immediately rather than continuing with only chat context
+- checkpoint minimum:
+  - `docs/STATUS.md`
+  - `docs/WORKPACKAGES.md`
+  - active `docs/session_workpackages/wpXX_*.md`
+- if the checkpoint cannot be completed immediately, emit an explicit warning that context-risk is increasing and schedule the checkpoint as the next step before further broad work
+
 Default discipline:
 
 - do not update all docs after every change

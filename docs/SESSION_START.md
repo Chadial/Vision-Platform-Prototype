@@ -19,6 +19,7 @@ Read this first to get from zero context to a workable repository overview witho
 9. If the target module is `prepared only`, read its `ROADMAP.md` before first activation work in that module.
 10. If the task may create a new module or move logic across `apps/`, `integrations/`, `services/`, or `libraries/`, read `docs/root_category_audit.md` first.
 11. If the task changes documentation structure, update rules, or documentation role boundaries, read `docs/DOCUMENTATION_PLAYBOOK.md`.
+12. If context is getting dense, run a documentation checkpoint (`docs/STATUS.md`, `docs/WORKPACKAGES.md`, active `docs/session_workpackages/wpXX_*.md`) before broad further changes.
 
 ## Current Baseline
 

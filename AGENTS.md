@@ -202,6 +202,22 @@ If central docs and module docs disagree, central project docs win for prioritiz
 
 ---
 
+## Context Window Discipline
+
+Treat conversational context as finite and non-authoritative.
+
+When implementation, planning, or architecture discussion accumulates enough detail that later sessions could lose decisions, assumptions, or boundaries, trigger a short mandatory documentation checkpoint before continuing broad changes.
+
+At minimum, record the current truth in:
+
+- `docs/STATUS.md` for verified state and active residuals
+- `docs/WORKPACKAGES.md` for current-next selection and ordering impact
+- the active `docs/session_workpackages/wpXX_*.md` file for slice-specific policy decisions and deferred items
+
+If this checkpoint is skipped, warn explicitly that context compression risk is increasing and request/perform the documentation step next.
+
+---
+
 ## High-Level Priorities
 
 Always optimize for the following, in order:
