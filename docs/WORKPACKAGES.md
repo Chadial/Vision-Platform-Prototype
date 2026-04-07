@@ -310,15 +310,15 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 51 | Shared Preview Interaction Command Layer | introduce a shared preview interaction/action layer above geometry and below concrete UI event systems | active lane | implemented on the current architecture branch; OpenCV preview now translates HighGUI input into shared interaction commands with dedicated service coverage | `docs/session_workpackages/wp51_shared_preview_interaction_command_layer.md` |
 | 52 | Overlay And Preview Status Model Definition | define UI-agnostic overlay/status models once geometry and interaction ownership are separated | active lane | implemented on the current architecture baseline; OpenCV preview now formats and renders shared descriptive status / overlay models | `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md` |
 | 53 | Local Working UI Shell Baseline | add a first pragmatic local UI shell on top of the extracted geometry and interaction layers | active lane | implemented as a bounded wxPython local shell over the shared controller/preview/display stack while OpenCV remains the fallback/reference path | `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md` |
-| 54 | wx Shell Hardware Enablement | add one bounded real-hardware startup path for the existing wxPython shell | current next | closes the concrete post-`WP53` gap exposed by the manual hardware rerun: the wx shell still has no real-hardware entry path | `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md` |
-| 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | queued | operational-readiness follow-up after wx-shell hardware enablement exists | `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
+| 54 | wx Shell Hardware Enablement | add one bounded real-hardware startup path for the existing wxPython shell | active lane | implemented; the wx shell now reuses the same headless source-selection, alias/profile, and configuration startup semantics on both simulated and hardware-backed paths | `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md` |
+| 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | current next | operational-readiness follow-up now that wx-shell hardware enablement exists | `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
 | 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | queued | operational-readiness polish behind the current architecture and hardware-shell chain | `docs/session_workpackages/wp56_cli_help_and_command_documentation.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable post-closure backlog categories:
 
-1. residual-driven hardening after the now-implemented `WP50` to `WP53` architecture/frontend chain, starting with wx-shell hardware enablement
+1. residual-driven hardening after the now-implemented `WP50` to `WP54` architecture/frontend chain, starting with hardware audit/logging
 2. residual-driven hardening
 3. operational readiness and productization polish after the architecture chain is prepared
 
@@ -327,7 +327,7 @@ Current prepared post-closure sequence:
 - `WP50 Display Geometry Service Extraction` implemented on the integrated architecture baseline
 - `WP51 Shared Preview Interaction Command Layer` implemented on the current branch
 - `WP53 Local Working UI Shell Baseline` implemented as a bounded wxPython shell baseline
-- `WP54 wx Shell Hardware Enablement`
+- `WP54 wx Shell Hardware Enablement` implemented as the bounded real-device startup follow-up for the existing shell
 - `WP55 Hardware Audit & Incident Logging Baseline`
 - defer `WP56` unless a concrete operational-help defect outranks the hardware-facing slices above it
 
@@ -551,21 +551,21 @@ The current coarse PM order should be:
 28. treat `WP51` as the implemented shared interaction slice on the current branch
 29. treat `WP52` as implemented; shared preview-status and overlay models now sit above OpenCV formatting and drawing
 30. treat `WP53` as implemented; one bounded wxPython local shell now exercises the shared controller/preview/display stack while OpenCV remains the fallback/reference path
-31. make `WP54` the current next slice as wx-shell hardware enablement rather than broader audit/logging work
-32. follow `WP54` with `WP55` before opening CLI-help polish
+31. treat `WP54` as implemented; the wx shell now has a bounded real-hardware startup path without introducing UI-private bootstrap logic
+32. make `WP55` the current next slice before opening CLI-help polish
 33. defer `WP56` unless a concrete help/documentation defect outranks the hardware-facing slices above it
 34. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
 
-`WP54 wx Shell Hardware Enablement`
+`WP55 Hardware Audit & Incident Logging Baseline`
 
 Reason:
 
-- a bounded local wx shell now exists, but the manual hardware rerun showed that the shell itself still has no real-device startup path
-- the next justified slice is therefore narrower than audit/logging work: first make the new local shell usable on the tested hardware path
-- `WP54` is now the narrowest next slice that closes the most immediate post-`WP53` functional gap without reopening UI breadth
-- delaying `WP54` would leave the repository with a local wx shell that still cannot be exercised against the same real hardware path already proven through CLI and OpenCV
+- the bounded wx shell can now start against the tested hardware path, so the next justified residual is no longer shell bootstrapping
+- the next narrower operational gap is structured audit evidence for extraordinary hardware warnings, failures, and degraded startup states
+- `WP55` now follows naturally from the April 7, 2026 manual reruns, which still show non-blocking SDK noise and access-mode warnings worth classifying and preserving more explicitly
+- delaying `WP55` would keep those extraordinary cases spread across ad-hoc terminal logs instead of one bounded append-only audit path
 
 ## Fresh Agent Decision Rule
 
@@ -684,8 +684,8 @@ Current explicit activation:
 - `Shared Preview Interaction Command Layer` now has its implementation and execution-ready file at `docs/session_workpackages/wp51_shared_preview_interaction_command_layer.md`
 - `Overlay And Preview Status Model Definition` is now implemented on the architecture baseline through `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md`
 - `Local Working UI Shell Baseline` is now implemented through `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md`
-- `wx Shell Hardware Enablement` is now the current next execution-ready file at `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md`
-- `Hardware Audit And Incident Logging Baseline` remains queued at `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
+- `wx Shell Hardware Enablement` is now implemented through `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md`
+- `Hardware Audit And Incident Logging Baseline` is now the current next execution-ready file at `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
 - `CLI Help And Command Documentation` remains queued at `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
 
 ## PM Refinement Rule

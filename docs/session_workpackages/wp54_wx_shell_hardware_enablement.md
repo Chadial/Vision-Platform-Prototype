@@ -21,7 +21,7 @@ Its purpose is to close the concrete gap exposed by the first manual hardware re
 ## Branch
 
 - intended branch: `feature/wx-shell-hardware-enablement`
-- activation state: current next
+- activation state: implemented
 
 ## Scope
 

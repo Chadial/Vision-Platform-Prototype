@@ -186,6 +186,12 @@ Use the bounded wx shell when local desktop preview work matters more than the t
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --snapshot-directory .\captures\wx_shell_snapshot
 ```
 
+Use the bounded wx shell on the tested hardware path when the goal is to exercise the same local shell against the real device:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --source hardware --camera-alias tested_camera --configuration-profile default --snapshot-directory .\captures\wx_shell_snapshot
+```
+
 ## Launch Readiness Checklist
 
 Before normal simulator-backed use:
