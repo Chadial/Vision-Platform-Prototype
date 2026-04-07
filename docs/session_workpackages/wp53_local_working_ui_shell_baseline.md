@@ -21,7 +21,7 @@ Its purpose is to create a better daily-use frontend without dragging framework 
 ## Branch
 
 - intended branch: `feature/local-working-ui-shell-baseline`
-- activation state: queued
+- activation state: implemented on branch scope
 
 ## Scope
 
@@ -40,3 +40,7 @@ Excluded:
 ## Activation Condition
 
 Activate only after `WP50`, `WP51`, and `WP52` are in place, or when there is a concrete operator need that justifies the shell immediately.
+
+## Implementation Note
+
+Implemented as a bounded optional wxPython shell under `vision_platform.apps.local_shell`, reusing the existing simulated bootstrap/controller path plus the extracted geometry, interaction, and preview-status layers while keeping the OpenCV frontend as fallback/reference.

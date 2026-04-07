@@ -109,6 +109,7 @@ Preferred hardware integration runner:
 Useful secondary launchers:
 
 - `vision-platform-cli`
+- `.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell`
 - `.\scripts\run_python_baseline.ps1`
 - `.\scripts\launchers\run_camera_cli.py`
 - `.\scripts\launchers\run_snapshot_smoke.py`
@@ -124,6 +125,7 @@ Current practical rule:
 - use `run_camera_cli.py` for bounded host-surface checks when a repo-local launcher is more practical
 - use `run_hardware_command_flow.py` for integrated real-device confidence passes
 - use the OpenCV launchers only when local visual inspection is actually needed
+- use `vision_platform.apps.local_shell` when a bounded local working frontend is needed and the optional `wxPython` dependency is installed in the same `.venv`
 
 ## When To Prefer Simulator First
 

@@ -131,6 +131,7 @@ It is the preferred integrated runner when hardware evidence is the actual goal.
 The current practical startup surface is intentionally small:
 
 - `vision_platform.apps.camera_cli`
+- `vision_platform.apps.local_shell`
 - installed `vision-platform-cli`
 - `scripts/launchers/run_camera_cli.py`
 - `scripts/run_python_baseline.ps1`
@@ -177,6 +178,12 @@ Use the convenience-helper form when repeated local usage matters more than pres
 
 ```powershell
 .\scripts\run_python_baseline.ps1 status --source simulated
+```
+
+Use the bounded wx shell when local desktop preview work matters more than the temporary OpenCV operator window:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --snapshot-directory .\captures\wx_shell_snapshot
 ```
 
 ## Launch Readiness Checklist

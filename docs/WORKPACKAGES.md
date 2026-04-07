@@ -309,15 +309,15 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 50 | Display Geometry Service Extraction | extract reusable viewport geometry from the OpenCV preview so later UI and host-facing work can share one headless mapping core | active lane | implemented on the current architecture baseline; OpenCV preview now consumes a headless geometry service and dedicated geometry coverage exists | `docs/session_workpackages/wp50_display_geometry_service_extraction.md` |
 | 51 | Shared Preview Interaction Command Layer | introduce a shared preview interaction/action layer above geometry and below concrete UI event systems | active lane | implemented on the current architecture branch; OpenCV preview now translates HighGUI input into shared interaction commands with dedicated service coverage | `docs/session_workpackages/wp51_shared_preview_interaction_command_layer.md` |
 | 52 | Overlay And Preview Status Model Definition | define UI-agnostic overlay/status models once geometry and interaction ownership are separated | active lane | implemented on the current architecture baseline; OpenCV preview now formats and renders shared descriptive status / overlay models | `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md` |
-| 53 | Local Working UI Shell Baseline | add a first pragmatic local UI shell on top of the extracted geometry and interaction layers | current next | intentionally follows the now-implemented `WP50` to `WP52` chain | `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md` |
-| 54 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | queued | operational-readiness polish behind the current architecture chain | `docs/session_workpackages/wp54_hardware_audit_and_incident_logging_baseline.md` |
+| 53 | Local Working UI Shell Baseline | add a first pragmatic local UI shell on top of the extracted geometry and interaction layers | active lane | implemented as a bounded wxPython local shell over the shared controller/preview/display stack while OpenCV remains the fallback/reference path | `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md` |
+| 54 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | current next | operational-readiness follow-up after the now-implemented local shell baseline | `docs/session_workpackages/wp54_hardware_audit_and_incident_logging_baseline.md` |
 | 55 | CLI Help & Documentation | refine CLI help and human-readable command documentation | queued | operational-readiness polish behind the current architecture chain | `docs/session_workpackages/wp55_cli_help_and_command_documentation.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable post-closure backlog categories:
 
-1. architecture-first UI/host decoupling (`WP53`) after the now-implemented `WP50` to `WP52` chain
+1. residual-driven hardening after the now-implemented `WP50` to `WP53` architecture/frontend chain
 2. residual-driven hardening
 3. operational readiness and productization polish after the architecture chain is prepared
 
@@ -325,8 +325,9 @@ Current prepared post-closure sequence:
 
 - `WP50 Display Geometry Service Extraction` implemented on the integrated architecture baseline
 - `WP51 Shared Preview Interaction Command Layer` implemented on the current branch
-- `WP53 Local Working UI Shell Baseline`
-- defer `WP54` and `WP55` until the architecture chain above is prepared or a concrete operational defect forces reprioritization
+- `WP53 Local Working UI Shell Baseline` implemented as a bounded wxPython shell baseline
+- `WP54 Hardware Audit & Incident Logging Baseline`
+- defer `WP55` unless a concrete operational-help defect outranks `WP54`
 
 Most recently landed detailed packages:
 
@@ -547,20 +548,21 @@ The current coarse PM order should be:
 27. treat `WP50` as the implemented headless geometry slice on the integrated architecture baseline
 28. treat `WP51` as the implemented shared interaction slice on the current branch
 29. treat `WP52` as implemented; shared preview-status and overlay models now sit above OpenCV formatting and drawing
-30. make `WP53` the current next slice before opening any polish-oriented operational work
-31. defer `WP54` and `WP55` behind the architecture chain unless a concrete audit/help defect outranks it
-32. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+30. treat `WP53` as implemented; one bounded wxPython local shell now exercises the shared controller/preview/display stack while OpenCV remains the fallback/reference path
+31. make `WP54` the current next slice
+32. defer `WP55` unless a concrete help/documentation defect outranks `WP54`
+33. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
 
-`WP53 Local Working UI Shell Baseline`
+`WP54 Hardware Audit & Incident Logging Baseline`
 
 Reason:
 
-- geometry, interaction, and descriptive status / overlay ownership now live in shared display-service layers
-- the next justified architecture slice is a local shell that consumes those extracted layers instead of extending OpenCV-private behavior again
-- `WP53` is now the narrowest next slice that proves the extracted display stack can host a pragmatic local shell boundary
-- delaying `WP53` would leave the current architecture chain technically extracted but still only exercised through the OpenCV prototype window
+- a bounded local shell now exists, but the repository still lacks a structured audit path for extraordinary hardware states and operator-relevant incidents
+- the next justified slice is operationally narrower than broader frontend growth and now fits the post-shell baseline better than more UI breadth
+- `WP54` is now the narrowest next slice that adds practical incident evidence without reopening architecture churn
+- delaying `WP54` would leave the new local shell and the existing hardware path without the next explicit operational audit layer
 
 ## Fresh Agent Decision Rule
 
@@ -677,8 +679,8 @@ Current explicit activation:
 - `Display Geometry Service Extraction` now has its implementation and execution-ready file at `docs/session_workpackages/wp50_display_geometry_service_extraction.md`
 - `Shared Preview Interaction Command Layer` now has its implementation and execution-ready file at `docs/session_workpackages/wp51_shared_preview_interaction_command_layer.md`
 - `Overlay And Preview Status Model Definition` is now implemented on the architecture baseline through `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md`
-- `Local Working UI Shell Baseline` is now the current next execution-ready file at `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md`
-- `Hardware Audit And Incident Logging Baseline` remains queued at `docs/session_workpackages/wp54_hardware_audit_and_incident_logging_baseline.md`
+- `Local Working UI Shell Baseline` is now implemented through `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md`
+- `Hardware Audit And Incident Logging Baseline` is now the current next execution-ready file at `docs/session_workpackages/wp54_hardware_audit_and_incident_logging_baseline.md`
 - `CLI Help And Command Documentation` remains queued at `docs/session_workpackages/wp55_cli_help_and_command_documentation.md`
 
 ## PM Refinement Rule
