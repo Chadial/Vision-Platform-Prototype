@@ -86,9 +86,7 @@ def build_recording_log_path_for_run(request: RecordingRequest, *, start_frame_i
     validate_recording_request(request)
     if request.save_directory is None:
         raise ValueError("RecordingRequest.save_directory must be set before recording.")
-    if start_frame_index <= 0:
-        return build_recording_log_path(request)
-    return request.save_directory / f"{request.file_stem}_recording_log_{start_frame_index:06d}.csv"
+    return build_recording_log_path(request)
 
 
 def resolve_next_snapshot_index(

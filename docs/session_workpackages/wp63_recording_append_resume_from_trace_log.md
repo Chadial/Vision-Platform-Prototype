@@ -48,7 +48,7 @@ Landed on `feature/recording-append-resume` with:
 
 - append/resume-safe snapshot path resolution (`snapshot`, `snapshot_000001`, ...)
 - append/resume-safe recording frame indexing across repeated runs in the same directory and stem
-- recording log naming that keeps first-run compatibility while suffixing continuation logs (`..._recording_log.csv`, then `..._recording_log_000002.csv`, ...)
+- historical note: this slice originally kept first-run compatibility while suffixing continuation logs (`..._recording_log.csv`, then `..._recording_log_000002.csv`, ...); `WP67` later replaced that with one append-only deterministic recording log per `save_directory + file_stem`
 - additive recording metadata fields for continuation visibility (`continues_previous_series`, `recording_start_frame_index`)
 
 Validated with:
