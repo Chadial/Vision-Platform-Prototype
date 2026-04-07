@@ -614,6 +614,18 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertEqual(shell._build_recording_summary(status), "17/n")
 
+    def test_recording_summary_promotes_auto_stopped_bounded_run_into_last_summary(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._recording_active_frame_limit = 3
+        shell._recording_last_summary = None
+        status = SimpleNamespace(recording=SimpleNamespace(is_recording=False, frames_written=3))
+
+        summary = shell._build_recording_summary(status)
+
+        self.assertEqual(summary, "3/3")
+        self.assertEqual(shell._recording_last_summary, "3/3")
+        self.assertIsNone(shell._recording_active_frame_limit)
+
     def test_apply_recording_settings_updates_internal_state_and_controls(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         shell._recording_max_frames = _StubTextControl("0")

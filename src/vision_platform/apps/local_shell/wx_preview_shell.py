@@ -384,6 +384,8 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_active_frame_limit = frame_limit
         self._recording_target_frame_rate_value = target_frame_rate
         self._recording_last_summary = None
+        self._cached_status = None
+        self._last_status_refresh_time = 0.0
         self._set_transient_status_message(
             f"Recording started: {result.status.active_file_stem or self._recording_file_stem}"
         )
@@ -658,6 +660,18 @@ class WxLocalPreviewShell(wx.Frame):
                 frames_written=status.recording.frames_written,
                 frame_limit=self._recording_active_frame_limit,
             )
+        if (
+            self._recording_active_frame_limit is not None
+            and status.recording.frames_written > 0
+            and self._recording_last_summary is None
+        ):
+            summary = self._format_recording_summary(
+                frames_written=status.recording.frames_written,
+                frame_limit=self._recording_active_frame_limit,
+            )
+            self._recording_last_summary = summary
+            self._recording_active_frame_limit = None
+            return summary
         if self._recording_last_summary is not None:
             return self._recording_last_summary
         return None
