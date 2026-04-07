@@ -32,6 +32,19 @@ from vision_platform.models import (
 from vision_platform.services.api_service import build_error_command_payload, build_success_command_payload
 from vision_platform.services.recording_service.traceability import build_snapshot_run_id
 
+_CLI_HELP_DESCRIPTION = (
+    "Run the bounded camera CLI against simulated or hardware-backed sources.\n\n"
+    "The CLI stays thin over the shared controller and service layer."
+)
+
+_CLI_HELP_EPILOG = (
+    "Quick reference:\n"
+    "  status --source simulated\n"
+    "  snapshot --source simulated --base-directory .\\captures\\sim_smoke --file-extension .bmp\n"
+    "  recording --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\\captures\\hardware_smoke --frame-limit 5\n"
+    "  interval-capture --source simulated --base-directory .\\captures\\sim_smoke --interval-seconds 0.10 --frame-limit 3\n"
+)
+
 
 @dataclass(slots=True)
 class CameraCliResult:
@@ -65,7 +78,9 @@ class CameraCliArgumentParser(argparse.ArgumentParser):
 
 def build_argument_parser() -> argparse.ArgumentParser:
     parser = CameraCliArgumentParser(
-        description="Run camera-oriented platform commands from one consistent CLI surface.",
+        description=_CLI_HELP_DESCRIPTION,
+        epilog=_CLI_HELP_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -76,14 +91,18 @@ def build_argument_parser() -> argparse.ArgumentParser:
     status_parser = subparsers.add_parser(
         "status",
         parents=[common_parser],
-        help="Initialize the selected camera source and print consolidated status.",
+        description="Initialize the selected source, apply any requested configuration, and print consolidated status.",
+        help="Inspect consolidated camera readiness and status.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     status_parser.set_defaults(command_handler=_handle_status_command)
 
     snapshot_parser = subparsers.add_parser(
         "snapshot",
         parents=[common_parser],
-        help="Save one snapshot through the command-controller path.",
+        description="Save one snapshot through the shared command-controller path.",
+        help="Save one snapshot through the shared controller path.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     _add_common_storage_arguments(snapshot_parser)
     _add_snapshot_arguments(snapshot_parser)
@@ -92,7 +111,9 @@ def build_argument_parser() -> argparse.ArgumentParser:
     interval_parser = subparsers.add_parser(
         "interval-capture",
         parents=[common_parser],
-        help="Run bounded interval capture through the shared stream path.",
+        description="Run bounded interval capture through the shared live stream path.",
+        help="Save timed single-image captures from the shared stream.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     _add_common_storage_arguments(interval_parser)
     _add_interval_capture_arguments(interval_parser)
@@ -101,7 +122,9 @@ def build_argument_parser() -> argparse.ArgumentParser:
     recording_parser = subparsers.add_parser(
         "recording",
         parents=[common_parser],
-        help="Run bounded recording through the command-controller path.",
+        description="Run bounded recording through the shared command-controller path.",
+        help="Save a bounded image series through the shared controller path.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     _add_common_storage_arguments(recording_parser)
     _add_recording_arguments(recording_parser)
@@ -535,13 +558,13 @@ def _add_common_camera_arguments(parser: argparse.ArgumentParser) -> None:
         "--source",
         choices=("simulated", "hardware"),
         default="simulated",
-        help="Choose the simulator-backed or hardware-backed camera path.",
+        help="Choose the simulated or hardware-backed camera path.",
     )
     parser.add_argument("--camera-id", default=None, help="Explicit camera id to initialize.")
     parser.add_argument(
         "--camera-alias",
         default=None,
-        help="Repo-local camera alias resolved through configs/camera_aliases.json.",
+        help="Repo-local camera alias resolved through configs/camera_aliases.json before initialization.",
     )
     parser.add_argument(
         "--sample-dir",

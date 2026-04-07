@@ -312,7 +312,7 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 53 | Local Working UI Shell Baseline | add a first pragmatic local UI shell on top of the extracted geometry and interaction layers | active lane | implemented as a bounded wxPython local shell over the shared controller/preview/display stack while OpenCV remains the fallback/reference path | `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md` |
 | 54 | wx Shell Hardware Enablement | add one bounded real-hardware startup path for the existing wxPython shell | active lane | implemented; the wx shell now reuses the same headless source-selection, alias/profile, and configuration startup semantics on both simulated and hardware-backed paths | `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md` |
 | 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | active lane | implemented as an append-only hardware-audit baseline that records warnings, degraded startup states, and incidents separately from artifact traceability | `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
-| 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | current next | operational-readiness polish behind the current architecture and hardware-shell chain | `docs/session_workpackages/wp56_cli_help_and_command_documentation.md` |
+| 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | active lane | landed CLI help and documentation polish; the bounded current command surface now has clearer argparse help and a compact human-readable reference | `docs/session_workpackages/wp56_cli_help_and_command_documentation.md` |
 | 60 | wx Recording Progress Status Baseline | surface bounded recording controls and progress in the wx shell through existing status models | active lane | landed bounded wx recording-control slice; recording controls, max-frames input, recording FPS input, and progress stay within the existing controller/status path | `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md` |
 
 ## Immediate PM Backlog
@@ -330,8 +330,8 @@ Current prepared post-closure sequence:
 - `WP53 Local Working UI Shell Baseline` implemented as a bounded wxPython shell baseline
 - `WP54 wx Shell Hardware Enablement` implemented as the bounded real-device startup follow-up for the existing shell
 - `WP55 Hardware Audit & Incident Logging Baseline` implemented as the append-only hardware-audit baseline
-- `WP56 CLI Help & Documentation`
-- defer any new recording append / IPC work packages until `WP56` is resolved
+- `WP56 CLI Help & Documentation` implemented as the CLI help / reference polish slice
+- defer any new recording append / IPC work packages until the current recording-progress slice is resolved
 
 Most recently landed detailed packages:
 
@@ -555,7 +555,7 @@ The current coarse PM order should be:
 30. treat `WP53` as implemented; one bounded wxPython local shell now exercises the shared controller/preview/display stack while OpenCV remains the fallback/reference path
 31. treat `WP54` as implemented; the wx shell now has a bounded real-hardware startup path without introducing UI-private bootstrap logic
 32. treat `WP55` as queued while the current user-directed wx-shell operator lane remains active
-33. treat `WP56` as queued unless a concrete help/documentation defect outranks the active wx-shell follow-ups
+33. treat `WP56` as landed CLI help / documentation polish unless a concrete help/documentation defect reopens it
 34. treat `WP57` as implemented; focus visibility and ROI ownership now render visibly in the wx shell while reusing the shared focus/ROI/display stack
 35. treat `WP58` as implemented; wx clipboard and point-selection semantics now align more closely with the current OpenCV baseline
 36. treat `WP59` as implemented; the wx shell now renders visible point/ROI anchors with bounded hover and first drag behavior above the shared display stack
@@ -696,7 +696,7 @@ Current explicit activation:
 - `Local Working UI Shell Baseline` is now implemented through `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md`
 - `wx Shell Hardware Enablement` is now implemented through `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md`
 - `Hardware Audit And Incident Logging Baseline` remains queued at `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
-- `CLI Help And Command Documentation` remains queued at `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
+- `CLI Help And Command Documentation` is now implemented through `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
 - `wx Focus Visibility And ROI Ownership` is now implemented through `docs/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
 - `wx Clipboard And Anchor Semantics Baseline` is now implemented through `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
 - `wx Anchor Drag Follow-Up` is now implemented through `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`

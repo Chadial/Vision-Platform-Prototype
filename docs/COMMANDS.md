@@ -55,6 +55,50 @@ These names are intentionally neutral. They fit:
 - a later C# host integration
 - a later API or IPC layer
 
+## Camera CLI Quick Reference
+
+Use the bounded CLI entry point when you want the current host-neutral command surface from the shell:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli
+```
+
+Supported command forms:
+
+- `status`: initialize the selected source and print consolidated status
+- `snapshot`: save one snapshot through the shared controller path
+- `recording`: save a bounded image series through the shared controller path
+- `interval-capture`: save timed single-image captures from the shared stream
+
+Common options:
+
+- `--source simulated|hardware`
+- `--camera-id` or `--camera-alias`
+- `--configuration-profile` and optional `--profile-camera-class`
+- `--base-directory` with `--save-mode append|new_subdirectory`
+- `--run-name` when `--save-mode new_subdirectory` is used
+
+Recording-specific options:
+
+- `--frame-limit`
+- `--duration-seconds`
+- `--target-frame-rate`
+
+Interval-capture-specific options:
+
+- `--interval-seconds`
+- `--frame-limit`
+- `--duration-seconds`
+
+Examples:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source simulated
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source simulated --base-directory .\captures\sim_smoke --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --frame-limit 5
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli interval-capture --source simulated --base-directory .\captures\sim_smoke --interval-seconds 0.10 --frame-limit 3
+```
+
 ## Request Overview
 
 ### `ApplyConfigurationRequest`

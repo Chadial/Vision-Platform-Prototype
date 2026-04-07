@@ -19,14 +19,14 @@ Scope level:
 ## Branch
 
 - intended branch: `docs/cli-help-and-command-documentation`
-- activation state: queued
+- activation state: landed
 
 ## Scope
 
 Included:
 
 - refine current CLI help strings
-- generate one human-readable command reference from the bounded current CLI
+- add one compact human-readable command reference to the command manual
 - keep documentation aligned with the existing host-neutral command surface
 
 Excluded:
@@ -34,6 +34,12 @@ Excluded:
 - broad command-surface redesign
 - new transport/API runtime
 - preview/UI architecture work
+
+## Result
+
+- `src/vision_platform/apps/camera_cli/camera_cli.py` now has clearer top-level and subcommand help text
+- `docs/COMMANDS.md` now includes a concise camera CLI quick reference
+- the bounded current CLI surface remains unchanged; this slice only improves discoverability
 
 ## Activation Condition
 

@@ -8,11 +8,30 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from tests import _path_setup
-from vision_platform.apps.camera_cli import CameraCliError, main, run_cli
+from vision_platform.apps.camera_cli import CameraCliError, build_argument_parser, main, run_cli
 from vision_platform.services.api_service import map_subsystem_status_to_api_payload
 
 
 class CameraCliTests(unittest.TestCase):
+    def test_build_argument_parser_help_includes_quick_reference(self) -> None:
+        help_text = build_argument_parser().format_help()
+
+        self.assertIn("Run the bounded camera CLI against simulated or hardware-backed sources.", help_text)
+        self.assertIn("Quick reference:", help_text)
+        self.assertIn("recording --source hardware", help_text)
+        self.assertIn("interval-capture --source simulated", help_text)
+
+    def test_recording_subcommand_help_mentions_target_frame_rate(self) -> None:
+        stdout = StringIO()
+
+        with contextlib.redirect_stdout(stdout), self.assertRaises(SystemExit) as exc_info:
+            build_argument_parser().parse_args(["recording", "--help"])
+
+        self.assertEqual(exc_info.exception.code, 0)
+        help_text = stdout.getvalue()
+        self.assertIn("Run bounded recording through the shared command-controller path.", help_text)
+        self.assertIn("--target-frame-rate", help_text)
+
     def test_status_command_reports_simulated_camera_and_configuration(self) -> None:
         result = run_cli(
             [

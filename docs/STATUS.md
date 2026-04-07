@@ -437,8 +437,8 @@ The repository currently provides a structured Python prototype for the vision p
 25. Treat `WP53` as implemented: one bounded wxPython local working shell now reuses the shared controller/preview/display stack while the OpenCV path remains the fallback/reference frontend.
 26. Treat the first post-`WP53` manual hardware rerun as passed for the existing CLI/OpenCV hardware paths and as the evidence that justified the next wx-shell hardware slice.
 27. Treat `WP54` as implemented: the wx shell now has a bounded hardware-backed startup path that still reuses the shared bootstrap/controller/display stack plus the existing alias/profile/configuration semantics.
-28. Treat `WP55` as queued while the active wx-shell operator lane continues.
-29. Treat `WP56` as queued unless a concrete operational-help defect outranks the current wx follow-ups.
+28. Treat `WP55` as implemented as the append-only hardware-audit baseline.
+29. Treat `WP56` as implemented CLI help / documentation polish unless a concrete operational-help defect reopens it.
 30. Treat `WP57` as implemented: the wx shell now renders visible focus markers/labels while keeping ROI ownership on the shared state path.
 31. Treat `WP58` as implemented: wx point selection and clipboard feedback now align more closely with the current OpenCV semantics.
 32. Treat `WP59` as implemented: the wx shell now renders visible point/ROI anchors with bounded hover and first drag behavior above the shared display stack.
