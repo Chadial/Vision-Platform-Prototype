@@ -36,6 +36,7 @@ except ImportError as exc:  # pragma: no cover - installation is validated separ
 
 
 _WX_RECORDING_FILE_EXTENSIONS = (".bmp", ".png", ".tiff", ".raw")
+_WX_CAMERA_PIXEL_FORMATS = ("<unchanged>", "Mono8", "Mono10", "Mono12", "Mono16", "Rgb8", "Rgb16")
 
 
 class PreviewCanvas(wx.Panel):
@@ -277,6 +278,7 @@ class WxLocalPreviewShell(wx.Frame):
         root_sizer.Add(self._status, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 8)
         panel.SetSizer(root_sizer)
         self.SetMenuBar(self._build_menu_bar())
+        self.SetAcceleratorTable(self._build_accelerator_table())
 
         self.Bind(wx.EVT_TIMER, self._on_timer, self._timer)
         self.Bind(wx.EVT_CLOSE, self._on_close)
@@ -326,6 +328,7 @@ class WxLocalPreviewShell(wx.Frame):
         if self._status.GetValue() != status_text:
             self._status.ChangeValue(status_text)
         self._update_recording_controls(status)
+        self._update_menu_state(status)
         self._publish_live_status_snapshot(status, focus_summary=focus_summary, recording_summary=recording_summary)
 
     def _on_timer(self, event) -> None:
@@ -418,19 +421,63 @@ class WxLocalPreviewShell(wx.Frame):
         event.Skip()
 
     def _on_char_hook(self, event) -> None:
+        if not self._should_process_global_shortcuts():
+            event.Skip()
+            return
         if _is_copy_shortcut(event):
             self._copy_selected_point()
             self.request_refresh()
             return
-        if event.GetKeyCode() == wx.WXK_ESCAPE and self._presenter.cancel_active_drag():
+        key_code = event.GetKeyCode()
+        if key_code in (ord("i"), ord("I")):
+            self._run_action("zoom_in")
+            return
+        if key_code in (ord("o"), ord("O")):
+            self._run_action("zoom_out")
+            return
+        if key_code in (ord("f"), ord("F")):
+            self._run_action("enable_fit")
+            return
+        if key_code in (ord("x"), ord("X")):
+            self._run_action("toggle_crosshair")
+            return
+        if key_code in (ord("y"), ord("Y")):
+            self._run_action("toggle_focus")
+            return
+        if key_code in (ord("r"), ord("R")):
+            self._run_roi_toggle("rectangle")
+            return
+        if key_code in (ord("e"), ord("E")):
+            self._run_roi_toggle("ellipse")
+            return
+        if key_code in (ord("+"), ord("=")):
+            self._on_snapshot(event)
+            return
+        if key_code == wx.WXK_ESCAPE and self._presenter.cancel_active_drag():
             self.request_refresh()
             return
         event.Skip()
+
+    def _should_process_global_shortcuts(self) -> bool:
+        focused_window = wx.Window.FindFocus()
+        if focused_window is None:
+            return True
+        if focused_window is self._canvas:
+            return True
+        if isinstance(focused_window, (wx.TextCtrl, wx.Choice)):
+            return False
+        return True
 
     def _build_menu_bar(self) -> wx.MenuBar:
         menu_bar = wx.MenuBar()
 
         file_menu = wx.Menu()
+        self._menu_snapshot = file_menu.Append(
+            wx.ID_ANY,
+            "Snapshot\tCtrl+P",
+            "Save the current preview frame.",
+        )
+        self.Bind(wx.EVT_MENU, self._on_snapshot, self._menu_snapshot)
         self._menu_set_save_directory = file_menu.Append(
             wx.ID_ANY,
             "Set Save Directory...\tCtrl+Shift+S",
@@ -438,9 +485,52 @@ class WxLocalPreviewShell(wx.Frame):
         )
         self.Bind(wx.EVT_MENU, self._on_menu_set_save_directory, self._menu_set_save_directory)
         file_menu.AppendSeparator()
-        exit_item = file_menu.Append(wx.ID_EXIT, "Exit\tCtrl+Q", "Close the local shell.")
-        self.Bind(wx.EVT_MENU, lambda _event: self.Close(), exit_item)
+        self._menu_exit = file_menu.Append(wx.ID_ANY, "Exit\tCtrl+Q", "Close the local shell.")
+        self.Bind(wx.EVT_MENU, lambda _event: self.Close(), self._menu_exit)
         menu_bar.Append(file_menu, "&File")
+
+        camera_menu = wx.Menu()
+        self._menu_camera_settings = camera_menu.Append(
+            wx.ID_ANY,
+            "Camera Settings...\tCtrl+Shift+C",
+            "Edit the camera configuration properties through the shared configuration request path.",
+        )
+        self.Bind(wx.EVT_MENU, self._on_menu_camera_settings, self._menu_camera_settings)
+        menu_bar.Append(camera_menu, "&Camera")
+
+        view_menu = wx.Menu()
+        self._menu_zoom_in = view_menu.Append(wx.ID_ANY, "Zoom In\tI", "Zoom in on the preview.")
+        self.Bind(wx.EVT_MENU, lambda _event: self._run_action("zoom_in"), self._menu_zoom_in)
+        self._menu_zoom_out = view_menu.Append(wx.ID_ANY, "Zoom Out\tO", "Zoom out on the preview.")
+        self.Bind(wx.EVT_MENU, lambda _event: self._run_action("zoom_out"), self._menu_zoom_out)
+        self._menu_fit = view_menu.Append(wx.ID_ANY, "Fit\tF", "Return the preview to fit-to-window mode.")
+        self.Bind(wx.EVT_MENU, lambda _event: self._run_action("enable_fit"), self._menu_fit)
+        view_menu.AppendSeparator()
+        self._menu_crosshair = view_menu.Append(wx.ID_ANY, "Crosshair\tX", "Toggle the crosshair overlay.")
+        self.Bind(wx.EVT_MENU, lambda _event: self._run_action("toggle_crosshair"), self._menu_crosshair)
+        self._menu_focus = view_menu.Append(wx.ID_ANY, "Focus\tY", "Toggle the focus overlay and status.")
+        self.Bind(wx.EVT_MENU, lambda _event: self._run_action("toggle_focus"), self._menu_focus)
+        menu_bar.Append(view_menu, "&View")
+
+        roi_menu = wx.Menu()
+        self._menu_rect_roi = roi_menu.Append(wx.ID_ANY, "Rectangle ROI\tR", "Toggle rectangle ROI entry.")
+        self.Bind(wx.EVT_MENU, lambda _event: self._run_roi_toggle("rectangle"), self._menu_rect_roi)
+        self._menu_ellipse_roi = roi_menu.Append(wx.ID_ANY, "Ellipse ROI\tE", "Toggle ellipse ROI entry.")
+        self.Bind(wx.EVT_MENU, lambda _event: self._run_roi_toggle("ellipse"), self._menu_ellipse_roi)
+        roi_menu.AppendSeparator()
+        self._menu_copy_point = roi_menu.Append(
+            wx.ID_ANY,
+            "Copy Selected Point\tCtrl+C",
+            "Copy the current selected point to the clipboard.",
+        )
+        self.Bind(wx.EVT_MENU, lambda _event: self._copy_selected_point(), self._menu_copy_point)
+        self._menu_cancel_drag = roi_menu.Append(
+            wx.ID_ANY,
+            "Cancel Active Drag\tEsc",
+            "Cancel the current point or ROI drag.",
+        )
+        self.Bind(wx.EVT_MENU, lambda _event: self._cancel_active_drag(), self._menu_cancel_drag)
+        menu_bar.Append(roi_menu, "&ROI")
 
         settings_menu = wx.Menu()
         self._menu_recording_settings = settings_menu.Append(
@@ -449,9 +539,88 @@ class WxLocalPreviewShell(wx.Frame):
             "Edit bounded recording settings used by Start Recording.",
         )
         self.Bind(wx.EVT_MENU, self._on_menu_recording_settings, self._menu_recording_settings)
-        menu_bar.Append(settings_menu, "&Settings")
+        self._menu_start_recording = settings_menu.Append(
+            wx.ID_ANY,
+            "Start Recording\tCtrl+Enter",
+            "Start bounded recording with the current settings.",
+        )
+        self.Bind(wx.EVT_MENU, self._on_start_recording, self._menu_start_recording)
+        self._menu_stop_recording = settings_menu.Append(
+            wx.ID_ANY,
+            "Stop Recording\tCtrl+Shift+Enter",
+            "Stop the current recording run.",
+        )
+        self.Bind(wx.EVT_MENU, self._on_stop_recording, self._menu_stop_recording)
+        menu_bar.Append(settings_menu, "&Recording")
+
+        help_menu = wx.Menu()
+        self._menu_shortcuts = help_menu.Append(
+            wx.ID_ANY,
+            "Keyboard Shortcuts...\tF1",
+            "Show the current keyboard shortcut map.",
+        )
+        self.Bind(wx.EVT_MENU, self._on_menu_shortcut_reference, self._menu_shortcuts)
+        menu_bar.Append(help_menu, "&Help")
 
         return menu_bar
+
+    def _build_accelerator_table(self) -> wx.AcceleratorTable:
+        entries = [
+            wx.AcceleratorEntry(wx.ACCEL_CTRL, ord("P"), self._menu_snapshot.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL | wx.ACCEL_SHIFT, ord("S"), self._menu_set_save_directory.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL | wx.ACCEL_SHIFT, ord("C"), self._menu_camera_settings.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL, ord("R"), self._menu_recording_settings.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL, wx.WXK_RETURN, self._menu_start_recording.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL | wx.ACCEL_SHIFT, wx.WXK_RETURN, self._menu_stop_recording.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL, ord("Q"), self._menu_exit.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F1, self._menu_shortcuts.GetId()),
+        ]
+        return wx.AcceleratorTable(entries)
+
+    def _on_menu_camera_settings(self, event) -> None:
+        status = self._get_status()
+        dialog = _CameraSettingsDialog(
+            self,
+            exposure_time_us=_format_optional_value(status.configuration.exposure_time_us if status.configuration else None),
+            gain=_format_optional_value(status.configuration.gain if status.configuration else None),
+            pixel_format=status.configuration.pixel_format if status.configuration and status.configuration.pixel_format else "",
+            acquisition_frame_rate=_format_optional_value(
+                status.configuration.acquisition_frame_rate if status.configuration else None
+            ),
+            roi_offset_x=_format_optional_value(status.configuration.roi_offset_x if status.configuration else None),
+            roi_offset_y=_format_optional_value(status.configuration.roi_offset_y if status.configuration else None),
+            roi_width=_format_optional_value(status.configuration.roi_width if status.configuration else None),
+            roi_height=_format_optional_value(status.configuration.roi_height if status.configuration else None),
+        )
+        try:
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            values = dialog.get_values()
+            request = self._build_camera_settings_request(**values)
+            self._session.subsystem.command_controller.apply_configuration(request)
+            self._cached_status = None
+            self._last_status_refresh_time = 0.0
+            self._cached_focus_state = None
+            self._last_focus_refresh_time = 0.0
+            self._set_transient_status_message("Camera settings updated")
+            self.request_refresh()
+        except Exception as exc:
+            self._set_transient_status_message(f"Camera settings failed: {exc}")
+            self.request_refresh()
+        finally:
+            dialog.Destroy()
+
+    def _on_menu_shortcut_reference(self, event) -> None:
+        wx.MessageBox(
+            self._build_shortcut_reference_text(),
+            "Keyboard Shortcuts",
+            wx.OK | wx.ICON_INFORMATION,
+            self,
+        )
+
+    def _cancel_active_drag(self) -> None:
+        if self._presenter.cancel_active_drag():
+            self.request_refresh()
 
     def _on_menu_set_save_directory(self, event) -> None:
         current_directory = self._get_recording_save_directory()
@@ -651,6 +820,9 @@ class WxLocalPreviewShell(wx.Frame):
             prefix.append("recording_fps=cfg")
         elif getattr(status, "recording", None) is not None and status.recording.is_recording:
             prefix.append("recording_fps=auto")
+        camera_configuration_summary = self._format_camera_configuration_summary(getattr(status, "configuration", None))
+        if camera_configuration_summary is not None:
+            prefix.append(f"config={camera_configuration_summary}")
         if status.default_save_directory is not None:
             prefix.append(f"save={status.default_save_directory}")
         if self._session.configuration_profile_id is not None:
@@ -691,11 +863,120 @@ class WxLocalPreviewShell(wx.Frame):
         if hasattr(self, "_stop_recording_button"):
             self._stop_recording_button.Enable(status.can_stop_recording)
 
+    def _update_menu_state(self, status) -> None:
+        menu_state = (
+            ("_menu_snapshot", status.can_save_snapshot),
+            ("_menu_camera_settings", status.can_apply_configuration),
+            ("_menu_start_recording", status.can_start_recording),
+            ("_menu_stop_recording", status.can_stop_recording),
+            ("_menu_recording_settings", True),
+            ("_menu_set_save_directory", True),
+            ("_menu_zoom_in", True),
+            ("_menu_zoom_out", True),
+            ("_menu_fit", True),
+            ("_menu_crosshair", True),
+            ("_menu_focus", True),
+            ("_menu_rect_roi", True),
+            ("_menu_ellipse_roi", True),
+            ("_menu_copy_point", True),
+            ("_menu_cancel_drag", True),
+            ("_menu_shortcuts", True),
+        )
+        for attr_name, enabled in menu_state:
+            menu_item = getattr(self, attr_name, None)
+            if menu_item is not None:
+                menu_item.Enable(enabled)
+
+    @staticmethod
+    def _format_camera_configuration_summary(configuration) -> str | None:
+        if configuration is None:
+            return None
+        parts: list[str] = []
+        if configuration.exposure_time_us is not None:
+            parts.append(f"exp={configuration.exposure_time_us:g}us")
+        if configuration.gain is not None:
+            parts.append(f"gain={configuration.gain:g}")
+        if configuration.pixel_format is not None:
+            parts.append(f"fmt={configuration.pixel_format}")
+        if configuration.acquisition_frame_rate is not None:
+            parts.append(f"fps={configuration.acquisition_frame_rate:g}")
+        roi_parts: list[str] = []
+        if configuration.roi_offset_x is not None:
+            roi_parts.append(f"x={configuration.roi_offset_x}")
+        if configuration.roi_offset_y is not None:
+            roi_parts.append(f"y={configuration.roi_offset_y}")
+        if configuration.roi_width is not None:
+            roi_parts.append(f"w={configuration.roi_width}")
+        if configuration.roi_height is not None:
+            roi_parts.append(f"h={configuration.roi_height}")
+        if roi_parts:
+            parts.append("roi=" + ",".join(roi_parts))
+        if not parts:
+            return None
+        return " ".join(parts)
+
+    @staticmethod
+    def _build_shortcut_reference_text() -> str:
+        return "\n".join(
+            [
+                "OpenCV-style preview shortcuts:",
+                "  i=zoom in, o=zoom out, f=fit, x=crosshair, y=focus, r=rectangle ROI, e=ellipse ROI",
+                "  +=snapshot, Ctrl+C=copy selected point, Esc=cancel active drag",
+                "Menu accelerators:",
+                "  Ctrl+P=snapshot, Ctrl+Shift+S=set save directory, Ctrl+Shift+C=camera settings",
+                "  Ctrl+R=recording settings, Ctrl+Enter=start recording, Ctrl+Shift+Enter=stop recording, Ctrl+Q=exit",
+            ]
+        )
+
+    def _build_camera_settings_request(
+        self,
+        *,
+        exposure_time_us: str,
+        gain: str,
+        pixel_format: str,
+        acquisition_frame_rate: str,
+        roi_offset_x: str,
+        roi_offset_y: str,
+        roi_width: str,
+        roi_height: str,
+    ) -> ApplyConfigurationRequest:
+        normalized_pixel_format = _normalize_wx_camera_pixel_format(pixel_format)
+        return ApplyConfigurationRequest(
+            exposure_time_us=self._parse_optional_float(exposure_time_us),
+            gain=self._parse_optional_float(gain),
+            pixel_format=normalized_pixel_format,
+            acquisition_frame_rate=self._parse_optional_float(acquisition_frame_rate),
+            roi_offset_x=self._parse_optional_int(roi_offset_x),
+            roi_offset_y=self._parse_optional_int(roi_offset_y),
+            roi_width=self._parse_optional_int(roi_width),
+            roi_height=self._parse_optional_int(roi_height),
+        )
+
     def _get_recording_save_directory(self) -> Path | None:
         status = self._get_status()
         if status.default_save_directory is not None:
             return status.default_save_directory
         return self._session.selected_save_directory
+
+    @staticmethod
+    def _parse_optional_int(value: str) -> int | None:
+        stripped = value.strip()
+        if not stripped:
+            return None
+        return int(stripped)
+
+    @staticmethod
+    def _parse_optional_float(value: str) -> float | None:
+        stripped = value.strip()
+        if not stripped:
+            return None
+        return float(stripped)
+
+    @staticmethod
+    def _format_optional_value(value) -> str:
+        if value is None:
+            return ""
+        return f"{value:g}" if isinstance(value, float) else str(value)
 
     @staticmethod
     def _parse_optional_positive_int(value: str) -> int | None:
@@ -1088,6 +1369,92 @@ class _RecordingSettingsDialog(wx.Dialog):
         }
 
 
+class _CameraSettingsDialog(wx.Dialog):
+    def __init__(
+        self,
+        parent: wx.Window,
+        *,
+        exposure_time_us: str,
+        gain: str,
+        pixel_format: str,
+        acquisition_frame_rate: str,
+        roi_offset_x: str,
+        roi_offset_y: str,
+        roi_width: str,
+        roi_height: str,
+    ) -> None:
+        super().__init__(parent, title="Camera Settings", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        panel = wx.Panel(self)
+        panel_sizer = wx.BoxSizer(wx.VERTICAL)
+        grid = wx.FlexGridSizer(cols=2, vgap=8, hgap=8)
+        grid.AddGrowableCol(1, 1)
+
+        grid.Add(wx.StaticText(panel, label="Exposure Time (us, blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._exposure_time_us = wx.TextCtrl(panel, value=exposure_time_us)
+        grid.Add(self._exposure_time_us, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="Gain (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._gain = wx.TextCtrl(panel, value=gain)
+        grid.Add(self._gain, 1, wx.EXPAND)
+
+        pixel_format_choices = list(_WX_CAMERA_PIXEL_FORMATS)
+        if pixel_format and pixel_format not in pixel_format_choices:
+            pixel_format_choices.insert(1, pixel_format)
+        self._pixel_format_choices = tuple(pixel_format_choices)
+        grid.Add(wx.StaticText(panel, label="Pixel Format"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._pixel_format = wx.Choice(panel, choices=pixel_format_choices)
+        if pixel_format and not self._pixel_format.SetStringSelection(pixel_format):
+            self._pixel_format.SetSelection(0)
+        elif not pixel_format:
+            self._pixel_format.SetSelection(0)
+        grid.Add(self._pixel_format, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="Acquisition FPS (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._acquisition_frame_rate = wx.TextCtrl(panel, value=acquisition_frame_rate)
+        grid.Add(self._acquisition_frame_rate, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="ROI Offset X (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._roi_offset_x = wx.TextCtrl(panel, value=roi_offset_x)
+        grid.Add(self._roi_offset_x, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="ROI Offset Y (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._roi_offset_y = wx.TextCtrl(panel, value=roi_offset_y)
+        grid.Add(self._roi_offset_y, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="ROI Width (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._roi_width = wx.TextCtrl(panel, value=roi_width)
+        grid.Add(self._roi_width, 1, wx.EXPAND)
+
+        grid.Add(wx.StaticText(panel, label="ROI Height (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
+        self._roi_height = wx.TextCtrl(panel, value=roi_height)
+        grid.Add(self._roi_height, 1, wx.EXPAND)
+
+        panel_sizer.Add(grid, 1, wx.EXPAND | wx.ALL, 10)
+        panel.SetSizer(panel_sizer)
+        buttons = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL)
+        root = wx.BoxSizer(wx.VERTICAL)
+        root.Add(panel, 1, wx.EXPAND)
+        if buttons is not None:
+            root.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        self.SetSizerAndFit(root)
+
+    def get_values(self) -> dict[str, str]:
+        return {
+            "exposure_time_us": self._exposure_time_us.GetValue(),
+            "gain": self._gain.GetValue(),
+            "pixel_format": _normalize_wx_camera_pixel_format(
+                self._pixel_format.GetStringSelection(),
+                allowed_formats=self._pixel_format_choices,
+            )
+            or "",
+            "acquisition_frame_rate": self._acquisition_frame_rate.GetValue(),
+            "roi_offset_x": self._roi_offset_x.GetValue(),
+            "roi_offset_y": self._roi_offset_y.GetValue(),
+            "roi_width": self._roi_width.GetValue(),
+            "roi_height": self._roi_height.GetValue(),
+        }
+
+
 __all__ = ["WxLocalPreviewShell", "main", "run_wx_preview_shell"]
 
 
@@ -1112,3 +1479,19 @@ def _normalize_wx_recording_file_extension(file_extension: str) -> str:
         allowed_extensions = ", ".join(_WX_RECORDING_FILE_EXTENSIONS)
         raise ValueError(f"file extension must be one of: {allowed_extensions}")
     return normalized_extension
+
+
+def _normalize_wx_camera_pixel_format(
+    pixel_format: str,
+    *,
+    allowed_formats: tuple[str, ...] | list[str] | None = None,
+) -> str | None:
+    normalized_pixel_format = pixel_format.strip()
+    if not normalized_pixel_format or normalized_pixel_format == "<unchanged>":
+        return None
+    allowed_formats = allowed_formats or _WX_CAMERA_PIXEL_FORMATS
+    allowed_format_set = {format_name for format_name in allowed_formats if format_name != "<unchanged>"}
+    if normalized_pixel_format not in allowed_format_set:
+        allowed_text = ", ".join(allowed_formats)
+        raise ValueError(f"pixel format must be one of: {allowed_text}")
+    return normalized_pixel_format
