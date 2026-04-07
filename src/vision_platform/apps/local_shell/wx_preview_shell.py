@@ -4,12 +4,16 @@ import argparse
 from pathlib import Path
 
 from camera_app.logging.log_service import configure_logging
-from vision_platform.bootstrap import build_simulated_camera_subsystem
 from vision_platform.libraries.roi_core import roi_bounds
-from vision_platform.models import SaveSnapshotRequest, SetSaveDirectoryRequest
+from vision_platform.models import SaveSnapshotRequest
 from vision_platform.services.display_service import PreviewInteractionCommand
 
 from vision_platform.apps.local_shell.preview_shell_state import PreviewShellPresenter, PreviewShellViewModel
+from vision_platform.apps.local_shell.startup import (
+    LocalShellLaunchOptions,
+    LocalShellSession,
+    build_local_shell_session,
+)
 
 try:
     import wx
@@ -114,25 +118,18 @@ class WxLocalPreviewShell(wx.Frame):
     def __init__(
         self,
         *,
-        sample_image_paths: list[Path],
-        snapshot_directory: Path,
+        session: LocalShellSession,
         poll_interval_seconds: float,
     ) -> None:
         super().__init__(None, title="Vision Platform wx Shell", size=(920, 720))
-        self._subsystem = build_simulated_camera_subsystem(
-            sample_image_paths=sample_image_paths,
-            preview_poll_interval_seconds=poll_interval_seconds,
-            shared_poll_interval_seconds=poll_interval_seconds,
-        )
-        self._subsystem.camera_service.initialize(camera_id="wx-shell-simulated")
-        self._subsystem.command_controller.set_save_directory(
-            SetSaveDirectoryRequest(base_directory=snapshot_directory, mode="append")
-        )
+        self._session = session
+        self._subsystem = session.subsystem
         self._subsystem.stream_service.start_preview()
         self._presenter = PreviewShellPresenter(roi_state_service=self._subsystem.stream_service.get_roi_state_service())
         self._timer = wx.Timer(self)
         self._status_lines: list[str] = []
         self._last_snapshot_name: str | None = None
+        self._is_closed = False
 
         panel = wx.Panel(self)
         root_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -171,11 +168,16 @@ class WxLocalPreviewShell(wx.Frame):
         self._canvas.update_view(view_model)
         status = self._subsystem.command_controller.get_status()
         prefix = [
+            f"source={self._session.source}",
             f"camera={'ready' if status.camera.is_initialized else 'offline'}",
             f"preview={'running' if self._subsystem.stream_service.is_preview_running else 'stopped'}",
         ]
+        if self._session.resolved_camera_id is not None:
+            prefix.append(f"camera_id={self._session.resolved_camera_id}")
         if status.default_save_directory is not None:
             prefix.append(f"save={status.default_save_directory}")
+        if self._session.configuration_profile_id is not None:
+            prefix.append(f"profile={self._session.configuration_profile_id}")
         if self._last_snapshot_name is not None:
             prefix.append(f"last_snapshot={self._last_snapshot_name}")
         self._status_lines = [" | ".join(prefix)] + view_model.status_lines
@@ -206,12 +208,7 @@ class WxLocalPreviewShell(wx.Frame):
         self.request_refresh()
 
     def _on_close(self, event) -> None:
-        self._timer.Stop()
-        try:
-            if self._subsystem.stream_service.is_preview_running:
-                self._subsystem.stream_service.stop_preview()
-        finally:
-            self._subsystem.driver.shutdown()
+        self._shutdown_subsystem()
         event.Skip()
 
     @staticmethod
@@ -220,37 +217,116 @@ class WxLocalPreviewShell(wx.Frame):
         button.Bind(wx.EVT_BUTTON, handler)
         sizer.Add(button, 0, wx.RIGHT, 6)
 
+    def _shutdown_subsystem(self) -> None:
+        if self._is_closed:
+            return
+        self._is_closed = True
+        self._timer.Stop()
+        try:
+            if self._subsystem.stream_service.is_preview_running:
+                self._subsystem.stream_service.stop_preview()
+        finally:
+            self._subsystem.driver.shutdown()
+
 
 def run_wx_preview_shell(
     *,
+    source: str = "simulated",
+    camera_id: str | None = None,
+    camera_alias: str | None = None,
     sample_dir: Path | None = None,
+    configuration_profile: str | None = None,
+    profile_camera_class: str | None = None,
+    exposure_time_us: float | None = None,
+    gain: float | None = None,
+    pixel_format: str | None = None,
+    acquisition_frame_rate: float | None = None,
+    roi_offset_x: int | None = None,
+    roi_offset_y: int | None = None,
+    roi_width: int | None = None,
+    roi_height: int | None = None,
     snapshot_directory: Path = Path("captures/wx_shell_snapshot"),
     poll_interval_seconds: float = 0.03,
 ) -> int:
-    sample_paths: list[Path] = []
-    if sample_dir is not None:
-        sample_paths = sorted(
-            path for path in sample_dir.iterdir() if path.is_file() and path.suffix.lower() in {".pgm", ".ppm"}
+    session = build_local_shell_session(
+        LocalShellLaunchOptions(
+            source=source,
+            camera_id=camera_id,
+            camera_alias=camera_alias,
+            sample_dir=sample_dir,
+            configuration_profile=configuration_profile,
+            profile_camera_class=profile_camera_class,
+            exposure_time_us=exposure_time_us,
+            gain=gain,
+            pixel_format=pixel_format,
+            acquisition_frame_rate=acquisition_frame_rate,
+            roi_offset_x=roi_offset_x,
+            roi_offset_y=roi_offset_y,
+            roi_width=roi_width,
+            roi_height=roi_height,
+            snapshot_directory=snapshot_directory,
+            poll_interval_seconds=poll_interval_seconds,
         )
-    app = wx.App(False)
-    frame = WxLocalPreviewShell(
-        sample_image_paths=sample_paths,
-        snapshot_directory=snapshot_directory,
-        poll_interval_seconds=poll_interval_seconds,
     )
-    frame.Show()
-    app.MainLoop()
-    return 0
+    app = wx.App(False)
+    try:
+        frame = WxLocalPreviewShell(
+            session=session,
+            poll_interval_seconds=poll_interval_seconds,
+        )
+        frame.Show()
+        app.MainLoop()
+        return 0
+    finally:
+        if "frame" in locals():
+            frame._shutdown_subsystem()
+        else:
+            session.subsystem.driver.shutdown()
 
 
 def _build_argument_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the bounded wxPython local preview shell with the simulated driver.")
+    parser = argparse.ArgumentParser(description="Run the bounded wxPython local preview shell.")
+    parser.add_argument(
+        "--source",
+        choices=("simulated", "hardware"),
+        default="simulated",
+        help="Choose the simulator-backed or hardware-backed camera path.",
+    )
+    parser.add_argument("--camera-id", default=None, help="Explicit camera id to initialize.")
+    parser.add_argument(
+        "--camera-alias",
+        default=None,
+        help="Repo-local camera alias resolved through configs/camera_aliases.json.",
+    )
     parser.add_argument(
         "--sample-dir",
         type=Path,
         default=None,
         help="Optional directory containing .pgm or .ppm sample images.",
     )
+    parser.add_argument(
+        "--configuration-profile",
+        default=None,
+        help="Named camera-class configuration profile from configs/camera_configuration_profiles.json.",
+    )
+    parser.add_argument(
+        "--profile-camera-class",
+        default=None,
+        help="Optional explicit camera-class key for profile resolution; defaults to a normalized camera model.",
+    )
+    parser.add_argument("--exposure-time-us", type=float, default=None, help="Exposure time in microseconds.")
+    parser.add_argument("--gain", type=float, default=None, help="Gain value to apply before preview starts.")
+    parser.add_argument("--pixel-format", default=None, help="Pixel format such as Mono8 or Mono10.")
+    parser.add_argument(
+        "--acquisition-frame-rate",
+        type=float,
+        default=None,
+        help="Requested acquisition frame rate in frames per second.",
+    )
+    parser.add_argument("--roi-offset-x", type=int, default=None, help="ROI X offset.")
+    parser.add_argument("--roi-offset-y", type=int, default=None, help="ROI Y offset.")
+    parser.add_argument("--roi-width", type=int, default=None, help="ROI width.")
+    parser.add_argument("--roi-height", type=int, default=None, help="ROI height.")
     parser.add_argument(
         "--snapshot-directory",
         type=Path,
@@ -270,8 +346,23 @@ def main() -> int:
     configure_logging()
     parser = _build_argument_parser()
     args = parser.parse_args()
+    if args.source == "hardware" and args.sample_dir is not None:
+        parser.error("--sample-dir is only valid for --source simulated.")
     return run_wx_preview_shell(
+        source=args.source,
+        camera_id=args.camera_id,
+        camera_alias=args.camera_alias,
         sample_dir=args.sample_dir,
+        configuration_profile=args.configuration_profile,
+        profile_camera_class=args.profile_camera_class,
+        exposure_time_us=args.exposure_time_us,
+        gain=args.gain,
+        pixel_format=args.pixel_format,
+        acquisition_frame_rate=args.acquisition_frame_rate,
+        roi_offset_x=args.roi_offset_x,
+        roi_offset_y=args.roi_offset_y,
+        roi_width=args.roi_width,
+        roi_height=args.roi_height,
         snapshot_directory=args.snapshot_directory,
         poll_interval_seconds=args.poll_interval_seconds,
     )
