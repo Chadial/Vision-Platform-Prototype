@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from time import monotonic
 
@@ -108,30 +109,31 @@ class PreviewCanvas(wx.Panel):
 
     def _on_left_down(self, event) -> None:
         self._presenter.handle_canvas_click(event.GetX(), event.GetY())
-        self._refresh_callback()
+        self._refresh_callback(interactive=True)
 
     def _on_middle_down(self, event) -> None:
         self._presenter.handle_pan_start(event.GetX(), event.GetY())
-        self._refresh_callback()
+        self._refresh_callback(interactive=True)
 
     def _on_middle_up(self, event) -> None:
         self._presenter.handle_pan_stop()
-        self._refresh_callback()
+        self._refresh_callback(interactive=True)
 
     def _on_motion(self, event) -> None:
         self._presenter.handle_pointer_move(event.GetX(), event.GetY())
         if event.MiddleIsDown():
             self._presenter.handle_pan_move(event.GetX(), event.GetY())
-        self._refresh_callback()
+        self._refresh_callback(interactive=True)
 
     def _on_mouse_wheel(self, event) -> None:
         self._presenter.handle_mouse_wheel(event.GetX(), event.GetY(), event.GetWheelRotation())
-        self._refresh_callback()
+        self._refresh_callback(interactive=True)
 
 
 class WxLocalPreviewShell(wx.Frame):
     _STATUS_REFRESH_INTERVAL_SECONDS = 0.5
-    _FOCUS_REFRESH_INTERVAL_SECONDS = 0.25
+    _FOCUS_REFRESH_INTERVAL_SECONDS = 0.5
+    _INTERACTIVE_RENDER_INTERVAL_SECONDS = 1.0 / 30.0
 
     def __init__(
         self,
@@ -153,6 +155,10 @@ class WxLocalPreviewShell(wx.Frame):
         self._last_status_refresh_time = 0.0
         self._cached_focus_state = None
         self._last_focus_refresh_time = 0.0
+        self._focus_refresh_future: Future | None = None
+        self._focus_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="WxShellFocus")
+        self._last_render_time = 0.0
+        self._refresh_scheduled = False
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
 
@@ -178,13 +184,24 @@ class WxLocalPreviewShell(wx.Frame):
 
         self.Bind(wx.EVT_TIMER, self._on_timer, self._timer)
         self.Bind(wx.EVT_CLOSE, self._on_close)
-        self._timer.Start(max(75, int(poll_interval_seconds * 1000)))
+        self._timer.Start(max(33, int(poll_interval_seconds * 1000)))
         self.request_refresh()
 
-    def request_refresh(self) -> None:
+    def request_refresh(self, *, interactive: bool = False) -> None:
+        now = monotonic()
+        if interactive and now - self._last_render_time < self._INTERACTIVE_RENDER_INTERVAL_SECONDS:
+            if not self._refresh_scheduled:
+                self._refresh_scheduled = True
+                wx.CallLater(
+                    max(1, int(self._INTERACTIVE_RENDER_INTERVAL_SECONDS * 1000)),
+                    self._run_scheduled_refresh,
+                )
+            return
         frame = self._subsystem.stream_service.get_latest_frame()
         if frame is None:
             return
+        self._refresh_scheduled = False
+        self._last_render_time = now
         focus_state = self._get_focus_state()
         canvas_size = self._canvas.GetClientSize()
         view_model = self._presenter.build_view(
@@ -258,6 +275,7 @@ class WxLocalPreviewShell(wx.Frame):
             if self._subsystem.stream_service.is_preview_running:
                 self._subsystem.stream_service.stop_preview()
         finally:
+            self._focus_executor.shutdown(wait=False, cancel_futures=True)
             self._subsystem.driver.shutdown()
 
     def _get_status(self):
@@ -273,13 +291,21 @@ class WxLocalPreviewShell(wx.Frame):
         if not self._presenter.state.interaction_state.focus_status_visible:
             return None
         now = monotonic()
+        if self._focus_refresh_future is not None and self._focus_refresh_future.done():
+            try:
+                self._cached_focus_state = self._focus_refresh_future.result()
+            finally:
+                self._focus_refresh_future = None
         if now - self._last_focus_refresh_time < self._FOCUS_REFRESH_INTERVAL_SECONDS:
             return self._cached_focus_state
-        self._cached_focus_state = self._focus_preview_service.refresh_once(
-            roi=self._subsystem.stream_service.get_roi_state_service().get_active_roi()
-        )
         self._last_focus_refresh_time = now
+        if self._focus_refresh_future is None:
+            roi = self._subsystem.stream_service.get_roi_state_service().get_active_roi()
+            self._focus_refresh_future = self._focus_executor.submit(self._focus_preview_service.refresh_once, roi)
         return self._cached_focus_state
+
+    def _run_scheduled_refresh(self) -> None:
+        self.request_refresh(interactive=False)
 
 
 def run_wx_preview_shell(

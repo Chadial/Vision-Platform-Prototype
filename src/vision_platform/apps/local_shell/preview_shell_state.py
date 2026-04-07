@@ -136,6 +136,7 @@ class PreviewShellPresenter:
         )
         self._state.last_viewport_mapping = mapping
         selected_point = self._state.interaction_state.selected_point
+        crosshair_point = selected_point or self._state.interaction_state.last_cursor_source_point
         selected_point_text = None
         if selected_point is not None:
             selected_point_text = self._coordinate_export_service.format_point(*selected_point)
@@ -161,7 +162,7 @@ class PreviewShellPresenter:
         )
         overlay_model = self._status_model_service.build_overlay_model(
             crosshair_visible=self._state.interaction_state.crosshair_visible,
-            selected_point=selected_point,
+            selected_point=crosshair_point,
             draft_roi=self._build_draft_roi(),
             active_roi=active_roi,
             show_viewport_outline=self._should_draw_viewport_outline(mapping),
@@ -228,12 +229,12 @@ class PreviewShellPresenter:
         return self.apply_command(PreviewInteractionCommand(action="stop_pan"))
 
     def handle_pointer_move(self, x: int, y: int) -> None:
+        source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         self.apply_command(
-            PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y)),
+            PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y), source_point=source_point),
         )
         if self._state.interaction_state.roi_anchor_point is None:
             return
-        source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         self._state.interaction_state.roi_preview_point = source_point
 
     def _build_draft_roi(self) -> RoiDefinition | None:

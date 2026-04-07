@@ -83,6 +83,21 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertTrue(any(line.startswith("Focus: laplace=") for line in view.status_lines))
         self.assertIn("y=focus", view.status_lines[-1])
 
+    def test_presenter_uses_cursor_position_for_crosshair_before_point_selection(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes(range(64)),
+            width=8,
+            height=8,
+            pixel_format="Mono8",
+        )
+
+        presenter.build_view(frame, viewport_width=8, viewport_height=8)
+        presenter.handle_pointer_move(4, 5)
+        view = presenter.build_view(frame, viewport_width=8, viewport_height=8)
+
+        self.assertEqual(view.overlay_model.crosshair_point, (4, 5))
+
     def test_wx_shell_module_import_path_stays_available(self) -> None:
         from vision_platform.apps.local_shell import run_wx_preview_shell
 

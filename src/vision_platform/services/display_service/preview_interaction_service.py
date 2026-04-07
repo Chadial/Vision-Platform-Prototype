@@ -34,6 +34,7 @@ class PreviewInteractionState:
     roi_anchor_point: tuple[int, int] | None = None
     roi_preview_point: tuple[int, int] | None = None
     last_cursor_viewport_point: tuple[int, int] | None = None
+    last_cursor_source_point: tuple[int, int] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -80,6 +81,7 @@ class PreviewInteractionService:
 
         if action == "cursor_moved":
             interaction_state.last_cursor_viewport_point = command.viewport_point
+            interaction_state.last_cursor_source_point = command.source_point
             return PreviewInteractionOutcome()
 
         if action == "zoom_in":
