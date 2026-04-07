@@ -341,8 +341,8 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 60 | wx Recording Progress Status Baseline | surface bounded recording controls and progress in the wx shell through existing status models | active lane | landed bounded wx recording-control slice; recording controls, max-frames input, recording FPS input, and progress stay within the existing controller/status path | `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md` |
 | 61 | wx Feature Inventory And Core/UI Boundary Documentation | document the implemented wx shell surface and the shared-core / UI-local split | active lane | implemented wx shell inventory and boundary documentation, captured in `apps/local_shell/FEATURES.md` | `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md` |
 | 62 | wx Live Command Sync For Open Shell | let an already open wx shell observe CLI/API-driven changes without moving command ownership into the UI | active lane | implemented bounded local session-bridge sync; the open wx shell now reflects external save/configuration/recording commands through the existing controller path | `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md` |
-| 63 | Recording Append / Resume From Trace Log | stop reused save directories from overwriting prior recording outputs and derive the next sequence position from existing trace/log context | current next | next practical artifact-continuity slice for trustworthy append-mode recording progress and later `n/n` semantics | `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md` |
-| 64 | wx Menu And Settings Dialog Baseline | add one bounded menu/settings popup surface to the wx shell above the shared controller/configuration path | queued | later local-usability slice after append/resume behavior is trustworthy | `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md` |
+| 63 | Recording Append / Resume From Trace Log | stop reused save directories from overwriting prior recording outputs and derive the next sequence position from existing trace/log context | active lane | landed artifact-continuity slice; reused directories now continue snapshot and recording naming instead of overwriting | `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md` |
+| 64 | wx Menu And Settings Dialog Baseline | add one bounded menu/settings popup surface to the wx shell above the shared controller/configuration path | current next | next local-usability slice after append/resume behavior is now trustworthy | `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md` |
 
 ## Immediate PM Backlog
 
@@ -350,7 +350,7 @@ These are the work-package groups PM should treat as the current actionable usab
 
 1. residual-driven hardening after the now-implemented `WP50` to `WP54` architecture/frontend chain, starting with hardware audit/logging
 2. CLI help/documentation polish once the hardware audit slice is cleared
-3. new recording append / IPC work only after the open operational-readiness WPs are cleared
+3. bounded menu/settings usability work above the now-landed append/resume recording baseline
 
 Current prepared usable-subsystem sequence:
 
@@ -363,8 +363,8 @@ Current prepared usable-subsystem sequence:
 - `WP60 wx Recording Progress Status Baseline` implemented as the bounded recording-progress slice on the wx shell
 - `WP61 wx Feature Inventory And Core/UI Boundary Documentation` implemented as the wx shell inventory / boundary documentation slice
 - `WP62 wx Live Command Sync For Open Shell` is now implemented as the bounded open-shell external-control slice
-- `WP63 Recording Append / Resume From Trace Log` is now the current next slice
-- keep menu/settings work behind artifact-continuity fixes so the shell does not expand while reused-directory recording remains misleading
+- `WP63 Recording Append / Resume From Trace Log` is now implemented as the append/resume-safe artifact continuity baseline
+- `WP64 wx Menu And Settings Dialog Baseline` is now the current next slice
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 
 Most recently landed detailed packages:
@@ -597,20 +597,20 @@ The current coarse PM order should be:
 37. treat `WP60` as implemented; recording progress and the recording controls now stay within the existing controller/status path
 38. treat `WP61` as implemented as the wx shell inventory / boundary documentation slice
 39. treat `WP62` as implemented; the wx shell now exposes one bounded local live-command session bridge for external save/configuration/recording control
-40. make `WP63` the current next slice for append/resume-safe recording artifact continuity in reused save directories
-41. keep `WP64` queued as the later bounded menu/settings shell slice after append/resume behavior is trustworthy
+40. treat `WP63` as implemented; reused save directories now continue snapshot/recording naming instead of overwriting
+41. make `WP64` the current next slice as the bounded menu/settings shell follow-up
 42. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 43. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
-`WP63 Recording Append / Resume From Trace Log`
+`WP64 wx Menu And Settings Dialog Baseline`
 
 Reason:
 
-- the current wx shell can now be controlled from outside while open, so the next operator-visible trust gap is reused-directory recording behavior
-- current append-mode recording still risks misleading progress and overwritten artifacts in repeated runs against the same save directory
-- fixing artifact continuity next keeps the official recording reference scenario trustworthy before broader menu/settings expansion
+- the current shell now has append/resume-safe artifact continuity, so bounded settings/menu UX is the next practical local-usability gap
+- save/configuration updates should be exposed in a clearer popup/menu path without introducing UI-private core logic
+- this keeps near-term work inside the active usable-subsystem priorities before broader headless-kernel preparation
 
 ## Fresh Agent Decision Rule
 
@@ -746,8 +746,8 @@ Current explicit activation:
 - `wx Clipboard And Anchor Semantics Baseline` is now implemented through `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
 - `wx Anchor Drag Follow-Up` is now implemented through `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
 - `wx Live Command Sync For Open Shell` is now implemented through `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md`
-- `Recording Append / Resume From Trace Log` is now the current next slice at `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
-- `wx Menu And Settings Dialog Baseline` remains queued at `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
+- `Recording Append / Resume From Trace Log` is now implemented through `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
+- `wx Menu And Settings Dialog Baseline` is now the current next slice at `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
 
 ## PM Refinement Rule
 

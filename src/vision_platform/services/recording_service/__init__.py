@@ -10,9 +10,13 @@ __all__ = [
     "SnapshotFocusService",
     "SnapshotService",
     "build_interval_capture_frame_path",
+    "build_next_snapshot_path",
     "build_recording_frame_path",
     "build_recording_log_path",
+    "build_recording_log_path_for_run",
     "build_snapshot_path",
+    "resolve_next_recording_frame_index",
+    "resolve_next_snapshot_index",
 ]
 
 
@@ -53,6 +57,10 @@ def __getattr__(name: str):
         from vision_platform.services.recording_service.file_naming import build_interval_capture_frame_path
 
         return build_interval_capture_frame_path
+    if name == "build_next_snapshot_path":
+        from vision_platform.services.recording_service.file_naming import build_next_snapshot_path
+
+        return build_next_snapshot_path
     if name == "build_recording_frame_path":
         from vision_platform.services.recording_service.file_naming import build_recording_frame_path
 
@@ -61,8 +69,20 @@ def __getattr__(name: str):
         from vision_platform.services.recording_service.file_naming import build_recording_log_path
 
         return build_recording_log_path
+    if name == "build_recording_log_path_for_run":
+        from vision_platform.services.recording_service.file_naming import build_recording_log_path_for_run
+
+        return build_recording_log_path_for_run
     if name == "build_snapshot_path":
         from vision_platform.services.recording_service.file_naming import build_snapshot_path
 
         return build_snapshot_path
+    if name == "resolve_next_recording_frame_index":
+        from vision_platform.services.recording_service.file_naming import resolve_next_recording_frame_index
+
+        return resolve_next_recording_frame_index
+    if name == "resolve_next_snapshot_index":
+        from vision_platform.services.recording_service.file_naming import resolve_next_snapshot_index
+
+        return resolve_next_snapshot_index
     raise AttributeError(name)

@@ -195,6 +195,35 @@ class SnapshotServiceTests(unittest.TestCase):
             self.assertIn("# run.file_stem: capture_001", trace_lines)
             self.assertIn("# run.file_stem: capture_002", trace_lines)
 
+    def test_save_snapshot_continues_naming_for_reused_directory_and_same_stem(self) -> None:
+        fake_driver = MagicMock()
+        fake_driver.capture_snapshot.side_effect = [
+            CapturedFrame(raw_frame=_FakeRawFrame(bytes([1])), width=1, height=1, frame_id=1, pixel_format="Mono8"),
+            CapturedFrame(raw_frame=_FakeRawFrame(bytes([2])), width=1, height=1, frame_id=2, pixel_format="Mono8"),
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            service = SnapshotService(fake_driver)
+            first_path = service.save_snapshot(
+                SnapshotRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="snapshot",
+                    file_extension=".bmp",
+                )
+            )
+            second_path = service.save_snapshot(
+                SnapshotRequest(
+                    save_directory=Path(temp_dir),
+                    file_stem="snapshot",
+                    file_extension=".bmp",
+                )
+            )
+
+            self.assertEqual(first_path.name, "snapshot.bmp")
+            self.assertEqual(second_path.name, "snapshot_000001.bmp")
+            self.assertTrue(first_path.exists())
+            self.assertTrue(second_path.exists())
+
     def test_record_snapshot_trace_writes_optional_analysis_and_focus_metadata(self) -> None:
         frame = CapturedFrame(
             raw_frame=_FakeRawFrame(bytes([0, 127, 200, 255])),

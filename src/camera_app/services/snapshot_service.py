@@ -7,7 +7,7 @@ from camera_app.models.camera_configuration import CameraConfiguration
 from camera_app.models.snapshot_request import SnapshotRequest
 from camera_app.validation.request_validation import validate_snapshot_request
 from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
-from vision_platform.services.recording_service.file_naming import build_snapshot_path
+from vision_platform.services.recording_service.file_naming import build_next_snapshot_path
 from vision_platform.services.recording_service.frame_writer import FrameWriter
 from vision_platform.services.recording_service.traceability import record_snapshot_trace
 
@@ -28,7 +28,7 @@ class SnapshotService:
 
     def save_snapshot(self, request: SnapshotRequest) -> Path:
         validate_snapshot_request(request)
-        target_path = build_snapshot_path(request)
+        target_path = build_next_snapshot_path(request)
         self._logger.info("Saving snapshot to '%s'.", target_path)
 
         try:

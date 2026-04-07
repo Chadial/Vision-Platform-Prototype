@@ -17,7 +17,11 @@ from camera_app.models.recording_status import RecordingStatus
 from camera_app.services.shared_frame_source import SharedFrameSource
 from camera_app.validation.request_validation import validate_recording_request
 from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
-from vision_platform.services.recording_service.file_naming import build_recording_frame_path, build_recording_log_path
+from vision_platform.services.recording_service.file_naming import (
+    build_recording_frame_path,
+    build_recording_log_path_for_run,
+    resolve_next_recording_frame_index,
+)
 from vision_platform.services.recording_service.frame_writer import FrameWriter
 from vision_platform.services.recording_service.traceability import (
     append_trace_image_row,
@@ -62,6 +66,7 @@ class RecordingService:
         self._recording_log_handle: TextIO | None = None
         self._recording_log_writer: csv.writer | None = None
         self._recording_session_started_utc: str | None = None
+        self._start_frame_index: int = 0
         self._trace_log_handle: TextIO | None = None
         self._trace_log_writer: csv.writer | None = None
         self._trace_run_id: str | None = None
@@ -84,8 +89,10 @@ class RecordingService:
             self._last_completed_run_id = None
             self._acquisition_stopped = False
             self._recording_session_started_utc = self._current_system_time_utc()
-            self._recording_deadline = (
-                monotonic() + request.duration_seconds if request.duration_seconds is not None else None
+            self._start_frame_index = resolve_next_recording_frame_index(
+                save_directory=request.save_directory,
+                file_stem=request.file_stem,
+                file_extension=request.file_extension,
             )
             self._next_frame_due_at = monotonic()
             if self._artifact_focus_metadata_producer is not None:
@@ -99,6 +106,10 @@ class RecordingService:
             else:
                 self._driver.start_acquisition()
             self._acquisition_started = True
+            # Start duration tracking only after setup is ready, so very short runs still record frames.
+            self._recording_deadline = (
+                monotonic() + request.duration_seconds if request.duration_seconds is not None else None
+            )
 
             self._producer_thread = Thread(target=self._producer_loop, name="RecordingProducer", daemon=True)
             self._writer_thread = Thread(target=self._writer_loop, name="RecordingWriter", daemon=True)
@@ -213,7 +224,10 @@ class RecordingService:
                 continue
 
             try:
-                target_path = build_recording_frame_path(self._active_request, frame_index)
+                target_path = build_recording_frame_path(
+                    self._active_request,
+                    frame_index + self._start_frame_index,
+                )
                 self._frame_writer.write_frame(
                     frame,
                     target_path,
@@ -242,7 +256,7 @@ class RecordingService:
             self._status.last_error = message
 
     def _open_recording_log(self, request: RecordingRequest) -> None:
-        log_path = build_recording_log_path(request)
+        log_path = build_recording_log_path_for_run(request, start_frame_index=self._start_frame_index)
         if request.create_directories:
             log_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -299,7 +313,8 @@ class RecordingService:
             ("frame_limit", "" if request.frame_limit is None else str(request.frame_limit)),
             ("duration_seconds", "" if request.duration_seconds is None else str(request.duration_seconds)),
             ("target_frame_rate", "" if request.target_frame_rate is None else str(request.target_frame_rate)),
-            ("continues_previous_series", "false"),
+            ("continues_previous_series", "true" if self._start_frame_index > 0 else "false"),
+            ("recording_start_frame_index", str(self._start_frame_index)),
             (
                 "exposure_time_us",
                 "" if configuration is None or configuration.exposure_time_us is None else str(configuration.exposure_time_us),
@@ -419,6 +434,7 @@ class RecordingService:
             self._frame_queue = None
             self._active_request = None
             self._recording_session_started_utc = None
+            self._start_frame_index = 0
             self._recording_deadline = None
             self._next_frame_due_at = None
             self._acquisition_started = False

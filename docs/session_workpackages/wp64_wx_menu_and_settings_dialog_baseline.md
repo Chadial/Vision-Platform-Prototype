@@ -19,7 +19,7 @@ Add a bounded menu and settings-dialog surface to the wx shell so the current wo
 ## Branch
 
 - intended branch: `feature/wx-menu-settings-baseline`
-- activation state: queued
+- activation state: current next
 
 ## Scope
 
