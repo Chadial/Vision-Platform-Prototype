@@ -365,6 +365,7 @@ Current prepared usable-subsystem sequence:
 - `WP62 wx Live Command Sync For Open Shell` is now implemented as the bounded open-shell external-control slice
 - `WP63 Recording Append / Resume From Trace Log` is now the current next slice
 - keep menu/settings work behind artifact-continuity fixes so the shell does not expand while reused-directory recording remains misleading
+- keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 
 Most recently landed detailed packages:
 
@@ -599,6 +600,7 @@ The current coarse PM order should be:
 40. make `WP63` the current next slice for append/resume-safe recording artifact continuity in reused save directories
 41. keep `WP64` queued as the later bounded menu/settings shell slice after append/resume behavior is trustworthy
 42. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+43. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 

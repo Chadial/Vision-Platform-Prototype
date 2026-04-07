@@ -57,3 +57,9 @@ Excluded:
 - external control commands can now be sent through `python -m vision_platform.apps.local_shell control ...`
 - the open shell consumes those commands and updates its visible status/controls without restart
 
+## Headless Follow-Up Note
+
+- this slice intentionally lands the session bridge under the wx-shell app boundary as a bounded local-working solution
+- it should not be treated as the final host-neutral command/runtime model
+- when the later headless-kernel preparation starts, the session/command-observation concept should be revisited and lifted into a host-neutral service or protocol surface that can serve UI, host control, and automation flows equally
+

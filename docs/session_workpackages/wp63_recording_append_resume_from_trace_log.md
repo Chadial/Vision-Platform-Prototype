@@ -41,3 +41,9 @@ Excluded:
 
 - start two bounded recordings into the same target directory and confirm that the second run continues numbering instead of overwriting
 - verify that the visible progress can later support `n/n` semantics for append-mode runs
+
+## Headless Follow-Up Note
+
+- this slice should stay compatible with the later headless-kernel direction
+- append/resume behavior must be implemented against shared recording/artifact semantics rather than against wx-specific UI state
+- the later host-neutral command/session work should be able to reuse the same append/resume rules without depending on the current wx-shell session bridge
