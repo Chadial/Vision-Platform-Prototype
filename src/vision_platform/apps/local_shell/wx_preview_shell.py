@@ -534,8 +534,10 @@ class WxLocalPreviewShell(wx.Frame):
         else:
             prefix.append("ui_fps=waiting")
         recording_target_frame_rate = getattr(self, "_recording_target_frame_rate_value", None)
-        if recording_target_frame_rate is not None:
-            prefix.append(f"recording_fps={recording_target_frame_rate:.1f}")
+        if isinstance(recording_target_frame_rate, (int, float)):
+            prefix.append(f"recording_fps={float(recording_target_frame_rate):.1f}")
+        elif recording_target_frame_rate is not None:
+            prefix.append("recording_fps=cfg")
         elif getattr(status, "recording", None) is not None and status.recording.is_recording:
             prefix.append("recording_fps=auto")
         if status.default_save_directory is not None:
