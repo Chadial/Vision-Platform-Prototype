@@ -630,6 +630,7 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(shell._recording_file_extension, ".bmp")
         self.assertEqual(shell._recording_max_frames.GetValue(), "12")
         self.assertEqual(shell._recording_target_frame_rate_input.GetValue(), "8.5")
+        self.assertEqual(shell._recording_target_frame_rate_value, 8.5)
 
     def test_apply_recording_settings_rejects_invalid_extension(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)

@@ -715,11 +715,12 @@ class WxLocalPreviewShell(wx.Frame):
         if not normalized_extension.startswith(".") or len(normalized_extension) < 2:
             raise ValueError("file extension must start with '.'")
         self._parse_optional_positive_int(max_frames)
-        self._parse_optional_positive_float(recording_fps)
+        parsed_recording_fps = self._parse_optional_positive_float(recording_fps)
         self._recording_file_stem = normalized_stem
         self._recording_file_extension = normalized_extension
         self._recording_max_frames.ChangeValue(max_frames.strip())
         self._recording_target_frame_rate_input.ChangeValue(recording_fps.strip())
+        self._recording_target_frame_rate_value = parsed_recording_fps
 
     def _poll_live_commands(self) -> None:
         live_sync_session = self._session.live_sync_session
