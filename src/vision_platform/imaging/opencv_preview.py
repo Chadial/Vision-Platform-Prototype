@@ -350,6 +350,9 @@ class OpenCvPreviewWindow:
             selected_point=self._selected_point,
             draft_roi=self._build_draft_roi(),
             active_roi=self._get_active_roi(),
+            focus_status_visible=self._focus_status_visible,
+            focus_state=self._focus_state_provider() if self._focus_state_provider is not None else None,
+            focus_anchor_point=None,
             show_viewport_outline=self._should_draw_viewport_outline(),
         )
 

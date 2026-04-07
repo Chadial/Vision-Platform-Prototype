@@ -162,7 +162,7 @@ class PreviewInteractionService:
             copy_text = coordinate_formatter(*interaction_state.selected_point)
             return PreviewInteractionOutcome(
                 copy_text=copy_text,
-                copy_success_message=f"Copied {copy_text}",
+                copy_success_message="Point copied",
             )
 
         if action == "start_pan":
@@ -226,7 +226,7 @@ class PreviewInteractionService:
                     roi_builder=roi_builder,
                 )
             interaction_state.selected_point = command.source_point
-            interaction_state.last_status_message = f"Selected {coordinate_formatter(*command.source_point)}"
+            interaction_state.last_status_message = "Point selected"
             return PreviewInteractionOutcome()
 
         raise ValueError(f"Unsupported preview interaction action '{action}'.")

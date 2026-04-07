@@ -56,6 +56,8 @@ class PreviewOverlayModel:
     crosshair_point: tuple[int, int] | None = None
     draft_roi: RoiDefinition | None = None
     active_roi: RoiDefinition | None = None
+    focus_anchor_point: tuple[int, int] | None = None
+    focus_label: str | None = None
     show_viewport_outline: bool = False
 
 
@@ -99,7 +101,7 @@ class PreviewStatusModelService:
         if fps is not None:
             primary_entries.append(PreviewStatusEntry(label="fps", value=f"FPS {fps:.1f}"))
         if selected_point is not None and selected_point_text is not None:
-            primary_entries.append(PreviewStatusEntry(label="selection", value=selected_point_text))
+            primary_entries.append(PreviewStatusEntry(label="selection", value=f"Selected {selected_point_text}"))
         if warning:
             primary_entries.append(PreviewStatusEntry(label="warning", value=f"WARN: {warning}", severity="warning"))
         if transient_message:
@@ -182,12 +184,30 @@ class PreviewStatusModelService:
         selected_point: tuple[int, int] | None,
         draft_roi: RoiDefinition | None,
         active_roi: RoiDefinition | None,
+        focus_status_visible: bool,
+        focus_state: FocusPreviewState | None,
+        focus_anchor_point: tuple[int, int] | None,
         show_viewport_outline: bool,
     ) -> PreviewOverlayModel:
+        focus_label = None
+        resolved_focus_anchor = focus_anchor_point
+        if focus_status_visible and focus_state is not None:
+            resolved_focus_anchor = (
+                int(round(focus_state.overlay.anchor_x)),
+                int(round(focus_state.overlay.anchor_y)),
+            )
+            if focus_state.result.is_valid:
+                focus_label = f"Focus {focus_state.result.score:.2f}"
+            else:
+                focus_label = "Focus invalid"
+        elif focus_status_visible and resolved_focus_anchor is not None:
+            focus_label = "Focus..."
         return PreviewOverlayModel(
             crosshair_point=selected_point if crosshair_visible else None,
             draft_roi=draft_roi,
             active_roi=active_roi,
+            focus_anchor_point=resolved_focus_anchor,
+            focus_label=focus_label,
             show_viewport_outline=show_viewport_outline,
         )
 

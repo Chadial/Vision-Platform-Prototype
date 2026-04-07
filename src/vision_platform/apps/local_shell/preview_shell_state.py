@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from importlib import import_module
 from importlib.util import find_spec
 
+from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.libraries.common_models import FocusPreviewState, RoiDefinition
 from vision_platform.models import CapturedFrame
 from vision_platform.services.display_service import (
@@ -141,6 +142,11 @@ class PreviewShellPresenter:
         if selected_point is not None:
             selected_point_text = self._coordinate_export_service.format_point(*selected_point)
         active_roi = self._roi_state_service.get_active_roi()
+        focus_anchor_point = self._resolve_focus_anchor_point(
+            frame=frame,
+            active_roi=active_roi,
+            focus_state=focus_state,
+        )
         status_model = self._status_model_service.build_status_model(
             fit_to_window=self._state.geometry_state.fit_to_window,
             display_scale=display_scale,
@@ -165,6 +171,9 @@ class PreviewShellPresenter:
             selected_point=crosshair_point,
             draft_roi=self._build_draft_roi(),
             active_roi=active_roi,
+            focus_status_visible=self._state.interaction_state.focus_status_visible,
+            focus_state=focus_state,
+            focus_anchor_point=focus_anchor_point,
             show_viewport_outline=self._should_draw_viewport_outline(mapping),
         )
         return PreviewShellViewModel(
@@ -244,6 +253,27 @@ class PreviewShellPresenter:
         if roi_mode is None or anchor is None or preview is None:
             return None
         return self._build_roi_definition(roi_mode, anchor, preview)
+
+    @staticmethod
+    def _resolve_focus_anchor_point(
+        *,
+        frame: CapturedFrame,
+        active_roi: RoiDefinition | None,
+        focus_state: FocusPreviewState | None,
+    ) -> tuple[int, int] | None:
+        if focus_state is not None:
+            return (
+                int(round(focus_state.overlay.anchor_x)),
+                int(round(focus_state.overlay.anchor_y)),
+            )
+        if active_roi is not None:
+            bounds = roi_bounds(active_roi)
+            if bounds is not None:
+                return (
+                    int(round((bounds[0] + bounds[2]) / 2.0)),
+                    int(round((bounds[1] + bounds[3]) / 2.0)),
+                )
+        return (frame.width // 2, frame.height // 2)
 
     @staticmethod
     def _should_draw_viewport_outline(mapping: ViewportMapping) -> bool:

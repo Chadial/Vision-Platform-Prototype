@@ -83,6 +83,13 @@ class PreviewCanvas(wx.Panel):
                 dc.DrawLine(viewport_point[0] - 8, viewport_point[1], viewport_point[0] + 8, viewport_point[1])
                 dc.DrawLine(viewport_point[0], viewport_point[1] - 8, viewport_point[0], viewport_point[1] + 8)
 
+        focus_anchor_point = view_model.overlay_model.focus_anchor_point
+        focus_label = view_model.overlay_model.focus_label
+        if focus_anchor_point is not None and focus_label:
+            viewport_point = _map_source_point_to_viewport(mapping, focus_anchor_point)
+            if viewport_point is not None:
+                self._draw_focus_overlay(dc, viewport_point, focus_label)
+
         for roi, colour in (
             (view_model.overlay_model.draft_roi, wx.Colour(0, 200, 255)),
             (view_model.overlay_model.active_roi, wx.Colour(0, 255, 0)),
@@ -106,6 +113,22 @@ class PreviewCanvas(wx.Panel):
                 dc.DrawEllipse(left, top, max(1, right - left), max(1, bottom - top))
             else:
                 dc.DrawRectangle(left, top, max(1, right - left), max(1, bottom - top))
+
+    @staticmethod
+    def _draw_focus_overlay(dc: wx.DC, viewport_point: tuple[int, int], label: str) -> None:
+        dc.SetPen(wx.Pen(wx.Colour(255, 128, 0), width=1))
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+        dc.DrawCircle(viewport_point[0], viewport_point[1], 6)
+        dc.DrawLine(viewport_point[0] - 10, viewport_point[1], viewport_point[0] + 10, viewport_point[1])
+        dc.DrawLine(viewport_point[0], viewport_point[1] - 10, viewport_point[0], viewport_point[1] + 10)
+        text_width, text_height = dc.GetTextExtent(label)
+        left = viewport_point[0] + 12
+        top = max(0, viewport_point[1] - text_height - 8)
+        dc.SetPen(wx.Pen(wx.Colour(255, 128, 0), width=1))
+        dc.SetBrush(wx.Brush(wx.Colour(30, 30, 30)))
+        dc.DrawRectangle(left, top, text_width + 10, text_height + 6)
+        dc.SetTextForeground(wx.Colour(255, 220, 160))
+        dc.DrawText(label, left + 5, top + 3)
 
     def _on_left_down(self, event) -> None:
         self._presenter.handle_canvas_click(event.GetX(), event.GetY())
@@ -186,6 +209,7 @@ class WxLocalPreviewShell(wx.Frame):
 
         self.Bind(wx.EVT_TIMER, self._on_timer, self._timer)
         self.Bind(wx.EVT_CLOSE, self._on_close)
+        self.Bind(wx.EVT_CHAR_HOOK, self._on_char_hook)
         self._timer.Start(max(33, int(poll_interval_seconds * 1000)))
         self.request_refresh()
 
@@ -254,6 +278,9 @@ class WxLocalPreviewShell(wx.Frame):
             PreviewInteractionCommand(action=action),
             has_focus_provider=self._focus_preview_service is not None,
         )
+        if action == "toggle_focus":
+            self._cached_focus_state = None
+            self._last_focus_refresh_time = 0.0
         self.request_refresh()
 
     def _run_roi_toggle(self, roi_mode: str) -> None:
@@ -262,6 +289,13 @@ class WxLocalPreviewShell(wx.Frame):
 
     def _on_close(self, event) -> None:
         self._shutdown_subsystem()
+        event.Skip()
+
+    def _on_char_hook(self, event) -> None:
+        if _is_copy_shortcut(event):
+            self._copy_selected_point()
+            self.request_refresh()
+            return
         event.Skip()
 
     @staticmethod
@@ -311,6 +345,20 @@ class WxLocalPreviewShell(wx.Frame):
             roi = self._subsystem.stream_service.get_roi_state_service().get_active_roi()
             self._focus_refresh_future = self._focus_executor.submit(self._focus_preview_service.refresh_once, roi)
         return self._cached_focus_state
+
+    def _copy_selected_point(self) -> None:
+        outcome = self._presenter.apply_command(
+            PreviewInteractionCommand(action="request_copy"),
+            has_focus_provider=self._focus_preview_service is not None,
+        )
+        if outcome.copy_text is None:
+            return
+        try:
+            _copy_text_to_clipboard(outcome.copy_text)
+        except Exception as exc:
+            self._set_transient_status_message(f"Copy failed: {exc}")
+            return
+        self._set_transient_status_message(outcome.copy_success_message or "Point copied")
 
     def _run_scheduled_refresh(self) -> None:
         self.request_refresh(interactive=False)
@@ -497,3 +545,18 @@ def _map_source_point_to_viewport(
 
 
 __all__ = ["WxLocalPreviewShell", "main", "run_wx_preview_shell"]
+
+
+def _is_copy_shortcut(event) -> bool:
+    key_code = event.GetKeyCode()
+    return bool((event.ControlDown() or event.CmdDown()) and key_code in (3, ord("C"), ord("c")))
+
+
+def _copy_text_to_clipboard(text: str) -> None:
+    if not wx.TheClipboard.Open():
+        raise RuntimeError("clipboard unavailable")
+    try:
+        if not wx.TheClipboard.SetData(wx.TextDataObject(text)):
+            raise RuntimeError("clipboard write failed")
+    finally:
+        wx.TheClipboard.Close()
