@@ -696,6 +696,43 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertIn("# run.frame_limit: 3", trace_lines)
             self.assertIn("# run.duration_seconds: 0.05", trace_lines)
 
+    def test_recording_continues_frame_sequence_for_reused_directory_and_same_stem(self) -> None:
+        driver = _StreamingRecordingDriver()
+        service = RecordingService(driver, poll_interval_seconds=0.001)
+
+        with TemporaryDirectory() as temp_dir:
+            request = RecordingRequest(
+                save_directory=Path(temp_dir),
+                file_stem="series",
+                file_extension=".raw",
+                frame_limit=2,
+                queue_size=4,
+            )
+
+            service.start_recording(request)
+            for _ in range(200):
+                if not service.get_status().is_recording:
+                    break
+                sleep(0.01)
+
+            service.start_recording(request)
+            for _ in range(200):
+                if not service.get_status().is_recording:
+                    break
+                sleep(0.01)
+
+            self.assertTrue((Path(temp_dir) / "series_000000.raw").exists())
+            self.assertTrue((Path(temp_dir) / "series_000001.raw").exists())
+            self.assertTrue((Path(temp_dir) / "series_000002.raw").exists())
+            self.assertTrue((Path(temp_dir) / "series_000003.raw").exists())
+
+            first_log_lines = (Path(temp_dir) / "series_recording_log.csv").read_text(encoding="utf-8").splitlines()
+            second_log_lines = (Path(temp_dir) / "series_recording_log_000002.csv").read_text(encoding="utf-8").splitlines()
+            self.assertIn("# continues_previous_series: false", first_log_lines)
+            self.assertIn("# recording_start_frame_index: 0", first_log_lines)
+            self.assertIn("# continues_previous_series: true", second_log_lines)
+            self.assertIn("# recording_start_frame_index: 2", second_log_lines)
+
     def test_recording_traceability_carries_alias_and_profile_context(self) -> None:
         driver = _StreamingRecordingDriver()
         service = RecordingService(
