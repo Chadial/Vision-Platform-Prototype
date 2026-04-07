@@ -1,4 +1,4 @@
-# WP54 Hardware Audit And Incident Logging Baseline
+# WP55 Hardware Audit And Incident Logging Baseline
 
 ## Purpose
 
@@ -19,7 +19,7 @@ Scope level:
 ## Branch
 
 - intended branch: `feature/hardware-audit-incident-logging-baseline`
-- activation state: queued
+- activation state: queued behind `WP54`
 
 ## Scope
 
@@ -37,4 +37,4 @@ Excluded:
 
 ## Activation Condition
 
-Activate after the current architecture chain (`WP50` to `WP53`) or earlier only if repeated hardware incidents make auditability the immediate bottleneck.
+Activate after `WP54` or earlier only if repeated hardware incidents make auditability the immediate bottleneck.
