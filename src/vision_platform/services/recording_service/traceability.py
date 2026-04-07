@@ -4,6 +4,7 @@ import csv
 from dataclasses import dataclass
 from math import isfinite
 from pathlib import Path
+from threading import RLock
 from typing import TextIO
 
 from vision_platform.libraries.common_models import RoiDefinition
@@ -11,6 +12,7 @@ from vision_platform.models import CameraConfiguration, CapturedFrame, Recording
 
 _TRACE_LOG_STEM = "saved_artifact_traceability"
 _TRACE_LOG_SUFFIX = ".csv"
+_TRACE_WRITE_LOCK = RLock()
 _TRACE_ROW_HEADER = [
     "artifact_kind",
     "run_id",
@@ -238,42 +240,47 @@ def record_snapshot_trace(
     artifact_metadata: TraceArtifactMetadata | None = None,
 ) -> Path:
     stable_context = build_snapshot_stable_context(request, configuration)
-    log_path, reused_existing_log = resolve_trace_log_path(request.save_directory, stable_context)
-    handle, writer = open_trace_log(log_path, stable_context, reused_existing_log=reused_existing_log)
     run_id = build_snapshot_run_id(saved_path)
-    try:
-        append_trace_run_start(
-            handle,
-            artifact_kind="snapshot",
-            run_id=run_id,
-            file_stem=saved_path.stem,
-            session_start_utc=frame.timestamp_utc.isoformat(),
-            frame_limit=1,
-            duration_seconds=None,
-            target_frame_rate=None,
-        )
-        append_trace_image_row(
-            writer,
-            handle,
-            artifact_kind="snapshot",
-            run_id=run_id,
-            image_name=saved_path.name,
-            frame=frame,
-            artifact_metadata=artifact_metadata,
-        )
-        append_trace_run_end(
-            handle,
-            artifact_kind="snapshot",
-            run_id=run_id,
-            frames_written=1,
-            dropped_frames=0,
-            last_error=None,
-            session_end_utc=frame.timestamp_utc.isoformat(),
-            end_state="completed",
-        )
-        return log_path
-    finally:
-        handle.close()
+    with _TRACE_WRITE_LOCK:
+        log_path, reused_existing_log = resolve_trace_log_path(request.save_directory, stable_context)
+        handle, writer = open_trace_log(log_path, stable_context, reused_existing_log=reused_existing_log)
+        try:
+            append_trace_run_start(
+                handle,
+                artifact_kind="snapshot",
+                run_id=run_id,
+                file_stem=saved_path.stem,
+                session_start_utc=frame.timestamp_utc.isoformat(),
+                frame_limit=1,
+                duration_seconds=None,
+                target_frame_rate=None,
+            )
+            append_trace_image_row(
+                writer,
+                handle,
+                artifact_kind="snapshot",
+                run_id=run_id,
+                image_name=saved_path.name,
+                frame=frame,
+                artifact_metadata=artifact_metadata,
+            )
+            append_trace_run_end(
+                handle,
+                artifact_kind="snapshot",
+                run_id=run_id,
+                frames_written=1,
+                dropped_frames=0,
+                last_error=None,
+                session_end_utc=frame.timestamp_utc.isoformat(),
+                end_state="completed",
+            )
+            return log_path
+        finally:
+            handle.close()
+
+
+def trace_write_lock() -> RLock:
+    return _TRACE_WRITE_LOCK
 
 
 def _iter_trace_candidates(save_directory: Path):

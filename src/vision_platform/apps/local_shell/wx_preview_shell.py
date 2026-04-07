@@ -1034,7 +1034,7 @@ class _RecordingSettingsDialog(wx.Dialog):
     ) -> None:
         super().__init__(parent, title="Recording Settings", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         panel = wx.Panel(self)
-        sizer = wx.BoxSizer(wx.VERTICAL)
+        panel_sizer = wx.BoxSizer(wx.VERTICAL)
         grid = wx.FlexGridSizer(cols=2, vgap=8, hgap=8)
         grid.AddGrowableCol(1, 1)
 
@@ -1054,13 +1054,13 @@ class _RecordingSettingsDialog(wx.Dialog):
         self._recording_fps = wx.TextCtrl(panel, value=recording_fps)
         grid.Add(self._recording_fps, 1, wx.EXPAND)
 
-        sizer.Add(grid, 1, wx.EXPAND | wx.ALL, 10)
+        panel_sizer.Add(grid, 1, wx.EXPAND | wx.ALL, 10)
+        panel.SetSizer(panel_sizer)
         buttons = self.CreateSeparatedButtonSizer(wx.OK | wx.CANCEL)
-        if buttons is not None:
-            sizer.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
-        panel.SetSizer(sizer)
         root = wx.BoxSizer(wx.VERTICAL)
         root.Add(panel, 1, wx.EXPAND)
+        if buttons is not None:
+            root.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         self.SetSizerAndFit(root)
 
     def get_values(self) -> dict[str, str]:

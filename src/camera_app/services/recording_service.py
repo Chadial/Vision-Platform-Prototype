@@ -31,6 +31,7 @@ from vision_platform.services.recording_service.traceability import (
     build_recording_stable_context,
     open_trace_log,
     resolve_trace_log_path,
+    trace_write_lock,
 )
 
 
@@ -67,8 +68,8 @@ class RecordingService:
         self._recording_log_writer: csv.writer | None = None
         self._recording_session_started_utc: str | None = None
         self._start_frame_index: int = 0
-        self._trace_log_handle: TextIO | None = None
-        self._trace_log_writer: csv.writer | None = None
+        self._trace_log_path: Path | None = None
+        self._trace_log_stable_context: dict[str, str] | None = None
         self._trace_run_id: str | None = None
         self._last_completed_run_id: str | None = None
 
@@ -279,25 +280,31 @@ class RecordingService:
         configuration = self._configuration_provider() if self._configuration_provider is not None else None
         stable_context = build_recording_stable_context(request, configuration)
         log_path, reused_existing_log = resolve_trace_log_path(request.save_directory, stable_context)
-        self._trace_log_handle, self._trace_log_writer = open_trace_log(
-            log_path,
-            stable_context,
-            reused_existing_log=reused_existing_log,
-        )
+        self._trace_log_path = log_path
+        self._trace_log_stable_context = stable_context
         self._trace_run_id = build_bounded_recording_run_id(
             request.file_stem,
             self._recording_session_started_utc or self._current_system_time_utc(),
         )
-        append_trace_run_start(
-            self._trace_log_handle,
-            "bounded_recording",
-            self._trace_run_id,
-            request.file_stem,
-            self._recording_session_started_utc,
-            request.frame_limit,
-            request.duration_seconds,
-            request.target_frame_rate,
-        )
+        with trace_write_lock():
+            handle, _writer = open_trace_log(
+                log_path,
+                stable_context,
+                reused_existing_log=reused_existing_log,
+            )
+            try:
+                append_trace_run_start(
+                    handle,
+                    "bounded_recording",
+                    self._trace_run_id,
+                    request.file_stem,
+                    self._recording_session_started_utc,
+                    request.frame_limit,
+                    request.duration_seconds,
+                    request.target_frame_rate,
+                )
+            finally:
+                handle.close()
 
     def _build_recording_log_metadata(
         self,
@@ -363,22 +370,30 @@ class RecordingService:
         self._recording_log_handle.flush()
 
     def _write_traceability_entry(self, image_name: str, frame: CapturedFrame) -> None:
-        if self._trace_log_writer is None or self._trace_log_handle is None or self._trace_run_id is None:
+        if self._trace_log_path is None or self._trace_log_stable_context is None or self._trace_run_id is None:
             raise RuntimeError("Recording traceability log is not initialized.")
-
-        append_trace_image_row(
-            self._trace_log_writer,
-            self._trace_log_handle,
-            "bounded_recording",
-            self._trace_run_id,
-            image_name,
-            frame,
-            artifact_metadata=(
-                self._artifact_focus_metadata_producer.build_metadata(frame)
-                if self._artifact_focus_metadata_producer is not None
-                else None
-            ),
-        )
+        with trace_write_lock():
+            handle, writer = open_trace_log(
+                self._trace_log_path,
+                self._trace_log_stable_context,
+                reused_existing_log=True,
+            )
+            try:
+                append_trace_image_row(
+                    writer,
+                    handle,
+                    "bounded_recording",
+                    self._trace_run_id,
+                    image_name,
+                    frame,
+                    artifact_metadata=(
+                        self._artifact_focus_metadata_producer.build_metadata(frame)
+                        if self._artifact_focus_metadata_producer is not None
+                        else None
+                    ),
+                )
+            finally:
+                handle.close()
 
     @staticmethod
     def _current_system_time_utc() -> str:
@@ -413,18 +428,27 @@ class RecordingService:
             session_end_utc = self._current_system_time_utc() if active_request is not None else None
             end_state = "failed" if final_status.last_error else "completed"
             completed_run_id = self._trace_run_id
-            if active_request is not None and self._trace_log_handle is not None and self._trace_run_id is not None:
+            if active_request is not None and self._trace_log_path is not None and self._trace_run_id is not None:
                 try:
-                    append_trace_run_end(
-                        self._trace_log_handle,
-                        "bounded_recording",
-                        self._trace_run_id,
-                        final_status.frames_written,
-                        final_status.dropped_frames,
-                        final_status.last_error,
-                        session_end_utc,
-                        end_state,
-                    )
+                    with trace_write_lock():
+                        handle, _writer = open_trace_log(
+                            self._trace_log_path,
+                            self._trace_log_stable_context or {},
+                            reused_existing_log=True,
+                        )
+                        try:
+                            append_trace_run_end(
+                                handle,
+                                "bounded_recording",
+                                self._trace_run_id,
+                                final_status.frames_written,
+                                final_status.dropped_frames,
+                                final_status.last_error,
+                                session_end_utc,
+                                end_state,
+                            )
+                        finally:
+                            handle.close()
                 except Exception as exc:
                     traceability_error = exc
                     self._record_error(f"Recording traceability log failed: {exc}")
@@ -442,11 +466,9 @@ class RecordingService:
                 self._recording_log_handle.close()
                 self._recording_log_handle = None
                 self._recording_log_writer = None
-            if self._trace_log_handle is not None:
-                self._trace_log_handle.close()
-                self._trace_log_handle = None
-                self._trace_log_writer = None
-                self._trace_run_id = None
+            self._trace_log_path = None
+            self._trace_log_stable_context = None
+            self._trace_run_id = None
             self._last_completed_run_id = completed_run_id
             with self._status_lock:
                 self._status.is_recording = False
