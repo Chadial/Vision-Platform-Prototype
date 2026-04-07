@@ -19,9 +19,9 @@ Each status update should state progress and gaps against both roadmaps.
 
 - Against `docs/ROADMAP.md`: Phase 0 repository reorganization is now completed for its first round, and Foundation, Camera Access, Snapshot Flow, Preview Flow, Recording Flow, Simulation, Host Integration, and the Python-side optional OpenCV path remain functionally implemented. Validation is no longer only simulator-backed: the March 27, 2026 hardware passes now cover an integrated command-flow baseline for snapshot save, preview readiness, interval capture from the shared preview stream, frame-limit recording, duration-only recording, target-frame-rate recording, supported alternate pixel format capture (`Mono10` as `.raw`), and explicit hardware-side failures for invalid camera id, unsupported pixel format, and invalid ROI increment choices on the Allied Vision `1800 U-1240m`. Phase 9 can therefore be treated as prototype-level hardware-validated for the current camera baseline, with remaining work limited to edge-case expansion rather than baseline viability. The focus baseline now also exists as a first implemented analysis capability on top of that reorganized platform surface, ROI groundwork has advanced from geometry-only helpers to analysis-consumable mask derivation for rectangle and ellipse shapes, and this branch now adds a first unified camera-oriented CLI baseline on top of the existing controller and service layer.
 - Against `docs/GlobalRoadmap.md`: the platform-reorganization phase is now established alongside the existing Python prototype baseline. Camera integration, stream/recording services, host-neutral command flow, the optional OpenCV prototype path, ROI geometry groundwork, ROI mask primitives, and a first manual-focus baseline are in place. A first real-hardware OpenCV preview path is now available for local inspection, and the OpenCV prototype now also provides a first viewport-based preview baseline with fit-to-window plus zoom controls, mouse-wheel zoom, middle-drag pan, cursor-anchored zoom, top-left image anchoring, a dedicated bottom status band, FPS readout, operator toggles for crosshair and focus-status visibility, a first two-click ROI creation baseline for rectangle and ellipse with live preview, a preview-frame snapshot shortcut driven by an explicit save directory, and a first layer of concise operator-facing warning/error feedback while keeping those concerns explicitly in the UI/display layer. That preview path now also treats status-band meaning and overlay-layer meaning as shared descriptive models above the renderer, instead of OpenCV-private strings and drawing assumptions. A bounded optional wxPython shell path now also exists as the first non-OpenCV local working frontend: it starts from the same project `.venv`, reuses the existing bootstrap/controller/preview/display layers, follows the proven OpenCV feature cut for preview, snapshot, status, zoom/fit, crosshair, ROI entry, focus status/toggle, and bounded drag interaction, and keeps OpenCV as fallback/reference rather than as the only local shell. The April 7, 2026 follow-up after that first shell slice first revalidated the broader hardware baseline through CLI and OpenCV, and now also closes the concrete gap it exposed: the wx shell itself has a bounded real-device startup path that reuses the same headless source-selection, alias-resolution, configuration-profile, and configuration-override semantics as the CLI. Same-day wx follow-ups now also treat snapshot feedback as transient shell status, evaluate focus through the shared headless service on a bounded downsampled work frame, render a visible focus marker/label in the image area, align point-selection / clipboard feedback more closely with the OpenCV baseline instead of duplicating raw coordinates in the status area, refine the first anchor-hover/drag baseline so ROI handles appear only on hover / active drag, ellipse-corner editing follows bounding-box semantics, support both hold-drag-release and click-to-lock-drag-click-to-release, allow whole-ROI body panning with optional `Shift` dominant-axis locking, keep small ROI body interaction usable through enlarged invisible body hit bounds, expose active ROI frame state cleanly to the wx renderer through shared `normal` / `hover` / `drag` overlay emphasis, add rectangle side-midpoint handles for one-axis box resizing, let active ROI/point drags be canceled back to their drag-start geometry with `Esc`, surface the camera acquisition FPS and measured wx UI refresh FPS explicitly in the shell header, and now add bounded recording controls for start/stop, max frames, recording FPS, and visible recording progress on the same shell surface, with the last recording summary staying visible after `Stop Recording` until the next `Start Recording`. The shared contract layer under `libraries/common_models` now also intentionally exposes some target-facing surface ahead of full implementation, with feature readiness expected to be marked in module-local status docs. Tracking/API modules remain open, but the Python camera baseline can now be regarded as architecturally, simulator-, and prototype-level hardware-validated for the tested camera path. The new `WP55` hardware-audit baseline now also exists as a separate append-only JSONL audit path under `captures/hardware_audit/`, and it records only warnings, degraded startup states, and incidents instead of normal artifact traceability. An April 7, 2026 recurring `WP04` hardware block now also revalidated the current tested device path after `WP50` and `WP51`: serial hardware `status`, hardware `snapshot`, integrated hardware command flow, and a bounded OpenCV hardware preview smoke all succeeded on `DEV_1AB22C046D81`. The next frontend-oriented residual is now later settings/menu surface rather than recording controls.
-- Against `docs/WORKPACKAGES.md`: project-level prioritization now runs through the centralized work-package queue instead of many distributed module roadmaps. The earlier command-surface, bounded OpenCV UI, ROI, focus, tracking, first API-preparation, and first postprocess packages can be treated as completed baseline-hardening work. The repository should no longer be read as being in an open-ended Extended MVP closure phase. That phase is now considered closed. Its landed slices through `docs/session_workpackages/wp12_host_control_closure.md`, `docs/session_workpackages/wp13_experiment_reliability_closure.md`, `docs/session_workpackages/wp14_data_logging_closure.md`, `docs/session_workpackages/wp15_offline_measurement_closure.md`, `docs/session_workpackages/wp16_data_logging_traceability.md`, `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`, `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`, `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`, `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`, `docs/session_workpackages/wp21_offline_stable_context_exposure.md`, `docs/session_workpackages/wp22_host_status_polling_hardening.md`, `docs/session_workpackages/wp23_host_command_confirmation_hardening.md`, `docs/session_workpackages/wp24_run_identity_trace_linkage.md`, `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`, and `docs/session_workpackages/wp26_hardware_revalidation_resume.md` established one bounded, host-oriented, hardware-validated Python working baseline on the tested camera path. `WP27` through `WP30` should now be read as the first landed post-closure hardening / diagnostics slices on top of that baseline. `WP29` specifically narrowed the current startup-warning interpretation: fresh serial March 30 hardware `status` and `snapshot(.bmp)` proofs on `DEV_1AB22C046D81` remained successful with `capabilities_available=True` and `capability_probe_error=None`, while `vmbpyLog <VmbError.NotAvailable: -30>` still appeared as SDK stderr output, so the current repository should classify that line as non-blocking SDK/logging residual on the successful tested path rather than as active startup failure. `WP35` now narrows the remaining enumeration ambiguity further: raw Vimba X enumeration on `DEV_1AB22C046D81` still shows duplicate SDK-visible entries for the same camera id, and the opened camera object can degrade serial from `067WH` to `N/A`, but the repository now resolves duplicate SDK-visible candidates by camera id and preserves the richer pre-open identity in host-visible status fields so the current hardware `status` surface again reports serial `067WH` on the tested path. `WP16` specifically adds one shared folder-local appendable traceability log for snapshot and bounded-recording outputs, with stable-context reuse, run/session blocks, and optional per-image analysis ROI / focus metadata fields. `WP17` provides the corresponding compact offline-consumer slice by saved image name. `WP18` tightens that artifact-level focus metadata shape by requiring an explicit aggregation basis when focus summary fields are stored. `WP19` adds the next producer-side step: normal snapshot and bounded-recording save flows can emit that metadata when explicit service/bootstrap producer wiring is enabled. `WP20` hardens that current summary-field policy by requiring `focus_method` whenever summary values are stored, validating `focus_score_frame_interval` as a positive integer count for the current aggregation-basis baseline, and rejecting negative `focus_value_stddev` values. `WP21` extends the same offline/reporting lane with one additive compact folder-level stable-context summary from traceability headers while keeping the existing per-image list-return path usable. `WP22` through `WP24` harden the current host-facing lane through additive polling, command-confirmation, and run-identity linkage slices. `WP25` adds one simulator-first integrated recovery proof over writer-side recording failure, repeated stop calls, and successful restart on the same subsystem instance. `WP26` adds fresh real-device evidence over the current integrated host/traceability/reliability baseline on camera `DEV_1AB22C046D81`, including preview readiness, snapshot, bounded recording, interval capture, active polling visibility, traceability output, practical offline BMP reuse, and same-subsystem reuse without process restart. `WP27` narrows one concrete real-device lifecycle seam by reusing the already opened hardware camera for capability probing instead of re-entering Vimba X through a second camera context during initialization; the March 30 serial hardware proofs (`status -> status`, `snapshot -> status`, `recording -> status`) no longer reproduced `camera already in use` on `DEV_1AB22C046D81`. `WP28` hardens one narrow host-/validation-facing reporting seam by keeping strict ROI capability enforcement while returning clearer width/height/offset constraint guidance and a dedicated CLI `configuration_error` code during apply-configuration failures. The repository now enters a post-closure Python baseline phase: remaining work is primarily hardening, operational readiness, controlled productization, and selective expansion rather than unfinished proof that the MVP is still not real.
+- Against `docs/WORKPACKAGES.md`: project-level prioritization now runs through the centralized work-package queue instead of many distributed module roadmaps. The earlier command-surface, bounded OpenCV UI, ROI, focus, tracking, first API-preparation, and first postprocess packages can be treated as completed baseline-building work. The repository should no longer be read as being in an open-ended Extended MVP closure phase. That phase is now historical. Its landed slices through `docs/session_workpackages/wp12_host_control_closure.md`, `docs/session_workpackages/wp13_experiment_reliability_closure.md`, `docs/session_workpackages/wp14_data_logging_closure.md`, `docs/session_workpackages/wp15_offline_measurement_closure.md`, `docs/session_workpackages/wp16_data_logging_traceability.md`, `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`, `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`, `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`, `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`, `docs/session_workpackages/wp21_offline_stable_context_exposure.md`, `docs/session_workpackages/wp22_host_status_polling_hardening.md`, `docs/session_workpackages/wp23_host_command_confirmation_hardening.md`, `docs/session_workpackages/wp24_run_identity_trace_linkage.md`, `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`, and `docs/session_workpackages/wp26_hardware_revalidation_resume.md` established one bounded, host-oriented, hardware-validated Python working baseline on the tested camera path. `WP27` through `WP30` should now be read as the first landed post-closure hardening / diagnostics slices on top of that baseline. `WP29` specifically narrowed the current startup-warning interpretation: fresh serial March 30 hardware `status` and `snapshot(.bmp)` proofs on `DEV_1AB22C046D81` remained successful with `capabilities_available=True` and `capability_probe_error=None`, while `vmbpyLog <VmbError.NotAvailable: -30>` still appeared as SDK stderr output, so the current repository should classify that line as non-blocking SDK/logging residual on the successful tested path rather than as active startup failure. `WP35` now narrows the remaining enumeration ambiguity further: raw Vimba X enumeration on `DEV_1AB22C046D81` still shows duplicate SDK-visible entries for the same camera id, and the opened camera object can degrade serial from `067WH` to `N/A`, but the repository now resolves duplicate SDK-visible candidates by camera id and preserves the richer pre-open identity in host-visible status fields so the current hardware `status` surface again reports serial `067WH` on the tested path. The active planning lens is now `Usable Camera Subsystem / Pre-Product Baseline`: local usability, host-side usability, official reference scenarios, and only then headless-kernel preparation. In that lens, `WP62` matters because it closes a real host/local usability gap for an already open working shell rather than because of transport or platform breadth.
 
-The immediate post-closure profile / alias / traceability follow-up sequence is now landed.
+The immediate baseline-building profile / alias / traceability follow-up sequence is now landed.
 
 Current order:
 
@@ -33,7 +33,7 @@ This sequence should be read as:
 - then one landed operational-readiness runbook slice through `WP31`
 - then one landed startup-surface slice through `WP32`
 - then one landed later-handover/productization clarification slice through `WP33`
-- then one explicit post-closure continuation:
+- then one explicit continuation toward the usable-subsystem phase:
   - `WP34` landed as bounded host-surface normalization
   - `WP35` landed as bounded enumeration / startup residual narrowing
   - `WP36` landed as bounded recording-lifecycle decision clarification
@@ -49,20 +49,19 @@ This sequence should be read as:
   - `WP46` landed as the follow-up bounded camera-alias / explicit-id convenience slice
   - `WP47` landed as the additive traceability control-context follow-up
 
-The active post-closure phase should now be read in four work types:
+The active usable-subsystem phase should now be read in four priorities:
 
-1. `Hardening`
-   - remaining lifecycle / cleanup residuals
-   - host-readable diagnostics
-   - bounded reliability follow-up
-   - removal of unnecessary real-use friction
-2. `Operational readiness`
-   - documentation, startup paths, packaging, and explicit operating rules
-   - clearer stable contracts and activation expectations
-3. `Selective expansion`
-   - broader host / transport, offline / measurement, or UI / frontend steps only when justified
-4. `Later product / handover preparation`
-   - preserve C# handover, broader productization, additional frontends, and wider hardware / deployment coverage as later horizons rather than current closure obligations
+1. `Local usability`
+   - reduce the remaining local operator friction in the wx shell
+   - keep OpenCV as fallback/reference, not as the long-term shell
+2. `Host-side usability`
+   - keep the command/status/result surface practical for AMB-side use
+   - tighten host-visible behavior before broad transport expansion
+3. `Official reference scenarios`
+   - preserve snapshot, bounded recording, and interval capture as anchor flows
+   - use those flows as examples and confidence scenarios
+4. `Headless preparation after usability`
+   - prepare the next shared kernel only after the subsystem is locally and host-side usable enough
 
 ## Merge Note
 
@@ -71,9 +70,20 @@ The active post-closure phase should now be read in four work types:
 
 ## Current Summary
 
-The repository should now be read as operating from a usable Python working baseline, not from an unresolved MVP identity.
+The repository should now be read as a practically usable camera/acquisition subsystem, not as an unresolved MVP identity or a repository still dominated by early reorganization work.
 
-The current active phase is therefore not "close the MVP", but "operate and improve the post-closure Python baseline" through hardening, operational readiness, selective expansion, and later handover-oriented preparation.
+The current active phase is:
+
+**Usable Camera Subsystem / Pre-Product Baseline**
+
+This phase means:
+
+- make the wx shell a genuinely usable local working frontend
+- make the shared host-neutral command surface practically usable from the AMB control side
+- preserve snapshot, bounded recording, and interval capture as official reference scenarios
+- prepare a truly headless kernel only after those usability goals are real enough
+
+The larger assisted-measurement system vision remains visible, but it is not the near-term default planning lane.
 
 The compact operating reference for that baseline now lives at:
 
@@ -82,6 +92,7 @@ The compact operating reference for that baseline now lives at:
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
 - `docs/HOST_CONTRACT_BASELINE.md`
+- `docs/TARGET_MAP.md`
 
 The repository currently provides a structured Python prototype for the vision platform with:
 
@@ -410,42 +421,13 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Treat `WP12` through `WP26` as the closed Extended MVP foundation that established the current Python working baseline.
-2. Treat `WP27` and `WP28` as landed post-closure hardening slices rather than as proof that the baseline is still unfinished.
-3. Treat `WP31` as landed and use `docs/PYTHON_BASELINE_RUNBOOK.md` as the compact operating reference for the current Python baseline.
-4. Treat `WP32` as landed and use `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` as the compact startup-surface reference for the preferred current entry points.
-5. Treat `WP33` as landed and use `docs/HOST_CONTRACT_BASELINE.md` as the compact stable-now / deferred-later reference for the current bounded host surface.
-6. Treat `WP34` as landed and read bounded `interval-capture` as part of the normalized current host-envelope baseline.
-7. Treat `WP35` as landed bounded enumeration / startup residual narrowing on the tested hardware path.
-8. Treat `WP36` as landed and use `docs/RECORDING_LIFECYCLE_BOUNDARY.md` as the compact decision boundary for bounded recording versus detached-later scope.
-9. Treat `WP37` as landed and use `scripts/run_python_baseline.ps1` only as a bounded local convenience helper rather than a new startup contract.
-10. Treat `WP38` as landed: the compact offline focus-report bundle now adds one additive summary line for entry count, traceability-join coverage, and the current highest-score image without widening into export or explorer scope.
-11. Treat `WP39` as landed; the first bounded module-doc trust / shrink pass is complete and `docs/module_doc_audit.md` now captures the tighter guidance.
-12. Treat `WP40` as landed: `vision_platform.bootstrap`, `vision_platform.control`, and `vision_platform.imaging` now own the implementation directly while `camera_app` remains the compatibility shim layer.
-13. Treat `WP41` as landed: storage-facing legacy service imports now point at platform-owned file-naming and frame-writer helpers directly, while `camera_app.storage` remains the compatibility shim layer.
-14. Treat `WP42` as landed: remaining `camera_app` dependencies inside `vision_platform` are now bounded, tested, and documented as intentional compatibility seams rather than silent drift.
-15. Treat `WP43` as landed: the bounded package-manifest and environment-contract guardrails are now explicit through `vision-platform-cli`, clearer bootstrap output, and `docs/PYTHON_BASELINE_ENVIRONMENT.md`.
-16. Treat `WP44` as landed: `vision_platform.services.api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without implying any framework runtime.
-17. Treat `WP45` as landed: named configuration profiles now start camera-class-first under `configs/camera_configuration_profiles.json`, begin with a bounded `default` profile baseline, and continue to reuse the existing capability-aware configuration path.
-18. Treat `WP46` as landed: camera aliases now resolve repo-locally to explicit `camera_id` values in the CLI path while preserving direct id usage and avoiding discovery or inventory scope.
-19. Treat `WP47` as landed: current snapshot and bounded-recording traceability now also preserves alias and optional profile-selection context additively when the producer path provides it.
-20. Treat `WP50` as implemented: headless display geometry now exists and is test-covered.
-21. Treat `WP51` as implemented on the current architecture branch: preview interaction ownership now sits in a shared command layer instead of OpenCV-specific event handling.
-22. Treat `WP04` as a recurring conditional hardware-validation slice rather than as a one-time historical package; activate it after meaningful implementation groups when attached hardware can answer a narrow real-device question.
-23. The April 7, 2026 recurring `WP04` slice revalidated the tested device path after `WP50` and `WP51`, including a bounded OpenCV hardware preview smoke.
-24. Treat `WP52` as implemented: preview status-band and overlay meaning now sit in a shared descriptive model layer above OpenCV formatting and drawing.
-25. Treat `WP53` as implemented: one bounded wxPython local working shell now reuses the shared controller/preview/display stack while the OpenCV path remains the fallback/reference frontend.
-26. Treat the first post-`WP53` manual hardware rerun as passed for the existing CLI/OpenCV hardware paths and as the evidence that justified the next wx-shell hardware slice.
-27. Treat `WP54` as implemented: the wx shell now has a bounded hardware-backed startup path that still reuses the shared bootstrap/controller/display stack plus the existing alias/profile/configuration semantics.
-28. Treat `WP55` as implemented as the append-only hardware-audit baseline.
-29. Treat `WP56` as implemented CLI help / documentation polish unless a concrete operational-help defect reopens it.
-30. Treat `WP57` as implemented: the wx shell now renders visible focus markers/labels while keeping ROI ownership on the shared state path.
-31. Treat `WP58` as implemented: wx point selection and clipboard feedback now align more closely with the current OpenCV semantics.
-32. Treat `WP59` as implemented: the wx shell now renders visible point/ROI anchors with bounded hover and first drag behavior above the shared display stack.
-33. Treat `WP60` as implemented: recording progress and the recording controls now stay within the existing controller/status path.
-34. Treat `WP61` as implemented: the wx shell inventory and core/UI boundary are now captured in `apps/local_shell/FEATURES.md`.
-35. Make `WP62` the current next slice for open-shell CLI/API live command sync.
-36. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+1. Treat `WP12` through `WP26` as the closed historical foundation that proved the bounded Python baseline is real.
+2. Use the new planning lens `Usable Camera Subsystem / Pre-Product Baseline` for future slice selection.
+3. Prioritize local usability first: keep the wx shell moving toward a genuinely usable working frontend and treat OpenCV as fallback/reference.
+4. Prioritize host-side usability second: keep the shared command/status/result surface practical for AMB-side integration work.
+5. Preserve snapshot, bounded recording, and interval capture as official reference scenarios and regression anchors.
+6. Treat `WP62` as the current next slice because live open-shell sync directly serves the local/host usability boundary.
+7. Keep broader API growth, additional frontends, larger offline tooling, MCP-oriented orchestration, and C# handover visible as later directions rather than current default obligations.
 
 ## Deferred Profile-System Bucket List
 

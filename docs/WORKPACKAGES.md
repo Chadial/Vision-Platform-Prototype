@@ -98,16 +98,19 @@ This section gives PM one compact view of:
 - which work packages exist
 - in which order they should currently run
 
+For the compact current-phase reading card, see `docs/TARGET_MAP.md`.
+
 ### Target Picture
 
 The project goal, derived from `docs/ProjectDescription.md`, `docs/ProjectAgents.md`, and `docs/GlobalRoadmap.md`, is:
 
-1. keep a stable Python-first camera and acquisition baseline
-2. preserve a clean modular architecture suitable for later C# handover
-3. support preview, snapshot, recording, ROI, focus, and later tracking
-4. keep one host-neutral command surface as the main control layer
-5. treat OpenCV as the current operator-facing preview/UI path, not as the platform core
-6. prepare later API/feed, postprocess, desktop, and web-capable paths only after the core contracts are stable
+1. treat the repository as a practically usable camera and acquisition subsystem
+2. make the wx shell the primary local working path, with OpenCV kept as fallback/reference
+3. keep one host-neutral command surface as the main control layer for AMB-side use
+4. preserve snapshot, bounded recording, and interval capture as official reference scenarios
+5. keep the subsystem usable as the first reference module for a later assisted measurement system
+6. prepare a truly headless kernel only after local and host usability are real enough
+7. keep broader API/feed, postprocess, desktop, web-capable, MCP-oriented, and C# productization work visible as later directions rather than the current default lane
 
 ### Current Implemented Baseline
 
@@ -133,12 +136,12 @@ The strongest currently documented sequencing signals are:
 
 Combined interpretation:
 
-1. keep the CLI baseline narrow and stable
-2. treat the current Python camera baseline as already broad enough to justify a closure phase instead of immediate breadth expansion
-3. keep OpenCV UI work separate and bounded instead of letting UI expansion define the next phase
-4. treat hardware work as evidence-driven closure work, not as a permanently separate stream
-5. prioritize host control, runtime reliability, data/logging, and offline experiment usability over new frontend breadth
-6. keep tracking, broad API expansion, C# handover widening, and further frontends visible as later lanes rather than the next default step
+1. treat the current camera software as a practically usable subsystem rather than as a proof artifact
+2. prioritize the wx shell as the primary local working path, with OpenCV held as fallback/reference
+3. prioritize practical host control over broad transport or platform speculation
+4. preserve small official reference scenarios as the anchor for operational confidence
+5. treat hardware work as recurring evidence-driven validation rather than as a separate strategic stream
+6. keep tracking, broad API expansion, MCP-oriented growth, C# handover widening, and further frontends visible as later lanes rather than the next default step
 
 ## Phase Transition
 
@@ -159,33 +162,42 @@ What the closure result now means:
 - future work should no longer default to "what is still needed to prove the MVP is real?"
 - future work should now default to "what is the next justified hardening, productization, or selective expansion step on top of the closed Python baseline?"
 
-## Post-Closure Python Baseline Lens
+## Usable Camera Subsystem / Pre-Product Baseline Lens
 
 The active planning lens is now:
 
-**Post-Closure Python Baseline = stable Python working reference baseline for hardening, operational readiness, controlled productization, and selective expansion**
+**Usable Camera Subsystem / Pre-Product Baseline = practically usable camera/acquisition subsystem with a real local working shell, real host-facing control semantics, and a small set of stable reference scenarios**
 
-This phase should optimize for four work types:
+This phase should optimize for four near-term priorities:
 
-1. `Hardening`
-   - smooth the last real friction points in the current baseline
-   - continue lifecycle / cleanup follow-ups, host-readable diagnostics, bounded reliability polish, and small real-use rough-edge removal
-2. `Operational readiness`
-   - make the Python baseline easier to run, document, operate, and hand over
-   - improve docs, packaging / startup paths, clearer stable contracts, and explicit activation / operating rules when needed
-3. `Selective expansion`
-   - open the next surface only when there is a concrete reason
-   - allow broader host / transport, offline / measurement, or UI / frontend follow-ups only when justified by actual need
-4. `Later product / handover preparation`
-   - keep the next larger horizon visible without treating it as the default immediate lane
-   - preserve C# handover, broader productization, additional frontends, and wider hardware / deployment coverage as later post-closure directions
+1. `Local usability`
+   - make the wx shell genuinely usable as the daily local working frontend
+   - keep OpenCV as fallback/reference rather than as the long-term working shell
+2. `Host-side usability`
+   - make the shared command/status/result surface practically usable from the AMB control side
+   - prefer host-semantic clarity over broad transport speculation
+3. `Official reference scenarios`
+   - preserve snapshot, bounded recording, and interval capture as small practical anchor flows
+   - use those flows as examples, confidence scenarios, and regression anchors
+4. `Headless preparation after usability`
+   - once local and host usability are real enough, prepare a truly headless kernel
+   - keep that kernel shared by local UI, host control, and later automation or agent flows
 
 This phase should **not** be treated as:
 
 - another generic MVP-closure backlog
-- a broad architecture rewrite phase
+- broad web/API platform work by default
+- broad MCP build-out
+- full product packaging
+- full C# handover
+- broad offline workstation expansion
 - proof that the Python baseline is still not usable
-- default reopening of API, frontend, or hardware breadth without a concrete driver
+
+This phase should also be read as the practical camera-project contribution to the larger vision:
+
+- first practically usable camera/acquisition subsystem
+- first reference module for a later assisted measurement system
+- larger assisted-measurement concerns stay visible, but secondary to the near-term subsystem-usage priorities above
 
 ## Closed Extended MVP Axes
 
@@ -255,7 +267,7 @@ The existing archived packages remain part of the repository history.
 
 The Extended MVP packages remain visible as the closed historical phase that established the current working baseline.
 
-Post-closure packages should now be read as hardening, operational-readiness, productization, or selective-expansion candidates above that closed phase.
+Current packages should now be read against the usable-subsystem phase lens, with the older closure work kept visible as historical foundation.
 
 | PM Order | Work Package | Purpose | Activation State | Priority | Detailed File |
 | --- | --- | --- | --- | --- | --- |
@@ -319,13 +331,13 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 
 ## Immediate PM Backlog
 
-These are the work-package groups PM should treat as the current actionable post-closure backlog categories:
+These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
 1. residual-driven hardening after the now-implemented `WP50` to `WP54` architecture/frontend chain, starting with hardware audit/logging
 2. CLI help/documentation polish once the hardware audit slice is cleared
 3. new recording append / IPC work only after the open operational-readiness WPs are cleared
 
-Current prepared post-closure sequence:
+Current prepared usable-subsystem sequence:
 
 - `WP50 Display Geometry Service Extraction` implemented on the integrated architecture baseline
 - `WP51 Shared Preview Interaction Command Layer` implemented on the current branch
@@ -492,33 +504,34 @@ Current activation note:
 - `WP28` is now landed as the narrow capability-aware ROI constraint reporting follow-up
 - this layer is now historical continuity, not the default active planning lens
 
-### Layer 4: Post-Closure Python Baseline
+### Layer 4: Usable Camera Subsystem / Pre-Product Baseline
 
 Goal:
 
-- operate from the now-usable Python working baseline
-- prioritize hardening, operational readiness, controlled productization, and selective expansion
+- operate from the now-usable camera/acquisition subsystem baseline
+- prioritize local usability, host-side usability, and official reference scenarios before broader expansion
 - only open new technical slices when they are justified by concrete residuals, operational friction, or a deliberate new scope decision
 
 Primary work types in this layer:
 
-1. `Hardening`
-   - remaining lifecycle or diagnostics hardening
-   - bounded reliability polish
-   - real-use friction removal without broad redesign
-2. `Operational readiness`
-   - clearer docs, startup paths, packaging, and operating rules
-   - clearer stable contracts and activation boundaries
-3. `Selective expansion`
-   - selective API, offline, frontend, or measurement follow-up only when justified
-4. `Later product / handover preparation`
-   - preserve broader C# handover, productization, additional frontend work, and wider hardware / deployment scope as the next larger horizon rather than the default immediate stream
+1. `Local usability`
+   - reduce remaining operator friction in the wx shell
+   - keep OpenCV as fallback/reference rather than the long-term shell
+2. `Host-side usability`
+   - keep the command/status/result surface practical for AMB-side use
+   - tighten host-visible behavior before broad transport expansion
+3. `Official reference scenarios`
+   - preserve snapshot, bounded recording, and interval capture as anchor flows
+   - use those flows as examples and confidence scenarios
+4. `Headless preparation after usability`
+   - prepare the next shared kernel only after the subsystem is locally and host-side usable enough
+
 ### Layer 5: Later Breadth Expansion
 
 Goal:
 
 - keep later breadth visible without letting it outrun the closure phase
-- only reopen broader frontend, transport, tracking, or handover expansion after the post-closure baseline hardening priorities are explicitly judged ready for it
+- only reopen broader frontend, transport, tracking, MCP-oriented, or handover expansion after the usable-subsystem priorities are explicitly judged ready for it
 
 Detailed work-package files:
 
@@ -587,8 +600,8 @@ When a fresh agent is not explicitly assigned a package:
 2. read `docs/SESSION_START.md`
 3. read `docs/MODULE_INDEX.md`
 4. read `docs/WORKPACKAGES.md`
-5. choose the package marked `current next`, unless the user or current branch scope clearly overrides it; if no package is marked `current next`, derive the next smallest justified post-closure slice from concrete residuals or the user's explicit direction
-6. if that package does not yet have a detailed session file, derive the narrowest execution-ready session work-package file from the selected post-closure need or explicitly chosen expansion lane before implementation
+5. choose the package marked `current next`, unless the user or current branch scope clearly overrides it; if no package is marked `current next`, derive the next smallest justified usable-subsystem slice from concrete residuals or the user's explicit direction
+6. if that package does not yet have a detailed session file, derive the narrowest execution-ready session work-package file from the selected usable-subsystem need or explicitly chosen expansion lane before implementation
 7. otherwise open that package's detailed `docs/session_workpackages/wpXX_*.md` file before implementation
 
 ## Detailed Package Inventory
@@ -658,7 +671,7 @@ The repository currently has explicit detailed session work-package files for th
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
-New detailed execution-ready files should now be created only when a concrete post-closure hardening, productization, or selective-expansion slice is actually chosen.
+New detailed execution-ready files should now be created only when a concrete usable-subsystem, headless-preparation, or later-expansion slice is actually chosen.
 
 Current explicit activation:
 
@@ -718,7 +731,7 @@ When PM activates one package from this file:
 
 1. choose one item from the current recommended order
 2. if a detailed file already exists, use it as the execution source
-3. if the selected package is a new post-closure need without a detailed file yet, first create one narrow execution-ready session work-package file for that slice
+3. if the selected package is a new usable-subsystem need without a detailed file yet, first create one narrow execution-ready session work-package file for that slice
 4. refine progress, sub-work-packages, and discoveries inside that detailed file
 5. keep branch scope coherent and narrow
 6. update this file only at the level of order, activation, and dependency changes

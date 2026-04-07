@@ -1,5 +1,27 @@
 # Codex-Agent Briefing – Reorganisation des bestehenden Kamera-Stream-Repos zur modularen Vision-Plattform
 
+## Historische Einordnung und heutige Nutzung
+
+Dieses Dokument beschreibt die urspruengliche Reorganisations- und Aufbauphase des Repositories.
+
+Diese Phase ist heute historischer Kontext und nicht mehr die aktive Planungsbrille fuer neue Arbeit.
+
+Der aktuelle Projektfokus ist jetzt:
+
+- `Usable Camera Subsystem / Pre-Product Baseline`
+- praktische lokale Nutzbarkeit
+- praktische Host-Nutzbarkeit
+- kleine offizielle Referenzszenarien wie Snapshot, bounded recording und interval capture
+- erst danach die Vorbereitung eines wirklich headless faehigen Kerns
+
+Fuer aktuelle Priorisierung gelten daher primaer:
+
+- `docs/WORKPACKAGES.md`
+- `docs/STATUS.md`
+- `docs/GlobalRoadmap.md`
+
+Dieses Dokument bleibt wertvoll, aber als Herkunfts- und Strukturhintergrund, nicht als aktive Priorisierungsquelle.
+
 ## Ziel
 
 Das bestehende Python-Repository enthält bereits funktionierende Teile für Kamerastream, Livebildanzeige und Bildspeicherung. Dieses Repository soll **nicht** durch ein separates neues Projekt ersetzt werden, sondern als Grundlage für eine **modulare Vision-Plattform** weiterentwickelt werden.

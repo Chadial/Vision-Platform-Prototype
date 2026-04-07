@@ -4,6 +4,24 @@
 
 Ziel des Projekts ist die Entwicklung einer modularen Bildverarbeitungs- und Kameraplattform zur Aufnahme, Anzeige, Analyse und Weiterverarbeitung von Livebilddaten. Die Plattform soll sowohl als prototypisches Entwicklungswerkzeug als auch als Grundlage für spätere produktionsnähere Anwendungen dienen.
 
+Die aktuelle Projektphase ist jedoch nicht mehr die fruehe Reorganisations- oder MVP-Aufbauphase. Das Repository ist inzwischen besser als ein `frueher Prototyp` beschrieben durch:
+
+- ein praktisch nutzbares Kamera- und Aufnahmesubsystem
+- eine bounded hardware-validierte Referenz auf dem getesteten Kamerapfad
+- einen host-neutralen Command-/Status-/Result-Kern
+- einen ersten bounded wxPython-Arbeitsshell-Pfad oberhalb desselben Kerns
+
+Die aktive Planungsbrille ist daher jetzt:
+
+**Usable Camera Subsystem / Pre-Product Baseline**
+
+In dieser Phase soll das Projekt:
+
+- als realer Ersatzpfad fuer die aktuelle teure Drittsoftware wachsen
+- praktisch vom AMB-Steuersystem aus nutzbar werden
+- als erstes Referenzmodul fuer ein spaeteres assisted-measurement System dienen
+- erst nach ausreichender lokaler und host-seitiger Nutzbarkeit den naechsten strukturellen Schritt zu einem wirklich headless Kernel vorbereiten
+
 Im Zentrum stehen folgende Funktionen:
 
 - Initialisierung und Parametrierung einer Kamera
@@ -66,6 +84,7 @@ Das Projekt entwickelt sich damit von einem isolierten Kamera- oder Bildverarbei
 
 ### 3.3 Langfristige Ziele
 
+- ein praktisch nutzbares Kamera-/Acquisition-Subsystem als Referenzbaustein fuer weitere Mess- und Analysefunktionen etablieren
 - Ausbau zu einer Desktop-Anwendung mit robusterer UI
 - zusätzliche Webstream-/Browser-basierte Darstellung
 - mobile oder tabletbasierte Ansichten
@@ -87,6 +106,15 @@ Folgende Punkte sind derzeit **nicht** primäre Ziele der ersten Ausbaustufe:
 - KI-basierte oder datengetriebene Rissdetektion in der ersten Phase
 - umfassende Multi-User- oder Cloud-Infrastruktur
 - vollständige Produktionsintegration aller Hardwarekopplungen in der ersten Stufe
+
+In der aktuellen Phase sind zusaetzlich ausdruecklich nicht die primaeren Treiber:
+
+- breite Web/API-Plattformarbeit als Selbstzweck
+- breite MCP-orientierte Expansion
+- vollstaendige Produktverpackung
+- vollstaendige C#-Uebergabe
+- breite Offline-Workstation-Expansion
+- ein Wiedereroeffnen der fruehen MVP-Closeout-Logik
 
 Das Projekt wird bewusst schrittweise aufgebaut. Zunächst stehen funktionale Prototypen, tragfähige Architekturprinzipien und modulare Kernlogik im Vordergrund.
 
@@ -650,3 +678,9 @@ Das Projekt gilt in einer ersten Stufe als erfolgreich, wenn folgende Punkte erf
 Das Vorhaben ist kein einzelnes kleines Bildverarbeitungsskript mehr, sondern die Grundlage für eine modulare Vision-Plattform. Der erste Schwerpunkt liegt auf einem tragfähigen Kern aus Kamerastream, interaktiver Anzeige, ROI-basierter Fokusbewertung und strukturierter Erweiterbarkeit. Darauf aufbauend sollen weitere Module für Kantenanalyse, Tracking, API-Ausgabe, Postprocessing und spätere Frontends folgen.
 
 Entscheidend ist, das Projekt von Beginn an nicht als monolithisches Tool, sondern als Sammlung klar abgegrenzter, gemeinsam nutzbarer Teilkomponenten zu verstehen.
+
+Fuer die aktuelle Projektphase bedeutet das konkreter:
+
+- jetzt: lokale Nutzbarkeit, Host-Nutzbarkeit und kleine offizielle Referenzszenarien
+- danach: Vorbereitung eines wirklich headless Kerns
+- spaeter: Ausbau zur groesseren assisted-measurement Plattform mit Analyse, Audit, Simulation, Statistik und weitergehender Orchestrierung

@@ -31,7 +31,31 @@ Current master-roadmap interpretation:
 
 - the repository now has a usable Python working baseline on the tested hardware path
 - the former Extended MVP closure concern is no longer the active planning lens
-- near-term work should now emphasize post-closure hardening, operational readiness, and selective expansion
+- near-term work should now emphasize practical subsystem usability before broader platform expansion
+
+## Current Active Phase
+
+Within this master roadmap, the active repository-level phase is now:
+
+**Usable Camera Subsystem / Pre-Product Baseline**
+
+Meaning:
+
+- treat the camera software as a practically usable subsystem rather than as an MVP proof artifact
+- make the wx shell the primary local working path, with OpenCV kept as fallback/reference
+- make the host-neutral command/status/result surface practically usable from the AMB control side
+- preserve a small set of official reference scenarios such as snapshot, bounded recording, and interval capture
+- use that usable subsystem as the first reference module for a later assisted measurement system
+- treat a truly headless kernel as the next structural step after local and host usability are real enough
+
+This active phase is not primarily about:
+
+- broad web or API platform expansion
+- broad MCP-oriented build-out
+- full product packaging
+- full C# handover
+- broad offline workstation expansion
+- reopening the old MVP-closure logic
 
 ## Master Phases
 
@@ -185,9 +209,9 @@ Turn the repository from a camera-centric code package into an explicitly modula
 
 ## Recommended Next Platform Steps
 
-1. Run the current Python baseline against real camera hardware again.
-2. Add a first real focus metric on top of the new foundation modules.
-3. Structure the next OpenCV prototype UI block around status bar, crosshair, ROI tools, and the operator-facing menu/control band.
-4. Decide how ROI objects should enter preview and snapshot workflows without mixing UI and analysis responsibilities.
-5. Expand tests to cover the `vision_platform` namespace as the preferred future import surface.
-6. After that, move selected implementation files physically behind the already established platform module boundaries.
+1. Improve the wx shell as the primary local working frontend while keeping OpenCV as the fallback/reference path.
+2. Improve host-side usability through the shared command/status/result surface instead of opening broad transport work by default.
+3. Preserve snapshot, bounded recording, and interval capture as official reference scenarios with clear operational confidence value.
+4. Use those usable scenarios to guide the next shell and host-sync slices, including the current open-shell live-sync work.
+5. After local and host usability are strong enough, prepare the next structural step: a truly headless kernel shared by UI, host control, and later automation flows.
+6. Keep the broader assisted-measurement system direction visible, but treat it as later platform growth rather than the current default lane.
