@@ -51,7 +51,7 @@ class FileNamingTests(unittest.TestCase):
         )
         self.assertEqual(build_recording_log_path(request), Path("captures/series_recording_log.csv"))
 
-    def test_build_recording_log_path_for_run_adds_start_index_suffix_for_continuation(self) -> None:
+    def test_build_recording_log_path_for_run_reuses_deterministic_path_for_continuation(self) -> None:
         request = RecordingRequest(
             save_directory=Path("captures"),
             file_stem="series",
@@ -60,7 +60,7 @@ class FileNamingTests(unittest.TestCase):
         )
         self.assertEqual(
             build_recording_log_path_for_run(request, start_frame_index=12),
-            Path("captures/series_recording_log_000012.csv"),
+            Path("captures/series_recording_log.csv"),
         )
 
     def test_resolve_next_recording_frame_index_uses_existing_files(self) -> None:

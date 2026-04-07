@@ -271,19 +271,22 @@ class RecordingService:
         if request.create_directories:
             log_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self._recording_log_handle = log_path.open("w", newline="", encoding="utf-8")
+        is_new_log = not log_path.exists() or log_path.stat().st_size == 0
+        self._recording_log_handle = log_path.open("a", newline="", encoding="utf-8")
         self._recording_log_writer = csv.writer(self._recording_log_handle)
         session_configuration = self._configuration_provider() if self._configuration_provider is not None else None
+        self._recording_log_handle.write("# run.start\n")
         for key, value in self._build_recording_log_metadata(request, session_configuration):
             self._recording_log_handle.write(f"# {key}: {value}\n")
-        self._recording_log_writer.writerow(
-            [
-                "image_name",
-                "frame_id",
-                "camera_timestamp",
-                "system_timestamp_utc",
-            ]
-        )
+        if is_new_log:
+            self._recording_log_writer.writerow(
+                [
+                    "image_name",
+                    "frame_id",
+                    "camera_timestamp",
+                    "system_timestamp_utc",
+                ]
+            )
         self._recording_log_handle.flush()
 
     def _open_traceability_log(self, request: RecordingRequest) -> None:
@@ -443,6 +446,14 @@ class RecordingService:
             session_end_utc = self._current_system_time_utc() if active_request is not None else None
             end_state = "failed" if final_status.last_error else "completed"
             completed_run_id = self._trace_run_id
+            if active_request is not None:
+                self._write_recording_log_run_end(
+                    frames_written=final_status.frames_written,
+                    dropped_frames=final_status.dropped_frames,
+                    last_error=final_status.last_error,
+                    end_state=end_state,
+                    session_end_utc=session_end_utc,
+                )
             if active_request is not None and self._trace_log_path is not None and self._trace_run_id is not None:
                 try:
                     with trace_write_lock():
@@ -531,3 +542,22 @@ class RecordingService:
             system_timestamp_utc=self._first_frame_system_timestamp_utc,
         )
         self._first_frame_anchor_written_to_trace_log = True
+
+    def _write_recording_log_run_end(
+        self,
+        *,
+        frames_written: int,
+        dropped_frames: int,
+        last_error: str | None,
+        end_state: str,
+        session_end_utc: str | None,
+    ) -> None:
+        if self._recording_log_handle is None:
+            return
+        self._recording_log_handle.write("# run.end\n")
+        self._recording_log_handle.write(f"# run.system_end_timestamp_utc: {session_end_utc or ''}\n")
+        self._recording_log_handle.write(f"# run.end_state: {end_state}\n")
+        self._recording_log_handle.write(f"# run.frames_written: {frames_written}\n")
+        self._recording_log_handle.write(f"# run.dropped_frames: {dropped_frames}\n")
+        self._recording_log_handle.write(f"# run.last_error: {last_error or ''}\n")
+        self._recording_log_handle.flush()

@@ -19,7 +19,7 @@ Tighten the remaining recording-log policy so reused save directories and repeat
 ## Branch
 
 - intended branch: `feature/recording-log-policy-alignment`
-- activation state: prepared
+- activation state: landed
 
 ## Scope
 
@@ -42,3 +42,4 @@ Excluded:
 - repeated recording into the same save directory follows one explicit and documented log policy
 - the resulting policy is covered by local unit tests
 - traceability and recording-log responsibilities stay easy to distinguish
+- local validation passed with `.\.venv\Scripts\python.exe -m unittest tests.test_file_naming tests.test_recording_service tests.test_snapshot_service`
