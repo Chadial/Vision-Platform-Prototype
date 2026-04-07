@@ -3,14 +3,25 @@ from __future__ import annotations
 import argparse
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
+import sys
 from time import monotonic
+from typing import Sequence
 
 from camera_app.logging.log_service import configure_logging
 from vision_platform.libraries.roi_core import roi_bounds
-from vision_platform.models import SaveSnapshotRequest
+from vision_platform.models import ApplyConfigurationRequest, SaveSnapshotRequest, SetSaveDirectoryRequest
 from vision_platform.models import StartRecordingRequest, StopRecordingRequest
 from vision_platform.services.display_service import PreviewInteractionCommand, format_focus_score
 
+from vision_platform.apps.local_shell.control_cli import main as run_local_shell_control_cli
+from vision_platform.apps.local_shell.live_command_sync import (
+    LocalShellLiveCommand,
+    close_live_sync_session,
+    read_pending_live_commands,
+    to_serializable,
+    write_live_command_result,
+    write_live_status_snapshot,
+)
 from vision_platform.apps.local_shell.preview_shell_state import PreviewShellPresenter, PreviewShellViewModel
 from vision_platform.apps.local_shell.startup import (
     LocalShellLaunchOptions,
@@ -223,6 +234,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_active_frame_limit: int | None = None
         self._recording_target_frame_rate_value: float | None = None
         self._recording_last_summary: str | None = None
+        self._live_sync_processed_count = 0
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
 
@@ -308,8 +320,10 @@ class WxLocalPreviewShell(wx.Frame):
         if self._status.GetValue() != status_text:
             self._status.ChangeValue(status_text)
         self._update_recording_controls(status)
+        self._publish_live_status_snapshot(status, focus_summary=focus_summary, recording_summary=recording_summary)
 
     def _on_timer(self, event) -> None:
+        self._poll_live_commands()
         self.request_refresh()
 
     def _on_snapshot(self, event) -> None:
@@ -422,6 +436,8 @@ class WxLocalPreviewShell(wx.Frame):
         finally:
             self._focus_executor.shutdown(wait=False, cancel_futures=True)
             self._subsystem.driver.shutdown()
+            if self._session.live_sync_session is not None:
+                close_live_sync_session(self._session.live_sync_session)
 
     def _get_status(self):
         now = monotonic()
@@ -599,6 +615,128 @@ class WxLocalPreviewShell(wx.Frame):
             raise ValueError("value must be positive")
         return parsed
 
+    def _poll_live_commands(self) -> None:
+        live_sync_session = self._session.live_sync_session
+        if live_sync_session is None:
+            return
+        commands, processed_count = read_pending_live_commands(
+            live_sync_session,
+            processed_count=self._live_sync_processed_count,
+        )
+        self._live_sync_processed_count = processed_count
+        for command in commands:
+            try:
+                result = self._execute_live_command(command)
+            except Exception as exc:
+                write_live_command_result(
+                    live_sync_session,
+                    command_id=command.command_id,
+                    success=False,
+                    error=str(exc),
+                )
+                self._set_transient_status_message(f"External command failed: {command.command_name}")
+                continue
+            write_live_command_result(
+                live_sync_session,
+                command_id=command.command_id,
+                success=True,
+                result=result,
+            )
+
+    def _execute_live_command(self, command: LocalShellLiveCommand) -> dict:
+        controller = self._session.subsystem.command_controller
+        payload = command.payload
+
+        if command.command_name == "apply_configuration":
+            result = controller.apply_configuration(
+                ApplyConfigurationRequest(
+                    exposure_time_us=payload.get("exposure_time_us"),
+                    gain=payload.get("gain"),
+                    pixel_format=payload.get("pixel_format"),
+                    acquisition_frame_rate=payload.get("acquisition_frame_rate"),
+                    roi_offset_x=payload.get("roi_offset_x"),
+                    roi_offset_y=payload.get("roi_offset_y"),
+                    roi_width=payload.get("roi_width"),
+                    roi_height=payload.get("roi_height"),
+                )
+            )
+            self._cached_focus_state = None
+            self._set_transient_status_message("External configuration applied")
+        elif command.command_name == "set_save_directory":
+            result = controller.set_save_directory(
+                SetSaveDirectoryRequest(
+                    base_directory=Path(payload["base_directory"]),
+                    mode=payload.get("mode", "append"),
+                    subdirectory_name=payload.get("subdirectory_name"),
+                )
+            )
+            self._session.selected_save_directory = result.selected_directory
+            self._set_transient_status_message(f"External save directory: {result.selected_directory}")
+        elif command.command_name == "save_snapshot":
+            result = controller.save_snapshot(
+                SaveSnapshotRequest(
+                    file_stem=payload.get("file_stem", "wx_shell_snapshot"),
+                    file_extension=payload.get("file_extension", ".bmp"),
+                    camera_id=self._session.resolved_camera_id,
+                    configuration_profile_id=self._session.configuration_profile_id,
+                    configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+                )
+            )
+            self._set_transient_status_message(f"External snapshot saved: {result.saved_path.name}")
+        elif command.command_name == "start_recording":
+            result = controller.start_recording(
+                StartRecordingRequest(
+                    file_stem=payload.get("file_stem", "wx_recording"),
+                    file_extension=payload.get("file_extension", ".raw"),
+                    save_directory=self._get_recording_save_directory(),
+                    max_frame_count=payload.get("max_frame_count"),
+                    target_frame_rate=payload.get("target_frame_rate"),
+                    camera_id=self._session.resolved_camera_id,
+                    configuration_profile_id=self._session.configuration_profile_id,
+                    configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+                )
+            )
+            self._recording_active_frame_limit = payload.get("max_frame_count")
+            self._recording_target_frame_rate_value = payload.get("target_frame_rate")
+            self._recording_last_summary = None
+            self._set_transient_status_message(
+                f"External recording started: {result.status.active_file_stem or payload.get('file_stem', 'wx_recording')}"
+            )
+        elif command.command_name == "stop_recording":
+            result = controller.stop_recording(
+                StopRecordingRequest(reason=payload.get("reason", "external_cli"))
+            )
+            self._recording_last_summary = self._format_recording_summary(
+                frames_written=result.status.frames_written,
+                frame_limit=self._recording_active_frame_limit,
+            )
+            self._recording_active_frame_limit = None
+            self._set_transient_status_message(f"External recording stopped: {result.status.frames_written} frames")
+        else:
+            raise RuntimeError(f"Unsupported live command '{command.command_name}'.")
+
+        self._cached_status = None
+        self._last_status_refresh_time = 0.0
+        return {"command": command.command_name, "result": to_serializable(result)}
+
+    def _publish_live_status_snapshot(self, status, *, focus_summary: str | None, recording_summary: str | None) -> None:
+        live_sync_session = self._session.live_sync_session
+        if live_sync_session is None:
+            return
+        write_live_status_snapshot(
+            live_sync_session,
+            {
+                "session_id": live_sync_session.session_id,
+                "source": self._session.source,
+                "camera_id": self._session.resolved_camera_id,
+                "configuration_profile_id": self._session.configuration_profile_id,
+                "focus_summary": focus_summary,
+                "recording_summary": recording_summary,
+                "status_lines": self._status_lines,
+                "status": to_serializable(status),
+            },
+        )
+
 
 def run_wx_preview_shell(
     *,
@@ -617,6 +755,7 @@ def run_wx_preview_shell(
     roi_width: int | None = None,
     roi_height: int | None = None,
     snapshot_directory: Path = Path("captures/wx_shell_snapshot"),
+    live_sync_directory: Path = Path("captures/wx_shell_sessions"),
     poll_interval_seconds: float = 0.03,
 ) -> int:
     session = build_local_shell_session(
@@ -636,6 +775,7 @@ def run_wx_preview_shell(
             roi_width=roi_width,
             roi_height=roi_height,
             snapshot_directory=snapshot_directory,
+            live_sync_directory=live_sync_directory,
             poll_interval_seconds=poll_interval_seconds,
         )
     )
@@ -705,6 +845,12 @@ def _build_argument_parser() -> argparse.ArgumentParser:
         help="Repo-local directory used by the snapshot button.",
     )
     parser.add_argument(
+        "--live-sync-directory",
+        type=Path,
+        default=Path("captures/wx_shell_sessions"),
+        help="Repo-local directory used for the bounded open-shell command sync session.",
+    )
+    parser.add_argument(
         "--poll-interval-seconds",
         type=float,
         default=0.03,
@@ -713,10 +859,13 @@ def _build_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     configure_logging()
+    args_list = list(argv) if argv is not None else sys.argv[1:]
+    if args_list and args_list[0] == "control":
+        return run_local_shell_control_cli(args_list[1:])
     parser = _build_argument_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args_list)
     if args.source == "hardware" and args.sample_dir is not None:
         parser.error("--sample-dir is only valid for --source simulated.")
     return run_wx_preview_shell(
@@ -735,6 +884,7 @@ def main() -> int:
         roi_width=args.roi_width,
         roi_height=args.roi_height,
         snapshot_directory=args.snapshot_directory,
+        live_sync_directory=args.live_sync_directory,
         poll_interval_seconds=args.poll_interval_seconds,
     )
 

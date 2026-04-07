@@ -12,6 +12,10 @@ from vision_platform.apps.camera_cli.camera_configuration_profiles import (
     normalize_camera_class_name,
     resolve_camera_configuration_profile,
 )
+from vision_platform.apps.local_shell.live_command_sync import (
+    LocalShellLiveSyncSession,
+    create_live_sync_session,
+)
 from vision_platform.libraries.common_models import FocusMethod
 from vision_platform.models import ApplyConfigurationRequest, CameraStatus, SetSaveDirectoryRequest
 from vision_platform.services.stream_service import FocusPreviewService
@@ -35,6 +39,7 @@ class LocalShellLaunchOptions:
     roi_height: int | None = None
     focus_method: FocusMethod | None = "laplace"
     snapshot_directory: Path = Path("captures/wx_shell_snapshot")
+    live_sync_directory: Path = Path("captures/wx_shell_sessions")
     poll_interval_seconds: float = 0.03
 
 
@@ -47,6 +52,7 @@ class LocalShellSession:
     focus_preview_service: FocusPreviewService | None = None
     configuration_profile_id: str | None = None
     configuration_profile_camera_class: str | None = None
+    live_sync_session: LocalShellLiveSyncSession | None = None
 
 
 @dataclass(slots=True)
@@ -80,6 +86,12 @@ def build_local_shell_session(
                 mode="append",
             )
         ).selected_directory
+        live_sync_session = create_live_sync_session(
+            root_directory=options.live_sync_directory,
+            source=options.source,
+            camera_id=resolved_camera_id,
+            configuration_profile_id=profile_identity[0] if profile_identity is not None else None,
+        )
         return LocalShellSession(
             subsystem=subsystem,
             source=options.source,
@@ -88,6 +100,7 @@ def build_local_shell_session(
             focus_preview_service=focus_preview_service,
             configuration_profile_id=profile_identity[0] if profile_identity is not None else None,
             configuration_profile_camera_class=profile_identity[1] if profile_identity is not None else None,
+            live_sync_session=live_sync_session,
         )
     except Exception:
         subsystem.driver.shutdown()
