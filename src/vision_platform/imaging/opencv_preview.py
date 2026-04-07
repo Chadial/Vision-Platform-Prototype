@@ -13,9 +13,17 @@ from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.services.display_service import (
     CoordinateExportService,
     DisplayGeometryService,
+    PreviewFocusStatusModel,
     PreviewInteractionCommand,
+    PreviewInteractionOutcome,
     PreviewInteractionService,
     PreviewInteractionState,
+    PreviewOverlayModel,
+    PreviewRoiStatusModel,
+    PreviewShortcutHint,
+    PreviewStatusLineModel,
+    PreviewStatusModel,
+    PreviewStatusModelService,
     ZoomPanState,
 )
 from vision_platform.services.stream_service.preview_service import PreviewService
@@ -41,6 +49,7 @@ class OpenCvPreviewWindow:
         coordinate_export_service: CoordinateExportService | None = None,
         geometry_service: DisplayGeometryService | None = None,
         interaction_service: PreviewInteractionService | None = None,
+        status_model_service: PreviewStatusModelService | None = None,
         zoom_step: float = 1.5,
         min_zoom_scale: float = 0.05,
         max_zoom_scale: float = 8.0,
@@ -57,6 +66,7 @@ class OpenCvPreviewWindow:
         self._coordinate_export_service = coordinate_export_service or CoordinateExportService()
         self._geometry_service = geometry_service or DisplayGeometryService()
         self._interaction_service = interaction_service or PreviewInteractionService(self._geometry_service)
+        self._status_model_service = status_model_service or PreviewStatusModelService()
         self._zoom_step = zoom_step
         self._min_zoom_scale = min_zoom_scale
         self._max_zoom_scale = max_zoom_scale
@@ -84,7 +94,8 @@ class OpenCvPreviewWindow:
         image = self._frame_adapter.to_image(frame)
         window_size = self._frame_adapter.get_window_image_size(self._window_name) or (frame.width, frame.height)
         self._record_render_timestamp()
-        status_lines = self._build_status_lines()
+        status_model = self._build_status_model()
+        status_lines = self._format_status_lines(status_model)
         status_band_height = self._calculate_status_band_height(status_lines)
         viewport_width = window_size[0]
         viewport_height = max(1, window_size[1] - status_band_height)
@@ -122,11 +133,7 @@ class OpenCvPreviewWindow:
             source_offset_x=viewport_origin[0],
             source_offset_y=viewport_origin[1],
         )
-        self._draw_viewport_outline_if_needed(display_image)
-        crosshair_position = self._map_source_point_to_viewport(self._selected_point)
-        if crosshair_position is not None and self._crosshair_visible:
-            self._frame_adapter.draw_crosshair(display_image, crosshair_position[0], crosshair_position[1])
-        self._draw_roi(display_image)
+        self._render_overlay_model(display_image, self._build_overlay_model())
         display_image = self._frame_adapter.append_status_band(
             display_image,
             status_lines,
@@ -278,36 +285,7 @@ class OpenCvPreviewWindow:
         self._window_created = True
 
     def _build_status_lines(self) -> list[str]:
-        mode = "FIT" if self._geometry_state.fit_to_window else "ZOOM"
-        primary_parts = [f"{mode} {self._last_display_scale:.2f}x"]
-        viewport_text = self._build_viewport_status_text()
-        if viewport_text:
-            primary_parts.append(viewport_text)
-        fps_text = self._build_fps_text()
-        if fps_text:
-            primary_parts.append(fps_text)
-        if self._selected_point is not None:
-            coordinate_text = self._coordinate_export_service.format_point(*self._selected_point)
-            primary_parts.append(coordinate_text)
-        if self._status_warning_provider is not None:
-            warning = self._status_warning_provider()
-            if warning:
-                primary_parts.append(f"WARN: {warning}")
-        if self._last_status_message:
-            primary_parts.append(self._last_status_message)
-        status_lines = [" | ".join(primary_parts)]
-        roi_line = self._build_roi_status_line()
-        if roi_line:
-            status_lines.append(roi_line)
-        focus_line = self._build_focus_status_line()
-        if focus_line:
-            status_lines.append(focus_line)
-        shortcut_line = self.build_shortcut_hint(
-            has_snapshot_shortcut=self._snapshot_callback is not None,
-            has_focus_toggle=self._focus_state_provider is not None,
-        )
-        status_lines.append(shortcut_line)
-        return status_lines
+        return self._format_status_lines(self._build_status_model())
 
     @staticmethod
     def build_shortcut_hint(
@@ -315,14 +293,11 @@ class OpenCvPreviewWindow:
         has_snapshot_shortcut: bool,
         has_focus_toggle: bool,
     ) -> str:
-        shortcut_parts = ["i=in", "o=out", "f=fit"]
-        if has_snapshot_shortcut:
-            shortcut_parts.append("+=snapshot")
-        shortcut_parts.append("x=crosshair")
-        if has_focus_toggle:
-            shortcut_parts.append("y=focus")
-        shortcut_parts.extend(["r=rect", "e=ellipse", "wheel=zoom", "mdrag=pan", "c=copy", "q=quit"])
-        return " ".join(shortcut_parts)
+        shortcut_hints = PreviewStatusModelService.build_shortcut_hints(
+            has_snapshot_shortcut=has_snapshot_shortcut,
+            has_focus_toggle=has_focus_toggle,
+        )
+        return OpenCvPreviewWindow._format_shortcut_hints(shortcut_hints)
 
     def _calculate_status_band_height(self, status_lines: list[str]) -> int:
         visible_lines = [line for line in status_lines if line]
@@ -333,7 +308,7 @@ class OpenCvPreviewWindow:
     def _record_render_timestamp(self) -> None:
         self._frame_render_timestamps.append(self._time_provider())
 
-    def _build_fps_text(self) -> str | None:
+    def _calculate_fps(self) -> float | None:
         if len(self._frame_render_timestamps) < 2:
             return None
 
@@ -341,43 +316,42 @@ class OpenCvPreviewWindow:
         if elapsed <= 0:
             return None
 
-        fps = (len(self._frame_render_timestamps) - 1) / elapsed
-        return f"FPS {fps:.1f}"
+        return (len(self._frame_render_timestamps) - 1) / elapsed
 
-    def _build_viewport_status_text(self) -> str | None:
-        if self._geometry_state.fit_to_window:
-            return None
-        origin = self._geometry_state.viewport_origin_scaled
-        return f"view={origin[0]},{origin[1]}"
+    def _build_status_model(self) -> PreviewStatusModel:
+        focus_state = self._focus_state_provider() if self._focus_state_provider is not None else None
+        selected_point_text = None
+        if self._selected_point is not None:
+            selected_point_text = self._coordinate_export_service.format_point(*self._selected_point)
+        warning = self._status_warning_provider() if self._status_warning_provider is not None else None
+        return self._status_model_service.build_status_model(
+            fit_to_window=self._geometry_state.fit_to_window,
+            display_scale=self._last_display_scale,
+            viewport_origin_scaled=self._geometry_state.viewport_origin_scaled,
+            fps=self._calculate_fps(),
+            selected_point=self._selected_point,
+            selected_point_text=selected_point_text,
+            warning=warning,
+            transient_message=self._last_status_message,
+            has_focus_provider=self._focus_state_provider is not None,
+            focus_status_visible=self._focus_status_visible,
+            focus_state=focus_state,
+            roi_mode=self._roi_mode,
+            roi_anchor_point=self._roi_anchor_point,
+            roi_preview_point=self._roi_preview_point,
+            active_roi=self._get_active_roi(),
+            has_snapshot_shortcut=self._snapshot_callback is not None,
+            has_focus_toggle=self._focus_state_provider is not None,
+        )
 
-    def _build_focus_status_line(self) -> str | None:
-        if not self._focus_status_visible or self._focus_state_provider is None:
-            return None
-
-        focus_state = self._focus_state_provider()
-        if focus_state is None:
-            return "Focus: waiting"
-        if not focus_state.result.is_valid:
-            return f"Focus: invalid ({focus_state.result.metric_name})"
-        return f"Focus: {focus_state.result.metric_name}={focus_state.result.score:.2f}"
-
-    def _build_roi_status_line(self) -> str | None:
-        if self._roi_anchor_point is not None and self._roi_mode is not None:
-            base_line = f"ROI mode: {self._roi_mode} anchor={self._coordinate_export_service.format_point(*self._roi_anchor_point)}"
-            if self._roi_preview_point is not None:
-                preview_text = self._coordinate_export_service.format_point(*self._roi_preview_point)
-                return f"{base_line} preview={preview_text}"
-            return base_line
-        active_roi = self._get_active_roi()
-        if active_roi is not None:
-            return f"ROI active: {active_roi.shape}"
-        if self._roi_mode is None:
-            return None
-        if self._roi_mode == "rectangle":
-            return "ROI mode: rectangle (entry point active)"
-        if self._roi_mode == "ellipse":
-            return "ROI mode: ellipse (entry point active)"
-        return f"ROI mode: {self._roi_mode}"
+    def _build_overlay_model(self) -> PreviewOverlayModel:
+        return self._status_model_service.build_overlay_model(
+            crosshair_visible=self._crosshair_visible,
+            selected_point=self._selected_point,
+            draft_roi=self._build_draft_roi(),
+            active_roi=self._get_active_roi(),
+            show_viewport_outline=self._should_draw_viewport_outline(),
+        )
 
     def _handle_shortcuts(self, pressed_key: int) -> None:
         normalized_key = pressed_key & 0xFF
@@ -476,24 +450,90 @@ class OpenCvPreviewWindow:
         points = (anchor_point, selected_point)
         return RoiDefinition(roi_id="preview-roi", shape="rectangle", points=points)
 
-    def _draw_roi(self, display_image) -> None:
-        draft_roi = self._build_draft_roi()
-        if draft_roi is not None:
-            self._draw_roi_definition(display_image, draft_roi)
-        active_roi = self._get_active_roi()
-        if active_roi is not None:
-            self._draw_roi_definition(display_image, active_roi)
+    def _render_overlay_model(self, display_image, overlay_model: PreviewOverlayModel) -> None:
+        if overlay_model.show_viewport_outline:
+            self._draw_viewport_outline(display_image)
+        crosshair_position = self._map_source_point_to_viewport(overlay_model.crosshair_point)
+        if crosshair_position is not None:
+            self._frame_adapter.draw_crosshair(display_image, crosshair_position[0], crosshair_position[1])
+        if overlay_model.draft_roi is not None:
+            self._draw_roi_definition(display_image, overlay_model.draft_roi)
+        if overlay_model.active_roi is not None:
+            self._draw_roi_definition(display_image, overlay_model.active_roi)
 
-    def _draw_viewport_outline_if_needed(self, display_image) -> None:
+    def _draw_roi(self, display_image) -> None:
+        self._render_overlay_model(display_image, self._build_overlay_model())
+
+    def _should_draw_viewport_outline(self) -> bool:
+        mapping = self._last_viewport_mapping
+        if mapping is None:
+            return False
+        if mapping.copy_width >= mapping.viewport_width and mapping.copy_height >= mapping.viewport_height:
+            return False
+        return True
+
+    def _draw_viewport_outline(self, display_image) -> None:
         mapping = self._last_viewport_mapping
         if mapping is None:
             return
-        if mapping.copy_width >= mapping.viewport_width and mapping.copy_height >= mapping.viewport_height:
-            return
-
         right = max(0, mapping.copy_width - 1)
         bottom = max(0, mapping.copy_height - 1)
         self._frame_adapter.draw_viewport_outline(display_image, 0, 0, right, bottom)
+
+    def _draw_viewport_outline_if_needed(self, display_image) -> None:
+        if self._should_draw_viewport_outline():
+            self._draw_viewport_outline(display_image)
+
+    def _format_status_lines(self, status_model: PreviewStatusModel) -> list[str]:
+        status_lines = [self._format_status_line_model(status_model.primary_line)]
+        roi_line = self._format_roi_status(status_model.roi_status)
+        if roi_line:
+            status_lines.append(roi_line)
+        focus_line = self._format_focus_status(status_model.focus_status)
+        if focus_line:
+            status_lines.append(focus_line)
+        status_lines.append(self._format_shortcut_hints(status_model.shortcuts))
+        return status_lines
+
+    @staticmethod
+    def _format_status_line_model(line_model: PreviewStatusLineModel) -> str:
+        return " | ".join(entry.value for entry in line_model.entries)
+
+    def _format_roi_status(self, roi_status: PreviewRoiStatusModel | None) -> str | None:
+        if roi_status is None:
+            return None
+        if roi_status.state == "active":
+            return f"ROI active: {roi_status.active_shape}"
+        if roi_status.state == "mode_active":
+            if roi_status.roi_mode == "rectangle":
+                return "ROI mode: rectangle (entry point active)"
+            if roi_status.roi_mode == "ellipse":
+                return "ROI mode: ellipse (entry point active)"
+            return f"ROI mode: {roi_status.roi_mode}"
+        if roi_status.state == "anchor_pending":
+            assert roi_status.roi_mode is not None
+            assert roi_status.anchor_point is not None
+            anchor_text = self._coordinate_export_service.format_point(*roi_status.anchor_point)
+            base_line = f"ROI mode: {roi_status.roi_mode} anchor={anchor_text}"
+            if roi_status.preview_point is None:
+                return base_line
+            preview_text = self._coordinate_export_service.format_point(*roi_status.preview_point)
+            return f"{base_line} preview={preview_text}"
+        return None
+
+    @staticmethod
+    def _format_focus_status(focus_status: PreviewFocusStatusModel | None) -> str | None:
+        if focus_status is None or focus_status.state == "hidden":
+            return None
+        if focus_status.state == "waiting":
+            return "Focus: waiting"
+        if focus_status.state == "invalid":
+            return f"Focus: invalid ({focus_status.metric_name})"
+        return f"Focus: {focus_status.metric_name}={focus_status.score:.2f}"
+
+    @staticmethod
+    def _format_shortcut_hints(shortcut_hints: tuple[PreviewShortcutHint, ...]) -> str:
+        return " ".join(f"{shortcut.key}={shortcut.action}" for shortcut in shortcut_hints)
 
     def _build_draft_roi(self) -> RoiDefinition | None:
         if self._roi_mode is None or self._roi_anchor_point is None or self._roi_preview_point is None:

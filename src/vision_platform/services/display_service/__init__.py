@@ -13,6 +13,16 @@ from vision_platform.services.display_service.preview_interaction_service import
     PreviewInteractionService,
     PreviewInteractionState,
 )
+from vision_platform.services.display_service.preview_status_model_service import (
+    PreviewFocusStatusModel,
+    PreviewOverlayModel,
+    PreviewRoiStatusModel,
+    PreviewShortcutHint,
+    PreviewStatusEntry,
+    PreviewStatusLineModel,
+    PreviewStatusModel,
+    PreviewStatusModelService,
+)
 
 __all__ = [
     "CoordinateExportService",
@@ -22,6 +32,14 @@ __all__ = [
     "PreviewInteractionOutcome",
     "PreviewInteractionService",
     "PreviewInteractionState",
+    "PreviewFocusStatusModel",
+    "PreviewOverlayModel",
+    "PreviewRoiStatusModel",
+    "PreviewShortcutHint",
+    "PreviewStatusEntry",
+    "PreviewStatusLineModel",
+    "PreviewStatusModel",
+    "PreviewStatusModelService",
     "ViewportMapping",
     "ZoomPanState",
 ]

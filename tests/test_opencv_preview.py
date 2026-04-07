@@ -146,6 +146,33 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         self.assertIn("ZOOM 2.00x", status_lines[0])
         self.assertIn("view=40,50", status_lines[0])
 
+    def test_build_status_model_exposes_overlay_and_focus_state_before_formatting(self) -> None:
+        preview_service = MagicMock()
+        focus_state = MagicMock()
+        focus_state.result.is_valid = True
+        focus_state.result.metric_name = "laplace"
+        focus_state.result.score = 12.34
+        window = OpenCvPreviewWindow(
+            preview_service,
+            focus_state_provider=lambda: focus_state,
+        )
+        window._fit_to_window = False
+        window._manual_zoom_scale = 2.0
+        window._last_display_scale = 2.0
+        window._viewport_origin_scaled = (40, 50)
+        window._selected_point = (20, 10)
+        window._last_status_message = "Copied x=20, y=10"
+        window._roi_mode = "rectangle"
+        window._roi_anchor_point = (10, 20)
+        window._roi_preview_point = (40, 60)
+
+        status_model = window._build_status_model()
+
+        self.assertEqual([entry.value for entry in status_model.primary_line.entries[:4]], ["ZOOM 2.00x", "view=40,50", "x=20, y=10", "Copied x=20, y=10"])
+        self.assertEqual(status_model.roi_status.state, "anchor_pending")
+        self.assertEqual(status_model.focus_status.state, "valid")
+        self.assertEqual(status_model.focus_status.metric_name, "laplace")
+
     def test_render_uses_window_height_minus_status_band_for_image_viewport(self) -> None:
         preview_service = MagicMock()
         preview_service.get_latest_frame.return_value = MagicMock(width=320, height=240)
