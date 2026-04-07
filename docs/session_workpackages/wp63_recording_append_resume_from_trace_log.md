@@ -19,7 +19,7 @@ Stop bounded recording and snapshot flows from overwriting prior outputs in reus
 ## Branch
 
 - intended branch: `feature/recording-append-resume`
-- activation state: current next
+- activation state: landed
 
 ## Scope
 
@@ -41,6 +41,19 @@ Excluded:
 
 - start two bounded recordings into the same target directory and confirm that the second run continues numbering instead of overwriting
 - verify that the visible progress can later support `n/n` semantics for append-mode runs
+
+## Implementation Status
+
+Landed on `feature/recording-append-resume` with:
+
+- append/resume-safe snapshot path resolution (`snapshot`, `snapshot_000001`, ...)
+- append/resume-safe recording frame indexing across repeated runs in the same directory and stem
+- recording log naming that keeps first-run compatibility while suffixing continuation logs (`..._recording_log.csv`, then `..._recording_log_000002.csv`, ...)
+- additive recording metadata fields for continuation visibility (`continues_previous_series`, `recording_start_frame_index`)
+
+Validated with:
+
+- `.\.venv\Scripts\python.exe -m unittest tests.test_file_naming tests.test_snapshot_service tests.test_recording_service`
 
 ## Headless Follow-Up Note
 
