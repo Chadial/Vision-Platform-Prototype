@@ -49,7 +49,7 @@ class FileNamingTests(unittest.TestCase):
             file_extension="raw",
             frame_limit=3,
         )
-        self.assertEqual(build_recording_log_path(request), Path("captures/series_recording_log.csv"))
+        self.assertEqual(build_recording_log_path(request), Path("captures/recording_log.csv"))
 
     def test_build_recording_log_path_for_run_reuses_deterministic_path_for_continuation(self) -> None:
         request = RecordingRequest(
@@ -60,7 +60,7 @@ class FileNamingTests(unittest.TestCase):
         )
         self.assertEqual(
             build_recording_log_path_for_run(request, start_frame_index=12),
-            Path("captures/series_recording_log.csv"),
+            Path("captures/recording_log.csv"),
         )
 
     def test_resolve_next_recording_frame_index_uses_existing_files(self) -> None:
@@ -74,6 +74,29 @@ class FileNamingTests(unittest.TestCase):
                 file_extension=".raw",
             )
             self.assertEqual(next_index, 2)
+
+    def test_resolve_next_recording_frame_index_uses_recording_log_rows(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            save_directory = Path(temp_dir)
+            (save_directory / "recording_log.csv").write_text(
+                "\n".join(
+                    [
+                        "image_name,frame_id,camera_timestamp,system_timestamp_utc",
+                        "series_000000.raw,0,1000,2026-04-07T00:00:00+00:00",
+                        "series_000001.raw,1,1001,2026-04-07T00:00:01+00:00",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            self.assertEqual(
+                resolve_next_recording_frame_index(
+                    save_directory=save_directory,
+                    file_stem="series",
+                    file_extension=".raw",
+                ),
+                2,
+            )
 
     def test_build_next_snapshot_path_starts_with_zero_padded_suffix(self) -> None:
         with TemporaryDirectory() as temp_dir:

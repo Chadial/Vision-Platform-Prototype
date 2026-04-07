@@ -20,10 +20,14 @@ from camera_app.validation.request_validation import validate_recording_request
 from vision_platform.services.recording_service.artifact_focus_metadata_producer import ArtifactFocusMetadataProducer
 from vision_platform.services.recording_service.file_naming import (
     build_recording_frame_path,
-    build_recording_log_path_for_run,
     resolve_next_recording_frame_index,
 )
 from vision_platform.services.recording_service.frame_writer import FrameWriter
+from vision_platform.services.recording_service.recording_log import (
+    append_recording_log_row,
+    build_recording_log_path,
+    open_recording_log,
+)
 from vision_platform.services.recording_service.traceability import (
     append_trace_first_frame_anchor,
     append_trace_image_row,
@@ -267,26 +271,15 @@ class RecordingService:
             self._status.last_error = message
 
     def _open_recording_log(self, request: RecordingRequest) -> None:
-        log_path = build_recording_log_path_for_run(request, start_frame_index=self._start_frame_index)
-        if request.create_directories:
-            log_path.parent.mkdir(parents=True, exist_ok=True)
-
-        is_new_log = not log_path.exists() or log_path.stat().st_size == 0
-        self._recording_log_handle = log_path.open("a", newline="", encoding="utf-8")
-        self._recording_log_writer = csv.writer(self._recording_log_handle)
+        log_path = build_recording_log_path(request.save_directory)
+        self._recording_log_handle, self._recording_log_writer, _is_new_log = open_recording_log(
+            log_path,
+            create_directories=request.create_directories,
+        )
         session_configuration = self._configuration_provider() if self._configuration_provider is not None else None
         self._recording_log_handle.write("# run.start\n")
         for key, value in self._build_recording_log_metadata(request, session_configuration):
             self._recording_log_handle.write(f"# {key}: {value}\n")
-        if is_new_log:
-            self._recording_log_writer.writerow(
-                [
-                    "image_name",
-                    "frame_id",
-                    "camera_timestamp",
-                    "system_timestamp_utc",
-                ]
-            )
         self._recording_log_handle.flush()
 
     def _open_traceability_log(self, request: RecordingRequest) -> None:
@@ -374,16 +367,14 @@ class RecordingService:
 
         self._capture_first_frame_anchor(frame)
         self._write_first_frame_anchor_to_recording_log_if_needed()
-
-        self._recording_log_writer.writerow(
-            [
-                image_name,
-                frame.frame_id,
-                frame.camera_timestamp,
-                frame.timestamp_utc.isoformat(),
-            ]
+        append_recording_log_row(
+            self._recording_log_writer,
+            self._recording_log_handle,
+            image_name=image_name,
+            frame_id=frame.frame_id,
+            camera_timestamp=frame.camera_timestamp,
+            system_timestamp_utc=frame.timestamp_utc.isoformat(),
         )
-        self._recording_log_handle.flush()
 
     def _write_traceability_entry(self, image_name: str, frame: CapturedFrame) -> None:
         if self._trace_log_path is None or self._trace_log_stable_context is None or self._trace_run_id is None:

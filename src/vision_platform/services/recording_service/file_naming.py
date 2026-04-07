@@ -8,6 +8,10 @@ from camera_app.validation.request_validation import (
     validate_snapshot_request,
 )
 from vision_platform.models import IntervalCaptureRequest, RecordingRequest, SnapshotRequest
+from vision_platform.services.recording_service.recording_log import (
+    build_recording_log_path as build_artifact_recording_log_path,
+    load_recording_log_image_names,
+)
 from vision_platform.services.recording_service.traceability import load_trace_logs_for_directory
 
 _SNAPSHOT_SUFFIX_RE = re.compile(r"^(?P<stem>.+)_(?P<index>\d+)$")
@@ -79,14 +83,14 @@ def build_recording_log_path(request: RecordingRequest) -> Path:
     validate_recording_request(request)
     if request.save_directory is None:
         raise ValueError("RecordingRequest.save_directory must be set before recording.")
-    return request.save_directory / f"{request.file_stem}_recording_log.csv"
+    return build_artifact_recording_log_path(request.save_directory)
 
 
 def build_recording_log_path_for_run(request: RecordingRequest, *, start_frame_index: int) -> Path:
     validate_recording_request(request)
     if request.save_directory is None:
         raise ValueError("RecordingRequest.save_directory must be set before recording.")
-    return build_recording_log_path(request)
+    return build_artifact_recording_log_path(request.save_directory)
 
 
 def resolve_next_snapshot_index(
@@ -111,6 +115,8 @@ def _iter_known_artifact_names(save_directory: Path):
         for path in save_directory.iterdir():
             if path.is_file():
                 yield path.name
+    for image_name in load_recording_log_image_names(build_artifact_recording_log_path(save_directory)):
+        yield image_name
     if save_directory.exists():
         trace_log_data = load_trace_logs_for_directory(save_directory)
         for image_name in trace_log_data.rows_by_image_name:

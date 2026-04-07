@@ -152,7 +152,7 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertEqual((Path(temp_dir) / "series_000000.raw").read_bytes(), b"\x00")
             self.assertEqual((Path(temp_dir) / "series_000001.raw").read_bytes(), b"\x01")
             self.assertEqual((Path(temp_dir) / "series_000002.raw").read_bytes(), b"\x02")
-            log_path = Path(temp_dir) / "series_recording_log.csv"
+            log_path = Path(temp_dir) / "recording_log.csv"
             log_lines = log_path.read_text(encoding="utf-8").splitlines()
             self.assertIn(f"# save_directory: {temp_dir}", log_lines)
             self.assertIn("# frame_limit: 3", log_lines)
@@ -433,7 +433,7 @@ class RecordingServiceTests(unittest.TestCase):
                     break
                 sleep(0.01)
 
-            log_lines = (Path(temp_dir) / "series_recording_log.csv").read_text(encoding="utf-8").splitlines()
+            log_lines = (Path(temp_dir) / "recording_log.csv").read_text(encoding="utf-8").splitlines()
             self.assertIn("# target_frame_rate: 8.0", log_lines)
             self.assertIn("# roi_x: 11", log_lines)
             self.assertIn("# roi_y: 22", log_lines)
@@ -752,7 +752,8 @@ class RecordingServiceTests(unittest.TestCase):
             self.assertTrue((Path(temp_dir) / "series_000002.raw").exists())
             self.assertTrue((Path(temp_dir) / "series_000003.raw").exists())
 
-            combined_log_lines = (Path(temp_dir) / "series_recording_log.csv").read_text(encoding="utf-8").splitlines()
+            combined_log_lines = (Path(temp_dir) / "recording_log.csv").read_text(encoding="utf-8").splitlines()
+            self.assertFalse((Path(temp_dir) / "series_recording_log.csv").exists())
             self.assertFalse((Path(temp_dir) / "series_recording_log_000002.csv").exists())
             self.assertEqual(combined_log_lines.count("# run.start"), 2)
             self.assertEqual(combined_log_lines.count("# run.end"), 2)
