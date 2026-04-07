@@ -17,6 +17,7 @@ It exists to offer a more practical daily-use local frontend than the current Op
 - simulated or hardware-backed preview window with image area
 - snapshot trigger through the existing command-controller path
 - shared status-line display derived from the extracted preview-status model
+- focus status visibility and toggle using the shared focus-preview service
 - fit/zoom, crosshair, and rectangle/ellipse ROI entry through the shared display-service layers
 - reuse of the same alias, configuration-profile, and configuration-override semantics already used by the camera CLI
 
