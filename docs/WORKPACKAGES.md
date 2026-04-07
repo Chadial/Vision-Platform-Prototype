@@ -372,7 +372,7 @@ Current prepared usable-subsystem sequence:
 - `WP65 wx Recording Settings Guardrails And Format Picker` is now landed
 - `WP66 Recording Timestamp Anchor Alignment` is now landed
 - `WP67 Recording Log Policy Alignment` is now landed
-- `WP68 Unified Artifact Recording Log Append Baseline` is now the current next slice
+- `WP68 Unified Artifact Recording Log Append Baseline` is now landed
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 
 Most recently landed detailed packages:
@@ -610,12 +610,13 @@ The current coarse PM order should be:
 42. treat `WP65` as landed; the wx recording-settings dialog now constrains output format through a picker and aligns default recording output with `.bmp`
 43. treat `WP66` as landed; recording and traceability logs now persist one explicit first-frame camera/system anchor per run while keeping per-image timing rows
 44. treat `WP67` as landed; repeated recording now appends to one deterministic recording log per save directory
-45. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
-46. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
+45. treat `WP68` as landed; snapshot saves and recording runs share one directory-scoped `recording_log.csv`
+46. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+47. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
-`WP68 Unified Artifact Recording Log Append Baseline`
+No package is currently marked `current next`.
 
 Reason:
 
