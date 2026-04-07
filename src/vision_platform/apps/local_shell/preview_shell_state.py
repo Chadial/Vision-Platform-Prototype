@@ -223,6 +223,8 @@ class PreviewShellPresenter:
         self.apply_command(
             PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y)),
         )
+        if self._toggle_locked_anchor_drag_if_active(x, y):
+            return PreviewInteractionOutcome()
         if self._start_anchor_drag_if_hit(x, y):
             return PreviewInteractionOutcome()
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
@@ -236,8 +238,21 @@ class PreviewShellPresenter:
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         if source_point is not None:
             self._update_anchor_drag(source_point)
+        drag_mode = self._state.interaction_state.active_anchor_drag_mode
+        if drag_mode == "pending":
+            anchor_id = self._state.interaction_state.active_anchor_drag_id
+            self._state.interaction_state.active_anchor_drag_mode = "locked"
+            self._state.interaction_state.hovered_anchor_id = anchor_id
+            if anchor_id == "selected_point":
+                self._state.interaction_state.last_status_message = "Point drag locked"
+            else:
+                self._state.interaction_state.last_status_message = "ROI drag locked"
+            return PreviewInteractionOutcome()
+        if drag_mode == "locked":
+            return PreviewInteractionOutcome()
         anchor_id = self._state.interaction_state.active_anchor_drag_id
         self._state.interaction_state.active_anchor_drag_id = None
+        self._state.interaction_state.active_anchor_drag_mode = None
         self._state.interaction_state.hovered_anchor_id = anchor_id
         if anchor_id == "selected_point":
             self._state.interaction_state.last_status_message = "Point moved"
@@ -266,7 +281,7 @@ class PreviewShellPresenter:
     def handle_pan_stop(self) -> PreviewInteractionOutcome:
         return self.apply_command(PreviewInteractionCommand(action="stop_pan"))
 
-    def handle_pointer_move(self, x: int, y: int) -> None:
+    def handle_pointer_move(self, x: int, y: int, *, left_button_down: bool = False) -> None:
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         self.apply_command(
             PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y), source_point=source_point),
@@ -274,7 +289,9 @@ class PreviewShellPresenter:
         active_anchor_drag_id = self._state.interaction_state.active_anchor_drag_id
         if active_anchor_drag_id is not None:
             self._state.interaction_state.hovered_anchor_id = active_anchor_drag_id
-            if source_point is not None:
+            if self._state.interaction_state.active_anchor_drag_mode == "pending" and left_button_down:
+                self._state.interaction_state.active_anchor_drag_mode = "hold"
+            if source_point is not None and self._state.interaction_state.active_anchor_drag_mode in {"hold", "locked"}:
                 self._update_anchor_drag(source_point)
             return
         self._state.interaction_state.hovered_anchor_id = self._resolve_hovered_anchor_id(x, y)
@@ -392,11 +409,30 @@ class PreviewShellPresenter:
         if anchor_id is None:
             return False
         self._state.interaction_state.active_anchor_drag_id = anchor_id
+        self._state.interaction_state.active_anchor_drag_mode = "pending"
         self._state.interaction_state.hovered_anchor_id = anchor_id
         if anchor_id == "selected_point":
             self._state.interaction_state.last_status_message = "Dragging point"
         else:
             self._state.interaction_state.last_status_message = "Dragging ROI"
+        return True
+
+    def _toggle_locked_anchor_drag_if_active(self, viewport_x: int, viewport_y: int) -> bool:
+        if self._state.interaction_state.active_anchor_drag_id is None:
+            return False
+        if self._state.interaction_state.active_anchor_drag_mode != "locked":
+            return False
+        source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, viewport_x, viewport_y)
+        if source_point is not None:
+            self._update_anchor_drag(source_point)
+        anchor_id = self._state.interaction_state.active_anchor_drag_id
+        self._state.interaction_state.active_anchor_drag_id = None
+        self._state.interaction_state.active_anchor_drag_mode = None
+        self._state.interaction_state.hovered_anchor_id = anchor_id
+        if anchor_id == "selected_point":
+            self._state.interaction_state.last_status_message = "Point moved"
+        else:
+            self._state.interaction_state.last_status_message = "ROI updated"
         return True
 
     def _update_anchor_drag(self, source_point: tuple[int, int]) -> None:

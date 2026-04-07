@@ -166,7 +166,7 @@ class PreviewCanvas(wx.Panel):
         self._refresh_callback(interactive=True)
 
     def _on_motion(self, event) -> None:
-        self._presenter.handle_pointer_move(event.GetX(), event.GetY())
+        self._presenter.handle_pointer_move(event.GetX(), event.GetY(), left_button_down=event.LeftIsDown())
         if event.MiddleIsDown():
             self._presenter.handle_pan_move(event.GetX(), event.GetY())
         self._refresh_callback(interactive=True)

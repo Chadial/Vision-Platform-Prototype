@@ -37,6 +37,7 @@ class PreviewInteractionState:
     last_cursor_source_point: tuple[int, int] | None = None
     hovered_anchor_id: str | None = None
     active_anchor_drag_id: str | None = None
+    active_anchor_drag_mode: Literal["pending", "hold", "locked"] | None = None
 
 
 @dataclass(frozen=True, slots=True)
