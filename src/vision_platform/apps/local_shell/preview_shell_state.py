@@ -18,6 +18,7 @@ from vision_platform.services.display_service import (
     PreviewStatusModelService,
     ViewportMapping,
     ZoomPanState,
+    format_focus_score,
 )
 from vision_platform.services.stream_service import RoiStateService
 
@@ -326,7 +327,7 @@ class PreviewShellPresenter:
             return "Focus: waiting"
         if focus_status.state == "invalid":
             return f"Focus: invalid ({focus_status.metric_name})"
-        return f"Focus: {focus_status.metric_name}={focus_status.score:.2f}"
+        return f"Focus: {focus_status.metric_name}={format_focus_score(focus_status.score)}"
 
 
 def render_viewport_image(frame: CapturedFrame, mapping: ViewportMapping) -> RenderedViewportImage:

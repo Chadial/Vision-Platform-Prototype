@@ -9,6 +9,10 @@ PreviewScaleMode = Literal["fit", "zoom"]
 PreviewSeverity = Literal["info", "warning"]
 
 
+def format_focus_score(score: float) -> str:
+    return f"{score:.3e}"
+
+
 @dataclass(frozen=True, slots=True)
 class PreviewStatusEntry:
     label: str
@@ -197,7 +201,7 @@ class PreviewStatusModelService:
                 int(round(focus_state.overlay.anchor_y)),
             )
             if focus_state.result.is_valid:
-                focus_label = f"Focus {focus_state.result.score:.2f}"
+                focus_label = f"Focus {format_focus_score(focus_state.result.score)}"
             else:
                 focus_label = "Focus invalid"
         elif focus_status_visible and resolved_focus_anchor is not None:
@@ -249,4 +253,5 @@ __all__ = [
     "PreviewStatusLineModel",
     "PreviewStatusModel",
     "PreviewStatusModelService",
+    "format_focus_score",
 ]

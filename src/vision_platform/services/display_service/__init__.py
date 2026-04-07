@@ -14,6 +14,7 @@ from vision_platform.services.display_service.preview_interaction_service import
     PreviewInteractionState,
 )
 from vision_platform.services.display_service.preview_status_model_service import (
+    format_focus_score,
     PreviewFocusStatusModel,
     PreviewOverlayModel,
     PreviewRoiStatusModel,
@@ -28,6 +29,7 @@ __all__ = [
     "CoordinateExportService",
     "DisplayGeometryService",
     "OverlayCompositionService",
+    "format_focus_score",
     "PreviewInteractionCommand",
     "PreviewInteractionOutcome",
     "PreviewInteractionService",

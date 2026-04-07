@@ -81,9 +81,9 @@ class WxPreviewShellTests(unittest.TestCase):
             has_focus_toggle=True,
         )
 
-        self.assertTrue(any(line.startswith("Focus: laplace=") for line in view.status_lines))
+        self.assertIn("Focus: laplace=1.250e+01", view.status_lines)
         self.assertEqual(view.overlay_model.focus_anchor_point, (1, 1))
-        self.assertEqual(view.overlay_model.focus_label, "Focus 12.50")
+        self.assertEqual(view.overlay_model.focus_label, "Focus 1.250e+01")
         self.assertIn("y=focus", view.status_lines[-1])
 
     def test_presenter_builds_waiting_focus_overlay_at_image_center_when_no_focus_state_exists(self) -> None:

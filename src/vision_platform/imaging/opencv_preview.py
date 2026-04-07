@@ -25,6 +25,7 @@ from vision_platform.services.display_service import (
     PreviewStatusModel,
     PreviewStatusModelService,
     ZoomPanState,
+    format_focus_score,
 )
 from vision_platform.services.stream_service.preview_service import PreviewService
 from vision_platform.services.stream_service.roi_state_service import RoiStateService
@@ -532,7 +533,7 @@ class OpenCvPreviewWindow:
             return "Focus: waiting"
         if focus_status.state == "invalid":
             return f"Focus: invalid ({focus_status.metric_name})"
-        return f"Focus: {focus_status.metric_name}={focus_status.score:.2f}"
+        return f"Focus: {focus_status.metric_name}={format_focus_score(focus_status.score)}"
 
     @staticmethod
     def _format_shortcut_hints(shortcut_hints: tuple[PreviewShortcutHint, ...]) -> str:

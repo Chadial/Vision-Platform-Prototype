@@ -279,7 +279,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
         window._handle_shortcuts(ord("y"))
         hidden_lines = window._build_status_lines()
 
-        self.assertIn("Focus: laplace=12.34", visible_lines)
+        self.assertIn("Focus: laplace=1.234e+01", visible_lines)
         self.assertEqual(hidden_lines, ["FIT 1.00x | Focus hidden", "i=in o=out f=fit x=crosshair y=focus r=rect e=ellipse wheel=zoom mdrag=pan c=copy q=quit"])
 
     def test_r_and_e_shortcuts_toggle_roi_entry_modes(self) -> None:
