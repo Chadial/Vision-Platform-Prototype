@@ -57,12 +57,21 @@ class PreviewStatusModel:
 
 @dataclass(frozen=True, slots=True)
 class PreviewOverlayModel:
+    @dataclass(frozen=True, slots=True)
+    class AnchorHandle:
+        anchor_id: str
+        point: tuple[int, int]
+        role: Literal["point", "roi"]
+        is_hovered: bool = False
+        is_active: bool = False
+
     crosshair_point: tuple[int, int] | None = None
     draft_roi: RoiDefinition | None = None
     active_roi: RoiDefinition | None = None
     focus_anchor_point: tuple[int, int] | None = None
     focus_label: str | None = None
     show_viewport_outline: bool = False
+    anchor_handles: tuple[AnchorHandle, ...] = ()
 
 
 class PreviewStatusModelService:

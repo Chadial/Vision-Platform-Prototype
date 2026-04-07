@@ -35,6 +35,8 @@ class PreviewInteractionState:
     roi_preview_point: tuple[int, int] | None = None
     last_cursor_viewport_point: tuple[int, int] | None = None
     last_cursor_source_point: tuple[int, int] | None = None
+    hovered_anchor_id: str | None = None
+    active_anchor_drag_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

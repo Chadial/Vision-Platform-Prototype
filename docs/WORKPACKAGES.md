@@ -556,8 +556,8 @@ The current coarse PM order should be:
 33. treat `WP56` as queued unless a concrete help/documentation defect outranks the active wx-shell follow-ups
 34. treat `WP57` as implemented; focus visibility and ROI ownership now render visibly in the wx shell while reusing the shared focus/ROI/display stack
 35. treat `WP58` as implemented; wx clipboard and point-selection semantics now align more closely with the current OpenCV baseline
-36. make `WP59` the current next slice for visible anchor hover/drag follow-up once the new focus/copy semantics are stable
-37. keep `WP60` queued behind that for recording/interval progress display
+36. treat `WP59` as implemented; the wx shell now renders visible point/ROI anchors with bounded hover and first drag behavior above the shared display stack
+37. make `WP60` the current next slice for recording/interval progress display
 38. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
@@ -697,8 +697,8 @@ Current explicit activation:
 - `CLI Help And Command Documentation` remains queued at `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
 - `wx Focus Visibility And ROI Ownership` is now implemented through `docs/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
 - `wx Clipboard And Anchor Semantics Baseline` is now implemented through `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
-- `wx Anchor Drag Follow-Up` is now the current next execution-ready file at `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
-- `wx Recording Progress Status Baseline` is now queued at `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
+- `wx Anchor Drag Follow-Up` is now implemented through `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
+- `wx Recording Progress Status Baseline` is now the current next execution-ready file at `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
 
 ## PM Refinement Rule
 

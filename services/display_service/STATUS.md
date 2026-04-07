@@ -10,9 +10,9 @@
 - working now: the current OpenCV preview window now consumes the geometry service instead of owning viewport math privately
 - working now: the current OpenCV preview window now translates HighGUI keyboard/mouse input into shared interaction commands instead of owning those state transitions privately
 - working now: the current OpenCV preview window now formats and renders shared preview-status / overlay models instead of owning status-band meaning privately
-- partial: no renderer outside the current OpenCV path consumes the geometry service yet
-- partial: no non-OpenCV frontend consumes the shared interaction layer yet
-- partial: no non-OpenCV frontend consumes the new preview-status / overlay model layer yet
+- working now: the current wx shell now also consumes the geometry service as its bounded non-OpenCV viewport baseline
+- working now: the current wx shell now also consumes the shared interaction layer for zoom, pan, ROI entry, point-copy semantics, and bounded anchor hover/drag state
+- working now: the current wx shell now also consumes the shared preview-status / overlay model layer, while app-local rendering still decides how those models are drawn
 - known issues: payload currently carries focus overlays and active ROI only, not future tracking or annotation layers
 - technical debt: preview and snapshot focus states still reuse the preview-oriented `FocusPreviewState` name
-- risk: future overlay growth may require a small layer model instead of flat fields only
+- risk: future overlay growth may require a small layer model instead of flat fields only; the new bounded anchor-handle model should stay narrow unless later frontends genuinely need richer editing semantics

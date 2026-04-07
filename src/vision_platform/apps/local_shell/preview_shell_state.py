@@ -10,6 +10,7 @@ from vision_platform.models import CapturedFrame
 from vision_platform.services.display_service import (
     CoordinateExportService,
     DisplayGeometryService,
+    PreviewAnchorHandle,
     PreviewInteractionCommand,
     PreviewInteractionOutcome,
     PreviewInteractionService,
@@ -94,6 +95,7 @@ class PreviewShellPresenter:
         self._zoom_step = zoom_step
         self._min_zoom_scale = min_zoom_scale
         self._max_zoom_scale = max_zoom_scale
+        self._anchor_hit_radius_pixels = 10
         self._state = PreviewShellState()
 
     @property
@@ -177,6 +179,15 @@ class PreviewShellPresenter:
             focus_anchor_point=focus_anchor_point,
             show_viewport_outline=self._should_draw_viewport_outline(mapping),
         )
+        overlay_model = PreviewOverlayModel(
+            crosshair_point=overlay_model.crosshair_point,
+            draft_roi=overlay_model.draft_roi,
+            active_roi=overlay_model.active_roi,
+            focus_anchor_point=overlay_model.focus_anchor_point,
+            focus_label=overlay_model.focus_label,
+            show_viewport_outline=overlay_model.show_viewport_outline,
+            anchor_handles=self._build_anchor_handles(active_roi),
+        )
         return PreviewShellViewModel(
             image=render_viewport_image(frame, mapping),
             overlay_model=overlay_model,
@@ -212,10 +223,27 @@ class PreviewShellPresenter:
         self.apply_command(
             PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y)),
         )
+        if self._start_anchor_drag_if_hit(x, y):
+            return PreviewInteractionOutcome()
         source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
         return self.apply_command(
             PreviewInteractionCommand(action="select_source_point", source_point=source_point),
         )
+
+    def handle_left_release(self, x: int, y: int) -> PreviewInteractionOutcome:
+        if self._state.interaction_state.active_anchor_drag_id is None:
+            return PreviewInteractionOutcome(handled=False)
+        source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
+        if source_point is not None:
+            self._update_anchor_drag(source_point)
+        anchor_id = self._state.interaction_state.active_anchor_drag_id
+        self._state.interaction_state.active_anchor_drag_id = None
+        self._state.interaction_state.hovered_anchor_id = anchor_id
+        if anchor_id == "selected_point":
+            self._state.interaction_state.last_status_message = "Point moved"
+        else:
+            self._state.interaction_state.last_status_message = "ROI updated"
+        return PreviewInteractionOutcome()
 
     def handle_mouse_wheel(self, x: int, y: int, wheel_delta: int) -> PreviewInteractionOutcome:
         self.apply_command(
@@ -243,9 +271,19 @@ class PreviewShellPresenter:
         self.apply_command(
             PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y), source_point=source_point),
         )
+        active_anchor_drag_id = self._state.interaction_state.active_anchor_drag_id
+        if active_anchor_drag_id is not None:
+            self._state.interaction_state.hovered_anchor_id = active_anchor_drag_id
+            if source_point is not None:
+                self._update_anchor_drag(source_point)
+            return
+        self._state.interaction_state.hovered_anchor_id = self._resolve_hovered_anchor_id(x, y)
         if self._state.interaction_state.roi_anchor_point is None:
             return
         self._state.interaction_state.roi_preview_point = source_point
+
+    def clear_hovered_anchor(self) -> None:
+        self._state.interaction_state.hovered_anchor_id = None
 
     def _build_draft_roi(self) -> RoiDefinition | None:
         roi_mode = self._state.interaction_state.roi_mode
@@ -254,6 +292,119 @@ class PreviewShellPresenter:
         if roi_mode is None or anchor is None or preview is None:
             return None
         return self._build_roi_definition(roi_mode, anchor, preview)
+
+    def _build_anchor_handles(self, active_roi: RoiDefinition | None) -> tuple[PreviewAnchorHandle, ...]:
+        handles: list[PreviewAnchorHandle] = []
+        selected_point = self._state.interaction_state.selected_point
+        if selected_point is not None:
+            handles.append(
+                PreviewAnchorHandle(
+                    anchor_id="selected_point",
+                    point=selected_point,
+                    role="point",
+                    is_hovered=self._state.interaction_state.hovered_anchor_id == "selected_point",
+                    is_active=self._state.interaction_state.active_anchor_drag_id == "selected_point",
+                )
+            )
+        if active_roi is None:
+            return tuple(handles)
+        bounds = roi_bounds(active_roi)
+        if bounds is None:
+            return tuple(handles)
+        left = int(round(bounds[0]))
+        top = int(round(bounds[1]))
+        right = int(round(bounds[2]))
+        bottom = int(round(bounds[3]))
+        for anchor_id, point in (
+            ("roi_top_left", (left, top)),
+            ("roi_top_right", (right, top)),
+            ("roi_bottom_left", (left, bottom)),
+            ("roi_bottom_right", (right, bottom)),
+        ):
+            handles.append(
+                PreviewAnchorHandle(
+                    anchor_id=anchor_id,
+                    point=point,
+                    role="roi",
+                    is_hovered=self._state.interaction_state.hovered_anchor_id == anchor_id,
+                    is_active=self._state.interaction_state.active_anchor_drag_id == anchor_id,
+                )
+            )
+        return tuple(handles)
+
+    def _resolve_hovered_anchor_id(self, viewport_x: int, viewport_y: int) -> str | None:
+        best_anchor_id = None
+        best_distance_sq = (self._anchor_hit_radius_pixels + 1) ** 2
+        for handle in self._build_anchor_handles(self._roi_state_service.get_active_roi()):
+            viewport_point = self._geometry_service.map_source_point_to_viewport(
+                self._state.last_viewport_mapping,
+                handle.point,
+            )
+            if viewport_point is None:
+                continue
+            delta_x = viewport_x - viewport_point[0]
+            delta_y = viewport_y - viewport_point[1]
+            distance_sq = delta_x * delta_x + delta_y * delta_y
+            if distance_sq <= self._anchor_hit_radius_pixels * self._anchor_hit_radius_pixels and distance_sq < best_distance_sq:
+                best_anchor_id = handle.anchor_id
+                best_distance_sq = distance_sq
+        return best_anchor_id
+
+    def _start_anchor_drag_if_hit(self, viewport_x: int, viewport_y: int) -> bool:
+        if self._state.interaction_state.roi_mode is not None:
+            if self._state.interaction_state.roi_anchor_point is not None:
+                return False
+            if self._roi_state_service.get_active_roi() is None:
+                return False
+        anchor_id = self._resolve_hovered_anchor_id(viewport_x, viewport_y)
+        if anchor_id is None:
+            return False
+        self._state.interaction_state.active_anchor_drag_id = anchor_id
+        self._state.interaction_state.hovered_anchor_id = anchor_id
+        if anchor_id == "selected_point":
+            self._state.interaction_state.last_status_message = "Dragging point"
+        else:
+            self._state.interaction_state.last_status_message = "Dragging ROI"
+        return True
+
+    def _update_anchor_drag(self, source_point: tuple[int, int]) -> None:
+        anchor_id = self._state.interaction_state.active_anchor_drag_id
+        if anchor_id is None:
+            return
+        if anchor_id == "selected_point":
+            self._state.interaction_state.selected_point = source_point
+            return
+        active_roi = self._roi_state_service.get_active_roi()
+        if active_roi is None:
+            return
+        updated_roi = self._build_dragged_roi(active_roi, anchor_id, source_point)
+        if updated_roi is None:
+            return
+        self._roi_state_service.set_active_roi(updated_roi)
+
+    def _build_dragged_roi(
+        self,
+        active_roi: RoiDefinition,
+        anchor_id: str,
+        source_point: tuple[int, int],
+    ) -> RoiDefinition | None:
+        bounds = roi_bounds(active_roi)
+        if bounds is None:
+            return None
+        left = int(round(bounds[0]))
+        top = int(round(bounds[1]))
+        right = int(round(bounds[2]))
+        bottom = int(round(bounds[3]))
+        opposite_points = {
+            "roi_top_left": (right, bottom),
+            "roi_top_right": (left, bottom),
+            "roi_bottom_left": (right, top),
+            "roi_bottom_right": (left, top),
+        }
+        opposite = opposite_points.get(anchor_id)
+        if opposite is None:
+            return None
+        return self._build_roi_definition(active_roi.shape, opposite, source_point)
 
     @staticmethod
     def _resolve_focus_anchor_point(

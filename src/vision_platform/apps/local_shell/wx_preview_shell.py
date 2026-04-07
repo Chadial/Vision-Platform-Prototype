@@ -34,10 +34,12 @@ class PreviewCanvas(wx.Panel):
         self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.Bind(wx.EVT_PAINT, self._on_paint)
         self.Bind(wx.EVT_LEFT_DOWN, self._on_left_down)
+        self.Bind(wx.EVT_LEFT_UP, self._on_left_up)
         self.Bind(wx.EVT_MIDDLE_DOWN, self._on_middle_down)
         self.Bind(wx.EVT_MIDDLE_UP, self._on_middle_up)
         self.Bind(wx.EVT_MOTION, self._on_motion)
         self.Bind(wx.EVT_MOUSEWHEEL, self._on_mouse_wheel)
+        self.Bind(wx.EVT_LEAVE_WINDOW, self._on_leave_window)
 
     def update_view(self, view_model: PreviewShellViewModel) -> None:
         self._view_model = view_model
@@ -113,6 +115,25 @@ class PreviewCanvas(wx.Panel):
                 dc.DrawEllipse(left, top, max(1, right - left), max(1, bottom - top))
             else:
                 dc.DrawRectangle(left, top, max(1, right - left), max(1, bottom - top))
+        self._draw_anchor_handles(dc, view_model)
+
+    @staticmethod
+    def _draw_anchor_handles(dc: wx.DC, view_model: PreviewShellViewModel) -> None:
+        for handle in view_model.overlay_model.anchor_handles:
+            viewport_point = _map_source_point_to_viewport(view_model.viewport_mapping, handle.point)
+            if viewport_point is None:
+                continue
+            if handle.is_active:
+                colour = wx.Colour(255, 140, 0)
+            elif handle.is_hovered:
+                colour = wx.Colour(255, 255, 255)
+            elif handle.role == "point":
+                colour = wx.Colour(255, 255, 0)
+            else:
+                colour = wx.Colour(0, 255, 0)
+            dc.SetPen(wx.Pen(colour, width=2))
+            dc.SetBrush(wx.Brush(colour))
+            dc.DrawRectangle(viewport_point[0] - 4, viewport_point[1] - 4, 8, 8)
 
     @staticmethod
     def _draw_focus_overlay(dc: wx.DC, viewport_point: tuple[int, int], label: str) -> None:
@@ -134,6 +155,10 @@ class PreviewCanvas(wx.Panel):
         self._presenter.handle_canvas_click(event.GetX(), event.GetY())
         self._refresh_callback(interactive=True)
 
+    def _on_left_up(self, event) -> None:
+        self._presenter.handle_left_release(event.GetX(), event.GetY())
+        self._refresh_callback(interactive=True)
+
     def _on_middle_down(self, event) -> None:
         self._presenter.handle_pan_start(event.GetX(), event.GetY())
         self._refresh_callback(interactive=True)
@@ -151,6 +176,11 @@ class PreviewCanvas(wx.Panel):
     def _on_mouse_wheel(self, event) -> None:
         self._presenter.handle_mouse_wheel(event.GetX(), event.GetY(), event.GetWheelRotation())
         self._refresh_callback(interactive=True)
+
+    def _on_leave_window(self, event) -> None:
+        self._presenter.clear_hovered_anchor()
+        self._refresh_callback(interactive=True)
+        event.Skip()
 
 
 class WxLocalPreviewShell(wx.Frame):

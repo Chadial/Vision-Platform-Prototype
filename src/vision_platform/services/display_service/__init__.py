@@ -25,11 +25,14 @@ from vision_platform.services.display_service.preview_status_model_service impor
     PreviewStatusModelService,
 )
 
+PreviewAnchorHandle = PreviewOverlayModel.AnchorHandle
+
 __all__ = [
     "CoordinateExportService",
     "DisplayGeometryService",
     "OverlayCompositionService",
     "format_focus_score",
+    "PreviewAnchorHandle",
     "PreviewInteractionCommand",
     "PreviewInteractionOutcome",
     "PreviewInteractionService",
