@@ -148,9 +148,7 @@ Landed evidence for this slice:
   - `status -> status`
   - `snapshot(.bmp) -> status`
   - bounded `recording(frame_limit=5) -> status`
-- artifact folders:
-  - `captures/hardware_smoke/wp27_reuse_check`
-  - `captures/hardware_smoke/wp27_recording_reuse_check`
+- artifact folders from that proof were later cleanup-pruned; keep the result here as documented hardware evidence
 
 ## Recovery Note
 

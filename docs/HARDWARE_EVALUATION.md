@@ -182,7 +182,7 @@ Latest integrated run on March 27, 2026:
 - camera id: `DEV_1AB22C046D81`
 - camera model: `Allied Vision 1800 U-1240m`
 - command path: `.\scripts\launchers\run_hardware_command_flow.py`
-- output directory: `captures/hardware_smoke/run_003`
+- output directory: historical `captures/hardware_smoke/run_003` (cleanup-pruned; later retained evidence lives under `wp26_*` and `wp04_*`)
 - configuration used: `Mono8`, `frame_limit=3`, `interval_frame_count=3`
 
 Observed result:
@@ -203,10 +203,10 @@ Still not closed by this run:
 
 Expanded matrix on March 27, 2026 after that baseline:
 
-- `run_004_duration`: combined hardware run with `Mono8`, `Exposure=10000`, `Gain=3.0`, `ROI=2000x1500`
-- `run_005_target_fps`: hardware run with the same configuration and `target_frame_rate=5.0`
-- `run_006_duration_only`: duration-only hardware run with the same configuration and `duration_seconds=1.5`
-- `mono10_snapshot_test`: successful hardware snapshot with supported alternate pixel format `Mono10` saved as `.raw`
+- historical `run_004_duration`: combined hardware run with `Mono8`, `Exposure=10000`, `Gain=3.0`, `ROI=2000x1500`
+- historical `run_005_target_fps`: hardware run with the same configuration and `target_frame_rate=5.0`
+- historical `run_006_duration_only`: duration-only hardware run with the same configuration and `duration_seconds=1.5`
+- historical `mono10_snapshot_test`: successful hardware snapshot with supported alternate pixel format `Mono10` saved as `.raw`
 
 Observed result from the expanded matrix:
 
@@ -335,9 +335,7 @@ Observed result from the WP27 serial hardware proof:
 - serial `status -> status` on `DEV_1AB22C046D81` succeeded without `camera already in use`
 - serial `snapshot -> status` on the same camera id succeeded without `camera already in use`
 - serial bounded `recording(frame_limit=5) -> status` on the same camera id also succeeded without `camera already in use`
-- generated proof directories:
-  - `captures/hardware_smoke/wp27_reuse_check`
-  - `captures/hardware_smoke/wp27_recording_reuse_check`
+- proof directories from that slice were later cleanup-pruned; keep this section as documented result rather than retained artifact inventory
 - the residual `vmbpyLog <VmbError.NotAvailable: -30>` line was not the target of this slice and may still appear independently of the narrowed reuse result
 
 WP28 capability-aware ROI reporting follow-up on March 30, 2026:
@@ -596,7 +594,7 @@ Use a repo-local ignored directory so files remain inspectable but untracked:
 If needed, create per-run subdirectories such as:
 
 - `captures/hardware_smoke/run_001/`
-- `captures/hardware_smoke/run_002/`
+- `captures/hardware_smoke/wpXX_manual_block/`
 
 ## Pass / Fail Rule
 
