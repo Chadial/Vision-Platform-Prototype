@@ -16,11 +16,12 @@ Composes UI-free display payloads and owns headless preview-geometry logic witho
 - `DisplayGeometryService`
 - `OverlayCompositionService`
 - `PreviewInteractionService`
+- `PreviewStatusModelService`
 
 ## Inputs / Outputs
 
 - inputs: frame size, viewport size, zoom/pan state, preview interaction commands/state, preview focus state, snapshot focus state or capture, active ROI or ROI state service
-- outputs: viewport mappings and coordinate transforms, interaction state transitions, plus shared display payload with active ROI and focus overlays
+- outputs: viewport mappings and coordinate transforms, interaction state transitions, shared preview-status and overlay models, plus shared display payload with active ROI and focus overlays
 
 ## Dependencies
 

@@ -5,6 +5,7 @@
 - working now: the current preview baseline supports fit-to-window, cursor-anchored zoom, middle-drag pan, a bottom status band, FPS readout, crosshair and focus-status toggles, two-click rectangle/ellipse ROI creation through shared ROI state, preview-frame snapshot save with explicit directory, and concise operator-facing unavailable/error feedback
 - working now: `OpenCvPreviewWindow` now delegates viewport mapping, zoom anchoring, and pan-boundary math into the headless `DisplayGeometryService` instead of owning those rules privately
 - working now: `OpenCvPreviewWindow` now also translates keyboard and mouse input into the shared `PreviewInteractionService` instead of owning those interaction state transitions privately
+- working now: `OpenCvPreviewWindow` now also builds shared preview-status and overlay models through `PreviewStatusModelService`, keeping the OpenCV status band and overlay drawing as renderer-only formatting work
 - working now: the current hardware preview path has bounded real-device evidence on `DEV_1AB22C046D81`, including visible preview output, zoom/pan behavior, ROI creation, coordinate copy, snapshot shortcut, and normal preview shutdown
 - working now: OpenCV prototype demos now own their local `DemoRunResult` type under `vision_platform.apps.opencv_prototype` instead of importing it from the legacy `camera_app.smoke` path
 - partial: richer operator controls, editable ROI tools, and a broader focus-aware hardware preview path remain open UI-only follow-up work
