@@ -196,6 +196,16 @@ class RequestModelTests(unittest.TestCase):
         self.assertEqual(request.configuration_profile_id, "inspection")
         self.assertEqual(request.configuration_profile_camera_class, "alvium_1800_u_1240m")
 
+    def test_recording_request_default_file_extension_is_bmp(self) -> None:
+        request = RecordingRequest(save_directory=Path("captures"), file_stem="series_default")
+
+        self.assertEqual(request.file_extension, ".bmp")
+
+    def test_start_recording_request_default_file_extension_is_bmp(self) -> None:
+        request = StartRecordingRequest(file_stem="series_default")
+
+        self.assertEqual(request.file_extension, ".bmp")
+
     def test_interval_capture_request_stores_expected_fields(self) -> None:
         request = IntervalCaptureRequest(
             save_directory=Path("captures"),

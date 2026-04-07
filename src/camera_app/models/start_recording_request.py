@@ -8,7 +8,7 @@ from camera_app.models.recording_request import RecordingRequest
 @dataclass(slots=True)
 class StartRecordingRequest:
     file_stem: str
-    file_extension: str = ".png"
+    file_extension: str = ".bmp"
     save_directory: Optional[Path] = None
     max_frame_count: Optional[int] = None
     duration_seconds: Optional[float] = None

@@ -35,7 +35,7 @@ except ImportError as exc:  # pragma: no cover - installation is validated separ
     raise RuntimeError("wxPython is not installed in the project environment.") from exc
 
 
-_WX_RECORDING_FILE_EXTENSIONS = (".raw", ".bmp", ".png", ".tiff")
+_WX_RECORDING_FILE_EXTENSIONS = (".bmp", ".png", ".tiff", ".raw")
 
 
 class PreviewCanvas(wx.Panel):
@@ -238,7 +238,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_target_frame_rate_value: float | None = None
         self._recording_last_summary: str | None = None
         self._recording_file_stem = "wx_recording"
-        self._recording_file_extension = ".raw"
+        self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
@@ -809,7 +809,7 @@ class WxLocalPreviewShell(wx.Frame):
             result = controller.start_recording(
                 StartRecordingRequest(
                     file_stem=payload.get("file_stem", "wx_recording"),
-                    file_extension=payload.get("file_extension", ".raw"),
+                    file_extension=payload.get("file_extension", ".bmp"),
                     save_directory=self._get_recording_save_directory(),
                     max_frame_count=payload.get("max_frame_count"),
                     target_frame_rate=payload.get("target_frame_rate"),
