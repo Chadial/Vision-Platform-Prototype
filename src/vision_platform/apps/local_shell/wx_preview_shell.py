@@ -150,7 +150,6 @@ class WxLocalPreviewShell(wx.Frame):
         self._presenter = PreviewShellPresenter(roi_state_service=self._subsystem.stream_service.get_roi_state_service())
         self._timer = wx.Timer(self)
         self._status_lines: list[str] = []
-        self._last_snapshot_name: str | None = None
         self._is_closed = False
         self._transient_status_message: str | None = None
         self._transient_status_deadline = 0.0
@@ -205,6 +204,7 @@ class WxLocalPreviewShell(wx.Frame):
             return
         self._refresh_scheduled = False
         self._last_render_time = now
+        self._consume_interaction_status_message()
         self._sync_transient_status_message(now)
         focus_state = self._get_focus_state()
         canvas_size = self._canvas.GetClientSize()
@@ -228,10 +228,10 @@ class WxLocalPreviewShell(wx.Frame):
             prefix.append(f"save={status.default_save_directory}")
         if self._session.configuration_profile_id is not None:
             prefix.append(f"profile={self._session.configuration_profile_id}")
-        if self._last_snapshot_name is not None:
-            prefix.append(f"last_snapshot={self._last_snapshot_name}")
         self._status_lines = [" | ".join(prefix)] + view_model.status_lines
-        self._status.SetValue("\n".join(self._status_lines))
+        status_text = "\n".join(self._status_lines)
+        if self._status.GetValue() != status_text:
+            self._status.ChangeValue(status_text)
 
     def _on_timer(self, event) -> None:
         self.request_refresh()
@@ -245,7 +245,6 @@ class WxLocalPreviewShell(wx.Frame):
             self._set_transient_status_message(f"Snapshot failed: {exc}")
             self.request_refresh()
             return
-        self._last_snapshot_name = result.saved_path.name
         self._cached_status = None
         self._set_transient_status_message(f"Snapshot saved: {result.saved_path.name}")
         self.request_refresh()
@@ -320,6 +319,14 @@ class WxLocalPreviewShell(wx.Frame):
         self._transient_status_message = message
         self._transient_status_deadline = monotonic() + self._TRANSIENT_STATUS_TTL_SECONDS
         self._presenter.state.interaction_state.last_status_message = message
+
+    def _consume_interaction_status_message(self) -> None:
+        message = self._presenter.state.interaction_state.last_status_message
+        if not message:
+            return
+        self._transient_status_message = message
+        self._transient_status_deadline = monotonic() + self._TRANSIENT_STATUS_TTL_SECONDS
+        self._presenter.state.interaction_state.last_status_message = None
 
     def _sync_transient_status_message(self, now: float) -> None:
         if self._transient_status_message is None:
