@@ -442,8 +442,10 @@ The repository currently provides a structured Python prototype for the vision p
 30. Treat `WP57` as implemented: the wx shell now renders visible focus markers/labels while keeping ROI ownership on the shared state path.
 31. Treat `WP58` as implemented: wx point selection and clipboard feedback now align more closely with the current OpenCV semantics.
 32. Treat `WP59` as implemented: the wx shell now renders visible point/ROI anchors with bounded hover and first drag behavior above the shared display stack.
-33. Make `WP60` the current next slice for recording/interval progress display.
-34. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
+33. Treat `WP60` as implemented: recording progress and the recording controls now stay within the existing controller/status path.
+34. Make `WP61` the current next slice for wx feature inventory and core/UI boundary documentation.
+35. Treat `WP62` as queued until the boundary documentation is resolved.
+36. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
 
 ## Deferred Profile-System Bucket List
 

@@ -24,6 +24,25 @@ It exists to offer a more practical daily-use local frontend than the current Op
 - `Ctrl+C` point-copy behavior aligned with the current OpenCV operator path
 - reuse of the same alias, configuration-profile, and configuration-override semantics already used by the camera CLI
 
+## Implemented Surface
+
+- preview rendering through a bounded wx canvas over the shared preview stream
+- snapshot trigger through the existing command-controller path
+- focus visibility, focus marker, and focus-score reporting through the shared focus-preview service
+- crosshair visibility plus point-copy behavior aligned with the current OpenCV baseline
+- rectangle and ellipse ROI entry, hover emphasis, corner anchors, and bounded drag interaction
+- ROI body panning with `Shift` dominant-axis projection and `Esc` cancel-to-start behavior
+- recording start/stop controls with `Max Frames` and `Recording FPS`
+- recording progress and the latest recording summary in the shell status area
+- camera and UI cadence readouts in the shell header
+
+## Core vs UI
+
+- shared headless core responsibilities: bootstrap, command controller, stream service, display geometry, preview interaction, preview-status models, and focus preview evaluation
+- UI-local responsibilities: wx windowing, button layout, bitmap rendering, event translation, status text presentation, clipboard integration, and menu/shortcut affordances
+- the shell is allowed to decide how to draw and route input, but it should not own camera semantics, recording semantics, or duplicate shared status models
+- future live command sync should observe shared state instead of pushing new camera logic into the UI layer
+
 ## Dependencies
 
 - `vision_platform.bootstrap`
@@ -66,3 +85,4 @@ Bounded hardware-backed example on the tested path:
 - current anchor rendering and drag behavior are intentionally bounded to fixed-point movement and ROI corner updates, not full desktop vector editing
 - it does not yet provide full configuration or recording UI
 - the OpenCV prototype remains the fallback/reference frontend
+- the documented wx feature surface intentionally stays narrower than the full future desktop-product direction

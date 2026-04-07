@@ -23,7 +23,7 @@ The same slice also keeps the header honest about live cadence by showing the cu
 ## Branch
 
 - intended branch: `feature/wx-recording-progress-status`
-- activation state: queued
+- activation state: landed
 
 ## Scope
 
@@ -44,3 +44,10 @@ Excluded:
 ## Validation
 
 Targeted controller/status tests plus bounded manual shell smoke during recording or interval capture.
+
+## Result
+
+- the wx shell now exposes start/stop recording controls, `Max Frames`, and `Recording FPS` on the same operator surface
+- bounded progress stays visible in the shell status area, and the last recording summary remains visible after `Stop Recording` until the next `Start Recording`
+- the shell header now shows the live camera acquisition FPS and the measured wx UI refresh FPS
+- the current implementation stops short of append/resume semantics such as `n/n` progress for directory-level append runs; that remains a later storage/recording follow-up
