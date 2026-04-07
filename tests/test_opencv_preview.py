@@ -168,7 +168,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
 
         status_model = window._build_status_model()
 
-        self.assertEqual([entry.value for entry in status_model.primary_line.entries[:4]], ["ZOOM 2.00x", "view=40,50", "x=20, y=10", "Copied x=20, y=10"])
+        self.assertEqual([entry.value for entry in status_model.primary_line.entries[:4]], ["ZOOM 2.00x", "view=40,50", "Selected x=20, y=10", "Copied x=20, y=10"])
         self.assertEqual(status_model.roi_status.state, "anchor_pending")
         self.assertEqual(status_model.focus_status.state, "valid")
         self.assertEqual(status_model.focus_status.metric_name, "laplace")
@@ -455,7 +455,7 @@ class OpenCvPreviewWindowTests(unittest.TestCase):
 
         copy_callback.assert_called_once_with("x=20, y=10")
         self.assertEqual(window._selected_point, (20, 10))
-        self.assertEqual(window._last_status_message, "Copied x=20, y=10")
+        self.assertEqual(window._last_status_message, "Point copied")
 
     def test_copy_without_selection_sets_status_message(self) -> None:
         preview_service = MagicMock()

@@ -57,7 +57,7 @@ class PreviewInteractionServiceTests(unittest.TestCase):
         self._apply(PreviewInteractionCommand(action="select_source_point", source_point=(12, 34)))
 
         self.assertEqual(self.interaction_state.selected_point, (12, 34))
-        self.assertEqual(self.interaction_state.last_status_message, "Selected x=12, y=34")
+        self.assertEqual(self.interaction_state.last_status_message, "Point selected")
 
     def test_select_source_point_commits_roi_when_roi_mode_is_active(self) -> None:
         self.interaction_state.roi_mode = "rectangle"

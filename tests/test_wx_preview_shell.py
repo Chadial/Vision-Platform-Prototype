@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from tests import _path_setup
 from vision_platform.apps.local_shell import PreviewShellPresenter
+from vision_platform.apps.local_shell.wx_preview_shell import _is_copy_shortcut
 from vision_platform.apps.local_shell.preview_shell_state import render_viewport_image
 from vision_platform.apps.local_shell.startup import (
     LocalShellLaunchOptions,
@@ -81,7 +82,29 @@ class WxPreviewShellTests(unittest.TestCase):
         )
 
         self.assertTrue(any(line.startswith("Focus: laplace=") for line in view.status_lines))
+        self.assertEqual(view.overlay_model.focus_anchor_point, (1, 1))
+        self.assertEqual(view.overlay_model.focus_label, "Focus 12.50")
         self.assertIn("y=focus", view.status_lines[-1])
+
+    def test_presenter_builds_waiting_focus_overlay_at_image_center_when_no_focus_state_exists(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes(range(64)),
+            width=8,
+            height=8,
+            pixel_format="Mono8",
+        )
+
+        view = presenter.build_view(
+            frame,
+            viewport_width=8,
+            viewport_height=8,
+            focus_state=None,
+            has_focus_toggle=True,
+        )
+
+        self.assertEqual(view.overlay_model.focus_anchor_point, (4, 4))
+        self.assertEqual(view.overlay_model.focus_label, "Focus...")
 
     def test_presenter_uses_cursor_position_for_crosshair_before_point_selection(self) -> None:
         presenter = PreviewShellPresenter()
@@ -102,6 +125,10 @@ class WxPreviewShellTests(unittest.TestCase):
         from vision_platform.apps.local_shell import run_wx_preview_shell
 
         self.assertTrue(callable(run_wx_preview_shell))
+
+    def test_copy_shortcut_helper_accepts_ctrl_c_and_rejects_plain_c(self) -> None:
+        self.assertTrue(_is_copy_shortcut(_StubKeyEvent(ord("C"), control_down=True)))
+        self.assertFalse(_is_copy_shortcut(_StubKeyEvent(ord("C"), control_down=False)))
 
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -186,3 +213,18 @@ class WxPreviewShellTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class _StubKeyEvent:
+    def __init__(self, key_code: int, *, control_down: bool) -> None:
+        self._key_code = key_code
+        self._control_down = control_down
+
+    def GetKeyCode(self) -> int:
+        return self._key_code
+
+    def ControlDown(self) -> bool:
+        return self._control_down
+
+    def CmdDown(self) -> bool:
+        return False

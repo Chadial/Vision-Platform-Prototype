@@ -35,7 +35,7 @@ class PreviewStatusModelServiceTests(unittest.TestCase):
                 "ZOOM 2.00x",
                 "view=40,50",
                 "FPS 10.0",
-                "x=20, y=10",
+                "Selected x=20, y=10",
                 "WARN: Capability probe unavailable",
                 "Copied x=20, y=10",
             ],
@@ -55,12 +55,17 @@ class PreviewStatusModelServiceTests(unittest.TestCase):
             selected_point=(12, 34),
             draft_roi=roi,
             active_roi=roi,
+            focus_status_visible=True,
+            focus_state=None,
+            focus_anchor_point=(25, 30),
             show_viewport_outline=True,
         )
 
         self.assertEqual(overlay_model.crosshair_point, (12, 34))
         self.assertIs(overlay_model.draft_roi, roi)
         self.assertIs(overlay_model.active_roi, roi)
+        self.assertEqual(overlay_model.focus_anchor_point, (25, 30))
+        self.assertEqual(overlay_model.focus_label, "Focus...")
         self.assertTrue(overlay_model.show_viewport_outline)
 
 
