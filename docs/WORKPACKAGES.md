@@ -343,7 +343,9 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 62 | wx Live Command Sync For Open Shell | let an already open wx shell observe CLI/API-driven changes without moving command ownership into the UI | active lane | implemented bounded local session-bridge sync; the open wx shell now reflects external save/configuration/recording commands through the existing controller path | `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md` |
 | 63 | Recording Append / Resume From Trace Log | stop reused save directories from overwriting prior recording outputs and derive the next sequence position from existing trace/log context | active lane | landed artifact-continuity slice; reused directories now continue snapshot and recording naming instead of overwriting | `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md` |
 | 64 | wx Menu And Settings Dialog Baseline | add one bounded menu/settings popup surface to the wx shell above the shared controller/configuration path | active lane | landed local-usability slice; wx shell now exposes working save-directory and recording-settings dialogs over the existing controller path | `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md` |
-| 65 | wx Recording Settings Guardrails And Format Picker | tighten the bounded recording-settings dialog with guided format selection instead of free-form extension typing | current next | next small wx-usability follow-up after the verified menu/settings baseline | `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md` |
+| 65 | wx Recording Settings Guardrails And Format Picker | tighten the bounded recording-settings dialog with guided format selection instead of free-form extension typing | active lane | landed wx usability hardening; the recording-settings dialog now constrains format selection through a picker and aligns default recording output with `.bmp` | `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md` |
+| 66 | Recording Timestamp Anchor Alignment | add one explicit first-frame camera/system timestamp anchor per recording session while preserving per-image timing rows | active lane | landed logging-semantics hardening; recording and traceability logs now persist a first-frame camera/system anchor while keeping per-image timing rows | `docs/session_workpackages/wp66_recording_timestamp_anchor_alignment.md` |
+| 67 | Recording Log Policy Alignment | define and implement the intended recording-log reuse versus per-run split policy for repeated sessions in one save directory | current next | next log-usability follow-up after timestamp-anchor alignment so operators do not have to reconcile avoidable recording-log fragmentation manually | `docs/session_workpackages/wp67_recording_log_policy_alignment.md` |
 
 ## Immediate PM Backlog
 
@@ -351,7 +353,7 @@ These are the work-package groups PM should treat as the current actionable usab
 
 1. residual-driven hardening after the now-implemented `WP50` to `WP54` architecture/frontend chain, starting with hardware audit/logging
 2. CLI help/documentation polish once the hardware audit slice is cleared
-3. bounded wx settings/input guardrail work above the now-landed menu/settings baseline
+3. bounded logging/traceability timing hardening above the current recording baseline
 
 Current prepared usable-subsystem sequence:
 
@@ -366,7 +368,9 @@ Current prepared usable-subsystem sequence:
 - `WP62 wx Live Command Sync For Open Shell` is now implemented as the bounded open-shell external-control slice
 - `WP63 Recording Append / Resume From Trace Log` is now implemented as the append/resume-safe artifact continuity baseline
 - `WP64 wx Menu And Settings Dialog Baseline` is now implemented and hardware-verified
-- `WP65 wx Recording Settings Guardrails And Format Picker` is now the current next slice
+- `WP65 wx Recording Settings Guardrails And Format Picker` is now landed
+- `WP66 Recording Timestamp Anchor Alignment` is now landed
+- `WP67 Recording Log Policy Alignment` is now the current next slice
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 
 Most recently landed detailed packages:
@@ -601,13 +605,15 @@ The current coarse PM order should be:
 39. treat `WP62` as implemented; the wx shell now exposes one bounded local live-command session bridge for external save/configuration/recording control
 40. treat `WP63` as implemented; reused save directories now continue snapshot/recording naming instead of overwriting
 41. treat `WP64` as landed; the wx shell now has bounded menu/settings dialogs validated on hardware
-42. make `WP65` the current next slice as the small recording-settings guardrail follow-up
-42. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
-43. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
+42. treat `WP65` as landed; the wx recording-settings dialog now constrains output format through a picker and aligns default recording output with `.bmp`
+43. treat `WP66` as landed; recording and traceability logs now persist one explicit first-frame camera/system anchor per run while keeping per-image timing rows
+44. make `WP67` the current next slice as the recording-log policy alignment follow-up
+45. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
+46. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
-`WP65 wx Recording Settings Guardrails And Format Picker`
+`WP67 Recording Log Policy Alignment`
 
 Reason:
 
@@ -752,7 +758,9 @@ Current explicit activation:
 - `wx Live Command Sync For Open Shell` is now implemented through `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md`
 - `Recording Append / Resume From Trace Log` is now implemented through `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
 - `wx Menu And Settings Dialog Baseline` is now implemented through `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
-- `wx Recording Settings Guardrails And Format Picker` is now the current next slice at `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
+- `wx Recording Settings Guardrails And Format Picker` is now implemented through `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
+- `Recording Timestamp Anchor Alignment` is now implemented through `docs/session_workpackages/wp66_recording_timestamp_anchor_alignment.md`
+- `Recording Log Policy Alignment` is now the current next slice at `docs/session_workpackages/wp67_recording_log_policy_alignment.md`
 
 ## PM Refinement Rule
 
