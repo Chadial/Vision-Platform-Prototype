@@ -40,6 +40,8 @@ class PreviewInteractionState:
     active_anchor_drag_mode: Literal["pending", "hold", "locked"] | None = None
     active_drag_origin_source_point: tuple[int, int] | None = None
     active_drag_initial_roi: RoiDefinition | None = None
+    active_drag_start_roi: RoiDefinition | None = None
+    active_drag_start_selected_point: tuple[int, int] | None = None
     active_drag_shift_down: bool = False
     active_drag_locked_axis: Literal["x", "y"] | None = None
 

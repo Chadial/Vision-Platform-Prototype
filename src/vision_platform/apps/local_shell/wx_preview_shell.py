@@ -332,6 +332,9 @@ class WxLocalPreviewShell(wx.Frame):
             self._copy_selected_point()
             self.request_refresh()
             return
+        if event.GetKeyCode() == wx.WXK_ESCAPE and self._presenter.cancel_active_drag():
+            self.request_refresh()
+            return
         event.Skip()
 
     @staticmethod
