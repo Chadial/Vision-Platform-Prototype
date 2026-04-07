@@ -222,6 +222,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._refresh_scheduled = False
         self._recording_active_frame_limit: int | None = None
         self._recording_target_frame_rate_value: float | None = None
+        self._recording_last_summary: str | None = None
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
 
@@ -365,6 +366,7 @@ class WxLocalPreviewShell(wx.Frame):
             return
         self._recording_active_frame_limit = frame_limit
         self._recording_target_frame_rate_value = target_frame_rate
+        self._recording_last_summary = None
         self._set_transient_status_message(
             f"Recording started: {result.status.active_file_stem or 'wx_recording'}"
         )
@@ -379,8 +381,11 @@ class WxLocalPreviewShell(wx.Frame):
             self._set_transient_status_message(f"Recording stop failed: {exc}")
             self.request_refresh()
             return
+        self._recording_last_summary = self._format_recording_summary(
+            frames_written=result.status.frames_written,
+            frame_limit=self._recording_active_frame_limit,
+        )
         self._recording_active_frame_limit = None
-        self._recording_target_frame_rate_value = None
         self._set_transient_status_message(
             f"Recording stopped: {result.status.frames_written} frames"
         )
@@ -547,12 +552,20 @@ class WxLocalPreviewShell(wx.Frame):
         return prefix
 
     def _build_recording_summary(self, status) -> str | None:
-        if self._recording_active_frame_limit is None and not status.recording.is_recording:
-            return None
-        written = status.recording.frames_written
-        if self._recording_active_frame_limit is None:
-            return f"{written}/n"
-        return f"{written}/{self._recording_active_frame_limit}"
+        if status.recording.is_recording:
+            return self._format_recording_summary(
+                frames_written=status.recording.frames_written,
+                frame_limit=self._recording_active_frame_limit,
+            )
+        if self._recording_last_summary is not None:
+            return self._recording_last_summary
+        return None
+
+    @staticmethod
+    def _format_recording_summary(*, frames_written: int, frame_limit: int | None) -> str:
+        if frame_limit is None:
+            return f"{frames_written}/n"
+        return f"{frames_written}/{frame_limit}"
 
     def _update_recording_controls(self, status) -> None:
         if hasattr(self, "_start_recording_button"):

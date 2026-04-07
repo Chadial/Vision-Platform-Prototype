@@ -597,6 +597,7 @@ class WxPreviewShellTests(unittest.TestCase):
         status = SimpleNamespace(recording=SimpleNamespace(is_recording=True, frames_written=3))
 
         shell._recording_active_frame_limit = 10
+        shell._recording_last_summary = None
         bounded_summary = shell._build_recording_summary(status)
 
         shell._recording_active_frame_limit = None
@@ -604,6 +605,14 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertEqual(bounded_summary, "3/10")
         self.assertEqual(unbounded_summary, "3/n")
+
+    def test_recording_summary_keeps_last_stopped_value_until_next_start(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._recording_active_frame_limit = None
+        shell._recording_last_summary = "17/n"
+        status = SimpleNamespace(recording=SimpleNamespace(is_recording=False, frames_written=17))
+
+        self.assertEqual(shell._build_recording_summary(status), "17/n")
 
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:

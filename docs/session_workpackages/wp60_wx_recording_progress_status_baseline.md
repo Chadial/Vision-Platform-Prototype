@@ -32,6 +32,7 @@ Included:
 - show bounded recording progress through existing status models
 - add start/stop recording controls with `Max Frames` and `Recording FPS` inputs
 - render progress as `n/m` for bounded runs and `n/n` for unlimited runs
+- keep the last recording summary visible after `Stop Recording` until the next `Start Recording`
 - prefer status-line or light shell-surface presentation over new workflow logic
 
 Excluded:
