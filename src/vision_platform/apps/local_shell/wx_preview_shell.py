@@ -134,6 +134,7 @@ class WxLocalPreviewShell(wx.Frame):
     _STATUS_REFRESH_INTERVAL_SECONDS = 0.5
     _FOCUS_REFRESH_INTERVAL_SECONDS = 0.5
     _INTERACTIVE_RENDER_INTERVAL_SECONDS = 1.0 / 30.0
+    _TRANSIENT_STATUS_TTL_SECONDS = 2.5
 
     def __init__(
         self,
@@ -151,6 +152,8 @@ class WxLocalPreviewShell(wx.Frame):
         self._status_lines: list[str] = []
         self._last_snapshot_name: str | None = None
         self._is_closed = False
+        self._transient_status_message: str | None = None
+        self._transient_status_deadline = 0.0
         self._cached_status = None
         self._last_status_refresh_time = 0.0
         self._cached_focus_state = None
@@ -202,6 +205,7 @@ class WxLocalPreviewShell(wx.Frame):
             return
         self._refresh_scheduled = False
         self._last_render_time = now
+        self._sync_transient_status_message(now)
         focus_state = self._get_focus_state()
         canvas_size = self._canvas.GetClientSize()
         view_model = self._presenter.build_view(
@@ -238,11 +242,12 @@ class WxLocalPreviewShell(wx.Frame):
                 SaveSnapshotRequest(file_stem="wx_shell_snapshot", file_extension=".bmp")
             )
         except Exception as exc:
-            self._presenter.state.interaction_state.last_status_message = f"Snapshot failed: {exc}"
+            self._set_transient_status_message(f"Snapshot failed: {exc}")
             self.request_refresh()
             return
         self._last_snapshot_name = result.saved_path.name
-        self._presenter.state.interaction_state.last_status_message = f"Snapshot saved: {result.saved_path.name}"
+        self._cached_status = None
+        self._set_transient_status_message(f"Snapshot saved: {result.saved_path.name}")
         self.request_refresh()
 
     def _run_action(self, action: str) -> None:
@@ -289,11 +294,15 @@ class WxLocalPreviewShell(wx.Frame):
         if self._focus_preview_service is None:
             return None
         if not self._presenter.state.interaction_state.focus_status_visible:
+            self._cached_focus_state = None
             return None
         now = monotonic()
         if self._focus_refresh_future is not None and self._focus_refresh_future.done():
             try:
                 self._cached_focus_state = self._focus_refresh_future.result()
+            except Exception as exc:
+                self._set_transient_status_message(f"Focus failed: {exc}")
+                self._cached_focus_state = None
             finally:
                 self._focus_refresh_future = None
         if now - self._last_focus_refresh_time < self._FOCUS_REFRESH_INTERVAL_SECONDS:
@@ -306,6 +315,21 @@ class WxLocalPreviewShell(wx.Frame):
 
     def _run_scheduled_refresh(self) -> None:
         self.request_refresh(interactive=False)
+
+    def _set_transient_status_message(self, message: str) -> None:
+        self._transient_status_message = message
+        self._transient_status_deadline = monotonic() + self._TRANSIENT_STATUS_TTL_SECONDS
+        self._presenter.state.interaction_state.last_status_message = message
+
+    def _sync_transient_status_message(self, now: float) -> None:
+        if self._transient_status_message is None:
+            self._presenter.state.interaction_state.last_status_message = None
+            return
+        if now >= self._transient_status_deadline:
+            self._transient_status_message = None
+            self._presenter.state.interaction_state.last_status_message = None
+            return
+        self._presenter.state.interaction_state.last_status_message = self._transient_status_message
 
 
 def run_wx_preview_shell(

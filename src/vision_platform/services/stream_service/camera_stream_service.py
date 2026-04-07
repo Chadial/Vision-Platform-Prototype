@@ -92,11 +92,13 @@ class CameraStreamService:
         self,
         roi_state_service: RoiStateService | None = None,
         focus_method: FocusMethod | None = None,
+        max_frame_dimension: int | None = None,
     ) -> FocusPreviewService:
         return FocusPreviewService(
             self._preview_service,
             focus_method=focus_method,
             roi_state_service=roi_state_service or self._roi_state_service,
+            max_frame_dimension=max_frame_dimension,
         )
 
 

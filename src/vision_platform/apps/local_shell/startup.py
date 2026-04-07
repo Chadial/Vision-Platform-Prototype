@@ -70,7 +70,10 @@ def build_local_shell_session(
             options,
             initialized_status,
         )
-        focus_preview_service = subsystem.stream_service.create_focus_preview_service(focus_method=options.focus_method)
+        focus_preview_service = subsystem.stream_service.create_focus_preview_service(
+            focus_method=options.focus_method,
+            max_frame_dimension=512,
+        )
         selected_save_directory = subsystem.command_controller.set_save_directory(
             SetSaveDirectoryRequest(
                 base_directory=options.snapshot_directory,
