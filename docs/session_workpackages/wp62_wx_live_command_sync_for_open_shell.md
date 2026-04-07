@@ -19,7 +19,7 @@ Let an already open wx shell observe CLI/API-driven configuration and recording 
 ## Branch
 
 - intended branch: `feature/wx-live-command-sync`
-- activation state: queued
+- activation state: implemented
 
 ## Scope
 
@@ -38,12 +38,22 @@ Excluded:
 
 ## Open policy choices
 
-- polling vs event/IPC observer
-- in-process shared state vs session bridge
-- how much menu state is dynamically enabled or disabled
+- resolved for this slice:
+  - local file-backed session bridge
+  - polling from the already running shell timer
+  - command execution continues through the in-process `CommandController`
+- deferred:
+  - broader event/IPC transport
+  - richer menu-state sync once a real menu surface exists
 
 ## Validation
 
 - two-process smoke or equivalent local observation test
 - issue a CLI/API command while the wx shell is open and confirm the UI updates without restart
+
+## Landed Result
+
+- the wx shell now publishes one active local session under `captures/wx_shell_sessions/`
+- external control commands can now be sent through `python -m vision_platform.apps.local_shell control ...`
+- the open shell consumes those commands and updates its visible status/controls without restart
 

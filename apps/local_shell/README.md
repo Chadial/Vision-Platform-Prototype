@@ -35,6 +35,7 @@ It exists to offer a more practical daily-use local frontend than the current Op
 - recording start/stop controls with `Max Frames` and `Recording FPS`
 - recording progress and the latest recording summary in the shell status area
 - camera and UI cadence readouts in the shell header
+- bounded live command sync for an already open shell through a local session file/command queue
 
 See [`FEATURES.md`](FEATURES.md) for the full implemented wx shell inventory.
 
@@ -44,6 +45,7 @@ See [`FEATURES.md`](FEATURES.md) for the full implemented wx shell inventory.
 - UI-local responsibilities: wx windowing, button layout, bitmap rendering, event translation, status text presentation, clipboard integration, and menu/shortcut affordances
 - the shell is allowed to decide how to draw and route input, but it should not own camera semantics, recording semantics, or duplicate shared status models
 - future live command sync should observe shared state instead of pushing new camera logic into the UI layer
+- the current live command sync baseline is intentionally local and file-backed; it is not a broad transport framework
 
 ## Dependencies
 
@@ -72,6 +74,14 @@ Current example:
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --snapshot-directory .\captures\wx_shell_snapshot
 ```
 
+Bounded control example for an already open shell:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control start-recording --max-frames 0 --recording-fps 12.5
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control apply-configuration --exposure-time-us 8000 --gain 2.0
+```
+
 Bounded hardware-backed example on the tested path:
 
 ```powershell
@@ -86,5 +96,6 @@ Bounded hardware-backed example on the tested path:
 - current point-copy and focus-visibility behavior intentionally follow the already proven OpenCV prototype semantics where practical
 - current anchor rendering and drag behavior are intentionally bounded to fixed-point movement and ROI corner updates, not full desktop vector editing
 - it does not yet provide full configuration or recording UI
+- the current external-control baseline assumes one active local shell session at a time and uses a repo-local file-backed session bridge under `captures/wx_shell_sessions/`
 - the OpenCV prototype remains the fallback/reference frontend
 - the documented wx feature surface intentionally stays narrower than the full future desktop-product direction

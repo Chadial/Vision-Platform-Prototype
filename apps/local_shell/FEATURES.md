@@ -19,6 +19,7 @@ This document records the current implemented surface of the bounded wxPython lo
 - recording progress and the latest recording summary in the shell status area
 - camera and UI cadence readouts in the shell header
 - reuse of the same alias, configuration-profile, and configuration-override semantics already used by the camera CLI
+- bounded external control of an already open shell through a local session registry, command queue, and status snapshot under `captures/wx_shell_sessions/`
 
 ## Shared Core Ownership
 
@@ -44,18 +45,19 @@ These responsibilities stay in the wx shell:
 - clipboard integration
 - local menu / shortcut affordances
 - transient operator feedback for the running shell
+- local command-session polling and control-CLI result publication
 
 ## Current Boundaries
 
 - the shell should render and route input, but it should not own camera or recording semantics
 - the shell should reuse shared models rather than building a parallel status model
 - the shell may expose controls, but the control actions should continue to flow through the shared controller surface
-- live command sync remains out of scope for this inventory and is deferred to a later slice
+- the current live command sync baseline remains intentionally local and bounded, not a broad runtime transport or daemon layer
 
 ## Known Gaps
 
 - full configuration UI is still deferred
 - menu-driven settings flows are still deferred
-- live CLI/API sync for an already open shell is still deferred
+- append/resume naming for reused recording directories is still deferred
 - non-OpenCV renderer abstraction is still deferred
 

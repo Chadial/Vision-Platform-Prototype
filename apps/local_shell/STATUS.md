@@ -21,10 +21,13 @@
 - working now: `Shift` during ROI body drag now behaves as a live projection toggle, so pressing it constrains to the dominant axis and releasing it returns to the unconstrained cursor position
 - working now: `Esc` during active point or ROI drag now cancels that edit and restores the drag-start geometry
 - working now: the implemented wx shell feature inventory and core/UI boundary are now captured in `FEATURES.md`
-- next: reserve live CLI/API sync for a later slice
+- working now: an already open wx shell can now observe bounded external control commands through a repo-local live-sync session bridge under `captures/wx_shell_sessions/`
+- working now: external control commands for save-directory changes, bounded configuration updates, snapshot, and recording start/stop execute through the same in-process `CommandController`, and the shell reflects the resulting status without restart
+- partial: the current live-sync baseline assumes one active local shell session at a time and uses local file-backed polling rather than a broader transport/runtime-hosting layer
+- next: fix append/resume behavior for reused recording directories so later `n/n` progress and non-overwriting save behavior become trustworthy
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite
-- partial: recording progress display, ROI visibility toggles, configuration editing, and broader operator controls are intentionally not part of this slice
+- partial: ROI visibility toggles, menu-driven settings entry, and broader operator controls are intentionally not part of this slice
 - technical debt: the current shell keeps its viewport rendering in app-local helper code because no shared non-OpenCV image-presenter abstraction exists yet
 - risk: future non-OpenCV frontend growth may justify a shared renderer-facing display adapter above the current app-local bitmap conversion path
