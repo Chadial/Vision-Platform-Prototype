@@ -443,8 +443,8 @@ The repository currently provides a structured Python prototype for the vision p
 31. Treat `WP58` as implemented: wx point selection and clipboard feedback now align more closely with the current OpenCV semantics.
 32. Treat `WP59` as implemented: the wx shell now renders visible point/ROI anchors with bounded hover and first drag behavior above the shared display stack.
 33. Treat `WP60` as implemented: recording progress and the recording controls now stay within the existing controller/status path.
-34. Make `WP61` the current next slice for wx feature inventory and core/UI boundary documentation.
-35. Treat `WP62` as queued until the boundary documentation is resolved.
+34. Treat `WP61` as implemented: the wx shell inventory and core/UI boundary are now captured in `apps/local_shell/FEATURES.md`.
+35. Make `WP62` the current next slice for open-shell CLI/API live command sync.
 36. Treat broader API growth, additional frontends, larger offline tooling, and C# handover as justified post-closure directions rather than current closure obligations.
 
 ## Deferred Profile-System Bucket List

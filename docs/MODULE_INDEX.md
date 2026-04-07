@@ -28,7 +28,7 @@
 | `services/recording_service` | active core | snapshot, interval capture, recording implemented |
 | `services/display_service` | active baseline | UI-free overlay composition implemented; lightweight payload demo exists, renderer-facing adapter still open |
 | `apps/opencv_prototype` | active prototype | simulator and first real-hardware preview path available; viewport-based preview controls now implemented |
-| `apps/local_shell` | active prototype | bounded wxPython local working shell above the shared controller/preview/display layers |
+| `apps/local_shell` | active prototype | bounded wxPython local working shell above the shared controller/preview/display layers; see `FEATURES.md` for the implemented-shell inventory |
 | `libraries/common_models` | active foundation | portable contracts and overlay/display payloads added; some target-facing contract elements are intentionally ahead of implementation and must be marked in module status |
 | `libraries/roi_core` | active foundation | ROI bounds, centroid, pixel bounds, and rectangle/ellipse mask helpers implemented; freehand remains deferred |
 | `libraries/focus_core` | active baseline | Laplace focus scoring and overlay-ready mapping added; live preview-adjacent consumers now use the baseline |
@@ -38,6 +38,7 @@ For each active module:
 - read before edits:
   - `README.md`
   - `STATUS.md`
+- `FEATURES.md` when you need the compact implemented-surface inventory for a local shell slice
 - `ROADMAP.md`: local future intent only when it adds module-specific value beyond the central work-package queue
 
 Root category usage:

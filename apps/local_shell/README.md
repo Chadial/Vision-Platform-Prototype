@@ -36,6 +36,8 @@ It exists to offer a more practical daily-use local frontend than the current Op
 - recording progress and the latest recording summary in the shell status area
 - camera and UI cadence readouts in the shell header
 
+See [`FEATURES.md`](FEATURES.md) for the full implemented wx shell inventory.
+
 ## Core vs UI
 
 - shared headless core responsibilities: bootstrap, command controller, stream service, display geometry, preview interaction, preview-status models, and focus preview evaluation

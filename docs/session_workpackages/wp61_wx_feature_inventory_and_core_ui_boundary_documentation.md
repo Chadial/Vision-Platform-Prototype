@@ -19,7 +19,7 @@ Document the implemented wx shell surface and make the boundary between the shar
 ## Branch
 
 - intended branch: `docs/wx-shell-feature-inventory`
-- activation state: current next
+- activation state: landed
 
 ## Scope
 
@@ -42,3 +42,8 @@ Excluded:
 - cross-check the inventory against the current code and shell help/status text
 - confirm the documented boundary matches the implemented shell responsibilities
 
+## Result
+
+- the wx shell inventory is now captured in `apps/local_shell/FEATURES.md`
+- the module README points at that inventory for the full feature list
+- the core/UI boundary is now explicit in both the inventory and the module status text

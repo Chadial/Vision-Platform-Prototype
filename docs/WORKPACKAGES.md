@@ -314,8 +314,8 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | active lane | implemented as an append-only hardware-audit baseline that records warnings, degraded startup states, and incidents separately from artifact traceability | `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
 | 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | active lane | landed CLI help and documentation polish; the bounded current command surface now has clearer argparse help and a compact human-readable reference | `docs/session_workpackages/wp56_cli_help_and_command_documentation.md` |
 | 60 | wx Recording Progress Status Baseline | surface bounded recording controls and progress in the wx shell through existing status models | active lane | landed bounded wx recording-control slice; recording controls, max-frames input, recording FPS input, and progress stay within the existing controller/status path | `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md` |
-| 61 | wx Feature Inventory And Core/UI Boundary Documentation | document the implemented wx shell surface and the shared-core / UI-local split | current next | documentation slice that records the implemented wx feature inventory and explicit core-vs-UI boundary before any live sync work | `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md` |
-| 62 | wx Live Command Sync For Open Shell | let an already open wx shell observe CLI/API-driven changes without moving command ownership into the UI | queued | later selective-expansion sync slice after the boundary documentation is landed | `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md` |
+| 61 | wx Feature Inventory And Core/UI Boundary Documentation | document the implemented wx shell surface and the shared-core / UI-local split | active lane | implemented wx shell inventory and boundary documentation, captured in `apps/local_shell/FEATURES.md` | `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md` |
+| 62 | wx Live Command Sync For Open Shell | let an already open wx shell observe CLI/API-driven changes without moving command ownership into the UI | current next | later selective-expansion sync slice after the boundary documentation is landed | `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md` |
 
 ## Immediate PM Backlog
 
@@ -334,8 +334,9 @@ Current prepared post-closure sequence:
 - `WP55 Hardware Audit & Incident Logging Baseline` implemented as the append-only hardware-audit baseline
 - `WP56 CLI Help & Documentation` implemented as the CLI help / reference polish slice
 - `WP60 wx Recording Progress Status Baseline` implemented as the bounded recording-progress slice on the wx shell
-- `WP61 wx Feature Inventory And Core/UI Boundary Documentation` is now the current next documentation slice
-- defer any new CLI/API live-sync work packages until the wx feature-inventory slice is resolved
+- `WP61 wx Feature Inventory And Core/UI Boundary Documentation` implemented as the wx shell inventory / boundary documentation slice
+- `WP62 wx Live Command Sync For Open Shell` is now the current next selective-expansion slice
+- defer any new CLI/API live-sync work packages until the open-shell sync slice is resolved
 
 Most recently landed detailed packages:
 
@@ -564,19 +565,19 @@ The current coarse PM order should be:
 35. treat `WP58` as implemented; wx clipboard and point-selection semantics now align more closely with the current OpenCV baseline
 36. treat `WP59` as implemented; the wx shell now renders visible point/ROI anchors with bounded hover and first drag behavior above the shared display stack
 37. treat `WP60` as implemented; recording progress and the recording controls now stay within the existing controller/status path
-38. make `WP61` the current next slice for wx feature inventory and core/UI boundary documentation
-39. treat `WP62` as queued until the boundary documentation is resolved
+38. treat `WP61` as implemented as the wx shell inventory / boundary documentation slice
+39. make `WP62` the current next slice for open-shell CLI/API live command sync
 40. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
 
 ## Recommended Next Detailed Work Package
 
-`WP61 wx Feature Inventory And Core/UI Boundary Documentation`
+`WP62 wx Live Command Sync For Open Shell`
 
 Reason:
 
-- the recording-progress slice is already in place, so the next clear gap is documentation of what the wx shell actually owns versus what remains headless core
-- the implemented shell now has enough features that a feature inventory is useful for the next design discussion
-- documenting the boundary before live command sync reduces the risk of pushing more core behavior into the UI by accident
+- the wx shell inventory and core/UI boundary are now documented, so the next uncovered gap is live observation of CLI/API-driven changes in an already open shell
+- the live shell still does not react to external command changes, which keeps operator and host paths split more than necessary
+- moving to live sync after the boundary doc keeps the implementation order controlled rather than speculative
 
 ## Fresh Agent Decision Rule
 
@@ -705,7 +706,7 @@ Current explicit activation:
 - `Hardware Audit And Incident Logging Baseline` remains queued at `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
 - `CLI Help And Command Documentation` is now implemented through `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
 - `wx Recording Progress Status Baseline` is now implemented through `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
-- `wx Feature Inventory And Core/UI Boundary Documentation` is the current next execution-ready file at `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md`
+- `wx Feature Inventory And Core/UI Boundary Documentation` is now implemented through `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md`
 - `wx Focus Visibility And ROI Ownership` is now implemented through `docs/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
 - `wx Clipboard And Anchor Semantics Baseline` is now implemented through `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
 - `wx Anchor Drag Follow-Up` is now implemented through `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
