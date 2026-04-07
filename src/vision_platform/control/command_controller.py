@@ -35,6 +35,7 @@ from vision_platform.models import (
     StopRecordingRequest,
     SubsystemStatus,
 )
+from vision_platform.services.hardware_audit_service import HardwareAuditService
 from vision_platform.services.camera_configuration_validation_service import CameraConfigurationValidationService
 
 
@@ -47,6 +48,7 @@ class CommandController:
         interval_capture_service: IntervalCaptureService | None = None,
         capability_profile: CameraCapabilityProfile | None = None,
         configuration_validation_service: CameraConfigurationValidationService | None = None,
+        hardware_audit_service: HardwareAuditService | None = None,
     ) -> None:
         self._camera_service = camera_service
         self._snapshot_service = snapshot_service
@@ -55,6 +57,7 @@ class CommandController:
         self._default_save_directory: Optional[Path] = None
         self._capability_profile = capability_profile
         self._configuration_validation_service = configuration_validation_service or CameraConfigurationValidationService()
+        self._hardware_audit_service = hardware_audit_service
 
     def apply_configuration(
         self,
@@ -65,7 +68,17 @@ class CommandController:
         self._require_initialized_camera("apply configuration")
         validate_camera_configuration(config)
         self._configuration_validation_service.validate(config, self._get_effective_capability_profile())
-        self._camera_service.apply_configuration(config)
+        try:
+            self._camera_service.apply_configuration(config)
+        except Exception as exc:
+            self._record_hardware_incident(
+                stage="controller.apply_configuration",
+                severity="error",
+                event="configuration_failed",
+                message="configuration command failed",
+                exception=exc,
+            )
+            raise
         return ApplyConfigurationCommandResult.from_applied_configuration(config)
 
     def set_capability_profile(self, capability_profile: CameraCapabilityProfile | None) -> None:
@@ -85,7 +98,17 @@ class CommandController:
             request = request.to_snapshot_request()
         self._require_initialized_camera("save a snapshot")
         validate_snapshot_request(request)
-        saved_path = self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
+        try:
+            saved_path = self._snapshot_service.save_snapshot(self._resolve_snapshot_request(request))
+        except Exception as exc:
+            self._record_hardware_incident(
+                stage="controller.save_snapshot",
+                severity="error",
+                event="snapshot_failed",
+                message="snapshot command failed",
+                exception=exc,
+            )
+            raise
         return SnapshotCommandResult.from_saved_path(saved_path)
 
     def start_recording(self, request: RecordingRequest | StartRecordingRequest) -> RecordingCommandResult:
@@ -93,13 +116,34 @@ class CommandController:
             request = request.to_recording_request()
         self._require_initialized_camera("start recording")
         validate_recording_request(request)
-        status = self._recording_service.start_recording(self._resolve_recording_request(request))
+        try:
+            status = self._recording_service.start_recording(self._resolve_recording_request(request))
+        except Exception as exc:
+            self._record_hardware_incident(
+                stage="controller.start_recording",
+                severity="error",
+                event="recording_start_failed",
+                message="recording start failed",
+                exception=exc,
+            )
+            raise
         return RecordingCommandResult.from_status(status)
 
     def stop_recording(self, request: StopRecordingRequest | None = None) -> RecordingCommandResult:
         stop_request = request or StopRecordingRequest()
+        try:
+            status = self._recording_service.stop_recording()
+        except Exception as exc:
+            self._record_hardware_incident(
+                stage="controller.stop_recording",
+                severity="error",
+                event="recording_stop_failed",
+                message="recording stop failed",
+                exception=exc,
+            )
+            raise
         return RecordingCommandResult.from_status(
-            self._recording_service.stop_recording(),
+            status,
             stop_reason=stop_request.reason,
         )
 
@@ -113,7 +157,17 @@ class CommandController:
             request = request.to_interval_capture_request()
         self._require_initialized_camera("start interval capture")
         validate_interval_capture_request(request)
-        status = self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
+        try:
+            status = self._interval_capture_service.start_capture(self._resolve_interval_capture_request(request))
+        except Exception as exc:
+            self._record_hardware_incident(
+                stage="controller.start_interval_capture",
+                severity="warning",
+                event="interval_capture_start_failed",
+                message="interval capture start failed",
+                exception=exc,
+            )
+            raise
         return IntervalCaptureCommandResult.from_status(status)
 
     def stop_interval_capture(
@@ -123,8 +177,19 @@ class CommandController:
         if self._interval_capture_service is None:
             raise RuntimeError("Interval capture service is not configured.")
         stop_request = request or StopIntervalCaptureRequest()
+        try:
+            status = self._interval_capture_service.stop_capture()
+        except Exception as exc:
+            self._record_hardware_incident(
+                stage="controller.stop_interval_capture",
+                severity="warning",
+                event="interval_capture_stop_failed",
+                message="interval capture stop failed",
+                exception=exc,
+            )
+            raise
         return IntervalCaptureCommandResult.from_status(
-            self._interval_capture_service.stop_capture(),
+            status,
             stop_reason=stop_request.reason,
         )
 
@@ -140,8 +205,7 @@ class CommandController:
         )
         is_save_directory_configured = self._default_save_directory is not None
         can_save_to_disk = camera_status.is_initialized and is_save_directory_configured
-
-        return SubsystemStatus(
+        status = SubsystemStatus(
             camera=camera_status,
             configuration=configuration,
             recording=recording_status,
@@ -160,6 +224,11 @@ class CommandController:
             ),
             can_stop_interval_capture=interval_capture_status.is_capturing,
         )
+        self._record_hardware_status(
+            stage="controller.get_status",
+            status=status,
+        )
+        return status
 
     def _resolve_snapshot_request(self, request: SnapshotRequest) -> SnapshotRequest:
         resolved_save_directory = request.save_directory or self._default_save_directory
@@ -193,6 +262,37 @@ class CommandController:
         if isinstance(capability_profile, CameraCapabilityProfile):
             return capability_profile
         return None
+
+    def _record_hardware_status(self, *, stage: str, status: SubsystemStatus) -> None:
+        if self._hardware_audit_service is None:
+            return
+        self._hardware_audit_service.record_subsystem_status(stage=stage, status=status)
+
+    def _record_hardware_incident(
+        self,
+        *,
+        stage: str,
+        severity: str,
+        event: str,
+        message: str,
+        exception: Exception | None = None,
+    ) -> None:
+        if self._hardware_audit_service is None:
+            return
+        if exception is not None:
+            self._hardware_audit_service.record_exception(
+                stage=stage,
+                exc=exception,
+                severity=severity,
+                event=event,
+            )
+            return
+        self._hardware_audit_service.record_incident(
+            stage=stage,
+            severity=severity,
+            event=event,
+            message=message,
+        )
 
 
 __all__ = ["CommandController"]

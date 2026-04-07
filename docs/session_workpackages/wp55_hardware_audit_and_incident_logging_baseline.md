@@ -19,7 +19,7 @@ Scope level:
 ## Branch
 
 - intended branch: `feature/hardware-audit-incident-logging-baseline`
-- activation state: current next
+- activation state: landed
 
 ## Scope
 
@@ -28,6 +28,7 @@ Included:
 - define one narrow structured audit path for warnings, failures, degraded startup states, and extraordinary hardware incidents
 - keep that audit path separate from normal artifact traceability
 - prefer bounded append-only evidence over broad history browsing
+- store the audit stream as repo-local append-only JSONL under `captures/hardware_audit/`
 
 Excluded:
 

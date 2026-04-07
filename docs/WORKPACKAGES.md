@@ -311,8 +311,8 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 | 52 | Overlay And Preview Status Model Definition | define UI-agnostic overlay/status models once geometry and interaction ownership are separated | active lane | implemented on the current architecture baseline; OpenCV preview now formats and renders shared descriptive status / overlay models | `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md` |
 | 53 | Local Working UI Shell Baseline | add a first pragmatic local UI shell on top of the extracted geometry and interaction layers | active lane | implemented as a bounded wxPython local shell over the shared controller/preview/display stack while OpenCV remains the fallback/reference path | `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md` |
 | 54 | wx Shell Hardware Enablement | add one bounded real-hardware startup path for the existing wxPython shell | active lane | implemented; the wx shell now reuses the same headless source-selection, alias/profile, and configuration startup semantics on both simulated and hardware-backed paths | `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md` |
-| 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | current next | operational-readiness follow-up that becomes the default next slice once the wx recording-control slice lands | `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
-| 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | queued | operational-readiness polish behind the current architecture and hardware-shell chain | `docs/session_workpackages/wp56_cli_help_and_command_documentation.md` |
+| 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | active lane | implemented as an append-only hardware-audit baseline that records warnings, degraded startup states, and incidents separately from artifact traceability | `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
+| 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | current next | operational-readiness polish behind the current architecture and hardware-shell chain | `docs/session_workpackages/wp56_cli_help_and_command_documentation.md` |
 | 60 | wx Recording Progress Status Baseline | surface bounded recording controls and progress in the wx shell through existing status models | active lane | landed bounded wx recording-control slice; recording controls, max-frames input, recording FPS input, and progress stay within the existing controller/status path | `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md` |
 
 ## Immediate PM Backlog
@@ -320,8 +320,8 @@ Post-closure packages should now be read as hardening, operational-readiness, pr
 These are the work-package groups PM should treat as the current actionable post-closure backlog categories:
 
 1. residual-driven hardening after the now-implemented `WP50` to `WP54` architecture/frontend chain, starting with hardware audit/logging
-2. residual-driven hardening
-3. operational readiness and productization polish after the architecture chain is prepared
+2. CLI help/documentation polish once the hardware audit slice is cleared
+3. new recording append / IPC work only after the open operational-readiness WPs are cleared
 
 Current prepared post-closure sequence:
 
@@ -329,8 +329,9 @@ Current prepared post-closure sequence:
 - `WP51 Shared Preview Interaction Command Layer` implemented on the current branch
 - `WP53 Local Working UI Shell Baseline` implemented as a bounded wxPython shell baseline
 - `WP54 wx Shell Hardware Enablement` implemented as the bounded real-device startup follow-up for the existing shell
-- `WP55 Hardware Audit & Incident Logging Baseline`
-- defer `WP56` unless a concrete operational-help defect outranks the hardware-facing slices above it
+- `WP55 Hardware Audit & Incident Logging Baseline` implemented as the append-only hardware-audit baseline
+- `WP56 CLI Help & Documentation`
+- defer any new recording append / IPC work packages until `WP56` is resolved
 
 Most recently landed detailed packages:
 

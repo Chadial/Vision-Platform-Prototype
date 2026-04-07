@@ -6,6 +6,7 @@ from camera_app.models.camera_configuration import CameraConfiguration
 from camera_app.models.camera_status import CameraStatus
 from vision_platform.integrations.camera.capability_probe import DEFAULT_FEATURE_NAMES
 from vision_platform.services.camera_capability_service import CameraCapabilityService
+from vision_platform.services.hardware_audit_service import HardwareAuditService
 
 
 class CameraService:
@@ -13,22 +14,47 @@ class CameraService:
         self,
         driver: CameraDriver,
         capability_service: CameraCapabilityService | None = None,
+        hardware_audit_service: HardwareAuditService | None = None,
     ) -> None:
         self._driver = driver
         self._capability_service = capability_service or CameraCapabilityService()
+        self._hardware_audit_service = hardware_audit_service
         self._last_configuration: CameraConfiguration | None = None
         self._capability_profile: CameraCapabilityProfile | None = None
         self._camera_status = CameraStatus()
 
     def initialize(self, camera_id: str | None = None) -> CameraStatus:
-        self._camera_status = self._driver.initialize(camera_id=camera_id)
+        try:
+            self._camera_status = self._driver.initialize(camera_id=camera_id)
+        except Exception as exc:
+            self._camera_status.last_error = str(exc)
+            self._record_hardware_audit_incident(
+                stage="camera.initialize",
+                severity="error",
+                event="initialize_failed",
+                message="camera initialization failed",
+                exception=exc,
+            )
+            raise
         self._refresh_capability_profile_best_effort()
+        self._record_hardware_audit_status("camera.initialize")
         return deepcopy(self._camera_status)
 
     def apply_configuration(self, config: CameraConfiguration) -> None:
         if not self._camera_status.is_initialized:
             raise RuntimeError("Camera is not initialized.")
-        self._driver.apply_configuration(config)
+        try:
+            self._driver.apply_configuration(config)
+        except Exception as exc:
+            self._record_hardware_audit_incident(
+                stage="camera.apply_configuration",
+                severity="error",
+                event="configuration_failed",
+                message="camera configuration failed",
+                exception=exc,
+                details={"configuration": repr(config)},
+            )
+            raise
         self._last_configuration = deepcopy(config)
 
     def shutdown(self) -> None:
@@ -51,6 +77,7 @@ class CameraService:
         driver_status.capabilities_available = self._camera_status.capabilities_available
         driver_status.capability_probe_error = self._camera_status.capability_probe_error
         self._camera_status = driver_status
+        self._record_hardware_audit_status("camera.get_status")
         return deepcopy(self._camera_status)
 
     def _refresh_capability_profile_best_effort(self) -> None:
@@ -73,6 +100,42 @@ class CameraService:
             return
 
         self._camera_status.capabilities_available = True
+
+    def _record_hardware_audit_status(self, stage: str) -> None:
+        if self._hardware_audit_service is None:
+            return
+        self._hardware_audit_service.record_camera_status(stage=stage, status=self._camera_status)
+
+    def _record_hardware_audit_incident(
+        self,
+        *,
+        stage: str,
+        severity: str,
+        event: str,
+        message: str,
+        exception: Exception | None = None,
+        details: dict[str, object] | None = None,
+    ) -> None:
+        if self._hardware_audit_service is None:
+            return
+        if exception is not None:
+            self._hardware_audit_service.record_exception(
+                stage=stage,
+                exc=exception,
+                severity=severity,
+                event=event,
+                status=self._camera_status,
+                details=details,
+            )
+            return
+        self._hardware_audit_service.record_incident(
+            stage=stage,
+            severity=severity,
+            event=event,
+            message=message,
+            status=self._camera_status,
+            details=details,
+        )
 
     @staticmethod
     def _classify_capability_probe_issue(exc: Exception) -> str:
