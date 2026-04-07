@@ -39,3 +39,18 @@ Excluded:
 ## Validation
 
 - start the wx shell, open the bounded settings/menu path, change one save/configuration value, and confirm the shell reflects it through the shared status/controller path
+
+## Implementation Status
+
+Implemented on `feature/wx-menu-settings-baseline` as a bounded local-usability extension:
+
+- wx menu bar with `File -> Set Save Directory...` and `Settings -> Recording Settings...`
+- save-directory dialog wired to the existing controller path via `SetSaveDirectoryRequest(mode=\"append\")`
+- recording-settings dialog for `file_stem`, `file_extension`, `max_frames`, and `recording_fps`
+- `Start Recording` now reuses the configured recording settings values
+- targeted wx-shell tests for recording-settings application and start-recording request wiring
+
+Current checkpoint:
+
+- unit validation is passing
+- one manual shell smoke pass is still required before marking this package as landed in central status docs
