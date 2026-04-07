@@ -18,6 +18,9 @@ opencv = [
     "numpy>=1.26",
     "opencv-python>=4.10",
 ]
+wx = [
+    "wxPython>=4.2.5",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
