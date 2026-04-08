@@ -9,17 +9,18 @@ Read this first to get from zero context to a workable repository overview witho
 ## Five-Minute Startup Checklist
 
 1. Read `AGENTS.md`, then this file, then `docs/MODULE_INDEX.md`.
-2. Read `docs/WORKPACKAGES.md` when the next task is not already explicit.
-3. Check the current branch.
-4. Run `git status --short`.
-5. If the task changes repository state, read `docs/git_strategy.md`.
-6. If the worktree is dirty or branch scope is unclear, open `docs/branch_backlog.md` before editing.
-7. If the current branch is `main` and the task is substantive, create the correct branch first.
-8. Read the target module's `README.md` and `STATUS.md` before changing code in that module; read that module's `ROADMAP.md` only when the local module plan is directly needed.
-9. If the target module is `prepared only`, read its `ROADMAP.md` before first activation work in that module.
-10. If the task may create a new module or move logic across `apps/`, `integrations/`, `services/`, or `libraries/`, read `docs/root_category_audit.md` first.
-11. If the task changes documentation structure, update rules, or documentation role boundaries, read `docs/DOCUMENTATION_PLAYBOOK.md`.
-12. If context is getting dense, run a documentation checkpoint (`docs/STATUS.md`, `docs/WORKPACKAGES.md`, active `docs/session_workpackages/wpXX_*.md`) before broad further changes.
+2. Read `docs/STATUS.md` for the single authoritative repository status.
+3. Read `docs/WORKPACKAGES.md` for the single authoritative repository work queue when the next task is not already explicit.
+4. Check the current branch.
+5. Run `git status --short`.
+6. If the task changes repository state, read `docs/git_strategy.md`.
+7. If the worktree is dirty or branch scope is unclear, open `docs/branch_backlog.md` before editing.
+8. If the current branch is `main` and the task is substantive, create the correct branch first.
+9. Read the target module's `README.md` and `STATUS.md` before changing code in that module; read that module's `ROADMAP.md` only when the local module plan is directly needed.
+10. If the target module is `prepared only`, read its `ROADMAP.md` before first activation work in that module.
+11. If the task may create a new module or move logic across `apps/`, `integrations/`, `services/`, or `libraries/`, read `docs/root_category_audit.md` first.
+12. If the task changes documentation structure, update rules, or documentation role boundaries, read `docs/DOCUMENTATION_PLAYBOOK.md`.
+13. If context is getting dense, run a documentation checkpoint (`docs/STATUS.md`, `docs/WORKPACKAGES.md`, active `docs/session_workpackages/wpXX_*.md`) before broad further changes.
 
 ## Current Baseline
 
@@ -40,6 +41,8 @@ Read this first to get from zero context to a workable repository overview witho
 
 - preferred implementation surface: `src/vision_platform/...`
 - legacy compatibility surface: `src/camera_app/...`
+- `docs/STATUS.md` is the single authoritative repository status document
+- `docs/WORKPACKAGES.md` is the single authoritative repository work queue
 - module docs live in the root module folders under `apps/`, `integrations/`, `services/`, and `libraries/`
 - module `README.md`: purpose, boundaries, intended contract surface
 - module `STATUS.md`: current implemented state, residuals, and local known limits
@@ -126,8 +129,8 @@ Read these for every new session:
 
 ## Working Defaults
 
-- `docs/STATUS.md` is the current implementation truth.
-- `docs/WORKPACKAGES.md` is the central queue for the next concrete work slice.
+- `docs/STATUS.md` is the current implementation truth and the single authoritative repository status document.
+- `docs/WORKPACKAGES.md` is the central queue for the next concrete work slice and the single authoritative repository work queue.
 - `docs/PYTHON_BASELINE_RUNBOOK.md` is the compact operating reference for the current post-closure Python baseline.
 - `docs/PYTHON_BASELINE_ENVIRONMENT.md` is the compact bounded install-profile and environment-contract reference.
 - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` is the compact startup-surface reference for the preferred current entry points.

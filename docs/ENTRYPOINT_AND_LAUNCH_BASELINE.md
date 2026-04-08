@@ -192,6 +192,34 @@ Use the bounded wx shell on the tested hardware path when the goal is to exercis
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --source hardware --camera-alias tested_camera --configuration-profile default --snapshot-directory .\captures\wx_shell_snapshot
 ```
 
+## Reference Scenario Quick Path
+
+Use this when the goal is not ad-hoc command usage, but one small repeatable confidence pass over the official reference scenarios.
+
+Preferred quick path:
+
+```powershell
+.\.venv\Scripts\python.exe .\scripts\launchers\run_reference_scenario_validation.py
+```
+
+What this covers:
+
+- snapshot save path
+- bounded recording path
+- bounded interval-capture path
+
+Why this is the preferred quick path:
+
+- it reuses the landed `WP71` validation block instead of requiring manual command reconstruction
+- it is simulator-first and therefore repeatable without hardware
+- it gives fresh agents and operators one compact confidence command before they dive into the fuller recipes in `docs/REFERENCE_SCENARIOS.md`
+
+Use `docs/REFERENCE_SCENARIOS.md` when:
+
+- you want the full command-centered bounded recipes
+- you want to run one scenario individually instead of the compact validation block
+- you want the expected artifacts and success criteria for each scenario spelled out
+
 ## Launch Readiness Checklist
 
 Before normal simulator-backed use:

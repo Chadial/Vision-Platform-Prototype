@@ -5,6 +5,9 @@
 This is the compact planning card for the current active phase.
 
 Use it as the fast orientation layer above `docs/STATUS.md` and `docs/WORKPACKAGES.md`.
+It is a derived reading aid, not the authoritative status carrier.
+
+For a fuller but still lightweight prioritized task brainstorm, see `docs/PRIORITIES.md`.
 
 ## Active Phase
 

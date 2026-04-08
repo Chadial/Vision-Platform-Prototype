@@ -12,7 +12,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main` as the latest integrated baseline
+- `refactor/move-control-and-imaging-implementation` as the active topic branch in this worktree
+- `main` remains the latest integrated baseline
 - short-lived topic branches are created per active work package and merged back after local validation
 
 ## Current Phase
@@ -21,7 +22,11 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Next
 
-- No current next is queued. `WP69 wx Camera Settings Menu And Shortcut Baseline` is landed and the next residual should be derived from the next session's concrete need.
+- No current next is queued.
+- `WP75 Reference Scenario Operator Path Tightening` is now landed; `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and `docs/MANUALS_INDEX.md` now expose one compact validated entry path for the official reference scenarios.
+- `WP71 Reference Scenario Validation Narrowing` is now landed; the repository has one explicit repeatable validation block for snapshot, bounded recording, and interval capture through `tests.test_reference_scenarios` and `scripts/launchers/run_reference_scenario_validation.py`.
+- `WP70 Control And Imaging Compatibility Cleanup` remains complete on the topic branch and already archived as a finished refactor slice.
+- the latest documentation-governance maintenance also landed: `docs/STATUS.md` is the authoritative repository status, `docs/WORKPACKAGES.md` is the authoritative repository queue, and `docs/PRIORITIES.md` / `docs/TARGET_MAP.md` are derived views only
 
 ## Immediate Priorities
 
@@ -94,6 +99,9 @@ The active usable-subsystem phase should now be read in four priorities:
 ## Current Summary
 
 The repository should now be read as a practically usable camera/acquisition subsystem, not as an unresolved MVP identity or a repository still dominated by early reorganization work.
+The control/imaging compatibility cleanup is now complete on the topic branch and already documented as an archived refactor slice.
+The official reference scenarios now also have one explicit repeatable simulator-first validation block instead of being only an implied cross-file convention.
+The latest documentation-governance pass also reduced status drift risk by centralizing repository truth in `docs/STATUS.md` and work-package selection in `docs/WORKPACKAGES.md`.
 
 The current active phase is:
 
@@ -440,16 +448,17 @@ The repository currently provides a structured Python prototype for the vision p
 
 ```powershell
 .\.venv\Scripts\python.exe -m unittest tests.test_snapshot_service tests.test_frame_writer tests.test_snapshot_smoke tests.test_preview_service tests.test_file_naming tests.test_recording_service tests.test_interval_capture_service tests.test_camera_stream_service tests.test_bootstrap tests.test_simulated_camera_driver tests.test_simulated_demo tests.test_command_flow_demo tests.test_command_controller tests.test_request_models tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos tests.test_focus_core tests.test_focus_preview_service tests.test_focus_preview_demo tests.test_vision_platform_namespace
+.\.venv\Scripts\python.exe .\scripts\launchers\run_reference_scenario_validation.py
 ```
 
 ## Next Recommended Steps
 
-1. Treat `WP12` through `WP26` as the closed historical foundation that proved the bounded Python baseline is real.
-2. Use the new planning lens `Usable Camera Subsystem / Pre-Product Baseline` for future slice selection.
-3. Prioritize local usability first: keep the wx shell moving toward a genuinely usable working frontend and treat OpenCV as fallback/reference.
-4. Prioritize host-side usability second: keep the shared command/status/result surface practical for AMB-side integration work.
-5. Preserve snapshot, bounded recording, and interval capture as official reference scenarios and regression anchors.
-6. Treat `WP67` as landed; recording logs now append deterministically within one save-directory-scoped `recording_log.csv` instead of fragmenting into per-run suffix files.
+1. Treat the documentation-governance cleanup as landed maintenance: repository status now lives in `docs/STATUS.md`, while repository queue ownership now lives in `docs/WORKPACKAGES.md`.
+2. Treat `WP75` as landed: the preferred operator-facing quick path for the official reference scenarios now lives in `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and is indexed from `docs/MANUALS_INDEX.md`.
+3. Keep local usability after that as a conditional lane: activate `WP76` only from a concrete observed wx-shell feedback friction, not from generic UI expansion.
+4. Keep host-side usability after that as a conditional lane: activate `WP77` only from a concrete AMB-side naming or result ambiguity.
+5. Preserve snapshot, bounded recording, and interval capture as official reference scenarios and confidence anchors.
+6. Keep compatibility-seam work evidence-first: `WP78` is acceptable later, but not ahead of concrete usability work.
 7. Keep broader API growth, additional frontends, larger offline tooling, MCP-oriented orchestration, and C# handover visible as later directions rather than current default obligations.
 8. When the later headless-kernel work starts, revisit the current wx-shell live-sync bridge explicitly and lift or replace it with a host-neutral command/session seam instead of freezing the app-local file bridge as the long-term architecture.
 
