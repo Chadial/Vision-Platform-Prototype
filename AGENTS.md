@@ -32,6 +32,25 @@ This repository now uses a more centralized operating model:
 
 Do not treat scattered module `ROADMAP.md` files as the main project-planning mechanism. Project prioritization and active sequencing belong in the centralized docs above.
 
+### Single-Source Rule
+
+To minimize drift, treat these two files as the only central project-state carriers:
+
+- `docs/STATUS.md`: the single authoritative repository status document
+- `docs/WORKPACKAGES.md`: the single authoritative repository work queue
+
+Interpret the other central planning docs as derived or supporting views:
+
+- `docs/TARGET_MAP.md`: compact orientation card derived from `docs/STATUS.md` and `docs/WORKPACKAGES.md`
+- `docs/PRIORITIES.md`: lightweight prioritization aid derived from code reality plus the two central docs
+- `docs/ROADMAP.md` and `docs/GlobalRoadmap.md`: sequencing and long-range direction, not the current implementation truth
+
+Agent update rule:
+
+- when repository implementation truth changes, update `docs/STATUS.md`
+- when current-next ordering or work-package completion changes, update `docs/WORKPACKAGES.md`
+- update derived-view docs only when their own role is affected, and keep them explicitly secondary
+
 ---
 
 ## Mandatory Startup Read Order
@@ -175,7 +194,7 @@ Use document roles strictly:
 - `docs/SESSION_START.md`: compact startup flow and reading map
 - `docs/WORKFLOW.md`: execution flow from request to validation to doc updates
 - `docs/WORKPACKAGES.md`: active queue, work-package definitions, selection order
-- `docs/STATUS.md`: current verified implementation state and next recommendation
+- `docs/STATUS.md`: current verified implementation state and the single authoritative repository status document
 - `docs/ROADMAP.md`: repository-level delivery phases
 - `docs/GlobalRoadmap.md`: platform-wide master direction
 - `docs/MODULE_INDEX.md`: fast module lookup

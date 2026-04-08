@@ -123,6 +123,7 @@ Derived from `docs/STATUS.md`:
 - ROI rectangle/ellipse groundwork exists
 - first focus baseline exists
 - hardware validation has been completed at prototype level for the previously attached camera path, with further revalidation still useful when hardware is available again
+- the control/imaging compatibility cleanup has landed on `WP70`
 
 ### Current Priority Source
 
@@ -348,14 +349,26 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 67 | Recording Log Policy Alignment | define and implement the intended recording-log reuse versus per-run split policy for repeated sessions in one save directory | active lane | landed log-usability hardening; repeated recording now appends to one deterministic recording log per save directory with explicit run boundaries | `docs/session_workpackages/wp67_recording_log_policy_alignment.md` |
 | 68 | Unified Artifact Recording Log Append Baseline | make snapshot and recording save into one directory-scoped `recording_log.csv` append stream | landed | landed logging-continuity slice so snapshots and recordings share the same append base for later resume logic | `docs/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md` |
 | 69 | wx Camera Settings Menu And Shortcut Baseline | expose the host-neutral camera configuration surface through the bounded wx shell and define the GUI shortcut map | landed | landed wx-shell seam slice for camera settings, menu coverage, and shortcut alignment | `docs/session_workpackages/wp69_wx_camera_settings_menu_and_shortcut_baseline.md` |
+| 70 | Control And Imaging Compatibility Cleanup | remove the redundant legacy control/imaging implementation files and keep only package-level compatibility shims | landed | landed compatibility cleanup; the remaining work is merge cleanup only | `docs/archive/session_workpackages/wp70_control_and_imaging_compatibility_cleanup.md` |
+| 71 | Reference Scenario Validation Narrowing | tighten the official snapshot, bounded-recording, and interval-capture reference scenarios into one small repeatable validation block | landed | landed validation slice; the repository now provides one explicit three-test reference-scenario block plus a dedicated launcher wrapper | `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md` |
+| 75 | Reference Scenario Operator Path Tightening | make the validated reference scenarios easier to find and run through one small operator-facing run path | landed | landed doc/operator-path slice; the launch baseline and manuals index now expose one compact validated entry path for the official reference scenarios | `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md` |
+| 76 | wx Shell Status Feedback Tightening | improve one concrete shell feedback seam so local operators can read action outcome and current state more reliably | conditional | activate only from a specific observed status/feedback friction in the wx shell; do not use as generic polish work | `docs/session_workpackages/wp76_wx_shell_status_feedback_tightening.md` |
+| 77 | Host Result Envelope Naming Tightening | normalize one concrete confusing result, status, or error field in the host-facing command surface without widening transport scope | conditional | activate only when a specific AMB-side naming or interpretation ambiguity is observed | `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md` |
+| 78 | Compatibility Shim Usage Inventory | record where remaining `camera_app` compatibility imports are still exercised so later retirement work can target real usage instead of guesswork | queued | acceptable later evidence slice, but less urgent than current usability and operator-path clarity work | `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. residual-driven hardening after the now-implemented `WP50` to `WP54` architecture/frontend chain, starting with hardware audit/logging
-2. CLI help/documentation polish once the hardware audit slice is cleared
-3. derive the next bounded usable-subsystem slice from concrete residuals now that the current recording-log hardening chain is landed
+1. local-usability follow-up only from concrete wx-shell friction through conditional `WP76`
+2. host-side usability follow-up only from concrete command/payload ambiguity through conditional `WP77`
+3. later compatibility-evidence work through `WP78` only after the clearer usability/operator-path slices
+
+Documentation governance maintenance landed alongside the latest compatibility cleanup:
+
+- `docs/STATUS.md` is now the single authoritative repository status document
+- `docs/WORKPACKAGES.md` is now the single authoritative repository work queue
+- `docs/PRIORITIES.md` and `docs/TARGET_MAP.md` are now explicitly derived views only
 
 Current prepared usable-subsystem sequence:
 
@@ -375,6 +388,7 @@ Current prepared usable-subsystem sequence:
 - `WP67 Recording Log Policy Alignment` is now landed
 - `WP68 Unified Artifact Recording Log Append Baseline` is now landed
 - `WP69 wx Camera Settings Menu And Shortcut Baseline` is now landed
+  - `WP70 Control And Imaging Compatibility Cleanup` is now landed
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 
 Most recently landed detailed packages:
@@ -614,8 +628,11 @@ The current coarse PM order should be:
 44. treat `WP67` as landed; repeated recording now appends to one deterministic recording log per save directory
 45. treat `WP68` as landed; snapshot saves and recording runs share one directory-scoped `recording_log.csv`
 46. treat `WP69` as landed wx camera-settings menus and shortcut alignment
-47. continue to derive any further technical slice from concrete residuals or explicit user direction instead of reopening broad closure logic
-48. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
+47. treat `WP71` as landed; the repository now has one explicit repeatable validation block for snapshot, bounded recording, and interval capture plus a dedicated launcher wrapper
+48. treat `WP75` as landed; the launch baseline and manuals index now expose one compact validated entry path for the official reference scenarios
+49. keep `WP76` and `WP77` conditional on concrete observed shell friction or host-side ambiguity instead of reopening broad closure logic
+50. keep `WP78` as a later evidence-gathering slice rather than as immediate migration work
+51. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
@@ -623,9 +640,9 @@ No current next detailed work package is queued.
 
 Reason:
 
-- the recent recording-log hardening chain through `WP67` is landed, so the next slice now comes from the remaining local usability / host-seam residuals
-- `WP69` is landed, so no stale current-next package should remain queued here
-- future work selection should stay tied to concrete observed friction instead of queue fiction
+- `WP75` is now landed, so the official reference scenarios already have one compact validated entry path
+- `WP76` and `WP77` remain intentionally conditional until a concrete wx-shell or host-side ambiguity is observed
+- `WP78` remains a later evidence slice rather than the default next move
 
 ## Fresh Agent Decision Rule
 
@@ -769,6 +786,9 @@ Current explicit activation:
 - `Recording Log Policy Alignment` is now implemented through `docs/session_workpackages/wp67_recording_log_policy_alignment.md`
 - `Unified Artifact Recording Log Append Baseline` is now landed at `docs/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md`
 - `wx Camera Settings Menu And Shortcut Baseline` is now landed at `docs/session_workpackages/wp69_wx_camera_settings_menu_and_shortcut_baseline.md`
+- `Control And Imaging Compatibility Cleanup` is now landed at `docs/archive/session_workpackages/wp70_control_and_imaging_compatibility_cleanup.md`
+- `Reference Scenario Validation Narrowing` is now landed at `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md`
+- `Reference Scenario Operator Path Tightening` is now landed at `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md`
 
 ## PM Refinement Rule
 

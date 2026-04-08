@@ -112,6 +112,12 @@ Expected update frequency:
 - higher than stable or operational docs
 - only when project truth, PM order, or verified residuals actually change
 
+Single-source rule inside this class:
+
+- `docs/STATUS.md` is the only authoritative repository status document
+- `docs/WORKPACKAGES.md` is the only authoritative repository work queue
+- other current-state docs should be treated as derived, supporting, historical, or long-range views unless explicitly stated otherwise
+
 ### 4. Deferred and boundary docs
 
 Role:
@@ -326,6 +332,13 @@ Current-state docs must reflect landed reality.
 If implementation truth, PM order, phase state, or residual interpretation changes:
 
 - update the relevant current-state doc in the same slice when practical
+
+Priority order for avoiding drift:
+
+1. update `docs/STATUS.md` if repository truth changed
+2. update `docs/WORKPACKAGES.md` if the queue or completion state changed
+3. update `docs/session_workpackages/...` only for the selected slice
+4. update `docs/TARGET_MAP.md`, `docs/PRIORITIES.md`, or other compact views only if their derived summary would otherwise mislead
 
 ### 7. Minor change rule
 
