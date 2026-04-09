@@ -12,10 +12,10 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main` is the current checked-out integration branch
-- `feature/wp86-headless-seam` has been merged to complete `WP86`
-- short-lived topic branches are created per active work package and merged back after local validation
-- branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
+- `main` remains the current integration branch
+- the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, and `test/hardware-companion-smokes`
+- short-lived topic branches are created per active work package or hygiene slice and merged back after local validation
+- branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual repository state
 
 ## Current Phase
 
@@ -77,6 +77,7 @@ Each status update should state progress and gaps against both roadmaps.
 - the `WP87` session attempt produced one concrete hardware-availability answer on April 9, 2026: `camera_cli status --source hardware --camera-alias tested_camera` failed because `DEV_1AB22C046D81` was unavailable, and direct VmbPy enumeration exposed only simulator devices `DEV_Cam1`, `DEV_Cam2`, and `DEV_Cam3`
 - the permanent simulator-backed companion smoke coverage now also includes running-recording status reading plus setup-failure reflection through the current host path, including `labview_mapping` and published status visibility
 - the repository now also carries conditional real-hardware CLI smoke tests for the documented tested-camera path (`tested_camera` -> `DEV_1AB22C046D81`), and those tests skip cleanly when that real device is not attached locally
+- the current hardware-smoke baseline should therefore be read as `present but conditional`: real-device CLI smokes are ready to execute, but a local session without the documented tested camera will currently produce clean skips rather than fresh hardware evidence
 
 ## Immediate Priorities
 

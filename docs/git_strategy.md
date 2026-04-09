@@ -193,121 +193,27 @@ Examples:
 
 ## Recommended Next Branches
 
-Based on the current repository state, the next sensible branch scopes are:
+Based on the current repository state, there is no unconditional next branch.
 
-- `refactor/move-control-and-imaging-implementation`
-- `refactor/move-storage-implementation`
-- `feature/focus-core-baseline`
-- `docs/module-roadmap-tightening`
+Use these rules instead:
+
+- if the documented tested camera path is attached again, prefer one narrow hardware-evidence branch such as `test/wp87-hardware-workflow-rerun`
+- if hardware is still unavailable, derive the next smallest justified branch from current residuals, documentation drift, or an explicitly chosen later lane
+- keep simulator-only confidence work, hardware revalidation, runtime behavior changes, and documentation hygiene on separate short-lived branches
 
 ## Immediate Execution Plan
 
-### Branch 1
+The old branch-by-branch execution block below the current workflow-first chain is historical and should not be read as the default next action.
 
-Name:
+Current default:
 
-- `refactor/move-control-and-imaging-implementation`
+1. read `docs/STATUS.md` and `docs/WORKPACKAGES.md`
+2. confirm whether the next slice is:
+   - conditional hardware evidence
+   - non-hardware residual follow-up
+   - documentation or git hygiene
+3. create one short-lived branch that matches only that narrow scope
+4. keep validation matched to the touched scope
+5. merge and clean up locally merged topic branches when the merge gate is satisfied
 
-Goal:
-
-- physically move the control and imaging implementation behind the already established `vision_platform` module boundary
-- keep the public platform import surface stable
-- preserve the current test behavior
-
-Scope Included:
-
-- `src/camera_app/control`
-- `src/camera_app/imaging`
-- corresponding `vision_platform` facades
-- affected imports
-- affected tests
-- affected module docs and status notes
-
-Scope Excluded:
-
-- storage migration
-- recording-service internals unrelated to moved imports
-- ROI/focus feature work
-- unrelated README cleanup
-
-### Required Commit Sequence
-
-Commit 1:
-
-- `refactor: move control implementation behind vision_platform`
-- move or re-home `CommandController` implementation
-- keep compatibility imports working
-
-Commit 2:
-
-- `refactor: move imaging implementation behind vision_platform`
-- move or re-home OpenCV adapter and preview wrapper
-- keep compatibility imports working
-
-Commit 3:
-
-- `test: align control and imaging tests with moved implementation`
-- update or extend tests for the physical move
-
-Commit 4:
-
-- `docs: update module status after control and imaging move`
-- update affected `STATUS.md`, `ROADMAP.md`, and `docs/STATUS.md` if roadmap position changes
-
-### Required Validation For Branch 1
-
-Run at minimum:
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_command_controller tests.test_opencv_adapter tests.test_opencv_preview tests.test_opencv_smoke_demos tests.test_bootstrap
-```
-
-Preferred full validation before merge:
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest
-```
-
-### Merge Gate For Branch 1
-
-Do not merge unless all of the following are true:
-
-- compatibility imports still work
-- touched tests pass
-- no unrelated service or storage changes are bundled
-- affected docs are updated
-- repository remains runnable through the existing root scripts
-
-### Branch 2
-
-Name:
-
-- `refactor/move-storage-implementation`
-
-Required commit sequence:
-
-1. `refactor: move file naming implementation behind vision_platform`
-2. `refactor: move frame writer implementation behind vision_platform`
-3. `test: align storage tests with moved implementation`
-4. `docs: update recording module status after storage move`
-
-Validation focus:
-
-- `tests.test_file_naming`
-- `tests.test_frame_writer`
-- `tests.test_snapshot_service`
-- `tests.test_recording_service`
-- `tests.test_interval_capture_service`
-
-### Branch 3
-
-Name:
-
-- `feature/focus-core-baseline`
-
-Required commit sequence:
-
-1. `feat: add baseline focus evaluator contract`
-2. `feat: implement first simulator-backed focus metric`
-3. `test: add focus core coverage`
-4. `docs: update focus module roadmap and status`
+If a new default lane is chosen later, this section should be rewritten to match that new lane explicitly rather than leaving stale branch plans here.

@@ -846,6 +846,11 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp80_delamination_recording_workflow_narrowing.md`
 - `docs/session_workpackages/wp81_geometry_capture_workflow_narrowing.md`
 - `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md`
+- `docs/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md`
+- `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md`
+- `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
+- `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
+- `docs/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
@@ -912,6 +917,11 @@ Current explicit activation:
 - `Control And Imaging Compatibility Cleanup` is now landed at `docs/archive/session_workpackages/wp70_control_and_imaging_compatibility_cleanup.md`
 - `Reference Scenario Validation Narrowing` is now landed at `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md`
 - `Reference Scenario Operator Path Tightening` is now landed at `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md`
+- `Host Result And Status Surface Consistency Narrowing` is now landed at `docs/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md`
+- `Usable Failure Reflection Baseline` is now landed at `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md`
+- `Stage-2 LabVIEW Contract Mapping Narrowing` is now landed at `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
+- `Headless Command Seam Extraction Baseline` is now landed at `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
+- `Hybrid Companion Hardware Workflow Revalidation` remains conditional at `docs/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
 
 ## PM Refinement Rule
 
