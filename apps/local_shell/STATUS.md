@@ -33,6 +33,7 @@
 - working now: host-triggered configuration changes now read through setup-oriented messaging instead of generic configuration wording
 - working now: one repeatable host-control smoke block now covers the current setup path through bounded configuration plus ROI/focus visibility against the file-backed live-shell command/session baseline
 - working now: the permanent simulator-backed companion smoke block now also covers running-recording status reading plus setup-failure reflection through the current host path, including `labview_mapping` and published status visibility
+- working now: the repository now also carries conditional real-hardware CLI smoke tests for the documented tested-camera path (`tested_camera` -> `DEV_1AB22C046D81`), and those tests skip cleanly when that real device is not attached locally
 - working now: live command results now also expose additive reflection-aligned subsets for setup, snapshot, recording, and save-directory operations, so host result reading no longer depends on unrelated raw result shapes alone
 - working now: failed live command result files now keep one minimal command/result placeholder shape instead of collapsing to a bare error string only
 - working now: external `start-recording` now treats shell-visible recording settings as the default baseline; host-side commands only override file stem, file extension, `max frames`, and recording FPS when those values are explicitly supplied
