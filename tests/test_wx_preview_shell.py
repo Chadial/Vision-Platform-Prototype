@@ -772,6 +772,35 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertIn("recording_stop=host_stop", prefix)
 
+    def test_status_prefix_includes_failure_source_when_failure_reflection_exists(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(is_preview_running=True),
+        )
+        shell._ui_refresh_fps = None
+        shell._failure_reflection = {
+            "phase": "failed",
+            "source": "setup",
+            "action": "apply_configuration",
+            "message": "camera rejected roi",
+            "external": True,
+        }
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+            recording=SimpleNamespace(is_recording=False, active_file_stem=None),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertIn("failure=setup", prefix)
+
     def test_recording_summary_formats_bounded_and_unbounded_progress(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         status = SimpleNamespace(recording=SimpleNamespace(is_recording=True, frames_written=3))
@@ -1136,6 +1165,78 @@ class WxPreviewShellTests(unittest.TestCase):
                 "selected_directory": str(Path("captures/new_run")),
             },
         )
+        self.assertIsNone(result["failure_reflection"])
+
+    def test_build_live_command_result_carries_failure_reflection_when_present(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._cached_focus_state = None
+        shell._failure_reflection = {
+            "phase": "failed",
+            "source": "snapshot",
+            "action": "save_snapshot",
+            "message": "disk full",
+            "external": True,
+        }
+        shell._session = SimpleNamespace(
+            selected_save_directory=Path("captures/new_run"),
+        )
+        shell._subsystem = SimpleNamespace(
+            command_controller=SimpleNamespace(
+                get_status=lambda: SimpleNamespace(
+                    camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.0),
+                    default_save_directory=Path("captures/new_run"),
+                    recording=SimpleNamespace(
+                        is_recording=False,
+                        frames_written=0,
+                        active_file_stem=None,
+                        save_directory=None,
+                        last_error=None,
+                    ),
+                )
+            )
+        )
+        shell._focus_preview_service = None
+        shell._presenter = _StubPresenter(focus_status_visible=False)
+
+        result = shell._build_live_command_result(
+            command_name="set_save_directory",
+            result=SimpleNamespace(selected_directory=Path("captures/new_run")),
+        )
+
+        self.assertEqual(result["failure_reflection"]["source"], "snapshot")
+        self.assertEqual(result["failure_reflection"]["action"], "save_snapshot")
+
+    def test_execute_live_apply_configuration_failure_sets_setup_failure_reflection(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        transient_messages: list[str] = []
+
+        def _apply_configuration(_request):
+            raise RuntimeError("camera rejected roi")
+
+        shell._session = SimpleNamespace(
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="1800_u_1240m",
+            subsystem=SimpleNamespace(
+                command_controller=SimpleNamespace(apply_configuration=_apply_configuration),
+            ),
+        )
+        shell._subsystem = shell._session.subsystem
+        shell._set_transient_status_message = transient_messages.append
+
+        with self.assertRaises(RuntimeError):
+            shell._execute_live_command(
+                SimpleNamespace(
+                    command_name="apply_configuration",
+                    payload={"gain": 5.0},
+                )
+            )
+
+        self.assertEqual(shell._failure_reflection["source"], "setup")
+        self.assertEqual(shell._failure_reflection["action"], "apply_configuration")
+        self.assertEqual(shell._failure_reflection["message"], "camera rejected roi")
+        self.assertTrue(shell._failure_reflection["external"])
+        self.assertEqual(transient_messages[-1], "External setup configuration failed: camera rejected roi")
 
     def test_build_snapshot_reflection_uses_failed_phase_when_last_error_exists(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
