@@ -12,7 +12,7 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `docs/wp80-workflow-realignment` is the current checked-out topic branch for the active workflow-first PM realignment slice
+- `feature/wp80-delamination-recording-workflow` is the current checked-out topic branch for the first implementation slice under `WP80`
 - `main` remains the latest integrated implementation baseline
 - short-lived topic branches are created per active work package and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
@@ -54,6 +54,7 @@ Each status update should state progress and gaps against both roadmaps.
 - the latest documentation-governance maintenance also landed: `docs/STATUS.md` is the authoritative repository status, `docs/WORKPACKAGES.md` is the authoritative repository queue, and `docs/PRIORITIES.md` / `docs/TARGET_MAP.md` are derived views only
 - `WP81 Geometry Capture Workflow Narrowing` and `WP82 Setup Focus ROI Workflow Narrowing` are now the prepared next workflow packages behind `WP80`
 - `WP76`, `WP77`, and `WP78` are no longer the default open residual lane; they stay dormant unless the workflow-first sequence exposes one concrete seam that actually needs them
+- the first `WP80` implementation slice is now on the active topic branch: external `start-recording` commands in the wx-shell live-control path now fall back to the shell-visible recording settings when optional overrides are omitted, while explicit host overrides still win when provided
 
 ## Immediate Priorities
 
@@ -213,6 +214,7 @@ The repository should currently be read as a host-steerable running `Vision App 
 The control/imaging compatibility cleanup is complete, the wx shell already has bounded host-reflection and settings-menu groundwork, and the official technical anchor flows now have one explicit repeatable simulator-first validation block.
 The current phase remains `Usable Camera Subsystem / Pre-Product Baseline`, but "usable" is now concretely defined around host-driven control, visible shell reflection, shell settings access, understandable status/failure behavior, and practical execution of delamination recording, geometry capture, and setup/focus/ROI adjustment.
 The supporting repo-orientation surfaces now also follow that reading: the root README, workflow-selection notes, and secondary summary docs no longer present the old post-closure framing as the active default and now defer clearly to `docs/STATUS.md`, `docs/WORKPACKAGES.md`, and `docs/TARGET_MAP.md`.
+On the active `WP80` branch, the first concrete delamination-recording follow-up now keeps host-driven start behavior aligned with the visible shell recording settings instead of silently injecting CLI defaults when the host omits optional overrides.
 
 The larger assisted-measurement vision and later headless-kernel direction remain visible, but they are secondary to the near-term product direction above.
 
