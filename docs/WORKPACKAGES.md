@@ -444,17 +444,21 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 70 | Control And Imaging Compatibility Cleanup | remove the redundant legacy control/imaging implementation files and keep only package-level compatibility shims | landed | landed compatibility cleanup; the remaining work is merge cleanup only | `docs/archive/session_workpackages/wp70_control_and_imaging_compatibility_cleanup.md` |
 | 71 | Reference Scenario Validation Narrowing | tighten the technical snapshot, bounded-recording, and interval-capture reference flows into one small repeatable validation block | landed | landed validation slice; the repository now provides one explicit three-test technical-reference-flow block plus a dedicated launcher wrapper | `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md` |
 | 75 | Reference Scenario Operator Path Tightening | make the validated technical reference flows easier to find and run through one small operator-facing run path | landed | landed doc/operator-path slice; the launch baseline and manuals index now expose one compact validated entry path for the current technical reference flows | `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md` |
-| 76 | wx Shell Status Feedback Tightening | improve one concrete shell feedback seam so local operators can read action outcome and current state more reliably | conditional | activate only from a specific observed status/feedback friction in the wx shell; do not use as generic polish work | `docs/session_workpackages/wp76_wx_shell_status_feedback_tightening.md` |
-| 77 | Host Result Envelope Naming Tightening | normalize one concrete confusing result, status, or error field in the host-facing command surface without widening transport scope | conditional | activate only when a specific AMB-side naming or interpretation ambiguity is observed | `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md` |
-| 78 | Compatibility Shim Usage Inventory | record where remaining `camera_app` compatibility imports are still exercised so later retirement work can target real usage instead of guesswork | queued | acceptable later evidence slice, but less urgent than current usability and operator-path clarity work | `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md` |
+| 76 | wx Shell Status Feedback Tightening | improve one concrete shell feedback seam so local operators can read action outcome and current state more reliably | dormant | keep only as a fallback seam-specific follow-up if `WP80` through `WP82` expose one concrete shell-feedback blocker | `docs/session_workpackages/wp76_wx_shell_status_feedback_tightening.md` |
+| 77 | Host Result Envelope Naming Tightening | normalize one concrete confusing result, status, or error field in the host-facing command surface without widening transport scope | dormant | keep only as a fallback seam-specific follow-up if the workflow-first host path exposes one concrete naming ambiguity | `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md` |
+| 78 | Compatibility Shim Usage Inventory | record where remaining `camera_app` compatibility imports are still exercised so later retirement work can target real usage instead of guesswork | dormant | later evidence-only slice; explicitly outside the current workflow-first lane | `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md` |
+| 80 | Delamination Recording Workflow Narrowing | make the current `Delamination Recording` workflow the first explicit Hybrid Companion execution slice across host command, shell reflection, and shell settings use | current next | first workflow-first package after the PM reorientation; use it to anchor the current product reading in one concrete end-to-end slice | `docs/session_workpackages/wp80_delamination_recording_workflow_narrowing.md` |
+| 81 | Geometry Capture Workflow Narrowing | make the current `Geometry Capture` workflow executable through the same Hybrid Companion host-plus-shell lens | queued | next workflow package after `WP80`; keep snapshot, save-path, and shell feedback understandable without widening product scope | `docs/session_workpackages/wp81_geometry_capture_workflow_narrowing.md` |
+| 82 | Setup Focus ROI Workflow Narrowing | make the current `Setup / Focus / ROI Adjustment` workflow practically usable as the setup path for the main test flows | queued | third workflow package after `WP81`; keep focus/ROI and optional control snapshot aligned with the current host-plus-shell split | `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. companion-shell follow-up only from concrete friction in host reflection, status clarity, or settings/workflow usability through conditional `WP76`
-2. host-side usability follow-up only from concrete ambiguity in the current phase-1 command/result/status surface through conditional `WP77`
-3. later compatibility-evidence work through `WP78` only after the clearer Hybrid Companion usability slices
+1. execute `WP80` first as the workflow-first `Delamination Recording` slice for host commands, shell reflection, settings use, and practical recording behavior
+2. keep `WP81` prepared as the direct `Geometry Capture` follow-up once the recording workflow baseline is clarified
+3. keep `WP82` prepared as the setup-path follow-up for focus, ROI, and optional control snapshot usability
+4. keep `WP76`, `WP77`, and `WP78` explicitly outside the current default lane unless one of the workflow packages reveals a concrete blocking seam
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
 
@@ -481,7 +485,11 @@ Current prepared usable-subsystem sequence:
 - `WP68 Unified Artifact Recording Log Append Baseline` is now landed
 - `WP69 wx Camera Settings Menu And Shortcut Baseline` is now landed
   - `WP70 Control And Imaging Compatibility Cleanup` is now landed
+- `WP80 Delamination Recording Workflow Narrowing` is now the active workflow-first `current next`
+- `WP81 Geometry Capture Workflow Narrowing` is prepared as the next workflow package
+- `WP82 Setup Focus ROI Workflow Narrowing` is prepared as the setup workflow package after `WP81`
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
+- keep `WP76`, `WP77`, and `WP78` visible only as dormant seam- or evidence-driven follow-ups while the workflow-first sequence is active
 
 Most recently landed detailed packages:
 
@@ -722,19 +730,22 @@ The current coarse PM order should be:
 46. treat `WP69` as landed wx camera-settings menus and shortcut alignment
 47. treat `WP71` as landed; the repository now has one explicit repeatable validation block for snapshot, bounded recording, and interval capture plus a dedicated launcher wrapper
 48. treat `WP75` as landed; the launch baseline and manuals index now expose one compact validated entry path for the current technical reference flows
-49. keep `WP76` and `WP77` conditional on concrete observed Hybrid Companion shell friction or host-side ambiguity instead of reopening broad closure logic
-50. keep `WP78` as a later evidence-gathering slice rather than as immediate migration work
-51. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
+49. treat `WP80` as the current next package and the first explicit workflow-first slice for the confirmed `Hybrid Companion` direction
+50. treat `WP81` and `WP82` as the next prepared workflow packages for geometry capture and setup/focus/ROI
+51. keep `WP76` and `WP77` dormant unless one of the workflow packages exposes a concrete shell-feedback or host-naming blocker
+52. keep `WP78` dormant as a later evidence-gathering slice rather than as immediate migration work
+53. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
-No current next detailed work package is queued.
+`WP80 Delamination Recording Workflow Narrowing`
 
 Reason:
 
-- `WP75` is now landed, so the confirmed current workflows already have one compact operator-facing entry path and `WP71` already covers the underlying technical validation anchor
-- `WP76` and `WP77` remain intentionally conditional until a concrete Hybrid Companion shell-reflection, settings/workflow, or host-surface ambiguity is observed
-- `WP78` remains a later evidence slice rather than the default next move
+- the PM reorientation now needs one explicit workflow-first package instead of another abstract residual queue
+- `Delamination Recording` is the strongest current product-reading workflow because it exercises host `start` / `stop`, `max frames`, `recording fps`, `save path`, settings access, and visible shell reflection together
+- `WP81` and `WP82` should stay prepared behind that slice so the three confirmed workflows become the new default sequencing lane
+- `WP76`, `WP77`, and `WP78` remain available only if `WP80` through `WP82` reveal a concrete seam that truly needs one of those narrower follow-ups
 
 ## Fresh Agent Decision Rule
 
@@ -815,6 +826,12 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
 - `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
 - `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
+- `docs/session_workpackages/wp76_wx_shell_status_feedback_tightening.md`
+- `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md`
+- `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md`
+- `docs/session_workpackages/wp80_delamination_recording_workflow_narrowing.md`
+- `docs/session_workpackages/wp81_geometry_capture_workflow_narrowing.md`
+- `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 

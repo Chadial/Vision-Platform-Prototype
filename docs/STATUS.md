@@ -12,7 +12,7 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `docs/hybrid-companion-direction` is the current checked-out topic branch for the active documentation-alignment slice
+- `docs/wp80-workflow-realignment` is the current checked-out topic branch for the active workflow-first PM realignment slice
 - `main` remains the latest integrated implementation baseline
 - short-lived topic branches are created per active work package and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
@@ -45,13 +45,15 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Next
 
-- No current next is queued.
-- default next-step derivation should now use the confirmed `Hybrid Companion` product reading rather than a broad generic subsystem-hardening lens.
+- `WP80 Delamination Recording Workflow Narrowing` is now the `current next`.
+- default next-step derivation should now use the confirmed `Hybrid Companion` product reading through the three functional workflows rather than a broad generic subsystem-hardening lens.
 - the repo-level orientation cleanup now also extends beyond the central PM docs: `README.md`, `docs/WORKFLOW.md`, `docs/NEXT_SESSION_ORDER.md`, `docs/project_overview.md`, and the secondary summary notes now point at the same current product reading instead of older post-closure wording
 - `WP75 Reference Scenario Operator Path Tightening` is now landed; `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and `docs/MANUALS_INDEX.md` now expose one compact validated entry path for the official current workflows.
 - `WP71 Reference Scenario Validation Narrowing` is now landed; the repository has one explicit repeatable validation block for the current technical anchor flows through `tests.test_reference_scenarios` and `scripts/launchers/run_reference_scenario_validation.py`.
 - `WP70 Control And Imaging Compatibility Cleanup` remains complete on the topic branch and already archived as a finished refactor slice.
 - the latest documentation-governance maintenance also landed: `docs/STATUS.md` is the authoritative repository status, `docs/WORKPACKAGES.md` is the authoritative repository queue, and `docs/PRIORITIES.md` / `docs/TARGET_MAP.md` are derived views only
+- `WP81 Geometry Capture Workflow Narrowing` and `WP82 Setup Focus ROI Workflow Narrowing` are now the prepared next workflow packages behind `WP80`
+- `WP76`, `WP77`, and `WP78` are no longer the default open residual lane; they stay dormant unless the workflow-first sequence exposes one concrete seam that actually needs them
 
 ## Immediate Priorities
 
@@ -553,11 +555,12 @@ The repository currently provides a structured Python prototype for the vision p
 
 1. Treat this documentation pass as the product-direction alignment layer: future package selection should now default to the `Hybrid Companion` reading of the current phase.
 2. Keep `WP75` as the compact operator-facing path for the current functional workflows and `WP71` as the technical validation anchor for the underlying execution modes.
-3. Keep shell-side follow-up work conditional and product-facing: activate `WP76` only when a concrete host-reflection, status, or settings-feedback seam blocks practical workflow use.
-4. Keep host-surface follow-up work conditional and product-facing: activate `WP77` only when a concrete AMB/test-host naming or interpretation ambiguity appears in the current phase-1 command surface.
-5. Keep compatibility-seam work evidence-first: `WP78` is acceptable later, but not ahead of confirmed host-to-shell usability needs.
-6. Keep broader API growth, additional frontends, larger offline tooling, MCP-oriented orchestration, and C# handover visible as later directions rather than current default obligations.
-7. When the later headless-kernel work starts, revisit the current wx-shell live-sync bridge explicitly and lift or replace it with a host-neutral command/session seam instead of freezing the app-local file bridge as the long-term architecture.
+3. Execute the workflow-first sequence through `WP80`, then `WP81`, then `WP82` so future work is selected from the three confirmed functional workflows rather than from older residual buckets.
+4. Keep shell-side follow-up work conditional and product-facing: reactivate `WP76` only when one of those workflow packages exposes a concrete host-reflection, status, or settings-feedback blocker.
+5. Keep host-surface follow-up work conditional and product-facing: reactivate `WP77` only when a concrete AMB/test-host naming or interpretation ambiguity appears in the current phase-1 command surface.
+6. Keep compatibility-seam work evidence-first: `WP78` is acceptable later, but not ahead of the workflow-first Hybrid Companion slices.
+7. Keep broader API growth, additional frontends, larger offline tooling, MCP-oriented orchestration, and C# handover visible as later directions rather than current default obligations.
+8. When the later headless-kernel work starts, revisit the current wx-shell live-sync bridge explicitly and lift or replace it with a host-neutral command/session seam instead of freezing the app-local file bridge as the long-term architecture.
 
 ## Deferred Profile-System Bucket List
 

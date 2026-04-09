@@ -29,7 +29,7 @@ Leave the repository with a concrete map of remaining compatibility-shim usage a
 
 ## Status
 
-Prepared only. Do not activate until selected.
+Dormant under the workflow-first PM realignment. Keep visible for later compatibility evidence only; do not activate ahead of the confirmed workflow sequence.
 
 ## Sub-Packages
 

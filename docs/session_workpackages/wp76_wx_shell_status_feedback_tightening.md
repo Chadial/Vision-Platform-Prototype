@@ -30,7 +30,7 @@ Resolve one specific wx-shell feedback ambiguity, with a clear before/after desc
 
 ## Status
 
-Prepared only. Do not activate until a concrete friction point is chosen.
+Dormant under the workflow-first PM realignment. Reactivate only if `WP80` through `WP82` expose a concrete shell-feedback blocker that cannot be handled cleanly inside the selected workflow package.
 
 ## Sub-Packages
 
