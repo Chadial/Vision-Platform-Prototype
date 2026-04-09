@@ -105,7 +105,7 @@ Leave the repository with one execution-ready workflow package that makes `Delam
 
 Active. `WP80` is now being executed as one sequence of small sub-packages under the same workflow-first lane rather than as one large recording umbrella.
 
-Current residual after the first landed slices:
+Current residual after the first three landed slices:
 
 - the workflow still needs additional practical delamination-run tightening around visible run-state understanding, stop-path readability, and any remaining save-path / recording-summary seams that appear in real use
 
@@ -129,8 +129,6 @@ Current residual after the first landed slices:
   - the wx-shell live status snapshot now exposes one explicit recording-reflection block with run phase, summary, file stem, save directory, stop reason, and frames written
   - the visible shell status prefix now also keeps the current or last recording file stem readable
 
-### Prepared Next
-
 #### `WP80.C Stop-Reason Reflection Tightening`
 
 - status: landed
@@ -139,6 +137,8 @@ Current residual after the first landed slices:
   - visible stop reason in shell-facing reflection
   - same stop reason in published live status
   - no new stop-rule architecture
+
+### Prepared Next
 
 #### `WP80.D Save-Path Reflection Tightening`
 
