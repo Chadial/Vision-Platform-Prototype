@@ -1,11 +1,17 @@
 import argparse
+import contextlib
+import json
 import unittest
+from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from vision_platform.apps.local_shell import control_cli
+from vision_platform.apps.local_shell.labview_mapping import (
+    attach_labview_mapping_to_command_result,
+)
 from vision_platform.apps.local_shell.live_command_sync import (
     append_live_command,
     create_live_sync_session,
@@ -18,6 +24,26 @@ from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShel
 
 
 class LocalShellControlCliTests(unittest.TestCase):
+    def test_status_command_returns_additive_labview_mapping(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id="DEV_123",
+                configuration_profile_id="default",
+            )
+            shell = _build_smoke_shell(session=session, controller=_SmokeController())
+            shell._status_lines = ["source=simulated | preview=running | setup_focus=visible", "FPS 25.0"]
+            shell._publish_live_status_snapshot(shell._session.subsystem.command_controller.get_status(), focus_summary="1.234e-02", recording_summary=None)
+
+            payload = control_cli._handle_status_command(argparse.Namespace(session_root=Path(temp_dir)))
+
+        self.assertEqual(payload["labview_mapping"]["host_stage"], "stage2_labview_candidate")
+        self.assertTrue(payload["labview_mapping"]["camera_ready"])
+        self.assertTrue(payload["labview_mapping"]["preview_running"])
+        self.assertEqual(payload["labview_mapping"]["camera_id"], "DEV_123")
+        self.assertEqual(payload["labview_mapping"]["focus_value"], "1.234e-02")
+
     def test_snapshot_command_passes_file_stem_and_extension(self) -> None:
         args = argparse.Namespace(
             session_root=Path("captures/wx_shell_sessions"),
@@ -165,6 +191,13 @@ class LocalShellControlCliTests(unittest.TestCase):
             self.assertEqual(command_result["result"]["reflection_kind"], "snapshot")
             self.assertEqual(command_result["result"]["reflection"]["phase"], "saved")
 
+            mapped_result = attach_labview_mapping_to_command_result(command_result)
+            self.assertEqual(mapped_result["labview_mapping"]["command_name"], "save_snapshot")
+            self.assertTrue(mapped_result["labview_mapping"]["command_ok"])
+            self.assertEqual(mapped_result["labview_mapping"]["reflection_kind"], "snapshot")
+            self.assertEqual(mapped_result["labview_mapping"]["phase"], "saved")
+            self.assertEqual(mapped_result["labview_mapping"]["file_name"], "geometry_000001.bmp")
+
             status_snapshot = read_live_status_snapshot(session)
             self.assertEqual(status_snapshot["snapshot_reflection"]["phase"], "saved")
             self.assertEqual(status_snapshot["snapshot_reflection"]["file_name"], "geometry_000001.bmp")
@@ -206,6 +239,54 @@ class LocalShellControlCliTests(unittest.TestCase):
             self.assertEqual(status_snapshot["setup_reflection"]["focus_visibility"], "visible")
             self.assertEqual(status_snapshot["setup_reflection"]["roi_shape"], "rectangle")
             self.assertEqual(status_snapshot["setup_reflection"]["roi_bounds"], [10, 20, 110, 70])
+
+    def test_main_preserves_failed_command_result_with_labview_mapping(self) -> None:
+        failed_result = attach_labview_mapping_to_command_result(
+            {
+                "success": False,
+                "command_name": "apply_configuration",
+                "result": {
+                    "command": "apply_configuration",
+                    "reflection_kind": "setup",
+                    "reflection": {"phase": "failed"},
+                    "failure_reflection": {
+                        "phase": "failed",
+                        "source": "setup",
+                        "action": "apply_configuration",
+                        "message": "camera rejected roi",
+                        "external": True,
+                    },
+                    "result": None,
+                },
+                "error": "camera rejected roi",
+            }
+        )
+        stdout = StringIO()
+        with patch.object(
+            control_cli,
+            "_send_command",
+            side_effect=control_cli.LocalShellControlCommandError("camera rejected roi", payload=failed_result),
+        ):
+            with contextlib.redirect_stdout(stdout):
+                exit_code = control_cli.main(
+                    [
+                        "--session-root",
+                        "captures/wx_shell_sessions",
+                        "apply-configuration",
+                        "--roi-width",
+                        "-1",
+                    ]
+                )
+
+        payload = json.loads(stdout.getvalue())
+
+        self.assertEqual(exit_code, 1)
+        self.assertFalse(payload["success"])
+        self.assertEqual(payload["result"]["command_name"], "apply_configuration")
+        self.assertEqual(payload["result"]["labview_mapping"]["command_name"], "apply_configuration")
+        self.assertFalse(payload["result"]["labview_mapping"]["command_ok"])
+        self.assertEqual(payload["result"]["labview_mapping"]["failure_source"], "setup")
+        self.assertEqual(payload["result"]["labview_mapping"]["failure_message"], "camera rejected roi")
 
 
 class _SmokeController:

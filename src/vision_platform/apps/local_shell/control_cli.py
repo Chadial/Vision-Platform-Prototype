@@ -6,6 +6,10 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
+from vision_platform.apps.local_shell.labview_mapping import (
+    attach_labview_mapping_to_command_result,
+    attach_labview_mapping_to_status_snapshot,
+)
 from vision_platform.apps.local_shell.live_command_sync import (
     LocalShellLiveSyncError,
     append_live_command,
@@ -21,6 +25,12 @@ _DEFAULT_SESSION_ROOT = Path("captures/wx_shell_sessions")
 class LocalShellControlArgumentParser(argparse.ArgumentParser):
     def error(self, message: str) -> None:
         raise LocalShellLiveSyncError(message)
+
+
+class LocalShellControlCommandError(LocalShellLiveSyncError):
+    def __init__(self, message: str, *, payload: dict) -> None:
+        super().__init__(message)
+        self.payload = payload
 
 
 def build_argument_parser() -> argparse.ArgumentParser:
@@ -119,6 +129,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         if getattr(args, "save_mode", None) == "new_subdirectory" and not getattr(args, "run_name", None):
             parser.error("--run-name is required when --save-mode is new_subdirectory.")
         result = args.command_handler(args)
+    except LocalShellControlCommandError as exc:
+        _emit({"success": False, "error": str(exc), "result": exc.payload})
+        return 1
     except LocalShellLiveSyncError as exc:
         _emit({"success": False, "error": str(exc)})
         return 1
@@ -128,7 +141,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _handle_status_command(args: argparse.Namespace) -> dict:
     session = resolve_active_live_sync_session(args.session_root)
-    return read_live_status_snapshot(session)
+    return attach_labview_mapping_to_status_snapshot(read_live_status_snapshot(session))
 
 
 def _handle_set_save_directory_command(args: argparse.Namespace) -> dict:
@@ -201,9 +214,14 @@ def _handle_stop_recording_command(args: argparse.Namespace) -> dict:
 def _send_command(session_root: Path, *, command_name: str, payload: dict) -> dict:
     session = resolve_active_live_sync_session(session_root)
     command = append_live_command(session, command_name=command_name, payload=payload)
-    result = wait_for_live_command_result(session, command_id=command.command_id)
+    result = attach_labview_mapping_to_command_result(
+        wait_for_live_command_result(session, command_id=command.command_id)
+    )
     if not result.get("success", False):
-        raise LocalShellLiveSyncError(result.get("error") or f"wx shell command '{command_name}' failed")
+        raise LocalShellControlCommandError(
+            result.get("error") or f"wx shell command '{command_name}' failed",
+            payload=result,
+        )
     return result
 
 
