@@ -12,8 +12,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `feature/wp85-stage2-labview-mapping` is the current checked-out work-package branch
-- `feature/wp84-usable-failure-reflection` has already been merged to complete `WP84`
+- `main` is the current checked-out integration branch
+- `feature/wp85-stage2-labview-mapping` has been merged to complete `WP85`
 - short-lived topic branches are created per active work package and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
 
@@ -50,7 +50,7 @@ Each status update should state progress and gaps against both roadmaps.
 - `WP82 Setup Focus ROI Workflow Narrowing` is now landed on `main`.
 - `WP83 Host Result And Status Surface Consistency Narrowing` is now landed on `main`.
 - `WP84 Usable Failure Reflection Baseline` is now landed on `main`.
-- `WP85 Stage-2 LabVIEW Contract Mapping Narrowing` is now landed on this branch and ready to merge to `main`.
+- `WP85 Stage-2 LabVIEW Contract Mapping Narrowing` is now landed on `main`.
 - `WP86 Headless Command Seam Extraction Baseline` is now the `current next`.
 - default next-step derivation should now use the confirmed `Hybrid Companion` product reading through the three functional workflows rather than a broad generic subsystem-hardening lens.
 - the repo-level orientation cleanup now also extends beyond the central PM docs: `README.md`, `docs/WORKFLOW.md`, `docs/NEXT_SESSION_ORDER.md`, `docs/project_overview.md`, and the secondary summary notes now point at the same current product reading instead of older post-closure wording
@@ -70,7 +70,7 @@ Each status update should state progress and gaps against both roadmaps.
 - the `WP82` implementation slices are now also landed on `main`: shell-visible setup focus/ROI cues, published `setup_reflection` status, setup-oriented configuration messaging, and one repeatable host-triggered setup smoke block
 - the `WP83` implementation slices are now also landed on `main`: live command results now expose reflection-aligned subsets for setup, snapshot, recording, and save-directory paths, and failed result files now keep one minimal command/result placeholder shape
 - the `WP84` implementation slices are now also landed on `main`: shell status, published status, and failed live-command result files now share one readable `failure_reflection` baseline across setup, snapshot, and recording, including source/action/message/external ownership and overwrite-on-latest-failure semantics
-- the `WP85` implementation slices are now landed on this branch: the current `local_shell control` test-host path now exposes one additive `labview_mapping` block for status reads, successful command results, and failed command results, keeping the Stage-2 LabVIEW reading explicit without widening the runtime/transport model
+- the `WP85` implementation slices are now also landed on `main`: the current `local_shell control` test-host path now exposes one additive `labview_mapping` block for status reads, successful command results, and failed command results, keeping the Stage-2 LabVIEW reading explicit without widening the runtime/transport model
 
 ## Immediate Priorities
 
