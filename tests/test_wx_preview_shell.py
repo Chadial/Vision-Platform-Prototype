@@ -1063,14 +1063,28 @@ class WxPreviewShellTests(unittest.TestCase):
         shell._last_status_refresh_time = 1.0
         shell._snapshot_last_saved_path = None
         shell._snapshot_last_error = None
+        shell._cached_focus_state = None
+        command_controller = SimpleNamespace(
+            save_snapshot=_save_snapshot,
+            get_status=lambda: SimpleNamespace(
+                camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.0),
+                default_save_directory=Path("captures/geometry"),
+                recording=SimpleNamespace(is_recording=False, frames_written=0, active_file_stem=None, save_directory=None, last_error=None),
+            ),
+        )
         shell._session = SimpleNamespace(
             resolved_camera_id="DEV_123",
             configuration_profile_id="default",
             configuration_profile_camera_class="1800_u_1240m",
-            subsystem=SimpleNamespace(
-                command_controller=SimpleNamespace(save_snapshot=_save_snapshot),
-            ),
+            subsystem=SimpleNamespace(command_controller=command_controller),
+            selected_save_directory=Path("captures/geometry"),
         )
+        shell._subsystem = SimpleNamespace(
+            command_controller=command_controller,
+            stream_service=SimpleNamespace(get_roi_state_service=lambda: SimpleNamespace(get_active_roi=lambda: None)),
+        )
+        shell._focus_preview_service = None
+        shell._presenter = _StubPresenter(focus_status_visible=False)
         shell._set_transient_status_message = transient_messages.append
 
         result = shell._execute_live_command(
@@ -1081,11 +1095,46 @@ class WxPreviewShellTests(unittest.TestCase):
         )
 
         self.assertEqual(result["command"], "save_snapshot")
+        self.assertEqual(result["reflection_kind"], "snapshot")
+        self.assertEqual(result["reflection"]["phase"], "saved")
+        self.assertEqual(result["reflection"]["file_name"], "geometry_000001.bmp")
         self.assertEqual(shell._snapshot_last_saved_path, Path("captures/geometry/geometry_000001.bmp"))
         self.assertIsNone(shell._snapshot_last_error)
         self.assertEqual(
             transient_messages[-1],
             f"External geometry snapshot saved: geometry_000001.bmp -> {Path('captures/geometry')}",
+        )
+
+    def test_build_live_command_result_uses_save_directory_reflection_for_set_save_directory(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._cached_focus_state = None
+        shell._session = SimpleNamespace(
+            selected_save_directory=Path("captures/new_run"),
+        )
+        shell._subsystem = SimpleNamespace(
+            command_controller=SimpleNamespace(
+                get_status=lambda: SimpleNamespace(
+                    camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.0),
+                    default_save_directory=Path("captures/new_run"),
+                    recording=SimpleNamespace(is_recording=False, frames_written=0, active_file_stem=None, save_directory=None, last_error=None),
+                )
+            )
+        )
+        shell._focus_preview_service = None
+        shell._presenter = _StubPresenter(focus_status_visible=False)
+
+        result = shell._build_live_command_result(
+            command_name="set_save_directory",
+            result=SimpleNamespace(selected_directory=Path("captures/new_run")),
+        )
+
+        self.assertEqual(result["reflection_kind"], "save_directory")
+        self.assertEqual(
+            result["reflection"],
+            {
+                "phase": "selected",
+                "selected_directory": str(Path("captures/new_run")),
+            },
         )
 
     def test_build_snapshot_reflection_uses_failed_phase_when_last_error_exists(self) -> None:

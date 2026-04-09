@@ -12,8 +12,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main` is the current checked-out integration branch
-- `feature/wp82-setup-focus-roi-workflow` has been merged to complete `WP82`
+- `feature/wp83-host-status-surface-consistency` is the current checked-out topic branch
+- that branch is completing the implementation and documentation slices needed to close `WP83`
 - short-lived topic branches are created per active work package and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
 
@@ -48,7 +48,8 @@ Each status update should state progress and gaps against both roadmaps.
 - `WP80 Delamination Recording Workflow Narrowing` is now landed on `main`.
 - `WP81 Geometry Capture Workflow Narrowing` is now landed on `main`.
 - `WP82 Setup Focus ROI Workflow Narrowing` is now landed on `main`.
-- no new default detailed work package is preselected after the landed workflow-first trilogy; derive the next slice from one concrete residual seam or an explicitly chosen next lane.
+- `WP83 Host Result And Status Surface Consistency Narrowing` is in final branch-local closure on `feature/wp83-host-status-surface-consistency`.
+- `WP84 Usable Failure Reflection Baseline` is the prepared next package once this branch is merged.
 - default next-step derivation should now use the confirmed `Hybrid Companion` product reading through the three functional workflows rather than a broad generic subsystem-hardening lens.
 - the repo-level orientation cleanup now also extends beyond the central PM docs: `README.md`, `docs/WORKFLOW.md`, `docs/NEXT_SESSION_ORDER.md`, `docs/project_overview.md`, and the secondary summary notes now point at the same current product reading instead of older post-closure wording
 - `WP75 Reference Scenario Operator Path Tightening` is now landed; `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and `docs/MANUALS_INDEX.md` now expose one compact validated entry path for the official current workflows.
@@ -57,6 +58,7 @@ Each status update should state progress and gaps against both roadmaps.
 - the latest documentation-governance maintenance also landed: `docs/STATUS.md` is the authoritative repository status, `docs/WORKPACKAGES.md` is the authoritative repository queue, and `docs/PRIORITIES.md` / `docs/TARGET_MAP.md` are derived views only
 - `WP81` now also has landed geometry-capture slices for snapshot reflection, save-path readability, host-triggered snapshot smoke coverage, and explicit snapshot failure reflection
 - `WP82` now also has landed setup slices for setup-state reflection, setup-oriented messaging, ROI/focus visibility, and host-triggered setup smoke coverage
+- `WP83` now also has branch-local completion slices for reflection-aligned command results, save-directory result consistency, host/result smoke coverage, and a more consistent failed-result placeholder shape
 - `WP76`, `WP77`, and `WP78` are no longer the default open residual lane; they stay dormant unless the workflow-first sequence exposes one concrete seam that actually needs them
 - the first `WP80` implementation slice is now landed on `main`: external `start-recording` commands in the wx-shell live-control path now fall back to the shell-visible recording settings when optional overrides are omitted, while explicit host overrides still win when provided
 - the second `WP80` implementation slice is now landed on `main`: the wx-shell live status snapshot now publishes one explicit recording-reflection block for host/companion visibility, and the visible shell status prefix now keeps the current or last recording file stem readable
@@ -64,6 +66,7 @@ Each status update should state progress and gaps against both roadmaps.
 - the final `WP80` completion slices are now also landed on `main`: shell-visible save-path reflection, tighter run-lifecycle messaging, one repeatable host-control smoke block for the delamination path, and explicit failure reflection through `phase=failed` plus `last_error`
 - the `WP81` implementation slices are now also landed on `main`: shell-visible snapshot file/save reflection, published `snapshot_reflection` status, geometry-capture-oriented snapshot messaging, one repeatable host-triggered snapshot smoke block, and explicit snapshot failure reflection through `phase=failed` plus `last_error`
 - the `WP82` implementation slices are now also landed on `main`: shell-visible setup focus/ROI cues, published `setup_reflection` status, setup-oriented configuration messaging, and one repeatable host-triggered setup smoke block
+- the `WP83` implementation slices are now on the active topic branch: live command results now expose reflection-aligned subsets for setup, snapshot, recording, and save-directory paths, and failed result files now keep one minimal command/result placeholder shape
 
 ## Immediate Priorities
 
@@ -226,6 +229,7 @@ The supporting repo-orientation surfaces now also follow that reading: the root 
 `WP80` now spans one complete delamination-recording workflow chain: host-driven start behavior reuses visible shell defaults, the shell and published live status expose explicit recording reflection including save target and stop category, run-state wording now reads through the delamination path rather than generic bounded-recording mechanics, host-control smoke coverage exists for `start -> run -> stop`, and failure reflection now surfaces `phase=failed` plus `last_error` without widening the command architecture.
 `WP81` now spans the corresponding geometry-capture workflow chain on `main`: the shell and published live status expose explicit snapshot reflection including file/save target and failure state, snapshot messaging now reads through the geometry-capture path, and host-control smoke coverage exists for one repeatable host-triggered snapshot path without widening into gallery or offline lanes.
 `WP82` now spans the corresponding setup workflow chain on `main`: the shell and published live status expose explicit setup-state reflection for focus visibility, ROI state, and configuration summary, setup messaging now reads through the setup path, and host-control smoke coverage exists for one repeatable host-triggered setup block without widening into broad settings, focus-method, or ROI-feature expansion.
+`WP83` now spans the first narrow post-workflow host-surface consistency seam on the active topic branch: live command results and published status can now be read through the same reflection model for setup, snapshot, recording, and save-directory operations, without widening the transport or redesigning the host contract.
 
 The larger assisted-measurement vision and later headless-kernel direction remain visible, but they are secondary to the near-term product direction above.
 

@@ -5,6 +5,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 import sys
 from time import monotonic
+from types import SimpleNamespace
 from typing import Sequence
 
 from camera_app.logging.log_service import configure_logging
@@ -728,6 +729,16 @@ class WxLocalPreviewShell(wx.Frame):
             self._last_status_refresh_time = now
         return self._cached_status
 
+    def _get_command_controller(self):
+        session = getattr(self, "_session", None)
+        subsystem = getattr(session, "subsystem", None)
+        if subsystem is not None and getattr(subsystem, "command_controller", None) is not None:
+            return subsystem.command_controller
+        shell_subsystem = getattr(self, "_subsystem", None)
+        if shell_subsystem is not None and getattr(shell_subsystem, "command_controller", None) is not None:
+            return shell_subsystem.command_controller
+        raise AttributeError("No command controller is available on the current wx shell instance.")
+
     @staticmethod
     def _add_label(parent: wx.Window, sizer: wx.BoxSizer, text: str) -> None:
         sizer.Add(wx.StaticText(parent, label=text), 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 6)
@@ -810,7 +821,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._presenter.state.interaction_state.last_status_message = self._transient_status_message
 
     def _build_focus_summary(self, focus_state) -> str | None:
-        if self._focus_preview_service is None:
+        if getattr(self, "_focus_preview_service", None) is None:
             return None
         if not self._presenter.state.interaction_state.focus_status_visible:
             return "hidden"
@@ -926,16 +937,16 @@ class WxLocalPreviewShell(wx.Frame):
         if status.recording.is_recording:
             return self._format_recording_summary(
                 frames_written=status.recording.frames_written,
-                frame_limit=self._recording_active_frame_limit,
+                frame_limit=getattr(self, "_recording_active_frame_limit", None),
             )
         if (
-            self._recording_active_frame_limit is not None
+            getattr(self, "_recording_active_frame_limit", None) is not None
             and status.recording.frames_written > 0
-            and self._recording_last_summary is None
+            and getattr(self, "_recording_last_summary", None) is None
         ):
             summary = self._format_recording_summary(
                 frames_written=status.recording.frames_written,
-                frame_limit=self._recording_active_frame_limit,
+                frame_limit=getattr(self, "_recording_active_frame_limit", None),
             )
             self._recording_last_summary = summary
             if getattr(self, "_recording_last_stop_reason", None) is None:
@@ -952,7 +963,7 @@ class WxLocalPreviewShell(wx.Frame):
                 )
             self._recording_active_frame_limit = None
             return summary
-        if self._recording_last_summary is not None:
+        if getattr(self, "_recording_last_summary", None) is not None:
             return self._recording_last_summary
         return None
 
@@ -1044,6 +1055,71 @@ class WxLocalPreviewShell(wx.Frame):
             "file_stem": None if getattr(self, "_snapshot_last_saved_path", None) is None else self._snapshot_last_saved_path.stem,
             "save_directory": self._get_snapshot_reflection_save_directory(),
             "last_error": getattr(self, "_snapshot_last_error", None),
+        }
+
+    @staticmethod
+    def _build_save_directory_reflection(selected_directory: Path | None) -> dict[str, object | None]:
+        return {
+            "phase": "selected" if selected_directory is not None else "unset",
+            "selected_directory": None if selected_directory is None else str(selected_directory),
+        }
+
+    def _build_live_command_reflection(
+        self,
+        *,
+        command_name: str,
+        status,
+        focus_summary: str | None,
+        recording_summary: str | None,
+    ) -> tuple[str | None, dict[str, object | None] | None]:
+        if command_name == "apply_configuration":
+            return "setup", self._build_setup_reflection(focus_summary=focus_summary, status=status)
+        if command_name == "set_save_directory":
+            selected_directory = getattr(self._session, "selected_save_directory", None)
+            return "save_directory", self._build_save_directory_reflection(selected_directory)
+        if command_name == "save_snapshot":
+            return "snapshot", self._build_snapshot_reflection()
+        if command_name in {"start_recording", "stop_recording"}:
+            return "recording", self._build_recording_reflection(status, recording_summary=recording_summary)
+        return None, None
+
+    def _build_live_command_result(
+        self,
+        *,
+        command_name: str,
+        result,
+    ) -> dict:
+        self._cached_status = None
+        self._last_status_refresh_time = 0.0
+        controller = self._get_command_controller()
+        if hasattr(controller, "get_status"):
+            status = controller.get_status()
+        else:
+            status = SimpleNamespace(
+                camera=SimpleNamespace(is_initialized=False, reported_acquisition_frame_rate=None),
+                default_save_directory=getattr(self._session, "selected_save_directory", None),
+                configuration=None,
+                recording=SimpleNamespace(
+                    is_recording=command_name == "start_recording",
+                    frames_written=0,
+                    active_file_stem=getattr(self, "_recording_last_file_stem", None),
+                    save_directory=getattr(self, "_recording_last_save_directory", None),
+                    last_error=getattr(self, "_recording_last_error", None),
+                ),
+            )
+        focus_summary = self._build_focus_summary(getattr(self, "_cached_focus_state", None))
+        recording_summary = self._build_recording_summary(status)
+        reflection_kind, reflection = self._build_live_command_reflection(
+            command_name=command_name,
+            status=status,
+            focus_summary=focus_summary,
+            recording_summary=recording_summary,
+        )
+        return {
+            "command": command_name,
+            "reflection_kind": reflection_kind,
+            "reflection": reflection,
+            "result": to_serializable(result),
         }
 
     @staticmethod
@@ -1284,6 +1360,13 @@ class WxLocalPreviewShell(wx.Frame):
                     live_sync_session,
                     command_id=command.command_id,
                     success=False,
+                    command_name=command.command_name,
+                    result={
+                        "command": command.command_name,
+                        "reflection_kind": None,
+                        "reflection": None,
+                        "result": None,
+                    },
                     error=str(exc),
                 )
                 self._set_transient_status_message(f"External command failed: {command.command_name}")
@@ -1292,6 +1375,7 @@ class WxLocalPreviewShell(wx.Frame):
                 live_sync_session,
                 command_id=command.command_id,
                 success=True,
+                command_name=command.command_name,
                 result=result,
             )
 
@@ -1424,9 +1508,7 @@ class WxLocalPreviewShell(wx.Frame):
         else:
             raise RuntimeError(f"Unsupported live command '{command.command_name}'.")
 
-        self._cached_status = None
-        self._last_status_refresh_time = 0.0
-        return {"command": command.command_name, "result": to_serializable(result)}
+        return self._build_live_command_result(command_name=command.command_name, result=result)
 
     def _publish_live_status_snapshot(self, status, *, focus_summary: str | None, recording_summary: str | None) -> None:
         live_sync_session = self._session.live_sync_session
