@@ -28,6 +28,10 @@
 - working now: local and external snapshot lifecycle messages now read through the geometry-capture path more clearly and keep the save target visible on success
 - working now: snapshot failure reflection is now explicit in the published shell status through `phase=failed` plus `last_error`, and snapshot-save failures keep that error visible without widening the host/session architecture
 - working now: one repeatable host-control smoke block now covers the current geometry-capture snapshot path through the file-backed live-shell command/session baseline
+- working now: the visible shell status prefix now also keeps setup-oriented focus visibility and active ROI shape readable as `setup_focus=...` and `setup_roi=...`
+- working now: the published live shell status now also exposes one explicit `setup_reflection` block with focus visibility, focus summary, ROI state, ROI bounds, and configuration summary
+- working now: host-triggered configuration changes now read through setup-oriented messaging instead of generic configuration wording
+- working now: one repeatable host-control smoke block now covers the current setup path through bounded configuration plus ROI/focus visibility against the file-backed live-shell command/session baseline
 - working now: external `start-recording` now treats shell-visible recording settings as the default baseline; host-side commands only override file stem, file extension, `max frames`, and recording FPS when those values are explicitly supplied
 - working now: the published live shell status now also exposes one explicit recording-reflection block with current/last run phase, summary, file stem, save directory, stop reason, and frames written; the visible shell status prefix now also keeps the current/last recording file stem readable
 - working now: the shell-facing and published recording reflection now also categorize stop causes for the delamination path, distinguishing at least `host_stop`, `max_frames_reached`, and failure-oriented termination categories without introducing a new stop-rule architecture
@@ -36,7 +40,7 @@
 - working now: recording failure reflection is now explicit in the published shell status through `phase=failed` plus `last_error`, and start/stop failures keep that error visible without widening the host/session architecture
 - working now: one repeatable host-control smoke block now covers the current delamination path through host `start -> run -> stop` against the file-backed live-shell command/session baseline
 - partial: the current live-sync baseline assumes one active local shell session at a time and uses local file-backed polling rather than a broader transport/runtime-hosting layer
-- next: `WP82 Setup Focus ROI Workflow Narrowing` should now pull the same boundary discipline through the setup-focused preview, settings, ROI, and focus path
+- next: no further workflow-first package is preselected; derive the next slice from one concrete residual seam or from the later headless-preparation lane when explicitly chosen
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite

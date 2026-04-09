@@ -19,7 +19,7 @@ from vision_platform.apps.local_shell.startup import (
     build_local_shell_session,
 )
 from vision_platform.integrations.camera import SimulatedCameraDriver
-from vision_platform.libraries.common_models import FocusOverlayData, FocusPreviewState, FocusResult
+from vision_platform.libraries.common_models import FocusOverlayData, FocusPreviewState, FocusResult, RoiDefinition
 from vision_platform.models import CapturedFrame
 from vision_platform.services.display_service import PreviewInteractionCommand
 
@@ -703,6 +703,52 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertIn("snapshot_state=failed", prefix)
 
+    def test_status_prefix_includes_setup_focus_and_roi_state_when_available(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(
+                is_preview_running=True,
+                get_roi_state_service=lambda: SimpleNamespace(
+                    get_active_roi=lambda: RoiDefinition(
+                        roi_id="setup-roi",
+                        shape="rectangle",
+                        points=((10, 20), (110, 70)),
+                    )
+                ),
+            ),
+        )
+        shell._presenter = _StubPresenter(focus_status_visible=True)
+        shell._focus_preview_service = object()
+        shell._ui_refresh_fps = None
+        shell._snapshot_last_saved_path = None
+        shell._snapshot_last_error = None
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+            recording=SimpleNamespace(is_recording=False, active_file_stem=None),
+            configuration=SimpleNamespace(
+                exposure_time_us=1500.0,
+                gain=3.0,
+                pixel_format="Mono8",
+                acquisition_frame_rate=12.5,
+                roi_offset_x=10,
+                roi_offset_y=20,
+                roi_width=100,
+                roi_height=50,
+            ),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertIn("setup_focus=visible", prefix)
+        self.assertIn("setup_roi=rectangle", prefix)
+
     def test_status_prefix_includes_host_stop_category_for_last_recording_stop(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         shell._session = SimpleNamespace(
@@ -1053,6 +1099,46 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(reflection["file_name"], "geometry_000001.bmp")
         self.assertEqual(reflection["save_directory"], str(Path("captures/geometry")))
         self.assertEqual(reflection["last_error"], "disk full")
+
+    def test_build_setup_reflection_exposes_focus_roi_and_configuration_state(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._focus_preview_service = object()
+        shell._presenter = _StubPresenter(focus_status_visible=True)
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(
+                get_roi_state_service=lambda: SimpleNamespace(
+                    get_active_roi=lambda: RoiDefinition(
+                        roi_id="setup-roi",
+                        shape="rectangle",
+                        points=((10, 20), (110, 70)),
+                    )
+                )
+            )
+        )
+
+        reflection = shell._build_setup_reflection(
+            focus_summary="1.234e-02",
+            status=SimpleNamespace(
+                configuration=SimpleNamespace(
+                    exposure_time_us=1500.0,
+                    gain=3.0,
+                    pixel_format="Mono8",
+                    acquisition_frame_rate=12.5,
+                    roi_offset_x=10,
+                    roi_offset_y=20,
+                    roi_width=100,
+                    roi_height=50,
+                )
+            ),
+        )
+
+        self.assertEqual(reflection["phase"], "ready")
+        self.assertEqual(reflection["focus_visibility"], "visible")
+        self.assertEqual(reflection["focus_summary"], "1.234e-02")
+        self.assertTrue(reflection["roi_active"])
+        self.assertEqual(reflection["roi_shape"], "rectangle")
+        self.assertEqual(reflection["roi_bounds"], [10, 20, 110, 70])
+        self.assertIn("roi=x=10,y=20,w=100,h=50", reflection["configuration_summary"])
 
     def test_build_recording_reflection_uses_failed_phase_when_last_error_exists(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)

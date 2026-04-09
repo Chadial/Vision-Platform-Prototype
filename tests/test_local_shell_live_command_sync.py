@@ -155,6 +155,17 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
                 resolved_camera_id=None,
                 configuration_profile_id=None,
             )
+            shell._focus_preview_service = object()
+            shell._presenter = SimpleNamespace(
+                state=SimpleNamespace(interaction_state=SimpleNamespace(focus_status_visible=True))
+            )
+            shell._subsystem = SimpleNamespace(
+                stream_service=SimpleNamespace(
+                    get_roi_state_service=lambda: SimpleNamespace(
+                        get_active_roi=lambda: SimpleNamespace(shape="rectangle", points=((10, 20), (110, 70)))
+                    )
+                )
+            )
             shell._recording_last_file_stem = "delam_run"
             shell._recording_last_save_directory = Path("captures/delam")
             shell._recording_last_stop_reason = "external_cli"
@@ -179,6 +190,18 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
 
             snapshot = read_live_status_snapshot(session)
             self.assertEqual(snapshot["focus_summary"], "hidden")
+            self.assertEqual(
+                snapshot["setup_reflection"],
+                {
+                    "phase": "ready",
+                    "focus_visibility": "visible",
+                    "focus_summary": "hidden",
+                    "roi_active": True,
+                    "roi_shape": "rectangle",
+                    "roi_bounds": [10, 20, 110, 70],
+                    "configuration_summary": None,
+                },
+            )
             self.assertEqual(
                 snapshot["snapshot_reflection"],
                 {
@@ -327,6 +350,35 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             snapshot = read_live_status_snapshot(session)
             self.assertEqual(snapshot["snapshot_reflection"]["phase"], "failed")
             self.assertEqual(snapshot["snapshot_reflection"]["last_error"], "disk full")
+
+    def test_execute_live_apply_configuration_uses_setup_oriented_message(self) -> None:
+        controller = _StubController()
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            subsystem=SimpleNamespace(command_controller=controller),
+            selected_save_directory=Path("captures/wx_shell_snapshot"),
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="1800_u_1240m",
+            live_sync_session=None,
+            source="hardware",
+        )
+        shell._subsystem = shell._session.subsystem
+        shell._cached_focus_state = object()
+        shell._cached_status = object()
+        shell._last_status_refresh_time = 1.0
+        shell._set_transient_status_message = lambda message: setattr(shell, "_last_message", message)
+
+        result = shell._execute_live_command(
+            SimpleNamespace(
+                command_name="apply_configuration",
+                payload={"gain": 5.0, "roi_width": 100},
+            )
+        )
+
+        self.assertEqual(result["command"], "apply_configuration")
+        self.assertEqual(shell._last_message, "External setup configuration applied")
+        self.assertIsNone(shell._cached_focus_state)
 
 
 class _StubController:
