@@ -30,7 +30,7 @@ Resolve one host-facing naming ambiguity so an AMB-side caller can interpret the
 
 ## Status
 
-Prepared only. Activate only when a concrete ambiguity is observed.
+Dormant under the workflow-first PM realignment. Reactivate only if `WP80` through `WP82` expose a concrete host-surface naming ambiguity that warrants a dedicated narrow follow-up.
 
 ## Sub-Packages
 
