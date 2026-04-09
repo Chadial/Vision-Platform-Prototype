@@ -155,12 +155,21 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
                 resolved_camera_id=None,
                 configuration_profile_id=None,
             )
+            shell._recording_last_file_stem = "delam_run"
+            shell._recording_last_save_directory = Path("captures/delam")
+            shell._recording_last_stop_reason = "external_cli"
             shell._status_lines = ["source=simulated | preview=running", "FPS 25.0"]
 
             shell._publish_live_status_snapshot(
                 SimpleNamespace(
                     camera=SimpleNamespace(is_initialized=True),
                     default_save_directory=Path("captures/wx_shell_snapshot"),
+                    recording=SimpleNamespace(
+                        is_recording=False,
+                        frames_written=3,
+                        active_file_stem=None,
+                        save_directory=None,
+                    ),
                 ),
                 focus_summary="hidden",
                 recording_summary="3/n",
@@ -169,6 +178,17 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             snapshot = read_live_status_snapshot(session)
             self.assertEqual(snapshot["focus_summary"], "hidden")
             self.assertEqual(snapshot["recording_summary"], "3/n")
+            self.assertEqual(
+                snapshot["recording_reflection"],
+                {
+                    "phase": "idle",
+                    "summary": "3/n",
+                    "file_stem": "delam_run",
+                    "save_directory": str(Path("captures/delam")),
+                    "stop_reason": "external_cli",
+                    "frames_written": 3,
+                },
+            )
             self.assertEqual(snapshot["status_lines"], shell._status_lines)
 
 

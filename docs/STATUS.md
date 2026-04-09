@@ -55,6 +55,7 @@ Each status update should state progress and gaps against both roadmaps.
 - `WP81 Geometry Capture Workflow Narrowing` and `WP82 Setup Focus ROI Workflow Narrowing` are now the prepared next workflow packages behind `WP80`
 - `WP76`, `WP77`, and `WP78` are no longer the default open residual lane; they stay dormant unless the workflow-first sequence exposes one concrete seam that actually needs them
 - the first `WP80` implementation slice is now landed on `main`: external `start-recording` commands in the wx-shell live-control path now fall back to the shell-visible recording settings when optional overrides are omitted, while explicit host overrides still win when provided
+- the second `WP80` implementation slice is now on the active topic branch: the wx-shell live status snapshot now publishes one explicit recording-reflection block for host/companion visibility, and the visible shell status prefix now keeps the current or last recording file stem readable
 
 ## Immediate Priorities
 

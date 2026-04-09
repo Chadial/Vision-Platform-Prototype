@@ -109,6 +109,11 @@ Current residual after that slice:
 
 - the workflow still needs additional practical delamination-run tightening around visible run-state understanding, stop-path readability, and any remaining save-path / recording-summary seams that appear in real use
 
+Landed implementation slices so far:
+
+- external `start-recording` now reuses shell-visible recording settings by default and applies only explicitly supplied host overrides
+- the wx-shell live status snapshot now exposes one explicit recording-reflection block with run phase, summary, file stem, save directory, stop reason, and frames written, while the visible shell status prefix also keeps the current or last recording file stem readable
+
 ## Execution Plan
 
 1. restate the workflow in product terms and in concrete technical terms
