@@ -12,8 +12,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `feature/complete-wp80-delamination-workflow` is the current checked-out topic branch
-- that branch is completing the remaining implementation and documentation slices needed to close `WP80`
+- `main` is the current checked-out integration branch
+- `feature/complete-wp80-delamination-workflow` has been merged to complete `WP80`
 - short-lived topic branches are created per active work package and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
 
@@ -45,8 +45,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Next
 
-- `WP80 Delamination Recording Workflow Narrowing` is in final branch-local closure on `feature/complete-wp80-delamination-workflow`.
-- `WP81 Geometry Capture Workflow Narrowing` is the prepared next package once this branch is merged.
+- `WP80 Delamination Recording Workflow Narrowing` is now landed on `main`.
+- `WP81 Geometry Capture Workflow Narrowing` is now the `current next`.
 - default next-step derivation should now use the confirmed `Hybrid Companion` product reading through the three functional workflows rather than a broad generic subsystem-hardening lens.
 - the repo-level orientation cleanup now also extends beyond the central PM docs: `README.md`, `docs/WORKFLOW.md`, `docs/NEXT_SESSION_ORDER.md`, `docs/project_overview.md`, and the secondary summary notes now point at the same current product reading instead of older post-closure wording
 - `WP75 Reference Scenario Operator Path Tightening` is now landed; `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and `docs/MANUALS_INDEX.md` now expose one compact validated entry path for the official current workflows.
@@ -58,7 +58,7 @@ Each status update should state progress and gaps against both roadmaps.
 - the first `WP80` implementation slice is now landed on `main`: external `start-recording` commands in the wx-shell live-control path now fall back to the shell-visible recording settings when optional overrides are omitted, while explicit host overrides still win when provided
 - the second `WP80` implementation slice is now landed on `main`: the wx-shell live status snapshot now publishes one explicit recording-reflection block for host/companion visibility, and the visible shell status prefix now keeps the current or last recording file stem readable
 - the third `WP80` implementation slice is now landed on `main`: the wx-shell recording reflection now categorizes stop causes for the delamination path so shell-facing status and published live status distinguish host stop, `max_frames_reached`, and failure-oriented termination more clearly
-- the remaining `WP80` completion slices are now on the active topic branch: shell-visible save-path reflection, tighter run-lifecycle messaging, one repeatable host-control smoke block for the delamination path, and explicit failure reflection through `phase=failed` plus `last_error`
+- the final `WP80` completion slices are now also landed on `main`: shell-visible save-path reflection, tighter run-lifecycle messaging, one repeatable host-control smoke block for the delamination path, and explicit failure reflection through `phase=failed` plus `last_error`
 
 ## Immediate Priorities
 
