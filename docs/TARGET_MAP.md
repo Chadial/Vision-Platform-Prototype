@@ -92,6 +92,32 @@ Current interpretation notes:
 - focus value is a status field in this phase
 - `conditional stop` currently means the practical `max frames reached` case
 
+## Host / Shell Workflow
+
+The current companion collaboration flow is file-backed and intentionally narrow.
+
+Typical sequence:
+
+1. start the visible wx shell
+2. let it register an active live-sync session under `captures/wx_shell_sessions/`
+3. send host commands from a separate process with `vision_platform.apps.local_shell control ...`
+4. let the shell execute those commands through the same command-controller path used locally
+5. read the published shell status or command result JSON that the shell wrote back
+
+Common host-side examples:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control snapshot --file-stem geometry_000001 --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control apply-configuration --exposure-time-us 8000 --gain 2.0
+```
+
+Reading rule:
+
+- treat the shell as the visible companion surface
+- treat the separate `control` process as the host-side command source
+- treat the JSON files under `captures/wx_shell_sessions/` as the current collaboration mechanism, not as a full transport contract
+
 ## Next
 
 - truly headless kernel preparation
