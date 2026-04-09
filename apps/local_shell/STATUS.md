@@ -42,7 +42,10 @@
 - working now: recording failure reflection is now explicit in the published shell status through `phase=failed` plus `last_error`, and start/stop failures keep that error visible without widening the host/session architecture
 - working now: one repeatable host-control smoke block now covers the current delamination path through host `start -> run -> stop` against the file-backed live-shell command/session baseline
 - partial: the current live-sync baseline assumes one active local shell session at a time and uses local file-backed polling rather than a broader transport/runtime-hosting layer
-- next: `WP84 Usable Failure Reflection Baseline` should now tighten shell-side and host-visible failure reading across the landed companion workflows
+- working now: shell status, published live status, and failed live-command result files now share one explicit `failure_reflection` baseline with `source`, `action`, `message`, and `external` ownership across current setup, snapshot, and recording failures
+- working now: the visible shell status prefix now also keeps the current failure owner readable as `failure=setup|snapshot|recording`, so the companion shell can signal the active failure lane without introducing a broader incident UI
+- working now: later success in the same workflow lane clears the currently owned `failure_reflection`, while a newer failure overwrites the older one; the shell intentionally keeps only the latest failure owner instead of building a full incident history
+- next: `WP85 Stage-2 LabVIEW Contract Mapping Narrowing` should now map the bounded Stage-1 host surface into one LabVIEW-near reading without widening the transport/runtime scope
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite

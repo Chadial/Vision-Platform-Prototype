@@ -245,6 +245,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_last_error: str | None = None
         self._snapshot_last_saved_path: Path | None = None
         self._snapshot_last_error: str | None = None
+        self._failure_reflection: dict[str, object | None] | None = None
         self._recording_file_stem = "wx_recording"
         self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
@@ -349,12 +350,19 @@ class WxLocalPreviewShell(wx.Frame):
             )
         except Exception as exc:
             self._snapshot_last_error = str(exc)
+            self._set_failure_reflection(
+                source="snapshot",
+                action="save_snapshot",
+                message=self._snapshot_last_error,
+                external=False,
+            )
             self._set_transient_status_message(self._format_snapshot_failure_message(self._snapshot_last_error))
             self.request_refresh()
             return
         self._cached_status = None
         self._snapshot_last_saved_path = result.saved_path
         self._snapshot_last_error = None
+        self._clear_failure_reflection_for_source("snapshot")
         self._set_transient_status_message(
             self._format_snapshot_saved_message(result.saved_path)
         )
@@ -381,6 +389,12 @@ class WxLocalPreviewShell(wx.Frame):
             save_directory = self._get_recording_save_directory()
             if save_directory is None:
                 self._recording_last_error = "no save directory configured"
+                self._set_failure_reflection(
+                    source="recording",
+                    action="start_recording",
+                    message=self._recording_last_error,
+                    external=False,
+                )
                 self._set_transient_status_message(self._format_recording_failure_message("start", self._recording_last_error))
                 self.request_refresh()
                 return
@@ -398,6 +412,12 @@ class WxLocalPreviewShell(wx.Frame):
             )
         except Exception as exc:
             self._recording_last_error = str(exc)
+            self._set_failure_reflection(
+                source="recording",
+                action="start_recording",
+                message=self._recording_last_error,
+                external=False,
+            )
             self._set_transient_status_message(self._format_recording_failure_message("start", self._recording_last_error))
             self.request_refresh()
             return
@@ -408,6 +428,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_last_save_directory = save_directory
         self._recording_last_stop_reason = None
         self._recording_last_error = None
+        self._clear_failure_reflection_for_source("recording")
         self._cached_status = None
         self._last_status_refresh_time = 0.0
         self._set_transient_status_message(self._format_recording_started_message(file_stem=self._recording_last_file_stem, save_directory=save_directory))
@@ -420,6 +441,12 @@ class WxLocalPreviewShell(wx.Frame):
             )
         except Exception as exc:
             self._recording_last_error = str(exc)
+            self._set_failure_reflection(
+                source="recording",
+                action="stop_recording",
+                message=self._recording_last_error,
+                external=False,
+            )
             self._set_transient_status_message(self._format_recording_failure_message("stop", self._recording_last_error))
             self.request_refresh()
             return
@@ -430,6 +457,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_last_stop_reason = result.stop_reason
         self._recording_last_error = None
         self._recording_active_frame_limit = None
+        self._clear_failure_reflection_for_source("recording")
         self._set_transient_status_message(
             self._format_recording_stopped_message(
                 frames_written=result.status.frames_written,
@@ -626,9 +654,16 @@ class WxLocalPreviewShell(wx.Frame):
             self._last_status_refresh_time = 0.0
             self._cached_focus_state = None
             self._last_focus_refresh_time = 0.0
+            self._clear_failure_reflection_for_source("setup")
             self._set_transient_status_message("Camera settings updated")
             self.request_refresh()
         except Exception as exc:
+            self._set_failure_reflection(
+                source="setup",
+                action="apply_configuration",
+                message=str(exc),
+                external=False,
+            )
             self._set_transient_status_message(f"Camera settings failed: {exc}")
             self.request_refresh()
         finally:
@@ -668,9 +703,16 @@ class WxLocalPreviewShell(wx.Frame):
             self._session.selected_save_directory = result.selected_directory
             self._cached_status = None
             self._last_status_refresh_time = 0.0
+            self._clear_failure_reflection_for_source("setup")
             self._set_transient_status_message(f"Save directory: {result.selected_directory}")
             self.request_refresh()
         except Exception as exc:
+            self._set_failure_reflection(
+                source="setup",
+                action="set_save_directory",
+                message=str(exc),
+                external=False,
+            )
             self._set_transient_status_message(f"Save directory failed: {exc}")
             self.request_refresh()
         finally:
@@ -877,6 +919,26 @@ class WxLocalPreviewShell(wx.Frame):
             "configuration_summary": configuration_summary,
         }
 
+    def _set_failure_reflection(self, *, source: str, action: str, message: str, external: bool) -> None:
+        self._failure_reflection = {
+            "phase": "failed",
+            "source": source,
+            "action": action,
+            "message": message,
+            "external": external,
+        }
+
+    def _clear_failure_reflection_for_source(self, source: str) -> None:
+        current = getattr(self, "_failure_reflection", None)
+        if current is not None and current.get("source") == source:
+            self._failure_reflection = None
+
+    def _build_failure_reflection(self) -> dict[str, object | None] | None:
+        failure_reflection = getattr(self, "_failure_reflection", None)
+        if failure_reflection is None:
+            return None
+        return dict(failure_reflection)
+
     def _build_status_prefix(self, status) -> list[str]:
         prefix = [
             f"source={self._session.source}",
@@ -929,6 +991,9 @@ class WxLocalPreviewShell(wx.Frame):
         recording_stop_category = self._get_recording_stop_category(status)
         if recording_stop_category is not None:
             prefix.append(f"recording_stop={recording_stop_category}")
+        failure_reflection = self._build_failure_reflection()
+        if failure_reflection is not None:
+            prefix.append(f"failure={failure_reflection['source']}")
         if self._session.configuration_profile_id is not None:
             prefix.append(f"profile={self._session.configuration_profile_id}")
         return prefix
@@ -1119,6 +1184,7 @@ class WxLocalPreviewShell(wx.Frame):
             "command": command_name,
             "reflection_kind": reflection_kind,
             "reflection": reflection,
+            "failure_reflection": self._build_failure_reflection(),
             "result": to_serializable(result),
         }
 
@@ -1365,6 +1431,7 @@ class WxLocalPreviewShell(wx.Frame):
                         "command": command.command_name,
                         "reflection_kind": None,
                         "reflection": None,
+                        "failure_reflection": self._build_failure_reflection(),
                         "result": None,
                     },
                     error=str(exc),
@@ -1384,29 +1451,51 @@ class WxLocalPreviewShell(wx.Frame):
         payload = command.payload
 
         if command.command_name == "apply_configuration":
-            result = controller.apply_configuration(
-                ApplyConfigurationRequest(
-                    exposure_time_us=payload.get("exposure_time_us"),
-                    gain=payload.get("gain"),
-                    pixel_format=payload.get("pixel_format"),
-                    acquisition_frame_rate=payload.get("acquisition_frame_rate"),
-                    roi_offset_x=payload.get("roi_offset_x"),
-                    roi_offset_y=payload.get("roi_offset_y"),
-                    roi_width=payload.get("roi_width"),
-                    roi_height=payload.get("roi_height"),
+            try:
+                result = controller.apply_configuration(
+                    ApplyConfigurationRequest(
+                        exposure_time_us=payload.get("exposure_time_us"),
+                        gain=payload.get("gain"),
+                        pixel_format=payload.get("pixel_format"),
+                        acquisition_frame_rate=payload.get("acquisition_frame_rate"),
+                        roi_offset_x=payload.get("roi_offset_x"),
+                        roi_offset_y=payload.get("roi_offset_y"),
+                        roi_width=payload.get("roi_width"),
+                        roi_height=payload.get("roi_height"),
+                    )
                 )
-            )
+            except Exception as exc:
+                self._set_failure_reflection(
+                    source="setup",
+                    action="apply_configuration",
+                    message=str(exc),
+                    external=True,
+                )
+                self._set_transient_status_message(f"External setup configuration failed: {exc}")
+                raise
             self._cached_focus_state = None
+            self._clear_failure_reflection_for_source("setup")
             self._set_transient_status_message("External setup configuration applied")
         elif command.command_name == "set_save_directory":
-            result = controller.set_save_directory(
-                SetSaveDirectoryRequest(
-                    base_directory=Path(payload["base_directory"]),
-                    mode=payload.get("mode", "append"),
-                    subdirectory_name=payload.get("subdirectory_name"),
+            try:
+                result = controller.set_save_directory(
+                    SetSaveDirectoryRequest(
+                        base_directory=Path(payload["base_directory"]),
+                        mode=payload.get("mode", "append"),
+                        subdirectory_name=payload.get("subdirectory_name"),
+                    )
                 )
-            )
+            except Exception as exc:
+                self._set_failure_reflection(
+                    source="setup",
+                    action="set_save_directory",
+                    message=str(exc),
+                    external=True,
+                )
+                self._set_transient_status_message(f"External save directory failed: {exc}")
+                raise
             self._session.selected_save_directory = result.selected_directory
+            self._clear_failure_reflection_for_source("setup")
             self._set_transient_status_message(f"External save directory: {result.selected_directory}")
         elif command.command_name == "save_snapshot":
             try:
@@ -1421,12 +1510,19 @@ class WxLocalPreviewShell(wx.Frame):
                 )
             except Exception as exc:
                 self._snapshot_last_error = str(exc)
+                self._set_failure_reflection(
+                    source="snapshot",
+                    action="save_snapshot",
+                    message=self._snapshot_last_error,
+                    external=True,
+                )
                 self._set_transient_status_message(
                     self._format_snapshot_failure_message(self._snapshot_last_error, external=True)
                 )
                 raise
             self._snapshot_last_saved_path = result.saved_path
             self._snapshot_last_error = None
+            self._clear_failure_reflection_for_source("snapshot")
             self._set_transient_status_message(
                 self._format_snapshot_saved_message(result.saved_path, external=True)
             )
@@ -1460,6 +1556,12 @@ class WxLocalPreviewShell(wx.Frame):
             except Exception as exc:
                 self._recording_last_error = str(exc)
                 self._recording_last_stop_reason = None
+                self._set_failure_reflection(
+                    source="recording",
+                    action="start_recording",
+                    message=self._recording_last_error,
+                    external=True,
+                )
                 self._set_transient_status_message(
                     self._format_recording_failure_message("start", self._recording_last_error, external=True)
                 )
@@ -1471,6 +1573,7 @@ class WxLocalPreviewShell(wx.Frame):
             self._recording_last_save_directory = save_directory
             self._recording_last_stop_reason = None
             self._recording_last_error = None
+            self._clear_failure_reflection_for_source("recording")
             self._set_transient_status_message(
                 self._format_recording_started_message(
                     file_stem=result.status.active_file_stem or file_stem,
@@ -1485,6 +1588,12 @@ class WxLocalPreviewShell(wx.Frame):
                 )
             except Exception as exc:
                 self._recording_last_error = str(exc)
+                self._set_failure_reflection(
+                    source="recording",
+                    action="stop_recording",
+                    message=self._recording_last_error,
+                    external=True,
+                )
                 self._set_transient_status_message(
                     self._format_recording_failure_message("stop", self._recording_last_error, external=True)
                 )
@@ -1496,6 +1605,7 @@ class WxLocalPreviewShell(wx.Frame):
             self._recording_last_stop_reason = result.stop_reason
             self._recording_last_error = None
             self._recording_active_frame_limit = None
+            self._clear_failure_reflection_for_source("recording")
             self._set_transient_status_message(
                 self._format_recording_stopped_message(
                     frames_written=result.status.frames_written,
@@ -1526,6 +1636,7 @@ class WxLocalPreviewShell(wx.Frame):
                 "configuration_profile_id": self._session.configuration_profile_id,
                 "focus_summary": focus_summary,
                 "setup_reflection": setup_reflection,
+                "failure_reflection": self._build_failure_reflection(),
                 "snapshot_reflection": snapshot_reflection,
                 "recording_summary": recording_summary,
                 "recording_reflection": recording_reflection,
