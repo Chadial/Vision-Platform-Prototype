@@ -820,6 +820,52 @@ class WxLocalPreviewShell(wx.Frame):
             return "invalid"
         return format_focus_score(focus_state.result.score)
 
+    def _get_setup_focus_visibility(self) -> str:
+        focus_service = getattr(self, "_focus_preview_service", None)
+        if focus_service is None:
+            return "unavailable"
+        presenter = getattr(self, "_presenter", None)
+        interaction_state = getattr(getattr(presenter, "state", None), "interaction_state", None)
+        if interaction_state is None:
+            return "hidden"
+        return "visible" if bool(getattr(interaction_state, "focus_status_visible", False)) else "hidden"
+
+    def _get_active_setup_roi(self):
+        subsystem = getattr(self, "_subsystem", None)
+        stream_service = getattr(subsystem, "stream_service", None)
+        if stream_service is None:
+            return None
+        roi_state_service = getattr(stream_service, "get_roi_state_service", None)
+        if roi_state_service is None:
+            return None
+        service = roi_state_service()
+        if service is None:
+            return None
+        get_active_roi = getattr(service, "get_active_roi", None)
+        if get_active_roi is None:
+            return None
+        return get_active_roi()
+
+    def _get_active_setup_roi_shape(self) -> str | None:
+        active_roi = self._get_active_setup_roi()
+        if active_roi is None:
+            return None
+        return getattr(active_roi, "shape", None)
+
+    def _build_setup_reflection(self, *, focus_summary: str | None, status) -> dict[str, object | None]:
+        active_roi = self._get_active_setup_roi()
+        active_roi_bounds = roi_bounds(active_roi) if active_roi is not None else None
+        configuration_summary = self._format_camera_configuration_summary(getattr(status, "configuration", None))
+        return {
+            "phase": "ready",
+            "focus_visibility": self._get_setup_focus_visibility(),
+            "focus_summary": focus_summary,
+            "roi_active": active_roi is not None,
+            "roi_shape": getattr(active_roi, "shape", None) if active_roi is not None else None,
+            "roi_bounds": None if active_roi_bounds is None else [int(round(value)) for value in active_roi_bounds],
+            "configuration_summary": configuration_summary,
+        }
+
     def _build_status_prefix(self, status) -> list[str]:
         prefix = [
             f"source={self._session.source}",
@@ -848,6 +894,12 @@ class WxLocalPreviewShell(wx.Frame):
             prefix.append(f"config={camera_configuration_summary}")
         if status.default_save_directory is not None:
             prefix.append(f"save={status.default_save_directory}")
+        setup_focus_visibility = self._get_setup_focus_visibility()
+        if setup_focus_visibility != "unavailable":
+            prefix.append(f"setup_focus={setup_focus_visibility}")
+        setup_roi_shape = self._get_active_setup_roi_shape()
+        if setup_roi_shape is not None:
+            prefix.append(f"setup_roi={setup_roi_shape}")
         snapshot_file_name = self._get_snapshot_reflection_file_name()
         if snapshot_file_name is not None:
             prefix.append(f"snapshot_file={snapshot_file_name}")
@@ -1261,7 +1313,7 @@ class WxLocalPreviewShell(wx.Frame):
                 )
             )
             self._cached_focus_state = None
-            self._set_transient_status_message("External configuration applied")
+            self._set_transient_status_message("External setup configuration applied")
         elif command.command_name == "set_save_directory":
             result = controller.set_save_directory(
                 SetSaveDirectoryRequest(
@@ -1380,6 +1432,7 @@ class WxLocalPreviewShell(wx.Frame):
         live_sync_session = self._session.live_sync_session
         if live_sync_session is None:
             return
+        setup_reflection = self._build_setup_reflection(focus_summary=focus_summary, status=status)
         recording_reflection = self._build_recording_reflection(status, recording_summary=recording_summary)
         snapshot_reflection = self._build_snapshot_reflection()
         write_live_status_snapshot(
@@ -1390,6 +1443,7 @@ class WxLocalPreviewShell(wx.Frame):
                 "camera_id": self._session.resolved_camera_id,
                 "configuration_profile_id": self._session.configuration_profile_id,
                 "focus_summary": focus_summary,
+                "setup_reflection": setup_reflection,
                 "snapshot_reflection": snapshot_reflection,
                 "recording_summary": recording_summary,
                 "recording_reflection": recording_reflection,

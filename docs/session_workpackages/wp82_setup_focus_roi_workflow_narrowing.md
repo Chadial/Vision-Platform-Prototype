@@ -70,7 +70,68 @@ Leave the repository with one execution-ready package for the current setup work
 
 ## Status
 
-Prepared only. Queue directly after `WP81`.
+Landed. `WP82` is now complete as one sequence of small sub-packages under the same workflow-first lane rather than as one large setup umbrella.
+
+Closure result:
+
+- the setup workflow now has one explicit host-plus-shell baseline for focus visibility, ROI state, and setup-oriented configuration readability
+- shell-visible and host-visible setup state are now readable enough for the current phase without widening settings UI, focus methods, or ROI features
+- the workflow-first trilogy is now complete, so future work can be derived from concrete residual seams instead of from an unfinished workflow package
+
+## Sub-Packages
+
+### Landed
+
+#### `WP82.A Setup State Reflection Tightening`
+
+- status: landed
+- purpose: make the current setup state readable in shell and published live status through focus visibility, focus summary, ROI state, and configuration summary
+- scope:
+  - setup-oriented shell prefix cues
+  - published live-status reflection for setup state
+  - no broad state-model redesign
+
+#### `WP82.B Setup Messaging Tightening`
+
+- status: landed
+- purpose: make host-triggered setup changes read as setup work rather than as generic configuration side effects
+- scope:
+  - tighter setup-oriented apply-configuration messaging
+  - no broad wording rewrite across the shell
+
+#### `WP82.C Host-Control Smoke For Setup Path`
+
+- status: landed
+- purpose: prove one repeatable host-driven setup block against the current companion-shell baseline
+- scope:
+  - host applies bounded setup configuration
+  - shell/live status reflect focus and ROI-related setup state
+  - no new host-surface breadth
+
+#### `WP82.D Setup Failure Reflection Narrowing`
+
+- status: landed
+- purpose: keep setup/configuration failures understandable enough in shell and published status without broadening into a new error platform
+- scope:
+  - configuration-application failure
+  - setup-state visibility after failure
+  - no retry workflow or broader diagnostics lane
+
+### Ordering Note
+
+Execution order used inside `WP82`:
+
+1. `WP82.A Setup State Reflection Tightening`
+2. `WP82.B Setup Messaging Tightening`
+3. `WP82.C Host-Control Smoke For Setup Path`
+4. `WP82.D Setup Failure Reflection Narrowing`
+
+Landed implementation slices so far:
+
+- the shell status prefix now keeps setup-oriented focus visibility and active ROI shape readable
+- the published live shell status now exposes one explicit `setup_reflection` block with focus visibility, focus summary, ROI state, ROI bounds, and configuration summary
+- host-triggered configuration changes now read through setup-oriented messaging instead of generic configuration wording
+- one repeatable host-control smoke block now covers the current setup path through bounded configuration plus ROI/focus visibility against the wx-shell live-command session bridge
 
 ## Execution Plan
 
@@ -79,27 +140,30 @@ Prepared only. Queue directly after `WP81`.
 3. pin the current setup expectations for shell-local and host-visible use
 4. keep focus value explicitly framed as status rather than as a separate command surface
 5. capture the smallest implementation seams that would need follow-up without turning this package into broad settings, shell, focus, or ROI expansion
+6. keep future implementation slices inside this workflow small and avoid broad settings, focus-method, or ROI-feature expansion
 
 ## Validation
 
 - verify consistency with the confirmed functional-workflow set
 - verify the package stays inside current setup usability and does not broaden into broad settings, shell, focus, ROI, analysis, or product-expansion lanes
+- verify the final implementation slice leaves one coherent setup path with understandable shell-visible and host-visible focus, ROI, and configuration state
 
 ## Documentation Updates
 
 - `docs/WORKPACKAGES.md` when the queue changes
 - `docs/STATUS.md` when it becomes active or landed
+- `apps/local_shell/STATUS.md` when shell-visible setup state changes materially
 
 ## Expected Commit Shape
 
-One PM/documentation commit is preferred.
+Implementation, tests, and PM/documentation updates are expected together for the closure slice.
 
 ## Merge Gate
 
 - the package clearly follows `WP81`
 - the current setup workflow is represented through the `Hybrid Companion` lens
 - focus value remains status, not a newly widened command surface
-- the package still reads as a narrow workflow-boundary definition rather than as a hidden umbrella for wider shell/setup work
+- the package closes with understandable setup-state reflection without becoming a hidden umbrella for wider shell/setup work
 
 ## Recovery Note
 

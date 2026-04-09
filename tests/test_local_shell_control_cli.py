@@ -166,12 +166,58 @@ class LocalShellControlCliTests(unittest.TestCase):
             self.assertEqual(status_snapshot["snapshot_reflection"]["file_name"], "geometry_000001.bmp")
             self.assertEqual(status_snapshot["snapshot_reflection"]["save_directory"], str(Path("captures/geometry")))
 
+    def test_host_control_smoke_covers_setup_status_for_setup_path(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id="DEV_123",
+                configuration_profile_id="default",
+            )
+            controller = _SmokeController()
+            shell = _build_smoke_shell(session=session, controller=controller)
+            shell._focus_preview_service = object()
+            shell._presenter = SimpleNamespace(
+                state=SimpleNamespace(interaction_state=SimpleNamespace(focus_status_visible=True))
+            )
+            controller._roi = SimpleNamespace(shape="rectangle", points=((10, 20), (110, 70)))
+
+            config_command = append_live_command(
+                session,
+                command_name="apply_configuration",
+                payload={"gain": 5.0, "roi_width": 100, "roi_height": 50},
+            )
+            commands, processed_count = read_pending_live_commands(session, processed_count=0)
+            self.assertEqual(processed_count, 1)
+            result = shell._execute_live_command(commands[0])
+            write_live_command_result(session, command_id=config_command.command_id, success=True, result=result)
+            shell._publish_live_status_snapshot(controller.get_status(), focus_summary="1.234e-02", recording_summary=None)
+            command_result = wait_for_live_command_result(session, command_id=config_command.command_id, timeout_seconds=0.2)
+            self.assertTrue(command_result["success"])
+
+            status_snapshot = read_live_status_snapshot(session)
+            self.assertEqual(status_snapshot["setup_reflection"]["phase"], "ready")
+            self.assertEqual(status_snapshot["setup_reflection"]["focus_visibility"], "visible")
+            self.assertEqual(status_snapshot["setup_reflection"]["roi_shape"], "rectangle")
+            self.assertEqual(status_snapshot["setup_reflection"]["roi_bounds"], [10, 20, 110, 70])
+
 
 class _SmokeController:
     def __init__(self) -> None:
+        self._roi = None
         self._status = SimpleNamespace(
             camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.0),
             default_save_directory=Path("captures/delam"),
+            configuration=SimpleNamespace(
+                exposure_time_us=None,
+                gain=None,
+                pixel_format=None,
+                acquisition_frame_rate=None,
+                roi_offset_x=None,
+                roi_offset_y=None,
+                roi_width=None,
+                roi_height=None,
+            ),
             recording=SimpleNamespace(
                 is_recording=False,
                 frames_written=0,
@@ -200,6 +246,14 @@ class _SmokeController:
     def save_snapshot(self, request):
         return SimpleNamespace(saved_path=Path("captures/geometry") / f"{request.file_stem}{request.file_extension}")
 
+    def apply_configuration(self, request):
+        self._status.configuration.gain = request.gain
+        self._status.configuration.roi_width = request.roi_width
+        self._status.configuration.roi_height = request.roi_height
+        self._status.configuration.roi_offset_x = 10 if request.roi_width is not None else None
+        self._status.configuration.roi_offset_y = 20 if request.roi_height is not None else None
+        return request
+
     def get_status(self):
         return self._status
 
@@ -216,7 +270,10 @@ def _build_smoke_shell(*, session, controller) -> WxLocalPreviewShell:
         source="simulated",
     )
     shell._subsystem = SimpleNamespace(
-        stream_service=SimpleNamespace(is_preview_running=True),
+        stream_service=SimpleNamespace(
+            is_preview_running=True,
+            get_roi_state_service=lambda: SimpleNamespace(get_active_roi=lambda: controller._roi),
+        ),
     )
     shell._cached_status = None
     shell._last_status_refresh_time = 0.0
