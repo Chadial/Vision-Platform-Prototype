@@ -103,11 +103,87 @@ Leave the repository with one execution-ready workflow package that makes `Delam
 
 ## Status
 
-Active. The first implementation slice is now on branch `feature/wp80-delamination-recording-workflow`: external `start-recording` commands in the wx-shell live-control path now reuse the shell-visible recording settings by default and apply only the host overrides that were explicitly supplied.
+Active. `WP80` is now being executed as one sequence of small sub-packages under the same workflow-first lane rather than as one large recording umbrella.
 
-Current residual after that slice:
+Current residual after the first landed slices:
 
 - the workflow still needs additional practical delamination-run tightening around visible run-state understanding, stop-path readability, and any remaining save-path / recording-summary seams that appear in real use
+
+## Sub-Packages
+
+### Landed
+
+#### `WP80.A Host Start Uses Visible Shell Recording Defaults`
+
+- status: landed
+- purpose: keep host-driven `start-recording` aligned with the visible shell recording settings when optional host overrides are omitted
+- result:
+  - external `start-recording` now reuses shell-visible recording settings by default
+  - the host overrides only the fields it explicitly supplies
+
+#### `WP80.B Recording Reflection In Shell Status`
+
+- status: landed
+- purpose: make the running or last delamination recording run more explicitly readable in the companion shell and published shell status
+- result:
+  - the wx-shell live status snapshot now exposes one explicit recording-reflection block with run phase, summary, file stem, save directory, stop reason, and frames written
+  - the visible shell status prefix now also keeps the current or last recording file stem readable
+
+### Prepared Next
+
+#### `WP80.C Stop-Reason Reflection Tightening`
+
+- status: prepared next
+- purpose: distinguish host stop, practical `max_frames_reached`, and failure termination more clearly in the delamination workflow
+- scope:
+  - visible stop reason in shell-facing reflection
+  - same stop reason in published live status
+  - no new stop-rule architecture
+
+#### `WP80.D Save-Path Reflection Tightening`
+
+- status: prepared
+- purpose: make the active or last recording target path easier to understand during and after the run
+- scope:
+  - align shell-visible save-path cues with published live status
+  - keep recording target-path reading understandable without opening broader storage work
+
+#### `WP80.E Run-State Messaging Tightening`
+
+- status: prepared
+- purpose: make the shell wording read more clearly as a delamination run lifecycle instead of generic bounded-recording mechanics
+- scope:
+  - tighten start / running / stopped messaging
+  - avoid broad shell copy or UI redesign
+
+#### `WP80.F Host-Control Smoke For Delamination Path`
+
+- status: prepared
+- purpose: prove one repeatable host-start / run / stop delamination-path block against the current companion shell baseline
+- scope:
+  - host starts recording
+  - shell reflects running state
+  - host stops or `max frames` ends the run practically
+  - resulting status remains understandable
+
+#### `WP80.G Failure Reflection Narrowing`
+
+- status: prepared later
+- purpose: make delamination-relevant recording failures understandable enough in shell and published status without opening a broad error-platform lane
+- scope:
+  - recording start failure
+  - recording stop failure
+  - save-path or write failure reflection
+
+### Ordering Note
+
+Recommended next order inside `WP80`:
+
+1. `WP80.C Stop-Reason Reflection Tightening`
+2. `WP80.D Save-Path Reflection Tightening`
+3. `WP80.E Run-State Messaging Tightening`
+4. `WP80.F Host-Control Smoke For Delamination Path`
+5. `WP80.G Failure Reflection Narrowing`
 
 Landed implementation slices so far:
 
