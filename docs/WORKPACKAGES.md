@@ -104,11 +104,14 @@ For the compact current-phase reading card, see `docs/TARGET_MAP.md`.
 
 The project goal, derived from `docs/ProjectDescription.md`, `docs/ProjectAgents.md`, and `docs/GlobalRoadmap.md`, is:
 
-1. treat the repository as a practically usable camera and acquisition subsystem
-2. make the wx shell the primary local working path, with OpenCV kept as fallback/reference
-3. keep one host-neutral command surface as the main control layer for AMB-side use
-4. preserve snapshot, bounded recording, and interval capture as official reference scenarios
-5. keep the subsystem usable as the first reference module for a later assisted measurement system
+1. steer the repository toward a running `Vision App / wxShell` that replaces the previous third-party software path and can be controlled by a host
+2. treat the current product form as `Hybrid Companion`: a visible local shell that remains locally adjustable while also reflecting host-driven actions and state
+3. prioritize host commands to the running app, shell reflection of those commands/state, and usable shell settings support
+4. use the three confirmed functional workflows as the main product-reading lens:
+   - Delamination Recording
+   - Geometry Capture
+   - Setup / Focus / ROI Adjustment
+5. keep one host-neutral command surface as the main control layer for Stage 1 test-host and Stage 2 LabVIEW-host integration
 6. prepare a truly headless kernel only after local and host usability are real enough
 7. keep broader API/feed, postprocess, desktop, web-capable, MCP-oriented, and C# productization work visible as later directions rather than the current default lane
 
@@ -137,10 +140,10 @@ The strongest currently documented sequencing signals are:
 
 Combined interpretation:
 
-1. treat the current camera software as a practically usable subsystem rather than as a proof artifact
-2. prioritize the wx shell as the primary local working path, with OpenCV held as fallback/reference
-3. prioritize practical host control over broad transport or platform speculation
-4. preserve small official reference scenarios as the anchor for operational confidence
+1. treat the current camera software as a host-steerable `Hybrid Companion`, not as a broad platform-build-out or proof artifact
+2. prioritize practical host control of the running wx shell over broad transport or platform speculation
+3. treat visible shell reflection of host-driven behavior as a first-order requirement, not as secondary polish
+4. preserve the confirmed functional workflows as the anchor for operational confidence
 5. treat hardware work as recurring evidence-driven validation rather than as a separate strategic stream
 6. keep tracking, broad API expansion, MCP-oriented growth, C# handover widening, and further frontends visible as later lanes rather than the next default step
 
@@ -173,21 +176,76 @@ What the closure result now means:
 
 The active planning lens is now:
 
-**Usable Camera Subsystem / Pre-Product Baseline = practically usable camera/acquisition subsystem with a real local working shell, real host-facing control semantics, and a small set of stable reference scenarios**
+**Usable Camera Subsystem / Pre-Product Baseline = host-steerable `Vision App / wxShell` in `Hybrid Companion` form, with practical local usability, practical host control, and a small set of confirmed current workflows**
+
+### Current Product Reading
+
+- first product goal:
+  - running `Vision App / wxShell`
+  - replaces the previous third-party software path
+  - can be controlled by a host
+- current product form:
+  - `Hybrid Companion`
+  - shell remains visible and usable
+  - shell remains locally adjustable while still standalone-running
+  - host can drive important camera/acquisition behavior
+  - shell should reflect host-driven actions and state
+- near-term host staging:
+  - Stage 1: test host
+  - Stage 2: LabVIEW host
+
+### Current Role Split
+
+- `wx shell role`
+  - companion/monitor surface for host-driven operation
+  - debug/developer surface for the current bounded baseline
+  - functional replacement path for the previous third-party software
+  - still locally adjustable while it remains standalone-running
+- `host role`
+  - define save location
+  - define core camera settings
+  - control acquisition
+  - obtain camera metadata
+  - support experiment documentation
+
+### Confirmed Functional Workflows
+
+1. `Delamination Recording`
+   - preview
+   - settings
+   - recording start/stop
+   - optional practical stop through `max frames reached`
+2. `Geometry Capture`
+   - preview
+   - settings
+   - snapshot
+3. `Setup / Focus / ROI Adjustment`
+   - preview
+   - settings
+   - ROI/focus
+   - optional control snapshot
+
+Technical execution modes remain important, but they should now be read as support for the workflows above:
+
+- preview
+- snapshot
+- recording start/stop
+- ROI/focus
+- max-frames stop behavior
 
 This phase should optimize for four near-term priorities:
 
-1. `Local usability`
-   - make the wx shell genuinely usable as the daily local working frontend
-   - keep OpenCV as fallback/reference rather than as the long-term working shell
-2. `Host-side usability`
-   - make the shared command/status/result surface practically usable from the AMB control side
-   - prefer host-semantic clarity over broad transport speculation
-3. `Official reference scenarios`
-   - preserve snapshot, bounded recording, and interval capture as small practical anchor flows
-   - use those flows as examples, confidence scenarios, and regression anchors
+1. `Host commands and shell reflection`
+   - make host commands to the running wx shell practical first
+   - ensure the shell visibly reflects host-driven behavior and state
+2. `Settings and workflow usability`
+   - keep camera/settings access usable in the shell
+   - make the three confirmed workflows executable in practice
+3. `Technical anchor flows`
+   - preserve preview, snapshot, recording start/stop, ROI/focus, and max-frames stop as the supporting technical execution modes
+   - keep those flows validated and understandable
 4. `Headless preparation after usability`
-   - once local and host usability are real enough, prepare a truly headless kernel
+   - once the companion app is locally and host-side usable enough, prepare a truly headless kernel
    - keep that kernel shared by local UI, host control, and later automation or agent flows
 
 This phase should **not** be treated as:
@@ -198,6 +256,7 @@ This phase should **not** be treated as:
 - full product packaging
 - full C# handover
 - broad offline workstation expansion
+- full assisted-measurement-system implementation
 - proof that the Python baseline is still not usable
 
 This phase should also be read as the practical camera-project contribution to the larger vision:
@@ -208,10 +267,43 @@ This phase should also be read as the practical camera-project contribution to t
 
 ## Immediate Priorities
 
-1. local usability
-2. host-side usability
-3. official reference scenarios
+1. host commands to the running `Vision App / wxShell`
+2. visible shell reflection of host-driven actions and state
+3. wx shell settings support and practical workflow usability
 4. then headless preparation
+
+## Current Usable Definition
+
+In this phase, `usable` should be read as:
+
+- the shell starts reliably
+- preview is practically usable
+- the host can send the core commands
+- camera settings are accessible in the shell
+- snapshot and recording are understandable and usable
+- ROI/focus is usable enough for setup
+- status and hardware failures are understandable enough
+- the three confirmed functional workflows can be executed in practice
+
+## Current Host Expectations
+
+The current phase-1 host surface should at least cover:
+
+This is the bounded Stage 1 test-host surface and the intended starting point for Stage 2 LabVIEW-host integration.
+
+- `start`
+- `stop`
+- `max frames`
+- `recording fps`
+- `save path`
+- settings for shutter/exposure, hardware ROI, and gain
+- ROI enable / disable
+- focus value and ROI-related state
+
+Current interpretation notes:
+
+- focus value is currently a status field, not a separate command surface
+- `conditional stop` should currently be read as the practical `max frames reached` case, not as a broad new stop-rule system
 
 ## Closed Extended MVP Axes
 
@@ -350,8 +442,8 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 68 | Unified Artifact Recording Log Append Baseline | make snapshot and recording save into one directory-scoped `recording_log.csv` append stream | landed | landed logging-continuity slice so snapshots and recordings share the same append base for later resume logic | `docs/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md` |
 | 69 | wx Camera Settings Menu And Shortcut Baseline | expose the host-neutral camera configuration surface through the bounded wx shell and define the GUI shortcut map | landed | landed wx-shell seam slice for camera settings, menu coverage, and shortcut alignment | `docs/session_workpackages/wp69_wx_camera_settings_menu_and_shortcut_baseline.md` |
 | 70 | Control And Imaging Compatibility Cleanup | remove the redundant legacy control/imaging implementation files and keep only package-level compatibility shims | landed | landed compatibility cleanup; the remaining work is merge cleanup only | `docs/archive/session_workpackages/wp70_control_and_imaging_compatibility_cleanup.md` |
-| 71 | Reference Scenario Validation Narrowing | tighten the official snapshot, bounded-recording, and interval-capture reference scenarios into one small repeatable validation block | landed | landed validation slice; the repository now provides one explicit three-test reference-scenario block plus a dedicated launcher wrapper | `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md` |
-| 75 | Reference Scenario Operator Path Tightening | make the validated reference scenarios easier to find and run through one small operator-facing run path | landed | landed doc/operator-path slice; the launch baseline and manuals index now expose one compact validated entry path for the official reference scenarios | `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md` |
+| 71 | Reference Scenario Validation Narrowing | tighten the technical snapshot, bounded-recording, and interval-capture reference flows into one small repeatable validation block | landed | landed validation slice; the repository now provides one explicit three-test technical-reference-flow block plus a dedicated launcher wrapper | `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md` |
+| 75 | Reference Scenario Operator Path Tightening | make the validated technical reference flows easier to find and run through one small operator-facing run path | landed | landed doc/operator-path slice; the launch baseline and manuals index now expose one compact validated entry path for the current technical reference flows | `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md` |
 | 76 | wx Shell Status Feedback Tightening | improve one concrete shell feedback seam so local operators can read action outcome and current state more reliably | conditional | activate only from a specific observed status/feedback friction in the wx shell; do not use as generic polish work | `docs/session_workpackages/wp76_wx_shell_status_feedback_tightening.md` |
 | 77 | Host Result Envelope Naming Tightening | normalize one concrete confusing result, status, or error field in the host-facing command surface without widening transport scope | conditional | activate only when a specific AMB-side naming or interpretation ambiguity is observed | `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md` |
 | 78 | Compatibility Shim Usage Inventory | record where remaining `camera_app` compatibility imports are still exercised so later retirement work can target real usage instead of guesswork | queued | acceptable later evidence slice, but less urgent than current usability and operator-path clarity work | `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md` |
@@ -360,9 +452,9 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. local-usability follow-up only from concrete wx-shell friction through conditional `WP76`
-2. host-side usability follow-up only from concrete command/payload ambiguity through conditional `WP77`
-3. later compatibility-evidence work through `WP78` only after the clearer usability/operator-path slices
+1. companion-shell follow-up only from concrete friction in host reflection, status clarity, or settings/workflow usability through conditional `WP76`
+2. host-side usability follow-up only from concrete ambiguity in the current phase-1 command/result/status surface through conditional `WP77`
+3. later compatibility-evidence work through `WP78` only after the clearer Hybrid Companion usability slices
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
 
@@ -380,7 +472,7 @@ Current prepared usable-subsystem sequence:
 - `WP56 CLI Help & Documentation` implemented as the CLI help / reference polish slice
 - `WP60 wx Recording Progress Status Baseline` implemented as the bounded recording-progress slice on the wx shell
 - `WP61 wx Feature Inventory And Core/UI Boundary Documentation` implemented as the wx shell inventory / boundary documentation slice
-- `WP62 wx Live Command Sync For Open Shell` is now implemented as the bounded open-shell external-control slice
+- `WP62 wx Live Command Sync For Open Shell` is now implemented as the bounded open-shell external-control slice and current host-to-shell reflection baseline
 - `WP63 Recording Append / Resume From Trace Log` is now implemented as the append/resume-safe artifact continuity baseline
 - `WP64 wx Menu And Settings Dialog Baseline` is now implemented and hardware-verified
 - `WP65 wx Recording Settings Guardrails And Format Picker` is now landed
@@ -550,19 +642,19 @@ Current activation note:
 Goal:
 
 - operate from the now-usable camera/acquisition subsystem baseline
-- prioritize local usability, host-side usability, and official reference scenarios before broader expansion
+- prioritize host commands to the running wx shell, visible shell reflection, settings/workflow usability, and only then broader expansion
 - only open new technical slices when they are justified by concrete residuals, operational friction, or a deliberate new scope decision
 
 Primary work types in this layer:
 
-1. `Local usability`
-   - reduce remaining operator friction in the wx shell
-   - keep OpenCV as fallback/reference rather than the long-term shell
-2. `Host-side usability`
-   - keep the command/status/result surface practical for AMB-side use
-   - tighten host-visible behavior before broad transport expansion
-3. `Official reference scenarios`
-   - preserve snapshot, bounded recording, and interval capture as anchor flows
+1. `Host commands and shell reflection`
+   - keep the running wx shell practical as a companion/monitor surface for host-driven operation
+   - ensure host-driven behavior is visible in the shell without moving command ownership into the UI
+2. `Settings and workflow usability`
+   - reduce remaining operator friction in settings access and execution of the confirmed workflows
+   - keep OpenCV as fallback/reference rather than the intended shell
+3. `Technical anchor flows`
+   - preserve preview, snapshot, recording start/stop, ROI/focus, and max-frames stop as the supporting technical execution modes
    - use those flows as examples and confidence scenarios
 4. `Headless preparation after usability`
    - prepare the next shared kernel only after the subsystem is locally and host-side usable enough
@@ -629,8 +721,8 @@ The current coarse PM order should be:
 45. treat `WP68` as landed; snapshot saves and recording runs share one directory-scoped `recording_log.csv`
 46. treat `WP69` as landed wx camera-settings menus and shortcut alignment
 47. treat `WP71` as landed; the repository now has one explicit repeatable validation block for snapshot, bounded recording, and interval capture plus a dedicated launcher wrapper
-48. treat `WP75` as landed; the launch baseline and manuals index now expose one compact validated entry path for the official reference scenarios
-49. keep `WP76` and `WP77` conditional on concrete observed shell friction or host-side ambiguity instead of reopening broad closure logic
+48. treat `WP75` as landed; the launch baseline and manuals index now expose one compact validated entry path for the current technical reference flows
+49. keep `WP76` and `WP77` conditional on concrete observed Hybrid Companion shell friction or host-side ambiguity instead of reopening broad closure logic
 50. keep `WP78` as a later evidence-gathering slice rather than as immediate migration work
 51. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
@@ -640,8 +732,8 @@ No current next detailed work package is queued.
 
 Reason:
 
-- `WP75` is now landed, so the official reference scenarios already have one compact validated entry path
-- `WP76` and `WP77` remain intentionally conditional until a concrete wx-shell or host-side ambiguity is observed
+- `WP75` is now landed, so the confirmed current workflows already have one compact operator-facing entry path and `WP71` already covers the underlying technical validation anchor
+- `WP76` and `WP77` remain intentionally conditional until a concrete Hybrid Companion shell-reflection, settings/workflow, or host-surface ambiguity is observed
 - `WP78` remains a later evidence slice rather than the default next move
 
 ## Fresh Agent Decision Rule

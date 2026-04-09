@@ -49,7 +49,7 @@ When the next task is not already explicit:
 If no stronger user direction is given, the next recommended path is:
 
 1. execute the package marked `current next` in `docs/WORKPACKAGES.md`
-2. if no package is marked `current next`, derive the next smallest justified post-closure slice from concrete residuals or the user's explicit direction
+2. if no package is marked `current next`, derive the next smallest justified usable-subsystem slice from concrete `Hybrid Companion` residuals, workflow friction, or the user's explicit direction
 3. then open that package's detailed `docs/session_workpackages/wpXX_*.md` file for actual execution and progress tracking
 4. use session work-package files as the detailed execution layer, not as the primary prioritization surface
 5. only consult `docs/ROADMAP.md` or `docs/GlobalRoadmap.md` when higher-level sequencing needs clarification

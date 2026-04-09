@@ -14,23 +14,28 @@ For active implementation ordering, continue to use:
 
 ## Must Now
 
+- keep the central docs aligned with the confirmed `Hybrid Companion` product direction
+- keep host-driven control of the running wx shell ahead of broad platform expansion
+- keep shell reflection of host-driven actions/state as a first-order requirement
+- keep shell-local adjustability explicitly compatible with host control instead of forcing headless-first assumptions into the current phase
 - keep completed refactor slices like `WP70` out of the active queue unless merge cleanup or a regression reopens them
 - keep the `vision_platform` namespace as the real implementation home
 - prevent `camera_app` compatibility shims from growing back into duplicate implementation surfaces
-- keep the central docs aligned with the actual implementation state
 
 ## Should Next
 
-- remove any remaining redundant legacy import paths that still point at old implementation locations
-- keep the local shell moving toward the primary daily working frontend
-- keep host-side command/status behavior practical and narrow
-- continue making snapshot, bounded recording, and interval capture the stable reference scenarios
+- keep the local shell moving toward the intended companion/monitor role for host-driven operation
+- keep host-side command/status behavior practical and narrow for the current phase-1 host surface
+- keep settings-menu support and workflow usability visible in the shell
+- continue making the three confirmed workflows and their supporting technical execution modes easy to identify
+- keep the functional-workflow layer distinct from the smaller technical anchor flows used for validation and operator recipes
 - standardize small, slice-specific validation instead of relying only on broad test runs
+- remove any remaining redundant legacy import paths that still point at old implementation locations
 
 ## Later
 
 - complete the broader `camera_app` to `vision_platform` physical migration where it still adds clarity
-- improve wx-shell usability where concrete friction still exists
+- improve wx-shell usability where concrete host-reflection or workflow friction still exists
 - harden host-facing payload clarity only when a concrete integration need appears
 - prepare the headless kernel after local and host usability are clearly strong enough
 - grow API, web-capable, MCP, and C#-handover scope only after the current baseline is stable
@@ -56,7 +61,7 @@ For active implementation ordering, continue to use:
 - conditional hardware revalidation when a camera is attached again
 - the completed control/imaging compatibility cleanup on the current refactor branch
 - the later `camera_app` to `vision_platform` physical migration where it still adds clarity
-- wx-shell usability follow-ups where concrete friction is still visible
+- wx-shell Hybrid Companion follow-ups where concrete host-reflection, settings, or workflow friction is still visible
 - host-facing payload clarity only when a concrete integration need appears
 - headless-kernel preparation only after local and host usability are strong enough
 - hardware-attached operator guidance updates when startup or recovery steps materially change
@@ -98,6 +103,11 @@ This section only records useful starting points for the listed themes.
   - see status: `docs/STATUS.md`
   - see queue: `docs/WORKPACKAGES.md`
   - see phase card: `docs/TARGET_MAP.md`
+- `Hybrid Companion product direction`
+  - see status: `docs/STATUS.md`
+  - see queue: `docs/WORKPACKAGES.md`
+  - see phase card: `docs/TARGET_MAP.md`
+  - see host surface note: `docs/HOST_CONTRACT_BASELINE.md`
 
 ### Common Entry Scripts
 
@@ -148,7 +158,7 @@ These are the most practical launch points when you want to inspect or exercise 
   - `src/vision_platform/services/api_service/status_payloads.py`
   - `src/vision_platform/services/api_service/command_payloads.py`
   - `src/vision_platform/control/command_controller.py`
-- headless-kernel preparation and stable reference scenarios:
+- headless-kernel preparation and technical anchor flows:
   - `docs/TARGET_MAP.md`
   - `docs/WORKPACKAGES.md`
   - `src/vision_platform/bootstrap.py`

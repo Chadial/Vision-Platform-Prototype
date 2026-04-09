@@ -56,7 +56,7 @@ If the user gave a broad goal:
 1. use `docs/STATUS.md` as the current truth
 2. use `docs/WORKPACKAGES.md` as the primary queue
 3. select the package marked `current next` unless the user request or current branch scope clearly overrides it
-4. if no package is marked `current next`, derive the next smallest justified post-closure slice from concrete residuals or the user's explicit direction
+4. if no package is marked `current next`, derive the next smallest justified usable-subsystem slice from concrete `Hybrid Companion` residuals, workflow friction, or the user's explicit direction
 5. open the referenced detailed `docs/session_workpackages/wpXX_*.md` file for execution details when one exists
 6. derive the next smallest verifiable slice inside that package if needed
 7. restate it in implementation terms before editing

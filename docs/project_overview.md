@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository now operates from a post-closure Python working baseline while preserving a modular vision-platform structure for later expansion and handover.
+This repository now operates from `Usable Camera Subsystem / Pre-Product Baseline` while preserving a modular vision-platform structure for later expansion and handover.
 
 Use this document as a compact repository-level overview.
 
@@ -39,6 +39,7 @@ For architecture detail, use:
 
 ## Current Working Baseline
 
+- host-steerable running `Vision App / wxShell` in `Hybrid Companion` form
 - bounded host-oriented command surface
 - snapshot, preview, bounded recording, and bounded interval capture
 - traceability and recording-log output

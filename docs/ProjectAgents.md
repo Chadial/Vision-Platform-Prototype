@@ -9,9 +9,9 @@ Diese Phase ist heute historischer Kontext und nicht mehr die aktive Planungsbri
 Der aktuelle Projektfokus ist jetzt:
 
 - `Usable Camera Subsystem / Pre-Product Baseline`
-- praktische lokale Nutzbarkeit
-- praktische Host-Nutzbarkeit
-- kleine offizielle Referenzszenarien wie Snapshot, bounded recording und interval capture
+- ein host-steuerbares laufendes `Vision App / wxShell` in `Hybrid Companion`-Form
+- Host-Kommandos an die laufende Shell, sichtbare Shell-Reflexion und Shell-Settings-Support
+- praktische Ausfuehrbarkeit von `Delamination Recording`, `Geometry Capture` und `Setup / Focus / ROI Adjustment`
 - erst danach die Vorbereitung eines wirklich headless faehigen Kerns
 
 Fuer aktuelle Priorisierung gelten daher primaer:

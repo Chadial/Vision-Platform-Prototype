@@ -24,7 +24,7 @@ Use for:
 
 - known-good run order
 - bounded local install profiles and environment contract
-- official bounded snapshot / recording / interval reference recipes
+- bounded technical snapshot / recording / interval reference recipes beneath the broader current workflows
 - the compact reference-scenario validation path via `scripts/launchers/run_reference_scenario_validation.py`
 - simulator-versus-hardware choice
 - current residual interpretation
@@ -38,7 +38,7 @@ Use for:
 - preferred interpreter
 - preferred `python -m` form
 - launcher fallback and convenience-helper rules
-- the quickest validated entry path for the official reference scenarios
+- the quickest validated entry path for the current technical reference flows
 
 ### Understand The Architecture Quickly
 

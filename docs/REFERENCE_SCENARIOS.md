@@ -2,7 +2,15 @@
 
 ## Purpose
 
-This document defines three official bounded reference scenarios for the current Python baseline.
+This document defines three bounded technical reference flows for the current Python baseline.
+
+Current reading rule:
+
+- the current product direction should first be read through the confirmed functional workflows in `docs/STATUS.md` and `docs/TARGET_MAP.md`:
+  - `Delamination Recording`
+  - `Geometry Capture`
+  - `Setup / Focus / ROI Adjustment`
+- this document preserves smaller technical execution recipes beneath that workflow layer
 
 Use them as:
 
@@ -12,7 +20,18 @@ Use them as:
 - bounded operational examples
 
 These scenarios are not a new test framework.
-They are command-centered reference runs over the current baseline.
+They are command-centered technical reference runs over the current baseline and do not replace the functional-workflow reading.
+
+## Workflow Mapping
+
+- `Snapshot` technical reference flow:
+  - supports `Geometry Capture`
+  - also supports optional control snapshots during `Setup / Focus / ROI Adjustment`
+- `Bounded Recording` technical reference flow:
+  - supports `Delamination Recording`
+- `Interval Capture` technical reference flow:
+  - remains a useful shared-stream confidence flow
+  - is not one of the three primary current functional workflows for this phase
 
 ## General Rule
 
@@ -24,7 +43,7 @@ They are command-centered reference runs over the current baseline.
 - when the repo-local alias file is present, `--camera-alias tested_camera` is the current bounded convenience form for the tested hardware path
 - when the repo-local profile file is present, `--configuration-profile default` is the current bounded convenience form for the tested hardware profile baseline
 
-## 1. Snapshot Reference Scenario
+## 1. Snapshot Technical Reference Flow
 
 ### Purpose
 
@@ -35,6 +54,11 @@ Verify the smallest useful end-to-end capture path:
 - confirm the artifact landed
 - confirm traceability exists
 - optionally confirm the current offline path can reuse the result
+
+Primary workflow tie-in:
+
+- `Geometry Capture`
+- optional control snapshot during `Setup / Focus / ROI Adjustment`
 
 ### When To Run
 
@@ -97,7 +121,7 @@ Real-device substitution when explicitly needed:
 - traceability exists for the folder
 - the offline focus-report command produces one valid report line for the saved file
 
-## 2. Bounded Recording Reference Scenario
+## 2. Bounded Recording Technical Reference Flow
 
 ### Purpose
 
@@ -107,6 +131,10 @@ Verify the current bounded image-series baseline:
 - run one short bounded recording
 - confirm artifacts, run/log behavior, and traceability
 - confirm the subsystem returns to idle usable state afterwards
+
+Primary workflow tie-in:
+
+- `Delamination Recording`
 
 ### When To Run
 
@@ -169,7 +197,7 @@ Real-device substitution when explicitly needed:
 - traceability exists for the folder
 - a follow-up `status` run is successful and shows no active recording
 
-## 3. Interval Capture Reference Scenario
+## 3. Interval Capture Technical Reference Flow
 
 ### Purpose
 
@@ -179,6 +207,11 @@ Verify the current periodic capture baseline from the shared preview/stream path
 - run one bounded interval capture
 - verify active bounded capture behavior and final artifact output
 - confirm the system returns to a usable state afterwards
+
+Current role in this phase:
+
+- bounded technical confidence flow for shared preview/acquisition behavior
+- not one of the three primary current functional workflows
 
 ### When To Run
 
