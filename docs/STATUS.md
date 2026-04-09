@@ -12,7 +12,7 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `docs/git-status-sync-rule` is the active topic branch in this worktree for the current documentation-maintenance slice
+- `main` is the current checked-out integration branch after the latest documentation-maintenance merge
 - `main` remains the latest integrated implementation baseline
 - short-lived topic branches are created per active work package and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
