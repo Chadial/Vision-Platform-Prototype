@@ -12,9 +12,10 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `refactor/move-control-and-imaging-implementation` as the active topic branch in this worktree
-- `main` remains the latest integrated baseline
+- `docs/git-status-sync-rule` is the active topic branch in this worktree for the current documentation-maintenance slice
+- `main` remains the latest integrated implementation baseline
 - short-lived topic branches are created per active work package and merged back after local validation
+- branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
 
 ## Current Phase
 

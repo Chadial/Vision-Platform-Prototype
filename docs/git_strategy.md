@@ -111,6 +111,22 @@ Apply the same pattern to merge cleanup:
 2. inspect the result
 3. only then merge the next branch or delete the merged topic branch
 
+## Repository-State Documentation Discipline
+
+Branch maintenance and general git maintenance are repository-state changes, not invisible housekeeping.
+
+When those actions change what the repository currently is or how it should be read, update the durable docs in the same branch.
+
+At minimum:
+
+- re-check `docs/STATUS.md` whenever branch creation, branch switching, merge completion, branch deletion, backlog reassignment, or similar maintenance makes an existing status statement inaccurate
+- keep the `Current Branch` section in `docs/STATUS.md` aligned with the actual checked-out branch when that section is meant to describe the active worktree state
+- if a completed merge changes which branch now carries the integrated baseline, remove or rewrite stale topic-branch wording in `docs/STATUS.md`
+- if git workflow policy changes, update this file in the same documentation slice instead of leaving the rule implicit in conversation only
+
+The goal is not to log every transient git command.
+The goal is to prevent durable project-state docs from drifting away from the actual repository state after git housekeeping.
+
 ## Expected Branch Flow
 
 For a normal work package:
@@ -171,6 +187,7 @@ Examples:
   - relevant module `STATUS.md`
   - relevant module `ROADMAP.md`
   - `docs/STATUS.md` when roadmap position changed
+- when branch maintenance or general git housekeeping changes durable repository-state truth, update `docs/STATUS.md` and any affected git workflow docs in the same branch
 - periodically check which local branches are already merged into `main` and delete them before they become stale context
 - if an old branch is clearly obsolete because the repository has moved on structurally or functionally, delete it explicitly rather than treating it as still-actionable work
 

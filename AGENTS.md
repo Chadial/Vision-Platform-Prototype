@@ -436,6 +436,13 @@ Branch names must describe scope, for example:
 
 When git commands change repository state, run them serially and re-check branch or worktree state before the next state-changing command.
 
+Repository-state documentation rule:
+
+- when branch housekeeping or general git housekeeping changes the repository's operative state, update the relevant durable docs in the same slice
+- at minimum, keep `docs/STATUS.md` aligned when its branch or repository-state statements stop matching the real git state
+- if git workflow guidance itself changes, update `docs/git_strategy.md` as the operational source in the same branch
+- do not leave branch-history or branch-ownership statements in `docs/STATUS.md` stale after branch creation, merge, deletion, or similar repository-maintenance work
+
 Autonomous merge rule:
 
 - once a coherent work-package branch has:
