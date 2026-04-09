@@ -103,11 +103,13 @@ Leave the repository with one execution-ready workflow package that makes `Delam
 
 ## Status
 
-Active. `WP80` is now being executed as one sequence of small sub-packages under the same workflow-first lane rather than as one large recording umbrella.
+Landed. `WP80` is now complete as one sequence of small sub-packages under the same workflow-first lane rather than as one large recording umbrella.
 
-Current residual after the first three landed slices:
+Closure result:
 
-- the workflow still needs additional practical delamination-run tightening around visible run-state understanding, stop-path readability, and any remaining save-path / recording-summary seams that appear in real use
+- the delamination workflow is now represented through one complete host-plus-shell baseline for `start -> run -> stop`
+- `max frames` remains available as one practical stop parameter when relevant, but it is not the conceptual center of the workflow
+- the remaining queue can now move to `WP81` without leaving delamination-recording reflection, save-path understanding, smoke coverage, or failure-state visibility half-defined
 
 ## Sub-Packages
 
@@ -138,11 +140,11 @@ Current residual after the first three landed slices:
   - same stop reason in published live status
   - no new stop-rule architecture
 
-### Prepared Next
+### Closure Slices
 
 #### `WP80.D Save-Path Reflection Tightening`
 
-- status: prepared
+- status: landed
 - purpose: make the active or last recording target path easier to understand during and after the run
 - scope:
   - align shell-visible save-path cues with published live status
@@ -150,7 +152,7 @@ Current residual after the first three landed slices:
 
 #### `WP80.E Run-State Messaging Tightening`
 
-- status: prepared
+- status: landed
 - purpose: make the shell wording read more clearly as a delamination run lifecycle instead of generic bounded-recording mechanics
 - scope:
   - tighten start / running / stopped messaging
@@ -158,7 +160,7 @@ Current residual after the first three landed slices:
 
 #### `WP80.F Host-Control Smoke For Delamination Path`
 
-- status: prepared
+- status: landed
 - purpose: prove one repeatable host-start / run / stop delamination-path block against the current companion shell baseline
 - scope:
   - host starts recording
@@ -168,7 +170,7 @@ Current residual after the first three landed slices:
 
 #### `WP80.G Failure Reflection Narrowing`
 
-- status: prepared later
+- status: landed
 - purpose: make delamination-relevant recording failures understandable enough in shell and published status without opening a broad error-platform lane
 - scope:
   - recording start failure
@@ -177,7 +179,7 @@ Current residual after the first three landed slices:
 
 ### Ordering Note
 
-Recommended next order inside `WP80`:
+Execution order used inside `WP80`:
 
 1. `WP80.D Save-Path Reflection Tightening`
 2. `WP80.E Run-State Messaging Tightening`
@@ -189,6 +191,10 @@ Landed implementation slices so far:
 - external `start-recording` now reuses shell-visible recording settings by default and applies only explicitly supplied host overrides
 - the wx-shell live status snapshot now exposes one explicit recording-reflection block with run phase, summary, file stem, save directory, stop reason, and frames written, while the visible shell status prefix also keeps the current or last recording file stem readable
 - the wx-shell recording reflection now also categorizes stop causes for the delamination path, so host stop, `max_frames_reached`, and failure-oriented termination are more clearly distinguished in shell-facing and published status
+- the visible shell status prefix now also keeps the active or last recording save directory readable so path understanding remains aligned between shell and live status
+- recording lifecycle messages now read more clearly as a host-driven delamination run, including path-aware start/stop wording instead of only generic bounded-recording wording
+- one repeatable host-control smoke block now covers the current host `start -> run -> stop` path against the wx-shell live-command session bridge
+- failure reflection now keeps `phase=failed` plus `last_error` visible in published status for start/stop and write-path failures without widening the command architecture
 
 ## Execution Plan
 
@@ -197,7 +203,7 @@ Landed implementation slices so far:
 3. define the exact host expectations for this workflow in the current phase
 4. define the exact shell-reflection and shell-settings expectations for this workflow in the current phase
 5. capture the smallest likely implementation seams without widening scope
-6. point follow-up activation either to direct implementation or, only if justified later, to a reactivated narrow seam package such as `WP76`
+6. close the package once save-path, run-state, smoke, and failure seams are tightened enough for the current delamination path
 
 ## Validation
 
@@ -205,23 +211,25 @@ Landed implementation slices so far:
 - verify the package does not reopen broad residual or architecture lanes
 - verify the package stays consistent with the current functional-workflow framing
 - verify the package does not implicitly redefine the workflow as merely a bounded-recording refinement
+- verify the final implementation slice leaves one coherent delamination path with understandable start, run, stop, save target, and failure reflection
 
 ## Documentation Updates
 
 - `docs/WORKPACKAGES.md`
 - `docs/STATUS.md`
+- `apps/local_shell/STATUS.md`
 - derived views only if the active queue summary later needs them
 
 ## Expected Commit Shape
 
-One PM/documentation commit is preferred.
+Implementation, tests, and PM/documentation updates are expected together for the closure slice.
 
 ## Merge Gate
 
-- `WP80` is clearly the `current next`
 - the workflow is expressed through the current `Hybrid Companion` product lens
 - the workflow is centered on host-driven delamination recording rather than on bounded-recording terminology
-- the package stays implementation-ready without turning into a broad refactor plan
+- the package closes with understandable host-plus-shell reflection for start, run, stop, save target, and failure state
+- the package stays narrow and does not turn into a broad refactor plan
 - older residual packages remain visible but no longer dominate next-step selection
 
 ## Recovery Note

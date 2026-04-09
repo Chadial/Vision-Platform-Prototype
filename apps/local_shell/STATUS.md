@@ -26,8 +26,12 @@
 - working now: external `start-recording` now treats shell-visible recording settings as the default baseline; host-side commands only override file stem, file extension, `max frames`, and recording FPS when those values are explicitly supplied
 - working now: the published live shell status now also exposes one explicit recording-reflection block with current/last run phase, summary, file stem, save directory, stop reason, and frames written; the visible shell status prefix now also keeps the current/last recording file stem readable
 - working now: the shell-facing and published recording reflection now also categorize stop causes for the delamination path, distinguishing at least `host_stop`, `max_frames_reached`, and failure-oriented termination categories without introducing a new stop-rule architecture
+- working now: the visible shell status prefix now also keeps the active or last recording save directory readable as `recording_save=...`, keeping shell-visible path cues aligned with the published recording reflection
+- working now: recording lifecycle messages now read through the current delamination path more clearly, including path-aware start/stop wording instead of only generic bounded-recording mechanics
+- working now: recording failure reflection is now explicit in the published shell status through `phase=failed` plus `last_error`, and start/stop failures keep that error visible without widening the host/session architecture
+- working now: one repeatable host-control smoke block now covers the current delamination path through host `start -> run -> stop` against the file-backed live-shell command/session baseline
 - partial: the current live-sync baseline assumes one active local shell session at a time and uses local file-backed polling rather than a broader transport/runtime-hosting layer
-- next: fix append/resume behavior for reused recording directories so later `n/n` progress and non-overwriting save behavior become trustworthy
+- next: `WP81 Geometry Capture Workflow Narrowing` should now pull the same host-plus-shell clarity through the operator-guided overlapping-image snapshot path
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite
