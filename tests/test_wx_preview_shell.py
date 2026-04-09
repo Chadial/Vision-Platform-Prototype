@@ -813,6 +813,98 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(started_requests[0].file_stem, "menu_stem")
         self.assertEqual(started_requests[0].file_extension, ".bmp")
 
+    def test_external_start_recording_uses_current_shell_recording_settings_when_overrides_are_omitted(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        started_requests: list = []
+        transient_messages: list[str] = []
+
+        def _start_recording(request):
+            started_requests.append(request)
+            return SimpleNamespace(status=SimpleNamespace(active_file_stem=request.file_stem))
+
+        shell._recording_file_stem = "shell_run"
+        shell._recording_file_extension = ".bmp"
+        shell._recording_max_frames = _StubTextControl("24")
+        shell._recording_target_frame_rate_input = _StubTextControl("8.5")
+        shell._recording_target_frame_rate_value = None
+        shell._recording_last_summary = "old"
+        shell._cached_status = object()
+        shell._last_status_refresh_time = 1.0
+        shell._session = SimpleNamespace(
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="1800_u_1240m",
+            subsystem=SimpleNamespace(
+                command_controller=SimpleNamespace(start_recording=_start_recording),
+            ),
+        )
+        shell._get_recording_save_directory = lambda: Path("captures/wx_shell_snapshot")
+        shell._set_transient_status_message = transient_messages.append
+
+        result = shell._execute_live_command(
+            SimpleNamespace(command_name="start_recording", payload={})
+        )
+
+        self.assertEqual(result["command"], "start_recording")
+        self.assertEqual(len(started_requests), 1)
+        self.assertEqual(started_requests[0].file_stem, "shell_run")
+        self.assertEqual(started_requests[0].file_extension, ".bmp")
+        self.assertEqual(started_requests[0].max_frame_count, 24)
+        self.assertEqual(started_requests[0].target_frame_rate, 8.5)
+        self.assertEqual(shell._recording_active_frame_limit, 24)
+        self.assertEqual(shell._recording_target_frame_rate_value, 8.5)
+        self.assertIsNone(shell._recording_last_summary)
+        self.assertIsNone(shell._cached_status)
+        self.assertEqual(shell._last_status_refresh_time, 0.0)
+        self.assertEqual(transient_messages[-1], "External recording started: shell_run")
+
+    def test_external_start_recording_honors_explicit_host_overrides(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        started_requests: list = []
+
+        def _start_recording(request):
+            started_requests.append(request)
+            return SimpleNamespace(status=SimpleNamespace(active_file_stem=request.file_stem))
+
+        shell._recording_file_stem = "shell_run"
+        shell._recording_file_extension = ".bmp"
+        shell._recording_max_frames = _StubTextControl("24")
+        shell._recording_target_frame_rate_input = _StubTextControl("8.5")
+        shell._recording_target_frame_rate_value = None
+        shell._recording_last_summary = None
+        shell._cached_status = object()
+        shell._last_status_refresh_time = 1.0
+        shell._session = SimpleNamespace(
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="1800_u_1240m",
+            subsystem=SimpleNamespace(
+                command_controller=SimpleNamespace(start_recording=_start_recording),
+            ),
+        )
+        shell._get_recording_save_directory = lambda: Path("captures/wx_shell_snapshot")
+        shell._set_transient_status_message = lambda _message: None
+
+        shell._execute_live_command(
+            SimpleNamespace(
+                command_name="start_recording",
+                payload={
+                    "file_stem": "host_run",
+                    "file_extension": ".raw",
+                    "max_frame_count": None,
+                    "target_frame_rate": 12.5,
+                },
+            )
+        )
+
+        self.assertEqual(len(started_requests), 1)
+        self.assertEqual(started_requests[0].file_stem, "host_run")
+        self.assertEqual(started_requests[0].file_extension, ".raw")
+        self.assertIsNone(started_requests[0].max_frame_count)
+        self.assertEqual(started_requests[0].target_frame_rate, 12.5)
+        self.assertIsNone(shell._recording_active_frame_limit)
+        self.assertEqual(shell._recording_target_frame_rate_value, 12.5)
+
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:
             session = build_local_shell_session(

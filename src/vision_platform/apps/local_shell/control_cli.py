@@ -78,15 +78,28 @@ def build_argument_parser() -> argparse.ArgumentParser:
         "start-recording",
         help="Start recording through the open wx shell core.",
     )
-    start_recording_parser.add_argument("--file-stem", default="wx_recording")
-    start_recording_parser.add_argument("--file-extension", default=".raw")
+    start_recording_parser.add_argument(
+        "--file-stem",
+        default=None,
+        help="Optional recording file stem override. Uses the current wx shell setting when omitted.",
+    )
+    start_recording_parser.add_argument(
+        "--file-extension",
+        default=None,
+        help="Optional recording file extension override. Uses the current wx shell setting when omitted.",
+    )
     start_recording_parser.add_argument(
         "--max-frames",
         type=int,
-        default=0,
-        help="0 means unbounded recording.",
+        default=None,
+        help="Optional recording stop override. Use 0 for unbounded recording; omit to keep the current wx shell setting.",
     )
-    start_recording_parser.add_argument("--recording-fps", type=float, default=None)
+    start_recording_parser.add_argument(
+        "--recording-fps",
+        type=float,
+        default=None,
+        help="Optional recording-FPS override. Uses the current wx shell setting when omitted.",
+    )
     start_recording_parser.set_defaults(command_handler=_handle_start_recording_command)
 
     stop_recording_parser = subparsers.add_parser(
@@ -159,18 +172,21 @@ def _handle_snapshot_command(args: argparse.Namespace) -> dict:
 
 
 def _handle_start_recording_command(args: argparse.Namespace) -> dict:
-    max_frames = None if args.max_frames == 0 else args.max_frames
-    if args.max_frames < 0:
+    if args.max_frames is not None and args.max_frames < 0:
         raise LocalShellLiveSyncError("--max-frames must be zero or greater.")
+    payload: dict[str, object | None] = {}
+    if args.file_stem is not None:
+        payload["file_stem"] = args.file_stem
+    if args.file_extension is not None:
+        payload["file_extension"] = args.file_extension
+    if args.max_frames is not None:
+        payload["max_frame_count"] = None if args.max_frames == 0 else args.max_frames
+    if args.recording_fps is not None:
+        payload["target_frame_rate"] = args.recording_fps
     return _send_command(
         args.session_root,
         command_name="start_recording",
-        payload={
-            "file_stem": args.file_stem,
-            "file_extension": args.file_extension,
-            "max_frame_count": max_frames,
-            "target_frame_rate": args.recording_fps,
-        },
+        payload=payload,
     )
 
 

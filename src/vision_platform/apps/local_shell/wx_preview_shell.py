@@ -1087,23 +1087,35 @@ class WxLocalPreviewShell(wx.Frame):
             )
             self._set_transient_status_message(f"External snapshot saved: {result.saved_path.name}")
         elif command.command_name == "start_recording":
+            file_stem = payload["file_stem"] if "file_stem" in payload else self._recording_file_stem
+            file_extension = payload["file_extension"] if "file_extension" in payload else self._recording_file_extension
+            frame_limit = (
+                payload["max_frame_count"]
+                if "max_frame_count" in payload
+                else self._parse_optional_positive_int(self._recording_max_frames.GetValue())
+            )
+            target_frame_rate = (
+                payload["target_frame_rate"]
+                if "target_frame_rate" in payload
+                else self._parse_optional_positive_float(self._recording_target_frame_rate_input.GetValue())
+            )
             result = controller.start_recording(
                 StartRecordingRequest(
-                    file_stem=payload.get("file_stem", "wx_recording"),
-                    file_extension=payload.get("file_extension", ".bmp"),
+                    file_stem=file_stem,
+                    file_extension=file_extension,
                     save_directory=self._get_recording_save_directory(),
-                    max_frame_count=payload.get("max_frame_count"),
-                    target_frame_rate=payload.get("target_frame_rate"),
+                    max_frame_count=frame_limit,
+                    target_frame_rate=target_frame_rate,
                     camera_id=self._session.resolved_camera_id,
                     configuration_profile_id=self._session.configuration_profile_id,
                     configuration_profile_camera_class=self._session.configuration_profile_camera_class,
                 )
             )
-            self._recording_active_frame_limit = payload.get("max_frame_count")
-            self._recording_target_frame_rate_value = payload.get("target_frame_rate")
+            self._recording_active_frame_limit = frame_limit
+            self._recording_target_frame_rate_value = target_frame_rate
             self._recording_last_summary = None
             self._set_transient_status_message(
-                f"External recording started: {result.status.active_file_stem or payload.get('file_stem', 'wx_recording')}"
+                f"External recording started: {result.status.active_file_stem or file_stem}"
             )
         elif command.command_name == "stop_recording":
             result = controller.stop_recording(

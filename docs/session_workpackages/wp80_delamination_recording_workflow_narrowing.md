@@ -103,7 +103,11 @@ Leave the repository with one execution-ready workflow package that makes `Delam
 
 ## Status
 
-Prepared and selected as `current next` at the PM level.
+Active. The first implementation slice is now on branch `feature/wp80-delamination-recording-workflow`: external `start-recording` commands in the wx-shell live-control path now reuse the shell-visible recording settings by default and apply only the host overrides that were explicitly supplied.
+
+Current residual after that slice:
+
+- the workflow still needs additional practical delamination-run tightening around visible run-state understanding, stop-path readability, and any remaining save-path / recording-summary seams that appear in real use
 
 ## Execution Plan
 
