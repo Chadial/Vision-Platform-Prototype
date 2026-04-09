@@ -56,12 +56,14 @@ Use for:
 - `docs/HOST_CONTRACT_BASELINE.md`
 - `docs/COMMANDS.md`
 - `docs/RECORDING_LIFECYCLE_BOUNDARY.md`
+- `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
 
 Use for:
 
 - stable-now host terms
 - command vocabulary
 - bounded recording semantics versus detached-later scope
+- the current local shell companion flow and its bounded `control` adapter
 
 ### Review Real Hardware Evidence
 

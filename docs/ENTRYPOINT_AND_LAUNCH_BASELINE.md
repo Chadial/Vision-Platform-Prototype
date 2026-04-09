@@ -126,6 +126,30 @@ This is not the default everyday command entry point.
 
 It is the preferred integrated runner when hardware evidence is the actual goal.
 
+### 6. Local shell companion control surface
+
+Use this when a running visible wx shell should be controlled from a separate host-side process:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control snapshot --file-stem geometry_000001 --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control apply-configuration --exposure-time-us 8000 --gain 2.0
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control start-recording --max-frames 0 --recording-fps 12.5
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control stop-recording --reason external_cli
+```
+
+Why this exists:
+
+- it exercises the current Stage 1 test-host behavior against an already running shell
+- it uses the same bounded live-sync session files as the shell itself
+- it keeps host control visible and local while the companion shell remains on screen
+
+Boundary:
+
+- this is a bounded companion control path, not a new transport layer
+- it is intended to mirror the shell-visible state rather than replace the shell
+- it should be read as the current host/shell collaboration pattern for the `Hybrid Companion` phase
+
 ## Current Bounded Entry Surface
 
 The current practical startup surface is intentionally small:
@@ -137,6 +161,7 @@ The current practical startup surface is intentionally small:
 - `scripts/run_python_baseline.ps1`
 - `scripts/launchers/run_hardware_command_flow.py`
 - selected visual inspection launchers under `scripts/launchers/` only when preview inspection is actually needed
+- `vision_platform.apps.local_shell control`
 
 The current baseline should not be described as having:
 

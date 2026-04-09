@@ -13,7 +13,7 @@ Each status update should state progress and gaps against both roadmaps.
 ## Current Branch
 
 - `main` remains the current integration branch
-- the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, and `test/hardware-companion-smokes`
+- the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, `test/hardware-companion-smokes`, and the manuals-alignment slice `docs/manuals-host-shell-flow-apr10`
 - short-lived topic branches are created per active work package or hygiene slice and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual repository state
 

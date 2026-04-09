@@ -29,6 +29,7 @@ It does not define:
 - preferred launcher fallback: `.\scripts\launchers\run_camera_cli.py`
 - preferred local convenience helper: `.\scripts\run_python_baseline.ps1`
 - preferred integrated real-hardware evidence path: `.\scripts\launchers\run_hardware_command_flow.py`
+- preferred local shell companion host path: `.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control`
 - current hardware residuals: `vmbpyLog <VmbError.NotAvailable: -30>`, duplicate SDK visibility for the tested camera id, bounded interval jitter, timing-sensitive back-to-back CLI reuse observations
 
 ## Stable Baseline
@@ -126,6 +127,34 @@ Current practical rule:
 - use `run_hardware_command_flow.py` for integrated real-device confidence passes
 - use the OpenCV launchers only when local visual inspection is actually needed
 - use `vision_platform.apps.local_shell` when a bounded local working frontend is needed and the optional `wxPython` dependency is installed in the same `.venv`
+- use `vision_platform.apps.local_shell control ...` when a separate host-side process should drive a running shell through the bounded live-sync session
+
+## Local Shell Host Workflow
+
+The current host-plus-shell collaboration flow is file-backed and intentionally narrow.
+
+Typical sequence:
+
+1. start the visible wx shell with `vision_platform.apps.local_shell`
+2. let the shell register an active live-sync session under `captures/wx_shell_sessions/`
+3. send host commands from a separate process with `vision_platform.apps.local_shell control ...`
+4. let the shell execute those commands through the same command-controller path
+5. read the published shell status or command result JSON that the shell wrote back
+
+Common host-side examples:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control snapshot --file-stem geometry_000001 --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control apply-configuration --exposure-time-us 8000 --gain 2.0
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control start-recording --max-frames 0 --recording-fps 12.5
+```
+
+Reading rule:
+
+- treat the shell as the visible companion surface
+- treat the separate `control` process as the host-side command source
+- treat the JSON files under `captures/wx_shell_sessions/` as the current collaboration mechanism, not as a full transport contract
 
 ## When To Prefer Simulator First
 

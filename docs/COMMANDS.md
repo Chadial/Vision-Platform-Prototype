@@ -99,6 +99,35 @@ Examples:
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli interval-capture --source simulated --base-directory .\captures\sim_smoke --interval-seconds 0.10 --frame-limit 3
 ```
 
+## Local Shell Companion Flow
+
+The current running wx shell has a separate host-side control adapter for bounded companion operation.
+
+Use this when a host process should steer an already open shell:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control snapshot --file-stem geometry_000001 --file-extension .bmp
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control apply-configuration --exposure-time-us 8000 --gain 2.0
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control start-recording --max-frames 0 --recording-fps 12.5
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control stop-recording --reason external_cli
+```
+
+Flow:
+
+1. start the visible wx shell
+2. wait for its live-sync session to appear under `captures/wx_shell_sessions/`
+3. send the host command through `local_shell control`
+4. let the shell execute the command through the same command-controller layer used locally
+5. read the result or the published status snapshot
+
+Reading rules:
+
+- `status` reads the latest published shell snapshot
+- command invocations append a request to the session queue and wait for one JSON result
+- the shell remains the visual owner of preview, settings, and reflection
+- the host remains the external command source, not a second UI core
+
 ## Request Overview
 
 ### `ApplyConfigurationRequest`

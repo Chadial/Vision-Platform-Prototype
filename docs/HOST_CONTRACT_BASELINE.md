@@ -124,6 +124,33 @@ Current meaning:
 - `recording` means bounded in-process recording that starts and completes within one invocation
 - `interval-capture` means bounded in-process timed capture that starts and completes within one invocation and now returns the same bounded result-ownership style as the other host-oriented commands
 
+### Host / Shell Collaboration
+
+The current `Hybrid Companion` host flow is intentionally file-backed and narrow.
+
+Typical collaboration sequence:
+
+1. the visible wx shell starts and registers one active session under `captures/wx_shell_sessions/`
+2. a separate host process sends a bounded command through `vision_platform.apps.local_shell control ...`
+3. the shell reads the queued command, executes it through the same command-controller layer used locally, and writes a JSON result
+4. the shell also publishes a current status snapshot so the host can read reflection state without restarting the UI
+
+Current host-side `control` commands:
+
+- `status`
+- `set-save-directory`
+- `apply-configuration`
+- `snapshot`
+- `start-recording`
+- `stop-recording`
+
+Current reading rules:
+
+- `status` is a snapshot read, not a polling transport contract
+- command results are JSON files under the active session result directory
+- the shell remains the visible companion surface while the host remains the external command source
+- this is the current Stage 1 test-host path and the starting point for later LabVIEW-host integration
+
 Recording boundary note:
 
 - `recording` is stable now only in that bounded in-process sense
