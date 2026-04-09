@@ -1,6 +1,6 @@
 # Current State
 
-This file is a compact repository-state note.
+This file is a compact secondary pointer only.
 
 For the authoritative current implementation truth, use:
 
@@ -10,26 +10,22 @@ For the compact current architecture map, use:
 
 - `docs/ARCHITECTURE_BASELINE.md`
 
-## Current Repository Reading
+## Current Rule
 
-- the repository now operates from a post-closure Python working baseline
-- the preferred platform-facing implementation surface is `src/vision_platform`
-- `src/camera_app` remains as a compatibility bridge during incremental physical migration
-- the current baseline already includes bounded host control, runtime services, traceability, and tested-camera-path hardware evidence
+Do not treat this file as an independent status surface.
 
-## Current Practical Summary
+If you need the current product reading, use:
 
-What is already real:
+- `docs/TARGET_MAP.md`
+- `docs/WORKPACKAGES.md`
 
-- snapshot, preview, bounded recording, and bounded interval capture
-- simulation and bounded real-hardware operation on the tested camera path
-- one host-neutral command/controller baseline with thin CLI exposure
-- traceability, recording-log output, and bounded offline artifact reuse
-- optional OpenCV preview/inspection path kept outside the platform core
+If you need the current verified implementation truth, use:
 
-What remains later:
+- `docs/STATUS.md`
 
-- broader transport/API surface
-- detached recording lifecycle control
-- broader frontend breadth
-- wider hardware matrix and productization work
+If you need the current active phase summary, read it as:
+
+- `Usable Camera Subsystem / Pre-Product Baseline`
+- first product goal: host-steerable running `Vision App / wxShell`
+- current product form: `Hybrid Companion`
+- next structural direction: headless kernel after local and host usability are strong enough

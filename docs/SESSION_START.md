@@ -25,6 +25,8 @@ Read this first to get from zero context to a workable repository overview witho
 ## Current Baseline
 
 - The repository now operates from `Usable Camera Subsystem / Pre-Product Baseline`, not from an open Extended MVP closure phase.
+- The current first product goal is a running host-steerable `Vision App / wxShell` in `Hybrid Companion` form, replacing the previous third-party software path while keeping local adjustability.
+- The confirmed current functional workflows are `Delamination Recording`, `Geometry Capture`, and `Setup / Focus / ROI Adjustment`; smaller technical reference flows remain support and validation recipes beneath that layer.
 - The preferred platform-facing implementation surface is `src/vision_platform`, with `src/camera_app` retained as a compatibility bridge while physical migration stays incremental.
 - The bounded baseline already covers snapshot, preview, bounded recording, bounded interval capture, simulation, host-style command flow, traceability, and bounded offline reuse.
 - The tested hardware path has bounded real-device evidence on `DEV_1AB22C046D81`; broader hardware matrix coverage is still intentionally out of scope.
@@ -34,8 +36,8 @@ Read this first to get from zero context to a workable repository overview witho
 
 - historical context: repository reorganization and Extended MVP closure built the current baseline
 - current active phase: `Usable Camera Subsystem / Pre-Product Baseline`
-- immediate priorities: local usability, host-side usability, official reference scenarios, then headless-kernel preparation
-- later but not current: broad transport/platform work, broad MCP expansion, broad packaging, full C# handover
+- immediate priorities: host commands to the running wx shell, shell reflection of host-driven state, shell settings support, then headless-kernel preparation
+- later but not current: broad transport/platform work, broad MCP expansion, broad packaging, full C# handover, full assisted-measurement-system implementation
 
 ## Current Truth Map
 
@@ -61,7 +63,7 @@ Read this first to get from zero context to a workable repository overview witho
 
 1. Keep the Python core stable and understandable.
 2. Treat the current Python baseline as already real and reusable on its bounded tested path.
-3. Derive new slices from concrete residuals, operational friction, or explicit expansion needs rather than from old MVP-closure logic.
+3. Derive new slices from concrete Hybrid Companion residuals, workflow friction, or explicit expansion needs rather than from old MVP-closure logic.
 4. Keep host/control, runtime services, hardware integration, and UI/frontend shells separated.
 5. Open broader transport, frontend, offline, or handover scope only when there is a clear reason.
 6. Continue documenting verified state and stable boundaries without turning docs into shadow PM surfaces.

@@ -17,10 +17,17 @@ Die aktive Planungsbrille ist daher jetzt:
 
 In dieser Phase soll das Projekt:
 
+- auf ein host-steuerbares laufendes `Vision App / wxShell` in `Hybrid Companion`-Form ausgerichtet sein
 - als realer Ersatzpfad fuer die aktuelle teure Drittsoftware wachsen
 - praktisch vom AMB-Steuersystem aus nutzbar werden
 - als erstes Referenzmodul fuer ein spaeteres assisted-measurement System dienen
 - erst nach ausreichender lokaler und host-seitiger Nutzbarkeit den naechsten strukturellen Schritt zu einem wirklich headless Kernel vorbereiten
+
+Die bestaetigten funktionalen Referenz-Workflows dieser Phase sind:
+
+- `Delamination Recording`
+- `Geometry Capture`
+- `Setup / Focus / ROI Adjustment`
 
 Im Zentrum stehen folgende Funktionen:
 
@@ -681,6 +688,7 @@ Entscheidend ist, das Projekt von Beginn an nicht als monolithisches Tool, sonde
 
 Fuer die aktuelle Projektphase bedeutet das konkreter:
 
-- jetzt: lokale Nutzbarkeit, Host-Nutzbarkeit und kleine offizielle Referenzszenarien
+- jetzt: host-steuerbares laufendes `Vision App / wxShell` in `Hybrid Companion`-Form
+- jetzt: Shell-Reflexion host-getriebener Aktionen, Shell-Settings und praktische Ausfuehrbarkeit der drei bestaetigten Workflows
 - danach: Vorbereitung eines wirklich headless Kerns
 - spaeter: Ausbau zur groesseren assisted-measurement Plattform mit Analyse, Audit, Simulation, Statistik und weitergehender Orchestrierung

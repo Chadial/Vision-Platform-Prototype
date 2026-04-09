@@ -20,7 +20,7 @@ That phase is now considered closed:
 
 - the Python camera subsystem is a bounded, host-oriented, hardware-validated working baseline on the tested camera path
 - the remaining work is no longer primarily about proving the MVP is real
-- the active phase is now a post-closure Python baseline phase focused on hardening, operational readiness, controlled productization, and selective expansion
+- the active phase is now `Usable Camera Subsystem / Pre-Product Baseline`, focused on a host-steerable `Hybrid Companion` product direction, operational readiness, controlled productization, and selective expansion
 
 ## Phase 0: Repository Reorganization Toward The Vision Platform
 
@@ -220,25 +220,28 @@ Status:
 - a lightweight overlay-payload demo already exists, while renderer-facing overlay adapters and richer operator controls remain open
 - still requires real-hardware validation before treating the optional path as hardware-proven
 
-## Post-Closure Python Baseline Phase
+## Usable Camera Subsystem / Pre-Product Baseline
 
 This phase should mean:
 
-1. `Hardening`
-   - smooth the last real friction points in the current Python baseline
-   - continue lifecycle / cleanup follow-ups, host-readable diagnostics, bounded reliability polish, and small real-use rough-edge removal
-2. `Operational readiness`
-   - make the Python baseline easier to use, run, document, and trust
-   - improve docs, packaging / startup paths, clearer stable contracts, and activation / operating rules when needed
-3. `Selective expansion`
-   - open broader host / transport, offline / measurement, or UI / frontend scope only when there is a concrete reason
-4. `Later product / handover preparation`
-   - keep C# handover, broader productization, additional frontends, and wider hardware / deployment coverage visible as later phase directions rather than immediate default obligations
+1. `Current product goal`
+   - steer the repository toward a running `Vision App / wxShell` that replaces the previous third-party software path and can be controlled by a host
+2. `Hybrid Companion operation`
+   - keep the shell visible, usable, and locally adjustable
+   - make host-driven actions and state visibly reflected in that shell
+3. `Workflow usability`
+   - keep Delamination Recording, Geometry Capture, and Setup / Focus / ROI Adjustment as the practical reading lens for the current phase
+   - read preview, snapshot, recording start/stop, ROI/focus, and max-frames stop as the technical support modes for those workflows
+4. `Later structural preparation`
+   - keep a truly headless kernel as the next structural step after local and host usability are strong enough
+   - keep broader productization and handover directions visible, but secondary
 
 This phase should not mean:
 
 - reopening MVP-closure logic as the default planning lens
 - broad backlog expansion without prioritization
+- broad MCP or transport expansion as the default lane
+- full assisted-measurement-system implementation now
 - architecture rewrite for its own sake
 
 ## Current Recommended Order
@@ -246,7 +249,10 @@ This phase should not mean:
 From the current repository state, the practical next steps are:
 
 1. treat the real-hardware baseline as already established on the tested camera path
-2. pick the next slice from concrete residual hardening, diagnostics, or operational-readiness needs
+2. pick the next slice from concrete Hybrid Companion usability needs:
+   - host command clarity
+   - shell reflection of host-driven state
+   - settings/workflow usability
 3. validate the already implemented optional OpenCV path against real hardware only if that inspection path is actively needed
 4. structure any next UI, transport, offline, or C#-handover work as deliberate post-closure expansion, not as unfinished MVP proof work
-5. keep the Python core stable as the working reference baseline for later handover and selective productization
+5. keep the Python core stable as the working reference baseline for later headless extraction and selective productization

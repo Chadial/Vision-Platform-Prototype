@@ -4,31 +4,53 @@ Python prototype with Allied Vision Vimba X integration.
 
 ## What This Repository Is
 
-This repository is the Python prototype baseline for a modular vision platform.
+This repository is the Python-first baseline for a host-steerable vision application and its later modular platform path.
 
 Its purpose is to:
 
-- validate camera, preview, snapshot, recording, ROI, and focus-related workflows in Python
+- deliver a running `Vision App / wxShell` that can replace the previous third-party software path
+- keep that app usable as a `Hybrid Companion`: visible locally, steerable by a host, and still locally adjustable in the current phase
+- support the current functional workflows for preview, settings, snapshot, recording, and ROI/focus setup in Python
 - keep the architecture clean enough for later handover to a C#/.NET team
 - preserve a simulator-backed development path when hardware is unavailable
 - prepare a UI-agnostic core that can later support desktop, host-integrated, or web-capable frontends
 
-This is not intended to be a finished end-user product yet. It is the working technical baseline and architecture reference for later phases.
+The current phase is `Usable Camera Subsystem / Pre-Product Baseline`, not an open-ended MVP-closure phase.
 
 ## Where To Read Next
 
 - For the shortest possible project overview, read [`docs/SESSION_START.md`](docs/SESSION_START.md).
 - For the current execution flow and work selection model, read [`docs/WORKFLOW.md`](docs/WORKFLOW.md) and [`docs/WORKPACKAGES.md`](docs/WORKPACKAGES.md).
 - For the current verified implementation state, read [`docs/STATUS.md`](docs/STATUS.md).
+- For the current compact product reading, read [`docs/TARGET_MAP.md`](docs/TARGET_MAP.md).
 - For the long-term product and architecture target, read [`docs/ProjectDescription.md`](docs/ProjectDescription.md).
 
-The current goal is not to build a full UI, but to establish a maintainable application core with:
+## Current Product Direction
+
+The current first product goal is:
+
+- a running `Vision App / wxShell`
+- host-steerable in `Hybrid Companion` form
+- replacing the previous third-party software path
+- staged first for a test host and then for a LabVIEW host
+
+The current immediate priorities are:
+
+- host commands to the running shell
+- visible shell reflection of host-driven actions and state
+- shell settings support
+- practical execution of:
+  - `Delamination Recording`
+  - `Geometry Capture`
+  - `Setup / Focus / ROI Adjustment`
+
+The current architecture focus is therefore:
 
 - Allied Vision / Vimba X camera integration
 - camera driver isolation
 - explicit command and status models
 - snapshot and recording services
-- future compatibility with external host control
+- practical compatibility with external host control in the current phase
 - future portability to desktop UI and web UI
 
 The repository is now also organized as the first step toward a broader modular vision platform. Legacy compatibility remains under `src/camera_app`, while the platform-facing implementation is being moved incrementally into `src/vision_platform` and the repository-level module workspaces for:
@@ -43,7 +65,7 @@ The repository is now also organized as the first step toward a broader modular 
 
 ## Current State
 
-The repository is currently a bounded post-closure Python working baseline with simulator-backed coverage and prototype-level hardware evidence on the tested camera path, including:
+The repository is currently a bounded usable-subsystem baseline with simulator-backed coverage and prototype-level hardware evidence on the tested camera path, including:
 
 - a core architecture built for Allied Vision / Vimba X while keeping SDK-specific code isolated in the driver layer
 - clean driver/service/storage/control separation
@@ -57,6 +79,7 @@ The repository is currently a bounded post-closure Python working baseline with 
 - ROI mask primitives for rectangle and ellipse selections
 - a first manual-focus baseline with ROI-aware evaluation hooks
 - UI-free overlay-payload composition for preview/snapshot-adjacent consumers
+- a bounded wx shell with host-reflection and settings-menu groundwork over the shared core
 
 The repository should not yet be treated as broadly hardware-validated across wider device or stress matrices. For the verified implementation state and roadmap position, use [`docs/STATUS.md`](docs/STATUS.md) together with [`docs/ROADMAP.md`](docs/ROADMAP.md) and [`docs/GlobalRoadmap.md`](docs/GlobalRoadmap.md).
 

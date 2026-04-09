@@ -13,20 +13,84 @@ For a fuller but still lightweight prioritized task brainstorm, see `docs/PRIORI
 
 **Usable Camera Subsystem / Pre-Product Baseline**
 
-The repository should currently be treated as a practically usable camera/acquisition subsystem and as the first reference module for a later assisted measurement system.
+The repository should currently be treated as a host-steerable running `Vision App / wxShell` and as the first reference module for a later assisted measurement system.
+
+## Current Product Goal
+
+- first product goal:
+  - a running `Vision App / wxShell`
+  - replaces the previous third-party software path
+  - can be controlled by a host
+- current product form:
+  - `Hybrid Companion`
+  - local shell remains visible and usable
+  - host can steer core camera/acquisition behavior
+  - shell reflects host-driven actions and state
+  - local adjustability remains intentional in this phase
+- near-term host staging:
+  - Stage 1: test host
+  - Stage 2: LabVIEW host
+
+## Current Role Split
+
+- `wx shell role`: companion/monitor surface for host-driven operation, debug/developer surface, functional replacement path for the previous third-party software, and still locally adjustable in this phase
+- `host role`: define save location, define core camera settings, control acquisition, obtain camera metadata, and support experiment documentation
 
 ## Now
 
-- local usability
-- host-side usability
-- official reference scenarios
+- host commands to the running `Vision App / wxShell`
+- shell reflection of host-driven actions and state
+- wx shell settings support
+- practical execution of the confirmed workflows
 
 Meaning:
 
-- make the wx shell the genuinely usable local working frontend
-- keep OpenCV as fallback/reference rather than the long-term working shell
-- make the shared command/status/result surface practically usable from the AMB control side
-- preserve snapshot, bounded recording, and interval capture as official anchor scenarios
+- make the wx shell a practical companion/monitor surface for host-driven work
+- keep OpenCV as fallback/reference rather than the intended shell
+- keep the shared command/status/result surface practical for the current host stages
+- preserve the confirmed workflows as the practical anchor scenarios
+
+## Confirmed Functional Workflows
+
+- `Delamination Recording`: preview, settings, recording start/stop, optional practical stop through `max frames reached`
+- `Geometry Capture`: preview, settings, snapshot
+- `Setup / Focus / ROI Adjustment`: preview, settings, ROI/focus, optional control snapshot
+
+Technical support modes:
+
+- preview
+- snapshot
+- recording start/stop
+- ROI/focus
+- max-frames stop behavior
+
+## Current Usable Definition
+
+- shell starts reliably
+- preview is practically usable
+- host can send the core commands
+- camera settings are accessible in the shell
+- snapshot and recording are understandable and usable
+- ROI/focus is usable enough for setup
+- status and hardware failures are understandable enough
+- the three workflows can be executed in practice
+
+## Current Host Expectations
+
+This is the bounded Stage 1 test-host surface and the intended starting point for Stage 2 LabVIEW-host integration.
+
+- `start` / `stop`
+- `max frames`
+- `recording fps`
+- `save path`
+- settings for shutter/exposure, hardware ROI, and gain
+- ROI enable / disable
+- focus value and ROI-related state
+
+Current interpretation notes:
+
+- focus value is a status field in this phase
+- `conditional stop` currently means the practical `max frames reached` case
 
 ## Next
 
@@ -56,7 +120,9 @@ Meaning:
 - reopen early reorganization logic
 - reopen MVP-closure proof work
 - broad web/API platform work by default
+- broad additional frontend expansion
 - broad MCP build-out by default
 - full packaging
 - full C# handover
 - broad offline workstation expansion
+- full assisted-measurement-system implementation

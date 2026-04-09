@@ -27,6 +27,7 @@ The current host-facing Python baseline should be treated as:
 - stable enough for bounded host reuse on the current command surface
 - intentionally narrow in scope
 - not yet a full external-interface product surface
+- specifically aimed at the current `Hybrid Companion` phase where a host steers a running visible wx shell rather than a fully detached headless runtime
 
 The stable-now baseline is centered on:
 
@@ -35,6 +36,7 @@ The stable-now baseline is centered on:
 - additive active polling
 - narrow confirmed-settings subsets
 - narrow `run_id` linkage
+- the current phase-1 host command and status surface for the running companion app
 
 The deferred-later area includes:
 
@@ -48,6 +50,38 @@ For the current bounded recording meaning versus detached-later scope, use:
 - `docs/RECORDING_LIFECYCLE_BOUNDARY.md`
 
 ## Stable Now
+
+### Current phase-1 host expectations
+
+The host should currently be able to:
+
+- define save location
+- define core camera settings
+- control acquisition
+- obtain camera metadata
+- support experiment documentation
+
+This current host surface should be read as:
+
+- the bounded Stage 1 test-host baseline
+- the intended starting point for Stage 2 LabVIEW-host integration
+- intentionally coexisting with shell-local adjustability while the app remains a visible companion
+
+The current phase-1 mandatory host surface includes at least:
+
+- `start`
+- `stop`
+- `max frames`
+- `recording fps`
+- `save path`
+- settings for shutter/exposure, hardware ROI, and gain
+- ROI enable / disable
+- focus value and ROI-related state
+
+Current interpretation notes:
+
+- focus value should currently be treated as a status field, not as a separate command surface
+- `conditional stop` should currently be read as the practical `max frames reached` case, not as a broad new stop-rule system
 
 ### Command terms
 
@@ -130,6 +164,7 @@ The stable current host-readable status baseline includes:
 - transport-neutral status payload mapping rather than raw core-model exposure
 - readiness and availability fields from the current `SubsystemStatus` family
 - one additive `active_run` subset during active bounded recording or interval capture
+- focus value and ROI-related state as current status-facing fields for setup / adjustment use
 
 This should be treated as:
 
@@ -173,6 +208,7 @@ The following areas are intentionally deferred rather than accidentally unfinish
 - preview-oriented control surfaces
 - frontend- or IPC-specific payload contracts
 - full external-interface freeze for all nested fields
+- treating the current companion-shell bridge as the final headless command/runtime architecture
 
 ## Practical Handover Reading
 

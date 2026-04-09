@@ -192,9 +192,9 @@ Use the bounded wx shell on the tested hardware path when the goal is to exercis
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --source hardware --camera-alias tested_camera --configuration-profile default --snapshot-directory .\captures\wx_shell_snapshot
 ```
 
-## Reference Scenario Quick Path
+## Technical Reference Flow Quick Path
 
-Use this when the goal is not ad-hoc command usage, but one small repeatable confidence pass over the official reference scenarios.
+Use this when the goal is not ad-hoc command usage, but one small repeatable confidence pass over the current technical reference flows.
 
 Preferred quick path:
 
@@ -212,13 +212,14 @@ Why this is the preferred quick path:
 
 - it reuses the landed `WP71` validation block instead of requiring manual command reconstruction
 - it is simulator-first and therefore repeatable without hardware
-- it gives fresh agents and operators one compact confidence command before they dive into the fuller recipes in `docs/REFERENCE_SCENARIOS.md`
+- it gives fresh agents and operators one compact confidence command before they dive into the fuller technical recipes in `docs/REFERENCE_SCENARIOS.md`
 
 Use `docs/REFERENCE_SCENARIOS.md` when:
 
-- you want the full command-centered bounded recipes
+- you want the full command-centered bounded technical recipes
 - you want to run one scenario individually instead of the compact validation block
 - you want the expected artifacts and success criteria for each scenario spelled out
+- you already understand that the broader current product workflows live in `docs/TARGET_MAP.md` and `docs/STATUS.md`
 
 ## Launch Readiness Checklist
 
@@ -257,6 +258,6 @@ Treat this as a follow-up trigger when:
 ## Relation To Other Docs
 
 - `docs/PYTHON_BASELINE_RUNBOOK.md`: practical operating order, residuals, and baseline decision rules
-- `docs/REFERENCE_SCENARIOS.md`: official bounded snapshot / recording / interval command recipes
+- `docs/REFERENCE_SCENARIOS.md`: bounded technical snapshot / recording / interval command recipes beneath the broader current workflow set
 - `docs/HARDWARE_EVALUATION.md`: real-device evidence and residual hardware observations
 - `apps/camera_cli/README.md`: module-local CLI purpose and usage notes

@@ -31,7 +31,7 @@ Current master-roadmap interpretation:
 
 - the repository now has a usable Python working baseline on the tested hardware path
 - the former Extended MVP closure concern is no longer the active planning lens
-- near-term work should now emphasize practical subsystem usability before broader platform expansion
+- near-term work should now emphasize a host-steerable `Hybrid Companion` product path before broader platform expansion
 
 ## Current Active Phase
 
@@ -42,26 +42,34 @@ Within this master roadmap, the active repository-level phase is now:
 Meaning:
 
 - treat the camera software as a practically usable subsystem rather than as an MVP proof artifact
-- make the wx shell the primary local working path, with OpenCV kept as fallback/reference
-- make the host-neutral command/status/result surface practically usable from the AMB control side
-- preserve a small set of official reference scenarios such as snapshot, bounded recording, and interval capture
+- steer it toward a running `Vision App / wxShell` that replaces the previous third-party software path and can be controlled by a host
+- treat the current product form as `Hybrid Companion`: visible local shell, host-steerable behavior, and shell reflection of host-driven state
+- keep the shell locally adjustable and visible while it remains a standalone-running companion app
+- keep the host responsible for save path, core camera settings, acquisition control, metadata access, and experiment-documentation support
+- keep the wx shell as the primary local working path, with OpenCV as fallback/reference
+- use the confirmed current workflows as the near-term product-reading lens:
+  - Delamination Recording
+  - Geometry Capture
+  - Setup / Focus / ROI Adjustment
 - use that usable subsystem as the first reference module for a later assisted measurement system
 - treat a truly headless kernel as the next structural step after local and host usability are real enough
 
 This active phase is not primarily about:
 
 - broad web or API platform expansion
+- broad additional frontend expansion
 - broad MCP-oriented build-out
 - full product packaging
 - full C# handover
 - broad offline workstation expansion
+- full assisted-measurement-system implementation
 - reopening the old MVP-closure logic
 
 ## Current Near-Term Priorities
 
-1. local usability
-2. host-side usability
-3. official reference scenarios
+1. host commands to the running `Vision App / wxShell`
+2. visible reflection of host-driven behavior and state in the wx shell
+3. wx shell settings support and practical execution of the confirmed workflows
 4. then headless-kernel preparation
 
 ## Historical Platform-Building Structure
@@ -222,9 +230,8 @@ Turn the repository from a camera-centric code package into an explicitly modula
 
 ## Recommended Next Platform Steps
 
-1. Improve the wx shell as the primary local working frontend while keeping OpenCV as the fallback/reference path.
-2. Improve host-side usability through the shared command/status/result surface instead of opening broad transport work by default.
-3. Preserve snapshot, bounded recording, and interval capture as official reference scenarios with clear operational confidence value.
-4. Use those usable scenarios to guide the next shell and host-sync slices, including the current open-shell live-sync work.
-5. After local and host usability are strong enough, prepare the next structural step: a truly headless kernel shared by UI, host control, and later automation flows.
-6. Keep the broader assisted-measurement system direction visible, but treat it as later platform growth rather than the current default lane.
+1. Improve the current host-to-shell command path so the running wx shell behaves as a practical `Hybrid Companion` for a Stage 1 test host and later LabVIEW host.
+2. Keep shell reflection, settings access, and workflow usability ahead of broad transport work.
+3. Read preview, snapshot, recording start/stop, ROI/focus, and max-frames stop as technical support for Delamination Recording, Geometry Capture, and Setup / Focus / ROI Adjustment.
+4. After local and host usability are strong enough, prepare the next structural step: a truly headless kernel shared by UI, host control, and later automation flows.
+5. Keep the broader assisted-measurement system direction visible, but treat it as later platform growth rather than the current default lane.
