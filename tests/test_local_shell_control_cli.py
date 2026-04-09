@@ -18,6 +18,25 @@ from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShel
 
 
 class LocalShellControlCliTests(unittest.TestCase):
+    def test_snapshot_command_passes_file_stem_and_extension(self) -> None:
+        args = argparse.Namespace(
+            session_root=Path("captures/wx_shell_sessions"),
+            file_stem="geometry_000001",
+            file_extension=".bmp",
+        )
+
+        with patch.object(control_cli, "_send_command", return_value={"ok": True}) as send_command:
+            control_cli._handle_snapshot_command(args)
+
+        send_command.assert_called_once_with(
+            Path("captures/wx_shell_sessions"),
+            command_name="save_snapshot",
+            payload={
+                "file_stem": "geometry_000001",
+                "file_extension": ".bmp",
+            },
+        )
+
     def test_start_recording_command_omits_unset_optional_overrides(self) -> None:
         args = argparse.Namespace(
             session_root=Path("captures/wx_shell_sessions"),
@@ -118,6 +137,35 @@ class LocalShellControlCliTests(unittest.TestCase):
             self.assertEqual(status_snapshot["recording_reflection"]["stop_category"], "host_stop")
             self.assertEqual(status_snapshot["recording_reflection"]["frames_written"], 4)
 
+    def test_host_control_smoke_covers_snapshot_status_for_geometry_capture_path(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id="DEV_123",
+                configuration_profile_id="default",
+            )
+            controller = _SmokeController()
+            shell = _build_smoke_shell(session=session, controller=controller)
+
+            snapshot_command = append_live_command(
+                session,
+                command_name="save_snapshot",
+                payload={"file_stem": "geometry_000001", "file_extension": ".bmp"},
+            )
+            commands, processed_count = read_pending_live_commands(session, processed_count=0)
+            self.assertEqual(processed_count, 1)
+            result = shell._execute_live_command(commands[0])
+            write_live_command_result(session, command_id=snapshot_command.command_id, success=True, result=result)
+            shell._publish_live_status_snapshot(controller.get_status(), focus_summary="hidden", recording_summary=None)
+            command_result = wait_for_live_command_result(session, command_id=snapshot_command.command_id, timeout_seconds=0.2)
+            self.assertTrue(command_result["success"])
+
+            status_snapshot = read_live_status_snapshot(session)
+            self.assertEqual(status_snapshot["snapshot_reflection"]["phase"], "saved")
+            self.assertEqual(status_snapshot["snapshot_reflection"]["file_name"], "geometry_000001.bmp")
+            self.assertEqual(status_snapshot["snapshot_reflection"]["save_directory"], str(Path("captures/geometry")))
+
 
 class _SmokeController:
     def __init__(self) -> None:
@@ -149,6 +197,9 @@ class _SmokeController:
         self._status.recording.last_error = None
         return SimpleNamespace(status=SimpleNamespace(frames_written=4), stop_reason=request.reason)
 
+    def save_snapshot(self, request):
+        return SimpleNamespace(saved_path=Path("captures/geometry") / f"{request.file_stem}{request.file_extension}")
+
     def get_status(self):
         return self._status
 
@@ -176,6 +227,8 @@ def _build_smoke_shell(*, session, controller) -> WxLocalPreviewShell:
     shell._recording_last_save_directory = None
     shell._recording_last_stop_reason = None
     shell._recording_last_error = None
+    shell._snapshot_last_saved_path = None
+    shell._snapshot_last_error = None
     shell._recording_file_stem = "wx_recording"
     shell._recording_file_extension = ".bmp"
     shell._recording_max_frames = SimpleNamespace(GetValue=lambda: "0")

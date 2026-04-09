@@ -654,6 +654,55 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertIn("recording_file=delam_run", prefix)
         self.assertIn(f"recording_save={Path('captures/delam')}", prefix)
 
+    def test_status_prefix_includes_last_snapshot_file_and_save_directory_when_available(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(is_preview_running=True),
+        )
+        shell._ui_refresh_fps = None
+        shell._snapshot_last_saved_path = Path("captures/geometry") / "geometry_000001.bmp"
+        shell._snapshot_last_error = None
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+            recording=SimpleNamespace(is_recording=False, active_file_stem=None),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertIn("snapshot_file=geometry_000001.bmp", prefix)
+        self.assertIn(f"snapshot_save={Path('captures/geometry')}", prefix)
+
+    def test_status_prefix_marks_failed_snapshot_state_when_last_error_exists(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(is_preview_running=True),
+        )
+        shell._ui_refresh_fps = None
+        shell._snapshot_last_saved_path = None
+        shell._snapshot_last_error = "disk full"
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+            recording=SimpleNamespace(is_recording=False, active_file_stem=None),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertIn("snapshot_state=failed", prefix)
+
     def test_status_prefix_includes_host_stop_category_for_last_recording_stop(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         shell._session = SimpleNamespace(
@@ -956,6 +1005,54 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(started_requests[0].target_frame_rate, 12.5)
         self.assertIsNone(shell._recording_active_frame_limit)
         self.assertEqual(shell._recording_target_frame_rate_value, 12.5)
+
+    def test_external_save_snapshot_updates_snapshot_reflection_and_message(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        transient_messages: list[str] = []
+
+        def _save_snapshot(request):
+            return SimpleNamespace(saved_path=Path("captures/geometry") / f"{request.file_stem}{request.file_extension}")
+
+        shell._cached_status = object()
+        shell._last_status_refresh_time = 1.0
+        shell._snapshot_last_saved_path = None
+        shell._snapshot_last_error = None
+        shell._session = SimpleNamespace(
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+            configuration_profile_camera_class="1800_u_1240m",
+            subsystem=SimpleNamespace(
+                command_controller=SimpleNamespace(save_snapshot=_save_snapshot),
+            ),
+        )
+        shell._set_transient_status_message = transient_messages.append
+
+        result = shell._execute_live_command(
+            SimpleNamespace(
+                command_name="save_snapshot",
+                payload={"file_stem": "geometry_000001", "file_extension": ".bmp"},
+            )
+        )
+
+        self.assertEqual(result["command"], "save_snapshot")
+        self.assertEqual(shell._snapshot_last_saved_path, Path("captures/geometry/geometry_000001.bmp"))
+        self.assertIsNone(shell._snapshot_last_error)
+        self.assertEqual(
+            transient_messages[-1],
+            f"External geometry snapshot saved: geometry_000001.bmp -> {Path('captures/geometry')}",
+        )
+
+    def test_build_snapshot_reflection_uses_failed_phase_when_last_error_exists(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._snapshot_last_saved_path = Path("captures/geometry/geometry_000001.bmp")
+        shell._snapshot_last_error = "disk full"
+
+        reflection = shell._build_snapshot_reflection()
+
+        self.assertEqual(reflection["phase"], "failed")
+        self.assertEqual(reflection["file_name"], "geometry_000001.bmp")
+        self.assertEqual(reflection["save_directory"], str(Path("captures/geometry")))
+        self.assertEqual(reflection["last_error"], "disk full")
 
     def test_build_recording_reflection_uses_failed_phase_when_last_error_exists(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
