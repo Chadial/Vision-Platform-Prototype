@@ -24,6 +24,7 @@
 - working now: an already open wx shell can now observe bounded external control commands through a repo-local live-sync session bridge under `captures/wx_shell_sessions/`
 - working now: external control commands for save-directory changes, bounded configuration updates, snapshot, and recording start/stop execute through the same in-process `CommandController`, and the shell reflects the resulting status without restart
 - working now: external `start-recording` now treats shell-visible recording settings as the default baseline; host-side commands only override file stem, file extension, `max frames`, and recording FPS when those values are explicitly supplied
+- working now: the published live shell status now also exposes one explicit recording-reflection block with current/last run phase, summary, file stem, save directory, stop reason, and frames written; the visible shell status prefix now also keeps the current/last recording file stem readable
 - partial: the current live-sync baseline assumes one active local shell session at a time and uses local file-backed polling rather than a broader transport/runtime-hosting layer
 - next: fix append/resume behavior for reused recording directories so later `n/n` progress and non-overwriting save behavior become trustworthy
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry

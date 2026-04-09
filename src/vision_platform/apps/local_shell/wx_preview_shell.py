@@ -238,6 +238,9 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_active_frame_limit: int | None = None
         self._recording_target_frame_rate_value: float | None = None
         self._recording_last_summary: str | None = None
+        self._recording_last_file_stem: str | None = None
+        self._recording_last_save_directory: Path | None = None
+        self._recording_last_stop_reason: str | None = None
         self._recording_file_stem = "wx_recording"
         self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
@@ -390,6 +393,9 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_active_frame_limit = frame_limit
         self._recording_target_frame_rate_value = target_frame_rate
         self._recording_last_summary = None
+        self._recording_last_file_stem = result.status.active_file_stem or self._recording_file_stem
+        self._recording_last_save_directory = save_directory
+        self._recording_last_stop_reason = None
         self._cached_status = None
         self._last_status_refresh_time = 0.0
         self._set_transient_status_message(
@@ -410,6 +416,7 @@ class WxLocalPreviewShell(wx.Frame):
             frames_written=result.status.frames_written,
             frame_limit=self._recording_active_frame_limit,
         )
+        self._recording_last_stop_reason = result.stop_reason
         self._recording_active_frame_limit = None
         self._set_transient_status_message(
             f"Recording stopped: {result.status.frames_written} frames"
@@ -825,6 +832,9 @@ class WxLocalPreviewShell(wx.Frame):
             prefix.append(f"config={camera_configuration_summary}")
         if status.default_save_directory is not None:
             prefix.append(f"save={status.default_save_directory}")
+        recording_file_stem = self._get_recording_reflection_file_stem(status)
+        if recording_file_stem is not None:
+            prefix.append(f"recording_file={recording_file_stem}")
         if self._session.configuration_profile_id is not None:
             prefix.append(f"profile={self._session.configuration_profile_id}")
         return prefix
@@ -845,6 +855,8 @@ class WxLocalPreviewShell(wx.Frame):
                 frame_limit=self._recording_active_frame_limit,
             )
             self._recording_last_summary = summary
+            if getattr(self, "_recording_last_stop_reason", None) is None:
+                self._recording_last_stop_reason = "max_frames_reached"
             self._recording_active_frame_limit = None
             return summary
         if self._recording_last_summary is not None:
@@ -856,6 +868,31 @@ class WxLocalPreviewShell(wx.Frame):
         if frame_limit is None:
             return f"{frames_written}/n"
         return f"{frames_written}/{frame_limit}"
+
+    def _get_recording_reflection_file_stem(self, status) -> str | None:
+        recording_status = getattr(status, "recording", None)
+        active_file_stem = getattr(recording_status, "active_file_stem", None)
+        if active_file_stem:
+            return active_file_stem
+        return getattr(self, "_recording_last_file_stem", None)
+
+    def _build_recording_reflection(self, status, *, recording_summary: str | None) -> dict[str, object | None]:
+        recording_status = getattr(status, "recording", None)
+        save_directory = getattr(recording_status, "save_directory", None)
+        if save_directory is None:
+            save_directory = getattr(self, "_recording_last_save_directory", None)
+        stop_reason = getattr(self, "_recording_last_stop_reason", None)
+        is_recording = bool(getattr(recording_status, "is_recording", False))
+        if is_recording:
+            stop_reason = None
+        return {
+            "phase": "running" if is_recording else "idle",
+            "summary": recording_summary,
+            "file_stem": self._get_recording_reflection_file_stem(status),
+            "save_directory": str(save_directory) if save_directory is not None else None,
+            "stop_reason": stop_reason,
+            "frames_written": getattr(recording_status, "frames_written", 0),
+        }
 
     def _update_recording_controls(self, status) -> None:
         if hasattr(self, "_start_recording_button"):
@@ -1114,6 +1151,9 @@ class WxLocalPreviewShell(wx.Frame):
             self._recording_active_frame_limit = frame_limit
             self._recording_target_frame_rate_value = target_frame_rate
             self._recording_last_summary = None
+            self._recording_last_file_stem = result.status.active_file_stem or file_stem
+            self._recording_last_save_directory = self._get_recording_save_directory()
+            self._recording_last_stop_reason = None
             self._set_transient_status_message(
                 f"External recording started: {result.status.active_file_stem or file_stem}"
             )
@@ -1125,6 +1165,7 @@ class WxLocalPreviewShell(wx.Frame):
                 frames_written=result.status.frames_written,
                 frame_limit=self._recording_active_frame_limit,
             )
+            self._recording_last_stop_reason = result.stop_reason
             self._recording_active_frame_limit = None
             self._set_transient_status_message(f"External recording stopped: {result.status.frames_written} frames")
         else:
@@ -1138,6 +1179,7 @@ class WxLocalPreviewShell(wx.Frame):
         live_sync_session = self._session.live_sync_session
         if live_sync_session is None:
             return
+        recording_reflection = self._build_recording_reflection(status, recording_summary=recording_summary)
         write_live_status_snapshot(
             live_sync_session,
             {
@@ -1147,6 +1189,7 @@ class WxLocalPreviewShell(wx.Frame):
                 "configuration_profile_id": self._session.configuration_profile_id,
                 "focus_summary": focus_summary,
                 "recording_summary": recording_summary,
+                "recording_reflection": recording_reflection,
                 "status_lines": self._status_lines,
                 "status": to_serializable(status),
             },
