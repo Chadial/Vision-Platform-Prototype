@@ -166,12 +166,14 @@ def write_live_command_result(
     success: bool,
     result: dict[str, Any] | None = None,
     error: str | None = None,
+    command_name: str | None = None,
 ) -> Path:
     result_path = session.results_directory / f"{command_id}.json"
     write_json(
         result_path,
         {
             "command_id": command_id,
+            "command_name": command_name,
             "success": success,
             "result": result,
             "error": error,

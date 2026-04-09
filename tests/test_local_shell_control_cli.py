@@ -113,6 +113,8 @@ class LocalShellControlCliTests(unittest.TestCase):
             shell._publish_live_status_snapshot(controller.get_status(), focus_summary="hidden", recording_summary="0/3")
             start_result = wait_for_live_command_result(session, command_id=start_command.command_id, timeout_seconds=0.2)
             self.assertTrue(start_result["success"])
+            self.assertEqual(start_result["result"]["reflection_kind"], "recording")
+            self.assertEqual(start_result["result"]["reflection"]["phase"], "running")
 
             status_snapshot = read_live_status_snapshot(session)
             self.assertEqual(status_snapshot["recording_reflection"]["phase"], "running")
@@ -160,6 +162,8 @@ class LocalShellControlCliTests(unittest.TestCase):
             shell._publish_live_status_snapshot(controller.get_status(), focus_summary="hidden", recording_summary=None)
             command_result = wait_for_live_command_result(session, command_id=snapshot_command.command_id, timeout_seconds=0.2)
             self.assertTrue(command_result["success"])
+            self.assertEqual(command_result["result"]["reflection_kind"], "snapshot")
+            self.assertEqual(command_result["result"]["reflection"]["phase"], "saved")
 
             status_snapshot = read_live_status_snapshot(session)
             self.assertEqual(status_snapshot["snapshot_reflection"]["phase"], "saved")
@@ -194,6 +198,8 @@ class LocalShellControlCliTests(unittest.TestCase):
             shell._publish_live_status_snapshot(controller.get_status(), focus_summary="1.234e-02", recording_summary=None)
             command_result = wait_for_live_command_result(session, command_id=config_command.command_id, timeout_seconds=0.2)
             self.assertTrue(command_result["success"])
+            self.assertEqual(command_result["result"]["reflection_kind"], "setup")
+            self.assertEqual(command_result["result"]["reflection"]["phase"], "ready")
 
             status_snapshot = read_live_status_snapshot(session)
             self.assertEqual(status_snapshot["setup_reflection"]["phase"], "ready")

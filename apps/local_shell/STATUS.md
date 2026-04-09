@@ -32,6 +32,8 @@
 - working now: the published live shell status now also exposes one explicit `setup_reflection` block with focus visibility, focus summary, ROI state, ROI bounds, and configuration summary
 - working now: host-triggered configuration changes now read through setup-oriented messaging instead of generic configuration wording
 - working now: one repeatable host-control smoke block now covers the current setup path through bounded configuration plus ROI/focus visibility against the file-backed live-shell command/session baseline
+- working now: live command results now also expose additive reflection-aligned subsets for setup, snapshot, recording, and save-directory operations, so host result reading no longer depends on unrelated raw result shapes alone
+- working now: failed live command result files now keep one minimal command/result placeholder shape instead of collapsing to a bare error string only
 - working now: external `start-recording` now treats shell-visible recording settings as the default baseline; host-side commands only override file stem, file extension, `max frames`, and recording FPS when those values are explicitly supplied
 - working now: the published live shell status now also exposes one explicit recording-reflection block with current/last run phase, summary, file stem, save directory, stop reason, and frames written; the visible shell status prefix now also keeps the current/last recording file stem readable
 - working now: the shell-facing and published recording reflection now also categorize stop causes for the delamination path, distinguishing at least `host_stop`, `max_frames_reached`, and failure-oriented termination categories without introducing a new stop-rule architecture
@@ -40,7 +42,7 @@
 - working now: recording failure reflection is now explicit in the published shell status through `phase=failed` plus `last_error`, and start/stop failures keep that error visible without widening the host/session architecture
 - working now: one repeatable host-control smoke block now covers the current delamination path through host `start -> run -> stop` against the file-backed live-shell command/session baseline
 - partial: the current live-sync baseline assumes one active local shell session at a time and uses local file-backed polling rather than a broader transport/runtime-hosting layer
-- next: no further workflow-first package is preselected; derive the next slice from one concrete residual seam or from the later headless-preparation lane when explicitly chosen
+- next: `WP84 Usable Failure Reflection Baseline` should now tighten shell-side and host-visible failure reading across the landed companion workflows
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite

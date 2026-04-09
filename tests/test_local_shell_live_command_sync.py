@@ -47,10 +47,12 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
                 session,
                 command_id=command.command_id,
                 success=True,
+                command_name="start_recording",
                 result={"ok": True},
             )
             result = wait_for_live_command_result(session, command_id=command.command_id, timeout_seconds=0.2)
             self.assertTrue(result["success"])
+            self.assertEqual(result["command_name"], "start_recording")
             self.assertEqual(result["result"], {"ok": True})
 
             write_live_status_snapshot(
@@ -107,6 +109,8 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
         self.assertEqual(shell._cached_status, None)
         self.assertIn("External recording run started", shell._last_message)
         self.assertEqual(result["command"], "start_recording")
+        self.assertEqual(result["reflection_kind"], "recording")
+        self.assertEqual(result["reflection"]["phase"], "running")
 
     def test_execute_live_stop_recording_keeps_last_summary(self) -> None:
         controller = _StubController()
@@ -139,6 +143,8 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
         self.assertEqual(shell._recording_last_summary, "4/10")
         self.assertIn("External recording run stopped", shell._last_message)
         self.assertEqual(result["command"], "stop_recording")
+        self.assertEqual(result["reflection_kind"], "recording")
+        self.assertEqual(result["reflection"]["stop_category"], "host_stop")
 
     def test_publish_live_status_snapshot_writes_current_shell_status(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -379,27 +385,99 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
         self.assertEqual(result["command"], "apply_configuration")
         self.assertEqual(shell._last_message, "External setup configuration applied")
         self.assertIsNone(shell._cached_focus_state)
+        self.assertEqual(result["reflection_kind"], "setup")
+        self.assertEqual(result["reflection"]["phase"], "ready")
+
+    def test_write_live_command_result_keeps_failure_command_name_and_placeholder_result(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            command = append_live_command(
+                session,
+                command_name="save_snapshot",
+                payload={"file_stem": "geometry_000001"},
+            )
+
+            write_live_command_result(
+                session,
+                command_id=command.command_id,
+                command_name="save_snapshot",
+                success=False,
+                result={
+                    "command": "save_snapshot",
+                    "reflection_kind": None,
+                    "reflection": None,
+                    "result": None,
+                },
+                error="disk full",
+            )
+
+            result = wait_for_live_command_result(session, command_id=command.command_id, timeout_seconds=0.2)
+            self.assertFalse(result["success"])
+            self.assertEqual(result["command_name"], "save_snapshot")
+            self.assertEqual(result["result"]["command"], "save_snapshot")
+            self.assertEqual(result["error"], "disk full")
 
 
 class _StubController:
     def __init__(self) -> None:
         self.start_recording_calls = []
+        self._status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.0),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+            configuration=SimpleNamespace(
+                exposure_time_us=None,
+                gain=None,
+                pixel_format=None,
+                acquisition_frame_rate=None,
+                roi_offset_x=None,
+                roi_offset_y=None,
+                roi_width=None,
+                roi_height=None,
+            ),
+            recording=SimpleNamespace(
+                is_recording=False,
+                frames_written=0,
+                active_file_stem=None,
+                save_directory=None,
+                last_error=None,
+            ),
+        )
 
     def start_recording(self, request):
         self.start_recording_calls.append(request)
+        self._status.recording.is_recording = True
+        self._status.recording.frames_written = 0
+        self._status.recording.active_file_stem = request.file_stem
+        self._status.recording.save_directory = Path("captures/wx_shell_snapshot")
         return SimpleNamespace(status=SimpleNamespace(active_file_stem=request.file_stem, frames_written=0))
 
     def stop_recording(self, request):
+        self._status.recording.is_recording = False
+        self._status.recording.frames_written = 4
+        self._status.recording.active_file_stem = None
+        self._status.recording.save_directory = None
         return SimpleNamespace(status=SimpleNamespace(frames_written=4), stop_reason=request.reason)
 
     def apply_configuration(self, request):
+        self._status.configuration.gain = request.gain
+        self._status.configuration.roi_width = request.roi_width
         return request
 
     def set_save_directory(self, request):
-        return SimpleNamespace(selected_directory=request.resolve_directory())
+        selected_directory = request.resolve_directory()
+        self._status.default_save_directory = selected_directory
+        return SimpleNamespace(selected_directory=selected_directory)
 
     def save_snapshot(self, request):
         return SimpleNamespace(saved_path=Path("captures/wx_shell_snapshot") / f"{request.file_stem}{request.file_extension}")
+
+    def get_status(self):
+        return self._status
 
 
 if __name__ == "__main__":
