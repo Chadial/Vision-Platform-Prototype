@@ -76,6 +76,7 @@ Each status update should state progress and gaps against both roadmaps.
 - the `WP86` implementation slices are now also landed on `main`: the current companion command-result payload shape, failed-result placeholder shape, and published status-snapshot payload shape now have one shell-independent home in `vision_platform.services.companion_contract_service`, while the wx-shell bridge consumes that seam instead of assembling those payloads directly
 - the `WP87` session attempt produced one concrete hardware-availability answer on April 9, 2026: `camera_cli status --source hardware --camera-alias tested_camera` failed because `DEV_1AB22C046D81` was unavailable, and direct VmbPy enumeration exposed only simulator devices `DEV_Cam1`, `DEV_Cam2`, and `DEV_Cam3`
 - the permanent simulator-backed companion smoke coverage now also includes running-recording status reading plus setup-failure reflection through the current host path, including `labview_mapping` and published status visibility
+- the repository now also carries conditional real-hardware CLI smoke tests for the documented tested-camera path (`tested_camera` -> `DEV_1AB22C046D81`), and those tests skip cleanly when that real device is not attached locally
 
 ## Immediate Priorities
 
