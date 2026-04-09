@@ -242,6 +242,8 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_last_save_directory: Path | None = None
         self._recording_last_stop_reason: str | None = None
         self._recording_last_error: str | None = None
+        self._snapshot_last_saved_path: Path | None = None
+        self._snapshot_last_error: str | None = None
         self._recording_file_stem = "wx_recording"
         self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
@@ -345,11 +347,16 @@ class WxLocalPreviewShell(wx.Frame):
                 SaveSnapshotRequest(file_stem="wx_shell_snapshot", file_extension=".bmp")
             )
         except Exception as exc:
-            self._set_transient_status_message(f"Snapshot failed: {exc}")
+            self._snapshot_last_error = str(exc)
+            self._set_transient_status_message(self._format_snapshot_failure_message(self._snapshot_last_error))
             self.request_refresh()
             return
         self._cached_status = None
-        self._set_transient_status_message(f"Snapshot saved: {result.saved_path.name}")
+        self._snapshot_last_saved_path = result.saved_path
+        self._snapshot_last_error = None
+        self._set_transient_status_message(
+            self._format_snapshot_saved_message(result.saved_path)
+        )
         self.request_refresh()
 
     def _run_action(self, action: str) -> None:
@@ -841,6 +848,15 @@ class WxLocalPreviewShell(wx.Frame):
             prefix.append(f"config={camera_configuration_summary}")
         if status.default_save_directory is not None:
             prefix.append(f"save={status.default_save_directory}")
+        snapshot_file_name = self._get_snapshot_reflection_file_name()
+        if snapshot_file_name is not None:
+            prefix.append(f"snapshot_file={snapshot_file_name}")
+        snapshot_save_directory = self._get_snapshot_reflection_save_directory()
+        if snapshot_save_directory is not None:
+            prefix.append(f"snapshot_save={snapshot_save_directory}")
+        snapshot_phase = self._get_snapshot_reflection_phase()
+        if snapshot_phase == "failed":
+            prefix.append("snapshot_state=failed")
         recording_file_stem = self._get_recording_reflection_file_stem(status)
         if recording_file_stem is not None:
             prefix.append(f"recording_file={recording_file_stem}")
@@ -939,6 +955,44 @@ class WxLocalPreviewShell(wx.Frame):
         if status_error:
             return status_error
         return getattr(self, "_recording_last_error", None)
+
+    @staticmethod
+    def _format_snapshot_saved_message(saved_path: Path, *, external: bool = False) -> str:
+        prefix = "External geometry snapshot saved" if external else "Geometry snapshot saved"
+        return f"{prefix}: {saved_path.name} -> {saved_path.parent}"
+
+    @staticmethod
+    def _format_snapshot_failure_message(error: str, *, external: bool = False) -> str:
+        prefix = "External geometry snapshot" if external else "Geometry snapshot"
+        return f"{prefix} failed: {error}"
+
+    def _get_snapshot_reflection_file_name(self) -> str | None:
+        saved_path = getattr(self, "_snapshot_last_saved_path", None)
+        if saved_path is None:
+            return None
+        return saved_path.name
+
+    def _get_snapshot_reflection_save_directory(self) -> str | None:
+        saved_path = getattr(self, "_snapshot_last_saved_path", None)
+        if saved_path is None:
+            return None
+        return str(saved_path.parent)
+
+    def _get_snapshot_reflection_phase(self) -> str:
+        if getattr(self, "_snapshot_last_error", None) is not None:
+            return "failed"
+        if getattr(self, "_snapshot_last_saved_path", None) is not None:
+            return "saved"
+        return "idle"
+
+    def _build_snapshot_reflection(self) -> dict[str, object | None]:
+        return {
+            "phase": self._get_snapshot_reflection_phase(),
+            "file_name": self._get_snapshot_reflection_file_name(),
+            "file_stem": None if getattr(self, "_snapshot_last_saved_path", None) is None else self._snapshot_last_saved_path.stem,
+            "save_directory": self._get_snapshot_reflection_save_directory(),
+            "last_error": getattr(self, "_snapshot_last_error", None),
+        }
 
     @staticmethod
     def _format_recording_started_message(*, file_stem: str | None, save_directory: Path | None, external: bool = False) -> str:
@@ -1219,16 +1273,27 @@ class WxLocalPreviewShell(wx.Frame):
             self._session.selected_save_directory = result.selected_directory
             self._set_transient_status_message(f"External save directory: {result.selected_directory}")
         elif command.command_name == "save_snapshot":
-            result = controller.save_snapshot(
-                SaveSnapshotRequest(
-                    file_stem=payload.get("file_stem", "wx_shell_snapshot"),
-                    file_extension=payload.get("file_extension", ".bmp"),
-                    camera_id=self._session.resolved_camera_id,
-                    configuration_profile_id=self._session.configuration_profile_id,
-                    configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+            try:
+                result = controller.save_snapshot(
+                    SaveSnapshotRequest(
+                        file_stem=payload.get("file_stem", "wx_shell_snapshot"),
+                        file_extension=payload.get("file_extension", ".bmp"),
+                        camera_id=self._session.resolved_camera_id,
+                        configuration_profile_id=self._session.configuration_profile_id,
+                        configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+                    )
                 )
+            except Exception as exc:
+                self._snapshot_last_error = str(exc)
+                self._set_transient_status_message(
+                    self._format_snapshot_failure_message(self._snapshot_last_error, external=True)
+                )
+                raise
+            self._snapshot_last_saved_path = result.saved_path
+            self._snapshot_last_error = None
+            self._set_transient_status_message(
+                self._format_snapshot_saved_message(result.saved_path, external=True)
             )
-            self._set_transient_status_message(f"External snapshot saved: {result.saved_path.name}")
         elif command.command_name == "start_recording":
             file_stem = payload["file_stem"] if "file_stem" in payload else self._recording_file_stem
             file_extension = payload["file_extension"] if "file_extension" in payload else self._recording_file_extension
@@ -1316,6 +1381,7 @@ class WxLocalPreviewShell(wx.Frame):
         if live_sync_session is None:
             return
         recording_reflection = self._build_recording_reflection(status, recording_summary=recording_summary)
+        snapshot_reflection = self._build_snapshot_reflection()
         write_live_status_snapshot(
             live_sync_session,
             {
@@ -1324,6 +1390,7 @@ class WxLocalPreviewShell(wx.Frame):
                 "camera_id": self._session.resolved_camera_id,
                 "configuration_profile_id": self._session.configuration_profile_id,
                 "focus_summary": focus_summary,
+                "snapshot_reflection": snapshot_reflection,
                 "recording_summary": recording_summary,
                 "recording_reflection": recording_reflection,
                 "status_lines": self._status_lines,

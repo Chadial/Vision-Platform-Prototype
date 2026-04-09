@@ -158,6 +158,8 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             shell._recording_last_file_stem = "delam_run"
             shell._recording_last_save_directory = Path("captures/delam")
             shell._recording_last_stop_reason = "external_cli"
+            shell._snapshot_last_saved_path = Path("captures/geometry/geometry_000001.bmp")
+            shell._snapshot_last_error = None
             shell._status_lines = ["source=simulated | preview=running", "FPS 25.0"]
 
             shell._publish_live_status_snapshot(
@@ -177,6 +179,16 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
 
             snapshot = read_live_status_snapshot(session)
             self.assertEqual(snapshot["focus_summary"], "hidden")
+            self.assertEqual(
+                snapshot["snapshot_reflection"],
+                {
+                    "phase": "saved",
+                    "file_name": "geometry_000001.bmp",
+                    "file_stem": "geometry_000001",
+                    "save_directory": str(Path("captures/geometry")),
+                    "last_error": None,
+                },
+            )
             self.assertEqual(snapshot["recording_summary"], "3/n")
             self.assertEqual(
                 snapshot["recording_reflection"],
@@ -273,6 +285,48 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             self.assertEqual(snapshot["recording_reflection"]["phase"], "failed")
             self.assertEqual(snapshot["recording_reflection"]["stop_category"], "failure_termination")
             self.assertEqual(snapshot["recording_reflection"]["last_error"], "disk full")
+
+    def test_publish_live_status_snapshot_marks_failed_snapshot_reflection_when_last_error_exists(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+            shell._session = SimpleNamespace(
+                live_sync_session=session,
+                source="simulated",
+                resolved_camera_id=None,
+                configuration_profile_id=None,
+            )
+            shell._snapshot_last_saved_path = Path("captures/geometry/geometry_000001.bmp")
+            shell._snapshot_last_error = "disk full"
+            shell._recording_last_file_stem = None
+            shell._recording_last_save_directory = None
+            shell._recording_last_stop_reason = None
+            shell._status_lines = ["source=simulated | preview=running", "FPS 25.0"]
+
+            shell._publish_live_status_snapshot(
+                SimpleNamespace(
+                    camera=SimpleNamespace(is_initialized=True),
+                    default_save_directory=Path("captures/wx_shell_snapshot"),
+                    recording=SimpleNamespace(
+                        is_recording=False,
+                        frames_written=0,
+                        active_file_stem=None,
+                        save_directory=None,
+                        last_error=None,
+                    ),
+                ),
+                focus_summary="hidden",
+                recording_summary=None,
+            )
+
+            snapshot = read_live_status_snapshot(session)
+            self.assertEqual(snapshot["snapshot_reflection"]["phase"], "failed")
+            self.assertEqual(snapshot["snapshot_reflection"]["last_error"], "disk full")
 
 
 class _StubController:

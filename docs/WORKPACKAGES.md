@@ -448,15 +448,15 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 77 | Host Result Envelope Naming Tightening | normalize one concrete confusing result, status, or error field in the host-facing command surface without widening transport scope | dormant | keep only as a fallback seam-specific follow-up if the workflow-first host path exposes one concrete naming ambiguity | `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md` |
 | 78 | Compatibility Shim Usage Inventory | record where remaining `camera_app` compatibility imports are still exercised so later retirement work can target real usage instead of guesswork | dormant | later evidence-only slice; explicitly outside the current workflow-first lane | `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md` |
 | 80 | Delamination Recording Workflow Narrowing | make the current `Delamination Recording` workflow the first explicit Hybrid Companion execution slice across host command, shell reflection, and shell settings use | landed | landed workflow-first package; the delamination path now has host-start defaults alignment, explicit shell/live recording reflection, save-path/run-state tightening, host-control smoke coverage, and failure reflection without widening architecture scope | `docs/session_workpackages/wp80_delamination_recording_workflow_narrowing.md` |
-| 81 | Geometry Capture Workflow Narrowing | make the current `Geometry Capture` workflow executable through the same Hybrid Companion host-plus-shell lens | current next | direct follow-up after landed `WP80`; keep snapshot, save-path, and shell feedback understandable without widening product scope | `docs/session_workpackages/wp81_geometry_capture_workflow_narrowing.md` |
-| 82 | Setup Focus ROI Workflow Narrowing | make the current `Setup / Focus / ROI Adjustment` workflow practically usable as the setup path for the main test flows | queued | third workflow package after `WP81`; keep focus/ROI and optional control snapshot aligned with the current host-plus-shell split | `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md` |
+| 81 | Geometry Capture Workflow Narrowing | make the current `Geometry Capture` workflow executable through the same Hybrid Companion host-plus-shell lens | landed | landed workflow-first package; the geometry-capture path now has explicit snapshot reflection, save-path/status readability, host-control smoke coverage, and failure reflection without widening product scope | `docs/session_workpackages/wp81_geometry_capture_workflow_narrowing.md` |
+| 82 | Setup Focus ROI Workflow Narrowing | make the current `Setup / Focus / ROI Adjustment` workflow practically usable as the setup path for the main test flows | current next | direct follow-up after landed `WP81`; keep focus/ROI and optional control snapshot aligned with the current host-plus-shell split | `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. execute `WP81` next as the workflow-first `Geometry Capture` slice after the now-landed delamination-recording baseline
-2. keep `WP82` prepared as the setup-path follow-up for focus, ROI, and optional control snapshot usability
+1. execute `WP82` next as the workflow-first setup-path slice after the now-landed delamination and geometry-capture baselines
+2. treat `WP81` as landed baseline context for geometry-capture snapshot reflection, save-path visibility, and host-triggered snapshot confidence
 3. treat `WP80` as landed baseline context for host-driven recording, shell reflection, and delamination-path status/failure understanding
 4. keep `WP76`, `WP77`, and `WP78` explicitly outside the current default lane unless one of the workflow packages reveals a concrete blocking seam
 
@@ -486,8 +486,8 @@ Current prepared usable-subsystem sequence:
 - `WP69 wx Camera Settings Menu And Shortcut Baseline` is now landed
   - `WP70 Control And Imaging Compatibility Cleanup` is now landed
 - `WP80 Delamination Recording Workflow Narrowing` is now landed as the first complete workflow-first package in the confirmed `Hybrid Companion` lane
-- `WP81 Geometry Capture Workflow Narrowing` is now the active workflow-first `current next`
-- `WP82 Setup Focus ROI Workflow Narrowing` is prepared as the setup workflow package after `WP81`
+- `WP81 Geometry Capture Workflow Narrowing` is now landed as the second complete workflow-first package in the confirmed `Hybrid Companion` lane
+- `WP82 Setup Focus ROI Workflow Narrowing` is now the active workflow-first `current next`
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 - keep `WP76`, `WP77`, and `WP78` visible only as dormant seam- or evidence-driven follow-ups while the workflow-first sequence is active
 
@@ -731,21 +731,20 @@ The current coarse PM order should be:
 47. treat `WP71` as landed; the repository now has one explicit repeatable validation block for snapshot, bounded recording, and interval capture plus a dedicated launcher wrapper
 48. treat `WP75` as landed; the launch baseline and manuals index now expose one compact validated entry path for the current technical reference flows
 49. treat `WP80` as the landed first explicit workflow-first slice for the confirmed `Hybrid Companion` direction
-50. treat `WP81` as the current next package and `WP82` as the prepared follow-up workflow package for setup/focus/ROI
+50. treat `WP81` as the landed geometry-capture workflow package and `WP82` as the current next follow-up workflow package for setup/focus/ROI
 51. keep `WP76` and `WP77` dormant unless one of the workflow packages exposes a concrete shell-feedback or host-naming blocker
 52. keep `WP78` dormant as a later evidence-gathering slice rather than as immediate migration work
 53. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
-`WP81 Geometry Capture Workflow Narrowing`
+`WP82 Setup Focus ROI Workflow Narrowing`
 
 Reason:
 
-- `WP80` is now landed and gives the queue one complete workflow-first baseline for host-driven recording, shell reflection, and understandable delamination status/failure behavior
-- `Geometry Capture` is now the next strongest product-reading workflow because it exercises operator-guided overlapping-image acquisition through preview, settings, snapshot, save-path clarity, and shell reflection
-- `WP82` should stay prepared behind that slice so the three confirmed workflows remain the default sequencing lane
-- `WP76`, `WP77`, and `WP78` remain available only if `WP81` or `WP82` reveal a concrete seam that truly needs one of those narrower follow-ups
+- `WP80` and `WP81` are now landed and give the queue two concrete workflow-first baselines for recording and geometry-capture behavior
+- `Setup / Focus / ROI Adjustment` is now the next strongest product-reading workflow because it defines the current setup boundary between shell-local control, host-visible state, and practical preparation for the main test flows
+- `WP76`, `WP77`, and `WP78` remain available only if `WP82` reveals a concrete seam that truly needs one of those narrower follow-ups
 
 ## Fresh Agent Decision Rule
 
