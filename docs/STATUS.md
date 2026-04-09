@@ -56,6 +56,7 @@ Each status update should state progress and gaps against both roadmaps.
 - `WP76`, `WP77`, and `WP78` are no longer the default open residual lane; they stay dormant unless the workflow-first sequence exposes one concrete seam that actually needs them
 - the first `WP80` implementation slice is now landed on `main`: external `start-recording` commands in the wx-shell live-control path now fall back to the shell-visible recording settings when optional overrides are omitted, while explicit host overrides still win when provided
 - the second `WP80` implementation slice is now landed on `main`: the wx-shell live status snapshot now publishes one explicit recording-reflection block for host/companion visibility, and the visible shell status prefix now keeps the current or last recording file stem readable
+- the third `WP80` implementation slice is now on the active topic branch: the wx-shell recording reflection now categorizes stop causes for the delamination path so shell-facing status and published live status distinguish host stop, `max_frames_reached`, and failure-oriented termination more clearly
 
 ## Immediate Priorities
 

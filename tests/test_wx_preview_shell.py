@@ -652,6 +652,29 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertIn("recording_file=delam_run", prefix)
 
+    def test_status_prefix_includes_host_stop_category_for_last_recording_stop(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._session = SimpleNamespace(
+            source="hardware",
+            resolved_camera_id="DEV_123",
+            configuration_profile_id="default",
+        )
+        shell._subsystem = SimpleNamespace(
+            stream_service=SimpleNamespace(is_preview_running=True),
+        )
+        shell._ui_refresh_fps = None
+        shell._recording_last_stop_reason = "external_cli"
+
+        status = SimpleNamespace(
+            camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
+            default_save_directory=Path("captures/wx_shell_snapshot"),
+            recording=SimpleNamespace(is_recording=False, active_file_stem=None),
+        )
+
+        prefix = shell._build_status_prefix(status)
+
+        self.assertIn("recording_stop=host_stop", prefix)
+
     def test_recording_summary_formats_bounded_and_unbounded_progress(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         status = SimpleNamespace(recording=SimpleNamespace(is_recording=True, frames_written=3))
@@ -685,6 +708,7 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(summary, "3/3")
         self.assertEqual(shell._recording_last_summary, "3/3")
         self.assertIsNone(shell._recording_active_frame_limit)
+        self.assertEqual(shell._recording_last_stop_reason, "max_frames_reached")
 
     def test_apply_recording_settings_updates_internal_state_and_controls(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)

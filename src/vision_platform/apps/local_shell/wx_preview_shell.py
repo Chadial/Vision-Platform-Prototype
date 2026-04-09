@@ -835,6 +835,9 @@ class WxLocalPreviewShell(wx.Frame):
         recording_file_stem = self._get_recording_reflection_file_stem(status)
         if recording_file_stem is not None:
             prefix.append(f"recording_file={recording_file_stem}")
+        recording_stop_category = self._get_recording_stop_category(status)
+        if recording_stop_category is not None:
+            prefix.append(f"recording_stop={recording_stop_category}")
         if self._session.configuration_profile_id is not None:
             prefix.append(f"profile={self._session.configuration_profile_id}")
         return prefix
@@ -876,6 +879,25 @@ class WxLocalPreviewShell(wx.Frame):
             return active_file_stem
         return getattr(self, "_recording_last_file_stem", None)
 
+    def _get_recording_stop_category(self, status) -> str | None:
+        recording_status = getattr(status, "recording", None)
+        if bool(getattr(recording_status, "is_recording", False)):
+            return None
+        stop_reason = getattr(self, "_recording_last_stop_reason", None)
+        return self._categorize_recording_stop_reason(stop_reason)
+
+    @staticmethod
+    def _categorize_recording_stop_reason(stop_reason: str | None) -> str | None:
+        if stop_reason is None:
+            return None
+        if stop_reason in {"bounded_completion", "max_frames_reached"}:
+            return "max_frames_reached"
+        if stop_reason in {"post_failure_cleanup", "duplicate_cleanup"}:
+            return "failure_termination"
+        if stop_reason in {"wx_shell_button", "external_cli", "external_request", "operator_cancelled", "host_shutdown"}:
+            return "host_stop"
+        return stop_reason
+
     def _build_recording_reflection(self, status, *, recording_summary: str | None) -> dict[str, object | None]:
         recording_status = getattr(status, "recording", None)
         save_directory = getattr(recording_status, "save_directory", None)
@@ -891,6 +913,7 @@ class WxLocalPreviewShell(wx.Frame):
             "file_stem": self._get_recording_reflection_file_stem(status),
             "save_directory": str(save_directory) if save_directory is not None else None,
             "stop_reason": stop_reason,
+            "stop_category": self._categorize_recording_stop_reason(stop_reason),
             "frames_written": getattr(recording_status, "frames_written", 0),
         }
 

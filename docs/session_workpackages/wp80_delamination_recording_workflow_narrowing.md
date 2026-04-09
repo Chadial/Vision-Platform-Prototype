@@ -133,7 +133,7 @@ Current residual after the first landed slices:
 
 #### `WP80.C Stop-Reason Reflection Tightening`
 
-- status: prepared next
+- status: landed
 - purpose: distinguish host stop, practical `max_frames_reached`, and failure termination more clearly in the delamination workflow
 - scope:
   - visible stop reason in shell-facing reflection
@@ -179,16 +179,16 @@ Current residual after the first landed slices:
 
 Recommended next order inside `WP80`:
 
-1. `WP80.C Stop-Reason Reflection Tightening`
-2. `WP80.D Save-Path Reflection Tightening`
-3. `WP80.E Run-State Messaging Tightening`
-4. `WP80.F Host-Control Smoke For Delamination Path`
-5. `WP80.G Failure Reflection Narrowing`
+1. `WP80.D Save-Path Reflection Tightening`
+2. `WP80.E Run-State Messaging Tightening`
+3. `WP80.F Host-Control Smoke For Delamination Path`
+4. `WP80.G Failure Reflection Narrowing`
 
 Landed implementation slices so far:
 
 - external `start-recording` now reuses shell-visible recording settings by default and applies only explicitly supplied host overrides
 - the wx-shell live status snapshot now exposes one explicit recording-reflection block with run phase, summary, file stem, save directory, stop reason, and frames written, while the visible shell status prefix also keeps the current or last recording file stem readable
+- the wx-shell recording reflection now also categorizes stop causes for the delamination path, so host stop, `max_frames_reached`, and failure-oriented termination are more clearly distinguished in shell-facing and published status
 
 ## Execution Plan
 
