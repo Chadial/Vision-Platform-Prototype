@@ -641,6 +641,7 @@ class WxPreviewShellTests(unittest.TestCase):
         )
         shell._ui_refresh_fps = None
         shell._recording_last_file_stem = "delam_run"
+        shell._recording_last_save_directory = Path("captures/delam")
 
         status = SimpleNamespace(
             camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
@@ -651,6 +652,7 @@ class WxPreviewShellTests(unittest.TestCase):
         prefix = shell._build_status_prefix(status)
 
         self.assertIn("recording_file=delam_run", prefix)
+        self.assertIn(f"recording_save={Path('captures/delam')}", prefix)
 
     def test_status_prefix_includes_host_stop_category_for_last_recording_stop(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
@@ -903,7 +905,10 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertIsNone(shell._recording_last_summary)
         self.assertIsNone(shell._cached_status)
         self.assertEqual(shell._last_status_refresh_time, 0.0)
-        self.assertEqual(transient_messages[-1], "External recording started: shell_run")
+        self.assertEqual(
+            transient_messages[-1],
+            f"External recording run started: shell_run -> {Path('captures/wx_shell_snapshot')}",
+        )
 
     def test_external_start_recording_honors_explicit_host_overrides(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
@@ -951,6 +956,31 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(started_requests[0].target_frame_rate, 12.5)
         self.assertIsNone(shell._recording_active_frame_limit)
         self.assertEqual(shell._recording_target_frame_rate_value, 12.5)
+
+    def test_build_recording_reflection_uses_failed_phase_when_last_error_exists(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._recording_last_file_stem = "delam_run"
+        shell._recording_last_save_directory = Path("captures/delam")
+        shell._recording_last_stop_reason = None
+        shell._recording_last_error = "disk full"
+
+        reflection = shell._build_recording_reflection(
+            SimpleNamespace(
+                recording=SimpleNamespace(
+                    is_recording=False,
+                    frames_written=4,
+                    active_file_stem=None,
+                    save_directory=None,
+                    last_error=None,
+                )
+            ),
+            recording_summary="4/n",
+        )
+
+        self.assertEqual(reflection["phase"], "failed")
+        self.assertEqual(reflection["stop_category"], "failure_termination")
+        self.assertEqual(reflection["last_error"], "disk full")
+        self.assertEqual(reflection["save_directory"], str(Path("captures/delam")))
 
     def test_build_local_shell_session_reuses_simulated_subsystem_and_save_directory(self) -> None:
         with TemporaryDirectory() as temp_dir:

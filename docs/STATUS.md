@@ -12,8 +12,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main` is the current checked-out integration branch
-- `feature/wp80-delamination-recording-workflow` has been merged as the first implementation slice under `WP80`
+- `feature/complete-wp80-delamination-workflow` is the current checked-out topic branch
+- that branch is completing the remaining implementation and documentation slices needed to close `WP80`
 - short-lived topic branches are created per active work package and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual git state
 
@@ -45,18 +45,20 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Next
 
-- `WP80 Delamination Recording Workflow Narrowing` is now the `current next`.
+- `WP80 Delamination Recording Workflow Narrowing` is in final branch-local closure on `feature/complete-wp80-delamination-workflow`.
+- `WP81 Geometry Capture Workflow Narrowing` is the prepared next package once this branch is merged.
 - default next-step derivation should now use the confirmed `Hybrid Companion` product reading through the three functional workflows rather than a broad generic subsystem-hardening lens.
 - the repo-level orientation cleanup now also extends beyond the central PM docs: `README.md`, `docs/WORKFLOW.md`, `docs/NEXT_SESSION_ORDER.md`, `docs/project_overview.md`, and the secondary summary notes now point at the same current product reading instead of older post-closure wording
 - `WP75 Reference Scenario Operator Path Tightening` is now landed; `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and `docs/MANUALS_INDEX.md` now expose one compact validated entry path for the official current workflows.
 - `WP71 Reference Scenario Validation Narrowing` is now landed; the repository has one explicit repeatable validation block for the current technical anchor flows through `tests.test_reference_scenarios` and `scripts/launchers/run_reference_scenario_validation.py`.
 - `WP70 Control And Imaging Compatibility Cleanup` remains complete on the topic branch and already archived as a finished refactor slice.
 - the latest documentation-governance maintenance also landed: `docs/STATUS.md` is the authoritative repository status, `docs/WORKPACKAGES.md` is the authoritative repository queue, and `docs/PRIORITIES.md` / `docs/TARGET_MAP.md` are derived views only
-- `WP81 Geometry Capture Workflow Narrowing` and `WP82 Setup Focus ROI Workflow Narrowing` are now the prepared next workflow packages behind `WP80`
+- `WP82 Setup Focus ROI Workflow Narrowing` remains the prepared third workflow package behind `WP81`
 - `WP76`, `WP77`, and `WP78` are no longer the default open residual lane; they stay dormant unless the workflow-first sequence exposes one concrete seam that actually needs them
 - the first `WP80` implementation slice is now landed on `main`: external `start-recording` commands in the wx-shell live-control path now fall back to the shell-visible recording settings when optional overrides are omitted, while explicit host overrides still win when provided
 - the second `WP80` implementation slice is now landed on `main`: the wx-shell live status snapshot now publishes one explicit recording-reflection block for host/companion visibility, and the visible shell status prefix now keeps the current or last recording file stem readable
 - the third `WP80` implementation slice is now landed on `main`: the wx-shell recording reflection now categorizes stop causes for the delamination path so shell-facing status and published live status distinguish host stop, `max_frames_reached`, and failure-oriented termination more clearly
+- the remaining `WP80` completion slices are now on the active topic branch: shell-visible save-path reflection, tighter run-lifecycle messaging, one repeatable host-control smoke block for the delamination path, and explicit failure reflection through `phase=failed` plus `last_error`
 
 ## Immediate Priorities
 
@@ -216,7 +218,7 @@ The repository should currently be read as a host-steerable running `Vision App 
 The control/imaging compatibility cleanup is complete, the wx shell already has bounded host-reflection and settings-menu groundwork, and the official technical anchor flows now have one explicit repeatable simulator-first validation block.
 The current phase remains `Usable Camera Subsystem / Pre-Product Baseline`, but "usable" is now concretely defined around host-driven control, visible shell reflection, shell settings access, understandable status/failure behavior, and practical execution of delamination recording, geometry capture, and setup/focus/ROI adjustment.
 The supporting repo-orientation surfaces now also follow that reading: the root README, workflow-selection notes, and secondary summary docs no longer present the old post-closure framing as the active default and now defer clearly to `docs/STATUS.md`, `docs/WORKPACKAGES.md`, and `docs/TARGET_MAP.md`.
-The first concrete `WP80` delamination-recording follow-up now keeps host-driven start behavior aligned with the visible shell recording settings instead of silently injecting CLI defaults when the host omits optional overrides.
+`WP80` now spans one complete delamination-recording workflow chain: host-driven start behavior reuses visible shell defaults, the shell and published live status expose explicit recording reflection including save target and stop category, run-state wording now reads through the delamination path rather than generic bounded-recording mechanics, host-control smoke coverage exists for `start -> run -> stop`, and failure reflection now surfaces `phase=failed` plus `last_error` without widening the command architecture.
 
 The larger assisted-measurement vision and later headless-kernel direction remain visible, but they are secondary to the near-term product direction above.
 

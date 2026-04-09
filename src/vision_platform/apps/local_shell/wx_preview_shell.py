@@ -241,6 +241,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_last_file_stem: str | None = None
         self._recording_last_save_directory: Path | None = None
         self._recording_last_stop_reason: str | None = None
+        self._recording_last_error: str | None = None
         self._recording_file_stem = "wx_recording"
         self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
@@ -371,7 +372,8 @@ class WxLocalPreviewShell(wx.Frame):
             target_frame_rate = self._parse_optional_positive_float(self._recording_target_frame_rate_input.GetValue())
             save_directory = self._get_recording_save_directory()
             if save_directory is None:
-                self._set_transient_status_message("Recording failed: no save directory configured")
+                self._recording_last_error = "no save directory configured"
+                self._set_transient_status_message(self._format_recording_failure_message("start", self._recording_last_error))
                 self.request_refresh()
                 return
             result = self._session.subsystem.command_controller.start_recording(
@@ -387,7 +389,8 @@ class WxLocalPreviewShell(wx.Frame):
                 )
             )
         except Exception as exc:
-            self._set_transient_status_message(f"Recording failed: {exc}")
+            self._recording_last_error = str(exc)
+            self._set_transient_status_message(self._format_recording_failure_message("start", self._recording_last_error))
             self.request_refresh()
             return
         self._recording_active_frame_limit = frame_limit
@@ -396,11 +399,10 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_last_file_stem = result.status.active_file_stem or self._recording_file_stem
         self._recording_last_save_directory = save_directory
         self._recording_last_stop_reason = None
+        self._recording_last_error = None
         self._cached_status = None
         self._last_status_refresh_time = 0.0
-        self._set_transient_status_message(
-            f"Recording started: {result.status.active_file_stem or self._recording_file_stem}"
-        )
+        self._set_transient_status_message(self._format_recording_started_message(file_stem=self._recording_last_file_stem, save_directory=save_directory))
         self.request_refresh()
 
     def _on_stop_recording(self, event) -> None:
@@ -409,7 +411,8 @@ class WxLocalPreviewShell(wx.Frame):
                 StopRecordingRequest(reason="wx_shell_button")
             )
         except Exception as exc:
-            self._set_transient_status_message(f"Recording stop failed: {exc}")
+            self._recording_last_error = str(exc)
+            self._set_transient_status_message(self._format_recording_failure_message("stop", self._recording_last_error))
             self.request_refresh()
             return
         self._recording_last_summary = self._format_recording_summary(
@@ -417,9 +420,15 @@ class WxLocalPreviewShell(wx.Frame):
             frame_limit=self._recording_active_frame_limit,
         )
         self._recording_last_stop_reason = result.stop_reason
+        self._recording_last_error = None
         self._recording_active_frame_limit = None
         self._set_transient_status_message(
-            f"Recording stopped: {result.status.frames_written} frames"
+            self._format_recording_stopped_message(
+                frames_written=result.status.frames_written,
+                recording_summary=self._recording_last_summary,
+                stop_reason=result.stop_reason,
+                save_directory=self._recording_last_save_directory,
+            )
         )
         self.request_refresh()
 
@@ -835,6 +844,9 @@ class WxLocalPreviewShell(wx.Frame):
         recording_file_stem = self._get_recording_reflection_file_stem(status)
         if recording_file_stem is not None:
             prefix.append(f"recording_file={recording_file_stem}")
+        recording_save_directory = self._get_recording_reflection_save_directory(status)
+        if recording_save_directory is not None:
+            prefix.append(f"recording_save={recording_save_directory}")
         recording_stop_category = self._get_recording_stop_category(status)
         if recording_stop_category is not None:
             prefix.append(f"recording_stop={recording_stop_category}")
@@ -860,6 +872,16 @@ class WxLocalPreviewShell(wx.Frame):
             self._recording_last_summary = summary
             if getattr(self, "_recording_last_stop_reason", None) is None:
                 self._recording_last_stop_reason = "max_frames_reached"
+            self._recording_last_error = None
+            if hasattr(self, "_presenter"):
+                self._set_transient_status_message(
+                    self._format_recording_stopped_message(
+                        frames_written=status.recording.frames_written,
+                        recording_summary=summary,
+                        stop_reason=self._recording_last_stop_reason,
+                        save_directory=getattr(self, "_recording_last_save_directory", None),
+                    )
+                )
             self._recording_active_frame_limit = None
             return summary
         if self._recording_last_summary is not None:
@@ -879,12 +901,25 @@ class WxLocalPreviewShell(wx.Frame):
             return active_file_stem
         return getattr(self, "_recording_last_file_stem", None)
 
+    def _get_recording_reflection_save_directory(self, status) -> str | None:
+        recording_status = getattr(status, "recording", None)
+        save_directory = getattr(recording_status, "save_directory", None)
+        if save_directory is None:
+            save_directory = getattr(self, "_recording_last_save_directory", None)
+        if save_directory is None:
+            return None
+        return str(save_directory)
+
     def _get_recording_stop_category(self, status) -> str | None:
         recording_status = getattr(status, "recording", None)
         if bool(getattr(recording_status, "is_recording", False)):
             return None
         stop_reason = getattr(self, "_recording_last_stop_reason", None)
-        return self._categorize_recording_stop_reason(stop_reason)
+        last_error = self._get_recording_last_error(status)
+        categorized = self._categorize_recording_stop_reason(stop_reason)
+        if categorized is None and last_error is not None:
+            return "failure_termination"
+        return categorized
 
     @staticmethod
     def _categorize_recording_stop_reason(stop_reason: str | None) -> str | None:
@@ -898,23 +933,69 @@ class WxLocalPreviewShell(wx.Frame):
             return "host_stop"
         return stop_reason
 
+    def _get_recording_last_error(self, status) -> str | None:
+        recording_status = getattr(status, "recording", None)
+        status_error = getattr(recording_status, "last_error", None)
+        if status_error:
+            return status_error
+        return getattr(self, "_recording_last_error", None)
+
+    @staticmethod
+    def _format_recording_started_message(*, file_stem: str | None, save_directory: Path | None, external: bool = False) -> str:
+        prefix = "External recording run started" if external else "Recording run started"
+        file_part = file_stem or "recording"
+        if save_directory is None:
+            return f"{prefix}: {file_part}"
+        return f"{prefix}: {file_part} -> {save_directory}"
+
+    def _format_recording_stopped_message(
+        self,
+        *,
+        frames_written: int,
+        recording_summary: str | None,
+        stop_reason: str | None,
+        save_directory: Path | None,
+        external: bool = False,
+    ) -> str:
+        stop_category = self._categorize_recording_stop_reason(stop_reason)
+        prefix = "External recording run" if external else "Recording run"
+        if stop_category == "max_frames_reached":
+            detail = f"completed (max frames): {recording_summary or frames_written}"
+        elif stop_category == "failure_termination":
+            detail = f"terminated after failure: {frames_written} frames"
+        elif stop_category == "host_stop":
+            detail = f"stopped (host stop): {frames_written} frames"
+        else:
+            detail = f"stopped: {frames_written} frames"
+        if save_directory is None:
+            return f"{prefix} {detail}"
+        return f"{prefix} {detail} -> {save_directory}"
+
+    @staticmethod
+    def _format_recording_failure_message(action: str, error: str, *, external: bool = False) -> str:
+        prefix = "External recording run" if external else "Recording run"
+        return f"{prefix} {action} failed: {error}"
+
     def _build_recording_reflection(self, status, *, recording_summary: str | None) -> dict[str, object | None]:
         recording_status = getattr(status, "recording", None)
-        save_directory = getattr(recording_status, "save_directory", None)
-        if save_directory is None:
-            save_directory = getattr(self, "_recording_last_save_directory", None)
+        save_directory = self._get_recording_reflection_save_directory(status)
         stop_reason = getattr(self, "_recording_last_stop_reason", None)
         is_recording = bool(getattr(recording_status, "is_recording", False))
+        last_error = self._get_recording_last_error(status)
         if is_recording:
             stop_reason = None
+        stop_category = self._categorize_recording_stop_reason(stop_reason)
+        if stop_category is None and last_error is not None:
+            stop_category = "failure_termination"
         return {
-            "phase": "running" if is_recording else "idle",
+            "phase": "running" if is_recording else ("failed" if last_error is not None else "idle"),
             "summary": recording_summary,
             "file_stem": self._get_recording_reflection_file_stem(status),
-            "save_directory": str(save_directory) if save_directory is not None else None,
+            "save_directory": save_directory,
             "stop_reason": stop_reason,
-            "stop_category": self._categorize_recording_stop_reason(stop_reason),
+            "stop_category": stop_category,
             "frames_written": getattr(recording_status, "frames_written", 0),
+            "last_error": last_error,
         }
 
     def _update_recording_controls(self, status) -> None:
@@ -1091,6 +1172,8 @@ class WxLocalPreviewShell(wx.Frame):
             try:
                 result = self._execute_live_command(command)
             except Exception as exc:
+                self._cached_status = None
+                self._last_status_refresh_time = 0.0
                 write_live_command_result(
                     live_sync_session,
                     command_id=command.command_id,
@@ -1159,38 +1242,68 @@ class WxLocalPreviewShell(wx.Frame):
                 if "target_frame_rate" in payload
                 else self._parse_optional_positive_float(self._recording_target_frame_rate_input.GetValue())
             )
-            result = controller.start_recording(
-                StartRecordingRequest(
-                    file_stem=file_stem,
-                    file_extension=file_extension,
-                    save_directory=self._get_recording_save_directory(),
-                    max_frame_count=frame_limit,
-                    target_frame_rate=target_frame_rate,
-                    camera_id=self._session.resolved_camera_id,
-                    configuration_profile_id=self._session.configuration_profile_id,
-                    configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+            save_directory = self._get_recording_save_directory()
+            try:
+                result = controller.start_recording(
+                    StartRecordingRequest(
+                        file_stem=file_stem,
+                        file_extension=file_extension,
+                        save_directory=save_directory,
+                        max_frame_count=frame_limit,
+                        target_frame_rate=target_frame_rate,
+                        camera_id=self._session.resolved_camera_id,
+                        configuration_profile_id=self._session.configuration_profile_id,
+                        configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+                    )
                 )
-            )
+            except Exception as exc:
+                self._recording_last_error = str(exc)
+                self._recording_last_stop_reason = None
+                self._set_transient_status_message(
+                    self._format_recording_failure_message("start", self._recording_last_error, external=True)
+                )
+                raise
             self._recording_active_frame_limit = frame_limit
             self._recording_target_frame_rate_value = target_frame_rate
             self._recording_last_summary = None
             self._recording_last_file_stem = result.status.active_file_stem or file_stem
-            self._recording_last_save_directory = self._get_recording_save_directory()
+            self._recording_last_save_directory = save_directory
             self._recording_last_stop_reason = None
+            self._recording_last_error = None
             self._set_transient_status_message(
-                f"External recording started: {result.status.active_file_stem or file_stem}"
+                self._format_recording_started_message(
+                    file_stem=result.status.active_file_stem or file_stem,
+                    save_directory=save_directory,
+                    external=True,
+                )
             )
         elif command.command_name == "stop_recording":
-            result = controller.stop_recording(
-                StopRecordingRequest(reason=payload.get("reason", "external_cli"))
-            )
+            try:
+                result = controller.stop_recording(
+                    StopRecordingRequest(reason=payload.get("reason", "external_cli"))
+                )
+            except Exception as exc:
+                self._recording_last_error = str(exc)
+                self._set_transient_status_message(
+                    self._format_recording_failure_message("stop", self._recording_last_error, external=True)
+                )
+                raise
             self._recording_last_summary = self._format_recording_summary(
                 frames_written=result.status.frames_written,
                 frame_limit=self._recording_active_frame_limit,
             )
             self._recording_last_stop_reason = result.stop_reason
+            self._recording_last_error = None
             self._recording_active_frame_limit = None
-            self._set_transient_status_message(f"External recording stopped: {result.status.frames_written} frames")
+            self._set_transient_status_message(
+                self._format_recording_stopped_message(
+                    frames_written=result.status.frames_written,
+                    recording_summary=self._recording_last_summary,
+                    stop_reason=result.stop_reason,
+                    save_directory=getattr(self, "_recording_last_save_directory", None),
+                    external=True,
+                )
+            )
         else:
             raise RuntimeError(f"Unsupported live command '{command.command_name}'.")
 
