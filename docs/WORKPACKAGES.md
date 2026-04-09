@@ -452,18 +452,17 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 82 | Setup Focus ROI Workflow Narrowing | make the current `Setup / Focus / ROI Adjustment` workflow practically usable as the setup path for the main test flows | landed | landed workflow-first package; the setup path now has explicit setup-state reflection, setup-oriented messaging, ROI/focus visibility, and host-control smoke coverage without widening scope | `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md` |
 | 83 | Host Result And Status Surface Consistency Narrowing | align the current live command result reading with the already published shell-status reflection model | landed | landed narrow host-surface slice; live command results now expose additive reflection-aligned subsets for setup, snapshot, recording, and save-directory paths, plus a more consistent failed-result placeholder shape | `docs/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md` |
 | 84 | Usable Failure Reflection Baseline | make current setup, snapshot, and recording failures readable enough in shell and published status without opening a broad error-platform lane | landed | landed narrow Hybrid Companion follow-up; shell status, published status, and failed command results now share one readable failure-reflection baseline across setup, snapshot, and recording | `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md` |
-| 85 | Stage-2 LabVIEW Contract Mapping Narrowing | map the current bounded Stage-1 host surface into one LabVIEW-near reading without widening transport scope | current next | next narrow Stage-2 follow-up after `WP84`; turn the current test-host surface into one explicit LabVIEW-near integration reading | `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md` |
-| 86 | Headless Command Seam Extraction Baseline | extract one small shell-independent command/status seam from the bounded wx-shell bridge as the first true headless-preparation slice | queued | follow `WP85`; keep extraction narrow and structural rather than attempting full headless conversion | `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md` |
+| 85 | Stage-2 LabVIEW Contract Mapping Narrowing | map the current bounded Stage-1 host surface into one LabVIEW-near reading without widening transport scope | landed | landed narrow Stage-2 follow-up; the current `local_shell control` path now exposes one additive `labview_mapping` block for status and command reads, including bounded failure preservation | `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md` |
+| 86 | Headless Command Seam Extraction Baseline | extract one small shell-independent command/status seam from the bounded wx-shell bridge as the first true headless-preparation slice | current next | next structural follow-up after `WP85`; keep extraction narrow and structural rather than attempting full headless conversion | `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md` |
 | 87 | Hybrid Companion Hardware Workflow Revalidation | revalidate the landed Hybrid Companion workflows on the tested hardware path through the current host-plus-shell mode | queued | later hardware-confidence slice after the next host/usability consistency seams are closed | `docs/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. execute `WP85` next as the direct LabVIEW-near contract-mapping follow-up to the landed workflow, host-surface, and failure-reading baselines
-2. keep `WP86` prepared as the first explicit headless-preparation extraction slice after the current host/usability seams are stronger
-3. keep `WP87` visible as the later hardware-confidence rerun over the landed Hybrid Companion workflows
-4. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the new slices reveals a concrete seam that actually needs them
+1. execute `WP86` next as the first explicit headless-preparation extraction slice after the landed workflow, host-surface, failure-reading, and LabVIEW-near mapping baselines
+2. keep `WP87` visible as the later hardware-confidence rerun over the landed Hybrid Companion workflows
+3. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the new slices reveals a concrete seam that actually needs them
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
 
@@ -495,8 +494,9 @@ Current prepared usable-subsystem sequence:
 - `WP82 Setup Focus ROI Workflow Narrowing` is now landed as the third complete workflow-first package in the confirmed `Hybrid Companion` lane
 - `WP83 Host Result And Status Surface Consistency Narrowing` is now landed as the first post-workflow host-surface consistency slice
 - `WP84 Usable Failure Reflection Baseline` is now landed as the shared failure-reading baseline across setup, snapshot, and recording
-- `WP85` is now the active `current next`
-- `WP86` and `WP87` remain the prepared follow-up slices for first headless seam extraction and hardware revalidation
+- `WP85` is now landed as the additive Stage-2 LabVIEW-near contract-mapping slice
+- `WP86` is now the active `current next`
+- `WP87` remains the prepared hardware-revalidation follow-up
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 - keep `WP76`, `WP77`, and `WP78` visible only as dormant seam- or evidence-driven follow-ups while the workflow-first sequence is active
 
@@ -743,21 +743,22 @@ The current coarse PM order should be:
 50. treat `WP81` and `WP82` as the landed geometry-capture and setup/focus/ROI workflow packages that complete the current workflow-first trilogy
 51. treat `WP83` as the landed first post-workflow host-result/status consistency slice
 52. treat `WP84` as landed; shell status, published status, and failed command results now share one readable failure-reflection baseline
-53. treat `WP85` as the current next slice for Stage-2 LabVIEW-near contract mapping
-54. treat `WP86` and `WP87` as the prepared follow-up slices for first headless seam extraction and Hybrid Companion hardware revalidation
-55. keep `WP76` and `WP77` dormant unless one of the new slices exposes a concrete shell-feedback or host-naming blocker
-56. keep `WP78` dormant as a later evidence-gathering slice rather than as immediate migration work
-57. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
+53. treat `WP85` as landed; the current test-host path now has one additive `labview_mapping` reading for status, command results, and bounded failures
+54. treat `WP86` as the current next slice for first headless seam extraction
+55. treat `WP87` as the prepared Hybrid Companion hardware revalidation follow-up
+56. keep `WP76` and `WP77` dormant unless one of the new slices exposes a concrete shell-feedback or host-naming blocker
+57. keep `WP78` dormant as a later evidence-gathering slice rather than as immediate migration work
+58. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
 
 ## Recommended Next Detailed Work Package
 
-`WP85 Stage-2 LabVIEW Contract Mapping Narrowing`
+`WP86 Headless Command Seam Extraction Baseline`
 
 Reason:
 
-- `WP80` through `WP84` are now landed and cover the workflow-first usable-subsystem chain, the first host-result/status consistency seam, and one shared usable-failure baseline
-- `Stage-2 LabVIEW Contract Mapping Narrowing` is now the next strongest product-reading slice because the confirmed direction explicitly names LabVIEW as the next real host integration stage
-- `WP86` and `WP87` should stay prepared behind that slice so first headless extraction and hardware confidence do not outrun the LabVIEW-near host reading
+- `WP80` through `WP85` are now landed and cover the workflow-first usable-subsystem chain, the first host-result/status consistency seam, one shared usable-failure baseline, and one additive LabVIEW-near mapping seam on the current test-host path
+- `Headless Command Seam Extraction Baseline` is now the next strongest structural slice because the current product-facing host/shell reading is strong enough to start lifting one shell-independent seam
+- `WP87` should stay prepared behind that slice so hardware confidence does not outrun the next structural extraction
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
 ## Fresh Agent Decision Rule

@@ -218,6 +218,11 @@ For near-term handover or integration, read the current host baseline as:
 - one stable command vocabulary
 - one stable narrow envelope ownership model
 - one stable additive polling slice
+
+Current Stage-2 mapping note:
+
+- the current `vision_platform.apps.local_shell control` path now also exposes one additive `labview_mapping` block for published status reads and command-result reads
+- this should be read as a LabVIEW-near adapter view over the existing bounded Stage-1 surface, not as a new transport or a full contract-family expansion
 - one stable narrow confirmed-settings and `run_id` traceability slice
 
 Do not read it as:
