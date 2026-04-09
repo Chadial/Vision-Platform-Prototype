@@ -240,6 +240,65 @@ class LocalShellControlCliTests(unittest.TestCase):
             self.assertEqual(status_snapshot["setup_reflection"]["roi_shape"], "rectangle")
             self.assertEqual(status_snapshot["setup_reflection"]["roi_bounds"], [10, 20, 110, 70])
 
+    def test_host_control_smoke_covers_recording_status_labview_mapping_on_simulated_path(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id="DEV_123",
+                configuration_profile_id="default",
+            )
+            controller = _SmokeController()
+            shell = _build_smoke_shell(session=session, controller=controller)
+
+            start_command = append_live_command(
+                session,
+                command_name="start_recording",
+                payload={"file_stem": "delam_run", "max_frame_count": 5},
+            )
+            commands, _processed_count = read_pending_live_commands(session, processed_count=0)
+            result = shell._execute_live_command(commands[0])
+            write_live_command_result(session, command_id=start_command.command_id, success=True, result=result)
+            shell._publish_live_status_snapshot(controller.get_status(), focus_summary="hidden", recording_summary="0/5")
+
+            payload = control_cli._handle_status_command(argparse.Namespace(session_root=Path(temp_dir)))
+
+            self.assertEqual(payload["labview_mapping"]["recording_phase"], "running")
+            self.assertEqual(payload["labview_mapping"]["recording_file_stem"], "delam_run")
+            self.assertEqual(payload["labview_mapping"]["recording_save_directory"], str(Path("captures/delam")))
+            self.assertIsNone(payload["labview_mapping"]["failure_source"])
+
+    def test_host_control_smoke_covers_setup_failure_status_and_labview_mapping_on_simulated_path(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id="DEV_123",
+                configuration_profile_id="default",
+            )
+            controller = _FailingSmokeController()
+            shell = _build_smoke_shell(session=session, controller=controller)
+
+            failed_command = append_live_command(
+                session,
+                command_name="apply_configuration",
+                payload={"roi_width": -1},
+            )
+            shell._poll_live_commands()
+            shell._publish_live_status_snapshot(controller.get_status(), focus_summary="hidden", recording_summary=None)
+
+            command_result = wait_for_live_command_result(session, command_id=failed_command.command_id, timeout_seconds=0.2)
+            mapped_result = attach_labview_mapping_to_command_result(command_result)
+            status_payload = control_cli._handle_status_command(argparse.Namespace(session_root=Path(temp_dir)))
+
+            self.assertFalse(command_result["success"])
+            self.assertEqual(mapped_result["labview_mapping"]["command_name"], "apply_configuration")
+            self.assertFalse(mapped_result["labview_mapping"]["command_ok"])
+            self.assertEqual(mapped_result["labview_mapping"]["failure_source"], "setup")
+            self.assertEqual(status_payload["failure_reflection"]["source"], "setup")
+            self.assertEqual(status_payload["labview_mapping"]["failure_source"], "setup")
+            self.assertEqual(status_payload["labview_mapping"]["failure_message"], "camera rejected roi")
+
     def test_main_preserves_failed_command_result_with_labview_mapping(self) -> None:
         failed_result = attach_labview_mapping_to_command_result(
             {
@@ -345,6 +404,11 @@ class _SmokeController:
         return self._status
 
 
+class _FailingSmokeController(_SmokeController):
+    def apply_configuration(self, request):
+        raise RuntimeError("camera rejected roi")
+
+
 def _build_smoke_shell(*, session, controller) -> WxLocalPreviewShell:
     shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
     shell._session = SimpleNamespace(
@@ -375,6 +439,7 @@ def _build_smoke_shell(*, session, controller) -> WxLocalPreviewShell:
     shell._snapshot_last_error = None
     shell._recording_file_stem = "wx_recording"
     shell._recording_file_extension = ".bmp"
+    shell._live_sync_processed_count = 0
     shell._recording_max_frames = SimpleNamespace(GetValue=lambda: "0")
     shell._recording_target_frame_rate_input = SimpleNamespace(GetValue=lambda: "")
     shell._status_lines = []
