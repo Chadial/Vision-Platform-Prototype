@@ -219,6 +219,17 @@ Observed result from the expanded matrix:
 
 Documented hardware-side error checks on March 27, 2026:
 
+Latest availability check on April 9, 2026 before `WP87 Hybrid Companion Hardware Workflow Revalidation`:
+
+- attempted command: `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-alias tested_camera`
+- observed result:
+  - failed with `No Camera with Id 'DEV_1AB22C046D81' available.`
+  - direct VmbPy enumeration only exposed camera simulators `DEV_Cam1`, `DEV_Cam2`, and `DEV_Cam3`
+- interpretation:
+  - the documented tested real-hardware path was not attached locally in this session
+  - no fresh real-device Hybrid Companion workflow evidence was collected on April 9, 2026
+  - simulator-visible Vimba devices do not satisfy the current tested-hardware revalidation requirement
+
 - invalid camera id: explicit failure, `No Camera with Id 'DOES_NOT_EXIST' available.`
 - unsupported pixel format: explicit failure when trying `Mono16`, with `No Entry associated with 'Mono16'`
 - unsupported ROI combination: explicit failure for width `2001`, with device-side increment guidance `not a multiple of 8`

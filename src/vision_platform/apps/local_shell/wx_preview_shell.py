@@ -12,6 +12,11 @@ from camera_app.logging.log_service import configure_logging
 from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.models import ApplyConfigurationRequest, SaveSnapshotRequest, SetSaveDirectoryRequest
 from vision_platform.models import StartRecordingRequest, StopRecordingRequest
+from vision_platform.services.companion_contract_service import (
+    build_companion_command_result,
+    build_companion_status_snapshot,
+    build_failed_companion_command_result,
+)
 from vision_platform.services.display_service import PreviewInteractionCommand, format_focus_score
 
 from vision_platform.apps.local_shell.control_cli import main as run_local_shell_control_cli
@@ -1180,13 +1185,13 @@ class WxLocalPreviewShell(wx.Frame):
             focus_summary=focus_summary,
             recording_summary=recording_summary,
         )
-        return {
-            "command": command_name,
-            "reflection_kind": reflection_kind,
-            "reflection": reflection,
-            "failure_reflection": self._build_failure_reflection(),
-            "result": to_serializable(result),
-        }
+        return build_companion_command_result(
+            command_name=command_name,
+            reflection_kind=reflection_kind,
+            reflection=reflection,
+            failure_reflection=self._build_failure_reflection(),
+            result=to_serializable(result),
+        )
 
     @staticmethod
     def _format_recording_started_message(*, file_stem: str | None, save_directory: Path | None, external: bool = False) -> str:
@@ -1427,13 +1432,10 @@ class WxLocalPreviewShell(wx.Frame):
                     command_id=command.command_id,
                     success=False,
                     command_name=command.command_name,
-                    result={
-                        "command": command.command_name,
-                        "reflection_kind": None,
-                        "reflection": None,
-                        "failure_reflection": self._build_failure_reflection(),
-                        "result": None,
-                    },
+                    result=build_failed_companion_command_result(
+                        command_name=command.command_name,
+                        failure_reflection=self._build_failure_reflection(),
+                    ),
                     error=str(exc),
                 )
                 self._set_transient_status_message(f"External command failed: {command.command_name}")
@@ -1629,20 +1631,20 @@ class WxLocalPreviewShell(wx.Frame):
         snapshot_reflection = self._build_snapshot_reflection()
         write_live_status_snapshot(
             live_sync_session,
-            {
-                "session_id": live_sync_session.session_id,
-                "source": self._session.source,
-                "camera_id": self._session.resolved_camera_id,
-                "configuration_profile_id": self._session.configuration_profile_id,
-                "focus_summary": focus_summary,
-                "setup_reflection": setup_reflection,
-                "failure_reflection": self._build_failure_reflection(),
-                "snapshot_reflection": snapshot_reflection,
-                "recording_summary": recording_summary,
-                "recording_reflection": recording_reflection,
-                "status_lines": self._status_lines,
-                "status": to_serializable(status),
-            },
+            build_companion_status_snapshot(
+                session_id=live_sync_session.session_id,
+                source=self._session.source,
+                camera_id=self._session.resolved_camera_id,
+                configuration_profile_id=self._session.configuration_profile_id,
+                focus_summary=focus_summary,
+                setup_reflection=setup_reflection,
+                failure_reflection=self._build_failure_reflection(),
+                snapshot_reflection=snapshot_reflection,
+                recording_summary=recording_summary,
+                recording_reflection=recording_reflection,
+                status_lines=self._status_lines,
+                status=to_serializable(status),
+            ),
         )
 
 
