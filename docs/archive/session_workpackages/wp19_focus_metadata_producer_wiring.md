@@ -86,7 +86,7 @@ Recommended focused validation:
 - `docs/WORKPACKAGES.md`
 - `services/recording_service/README.md`
 - `services/recording_service/STATUS.md`
-- `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md` only if activation wording needs clarification
+- `docs/archive/session_workpackages/wp18_focus_metadata_artifact_extension.md` only if activation wording needs clarification
 
 ## Expected Commit Shape
 
@@ -114,7 +114,7 @@ To activate this work package later:
 3. Read `docs/MODULE_INDEX.md`
 4. Read `docs/WORKPACKAGES.md`
 5. Read `docs/STATUS.md`
-6. Read `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
+6. Read `docs/archive/session_workpackages/wp18_focus_metadata_artifact_extension.md`
 7. Read `services/recording_service/README.md`
 8. Read `services/recording_service/STATUS.md`
 9. Create the intended branch before any substantive edits

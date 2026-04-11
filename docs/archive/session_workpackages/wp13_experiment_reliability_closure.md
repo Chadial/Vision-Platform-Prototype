@@ -136,8 +136,8 @@ Follow-up still left for later reliability work:
 1. Re-read:
    - `docs/STATUS.md`
    - `docs/WORKPACKAGES.md`
-   - `docs/session_workpackages/wp12_host_control_closure.md`
-   - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
+   - `docs/archive/session_workpackages/wp12_host_control_closure.md`
+   - `docs/archive/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 2. Inspect the current recording-service and controller tests for:
    - repeated bounded run coverage
    - post-failure reuse coverage
@@ -215,6 +215,6 @@ To activate this work package later:
 3. Read `docs/MODULE_INDEX.md`
 4. Read `docs/WORKPACKAGES.md`
 5. Read `docs/STATUS.md`
-6. Read `docs/session_workpackages/wp12_host_control_closure.md`
+6. Read `docs/archive/session_workpackages/wp12_host_control_closure.md`
 7. Read `docs/git_strategy.md`
 8. Create the intended branch before any substantive edits

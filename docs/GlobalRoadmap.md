@@ -125,7 +125,8 @@ Turn the repository from a camera-centric code package into an explicitly modula
 ### Status
 
 - functionally completed
-- still needs repeated real-hardware confirmation to be treated as validated baseline
+- bounded real-hardware validation now exists on the tested camera path
+- broader repeated revalidation and hardware-matrix confidence remain useful, but are no longer the main meaning of this phase
 
 ## Phase 2: Integration And Streaming Hardening
 
@@ -138,8 +139,8 @@ Turn the repository from a camera-centric code package into an explicitly modula
 
 ### Status
 
-- mostly completed on the simulator-backed path
-- real-hardware evaluation remains the main open item
+- mostly completed on both the simulator-backed path and the bounded tested hardware path
+- broader transport/runtime expansion and broader hardware-matrix confidence remain later work
 
 ## Phase 3: Common Analysis Foundations
 
@@ -226,7 +227,8 @@ Turn the repository from a camera-centric code package into an explicitly modula
 - OpenCV prototype path exists
 - first real-hardware OpenCV preview path now exists for local inspection
 - a first viewport-based OpenCV preview path with fit-to-window and zoom controls now exists as the prototype UI baseline
-- desktop, web, and postprocess fronts are prepared structurally only
+- a first bounded wxPython working shell and a first bounded postprocess-tool baseline now also exist
+- desktop and web fronts remain prepared for later work rather than current delivery targets
 
 ## Recommended Next Platform Steps
 

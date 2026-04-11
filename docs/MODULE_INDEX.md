@@ -23,7 +23,7 @@
 | Module | Status | Notes |
 | --- | --- | --- |
 | `apps/camera_cli` | active baseline | unified camera-oriented CLI for status, snapshot, recording, and interval capture |
-| `integrations/camera` | active core | drivers implemented, hardware validation still open |
+| `integrations/camera` | active core | drivers implemented, with bounded tested-path hardware validation present; broader hardware matrix coverage remains open |
 | `services/stream_service` | active core | preview/shared acquisition implemented |
 | `services/recording_service` | active core | snapshot, interval capture, recording implemented |
 | `services/display_service` | active baseline | UI-free overlay composition implemented; lightweight payload demo exists, renderer-facing adapter still open |

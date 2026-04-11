@@ -109,8 +109,8 @@ The immediate remaining gap is:
 1. Re-read:
    - `docs/STATUS.md`
    - `docs/WORKPACKAGES.md`
-   - `docs/session_workpackages/wp16_data_logging_traceability.md`
-   - `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
+   - `docs/archive/session_workpackages/wp16_data_logging_traceability.md`
+   - `docs/archive/session_workpackages/wp17_offline_measurement_metadata_extension.md`
    - `services/recording_service/README.md`
    - `services/recording_service/STATUS.md`
    - `apps/postprocess_tool/README.md`
@@ -199,8 +199,8 @@ To activate this work package later:
 3. Read `docs/MODULE_INDEX.md`
 4. Read `docs/WORKPACKAGES.md`
 5. Read `docs/STATUS.md`
-6. Read `docs/session_workpackages/wp16_data_logging_traceability.md`
-7. Read `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
+6. Read `docs/archive/session_workpackages/wp16_data_logging_traceability.md`
+7. Read `docs/archive/session_workpackages/wp17_offline_measurement_metadata_extension.md`
 8. Read `services/recording_service/README.md`
 9. Read `services/recording_service/STATUS.md`
 10. Read `apps/postprocess_tool/README.md`

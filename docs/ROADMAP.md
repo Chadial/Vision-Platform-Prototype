@@ -152,7 +152,8 @@ Status:
 
 - partially completed
 - simulator-backed validation is strong
-- real-hardware validation is still the key open item
+- bounded tested-path hardware validation is now present for the current CLI, command-flow, and Hybrid Companion shell path
+- broader repeated hardware evidence and wider hardware-matrix coverage remain open
 
 ## Phase 9: Real Hardware Evaluation
 
@@ -165,7 +166,8 @@ Status:
 
 Status:
 
-- open
+- prototype-level complete on the documented tested camera path
+- further reruns remain evidence-driven, and wider hardware coverage is still open
 
 ## Phase 10: Optional OpenCV Integration
 

@@ -380,80 +380,80 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 1 | Camera CLI Baseline Narrowing | keep the CLI intentionally thin and stable over the shared control layer | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp01_camera_cli.md` |
 | 2 | Host Integration Command Surface | harden the shared host-neutral command surface for later CLI, API, and C# embedding reuse | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp02_host_integration_command_surface.md` |
 | 3 | OpenCV UI Operator Follow-Up | continue bounded UI/operator work without leaking screen concerns into core services | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md` |
-| 4 | Hardware Revalidation Follow-Up | re-run selected hardware checks and capture new evidence when hardware is attached again | conditional | conditional / deferred until hardware is attached | `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md` |
+| 4 | Hardware Revalidation Follow-Up | re-run selected hardware checks and capture new evidence when hardware is attached again | conditional | conditional / deferred until hardware is attached | `docs/archive/session_workpackages/wp04_hardware_revalidation_follow_up.md` |
 | 5 | ROI Workflow Consolidation | define ownership and reuse of ROI state across preview, snapshot, and analysis | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md` |
 | 6 | Focus Method Expansion | add a stronger focus-method slice beyond the current baseline | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp06_focus_method_expansion.md` |
 | 7 | Tracking Core Baseline | establish the first edge/tracking foundation slice | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp07_tracking_core_baseline.md` |
 | 8 | API Surface Preparation | prepare the first external adapter above the host-neutral control layer | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp08_api_surface_preparation.md` |
 | 9 | C# Handover Hardening | identify and tighten contracts that are most likely to survive direct C# porting | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md` |
 | 10 | Postprocess Baseline | define an offline evaluation path over stored images and analysis data | dormant | completed and archived; keep for continuity only | `docs/archive/session_workpackages/wp10_postprocess_baseline.md` |
-| 11 | Additional Frontends | prepare desktop and later web-capable paths | dormant | keep for later continuity; not part of the current post-closure default lane | `docs/session_workpackages/wp11_additional_frontends.md` |
-| 12 | Host Control Closure | prove and tighten the host-steerable command/response and status-polling baseline | dormant | closed Extended MVP lane; first narrow slice landed through `WP12` | `docs/session_workpackages/wp12_host_control_closure.md` |
-| 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | dormant | closed Extended MVP lane; first narrow slice landed through `WP13` | `docs/session_workpackages/wp13_experiment_reliability_closure.md` |
-| 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | dormant | closed Extended MVP lane; first narrow slice landed through `WP14`, later extended by traceability follow-ups | `docs/session_workpackages/wp14_data_logging_closure.md` |
-| 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | dormant | closed Extended MVP lane; first narrow slice landed through `WP15`, later extended by metadata-aware offline follow-ups | `docs/session_workpackages/wp15_offline_measurement_closure.md` |
-| 16 | Data And Logging Traceability Extension | add one stable artifact-level metadata traceability path for saved snapshot and bounded recording outputs | active lane | first post-`WP14` extension slice; landed through `WP16` with one shared folder-local appendable trace log for snapshot and bounded recording | `docs/session_workpackages/wp16_data_logging_traceability.md` |
-| 17 | Offline And Measurement Metadata Extension | reuse saved artifact metadata in the offline report path so artifact context and focus results stay linked | active lane | landed narrow metadata-aware offline slice; compact postprocess reporting now joins folder-local traceability rows by saved image name | `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md` |
-| 18 | Focus Metadata Artifact Extension | define one narrow reusable artifact-level focus and analysis-ROI metadata baseline above the traceability path | active lane | landed narrow extension after `WP16`; focus summary metadata now requires an explicit aggregation basis, while exact defaults/bounds still need later testing and definition | `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md` |
-| 19 | Focus Metadata Producer Wiring | wire the artifact-level focus metadata producer into normal save flows without freezing broader statistics policy | active lane | landed narrow follow-up after `WP18`; snapshot and bounded-recording flows can now emit focus metadata when explicitly configured | `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md` |
-| 20 | Focus Metadata Policy Hardening | define and test explicit defaults, bounds, and validation policy for artifact-level focus summary metadata | active lane | landed narrow post-`WP19` policy slice; current summary fields now require `focus_method`, a positive integer `focus_score_frame_interval`, and non-negative `focus_value_stddev` values | `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md` |
-| 21 | Offline Stable Context Exposure | expose one compact folder-level stable-context summary from traceability headers in the offline focus report | active lane | landed narrow post-`WP20` consumer slice; the additive report-bundle path now exposes stable header context while the existing list-return path stays usable | `docs/session_workpackages/wp21_offline_stable_context_exposure.md` |
-| 22 | Host Status Polling Hardening | tighten one narrow host-readable status payload slice during active experiment runs | active lane | landed bounded post-`WP21` closure slice; the adapter-facing status family now exposes a conservative additive active-run polling subset without redesigning core status models | `docs/session_workpackages/wp22_host_status_polling_hardening.md` |
-| 23 | Host Command Confirmation Hardening | return one more explicit confirmed-settings subset for host-triggered capture and recording commands | active lane | landed host-control follow-up after `WP22`; command results now expose a narrower explicit confirmed-settings subset without widening the transport surface | `docs/session_workpackages/wp23_host_command_confirmation_hardening.md` |
-| 24 | Run Identity And Trace Linkage | align one deterministic run identity across host results, traceability blocks, and recording-side metadata outputs | active lane | landed cross-lane linkage slice; the current host path now reuses the same narrow `run_id` across snapshot / bounded-recording results and traceability blocks | `docs/session_workpackages/wp24_run_identity_trace_linkage.md` |
-| 25 | Experiment Recovery Validation Extension | prove one tighter simulator-first recovery block over host-driven recording failures and repeated restart behavior | active lane | landed reliability-focused validation slice; the integrated bootstrap/controller path now proves write-failure recovery plus repeated stop/restart idempotence without runtime redesign | `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md` |
-| 26 | Hardware Revalidation Resume | resume one bounded real-hardware revalidation block once the camera is attached again | dormant | landed final bounded confidence rerun inside the closed Extended MVP phase; future reruns are residual-driven only | `docs/session_workpackages/wp26_hardware_revalidation_resume.md` |
-| 27 | Hardware Lifecycle And Camera Release Hardening | narrow the remaining real-device lifecycle gap around camera release, process-to-process reuse, and cleanup determinism | active lane | landed first post-closure hardening slice after the bounded hardware baseline was already real | `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md` |
-| 28 | Capability-Aware ROI Constraint Reporting | make ROI width/height/offset constraint failures clearer and more host-usable on capability-backed camera paths | active lane | landed first post-closure diagnostics/polish slice; strict capability enforcement remains intact while host-readable guidance improved | `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md` |
-| 29 | Hardware Startup Warning Classification | classify and narrow the remaining real-device startup warnings so hardware runs distinguish actionable lifecycle issues from SDK-noise residuals | active lane | landed post-closure diagnostics slice; current March 30 evidence shows `VmbError.NotAvailable: -30` persists as a non-blocking SDK log residual during successful `status` / `snapshot` runs, while capability probing still succeeds and does not surface it as `capability_probe_error` | `docs/session_workpackages/wp29_hardware_startup_warning_classification.md` |
-| 30 | Interval Capture Timing And Polling Tightening | tighten bounded interval-capture timing evidence and active-run polling meaning on the integrated baseline | active lane | landed hardening slice; active interval polling now exposes non-fatal timing warnings during skipped intervals and reports compact completion summaries such as `completed with skipped_intervals=N` instead of leaving the end state implicit | `docs/session_workpackages/wp30_interval_capture_timing_polling_tightening.md` |
-| 31 | Python Baseline Operations Runbook | document the stable operating baseline, known-good commands, hardware assumptions, and residual rules for real use | active lane | landed first operational-readiness slice; the compact central runbook now lives in `docs/PYTHON_BASELINE_RUNBOOK.md` without changing product scope | `docs/session_workpackages/wp31_python_baseline_operations_runbook.md` |
-| 32 | Entry-Point And Launch Readiness Baseline | tighten the practical startup surface for the Python baseline through clearer launch paths and bounded readiness polish | active lane | landed second operational-readiness slice; the compact startup-surface reference now lives in `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` without opening packaging work | `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md` |
-| 33 | Host Contract Stability And Deferred Surface Clarification | define which host-facing command/status/result fields are stable now and which broader surfaces remain intentionally deferred | active lane | landed later-handover/productization clarification slice; the compact stable-now / deferred-later reference now lives in `docs/HOST_CONTRACT_BASELINE.md` without widening transport scope | `docs/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md` |
-| 34 | Interval-Capture Host Contract Normalization | bring the current bounded `interval-capture` path closer to the same host-envelope expectations used by the other bounded host commands | active lane | landed hardening slice; bounded `interval-capture` now returns selected save directory, frames written, stop reason, accepted capture bounds, and confirmed settings in the current host-envelope model | `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md` |
-| 35 | Hardware Enumeration And Startup Residual Narrowing | narrow duplicate camera enumeration and remaining startup-log ambiguity on the tested hardware path | active lane | landed residual-driven hardware follow-up; raw Vimba X enumeration still duplicates `DEV_1AB22C046D81`, but the repository now prefers the richer candidate and preserves serial `067WH` in host-visible status while `VmbError.NotAvailable: -30` remains non-blocking residual noise | `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md` |
-| 36 | Detached Recording Lifecycle Decision Slice | document the current bounded recording meaning versus any later detached lifecycle control direction | active lane | landed decision-oriented handover slice; the stable-now versus deferred-later recording boundary now lives in `docs/RECORDING_LIFECYCLE_BOUNDARY.md` without implementing detached lifecycle control | `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md` |
-| 37 | Python Baseline Operator Start Helper | reduce repeated local startup friction with one bounded helper if justified | active lane | landed operational-readiness polish slice; `scripts/run_python_baseline.ps1` now provides one thin local convenience wrapper over the existing `.venv` plus `run_camera_cli.py` path without becoming a new startup contract | `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md` |
-| 38 | Selective Offline Follow-Up | preserve one bounded offline-expansion option only when a concrete user need appears | active lane | landed selective-expansion slice; the compact offline focus-report bundle now adds one additive summary line for entry count, traceability coverage, and the current highest-score image without widening into explorer or export scope | `docs/session_workpackages/wp38_selective_offline_followup.md` |
-| 39 | Module Documentation Audit And Shrink Pass | refresh module-local docs, shrink stale local roadmaps, and reduce drift between local module docs and the post-closure baseline | active lane | landed bounded meta-documentation cleanup slice; active-module roadmaps were shrunk, stale transition wording reduced, and module-local doc roles clarified without central PM rewrite | `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md` |
-| 40 | Vision Platform Control And Imaging Physical Migration | move current control and optional imaging implementation behind the preferred `src/vision_platform` boundary while preserving compatibility imports | active lane | landed first post-closure architecture-convergence slice; `vision_platform` now owns bootstrap/control/imaging implementation directly while `camera_app` remains the compatibility shim layer | `docs/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md` |
-| 41 | Vision Platform Storage Physical Migration | move storage and persistence helpers behind the preferred `src/vision_platform` boundary while preserving current behavior | active lane | landed second architecture-convergence slice; storage-facing legacy services now import platform-owned file-naming and frame-writer helpers directly while `camera_app.storage` remains the compatibility shim layer | `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md` |
-| 42 | Vision Platform Namespace Coverage And Compatibility Audit | tighten trust in the preferred `vision_platform` import surface while keeping remaining compatibility shims explicit | active lane | landed trust-and-shim audit slice; current remaining `camera_app` dependencies are now bounded, tested, and documented as intentional compatibility seams rather than silent drift | `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md` |
-| 43 | Python Baseline Packaging Manifest And Environment Guardrails | make the bounded local Python baseline easier to set up and re-enter without pretending to solve full product packaging | active lane | landed operational-readiness follow-up; the package manifest now exposes `vision-platform-cli`, bootstrap output carries clearer install guardrails, and the bounded local install contract now lives in `docs/PYTHON_BASELINE_ENVIRONMENT.md` | `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md` |
-| 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | active lane | landed selective-expansion slice; `api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without introducing framework or transport runtime scope | `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
-| 45 | Stored Camera Configuration Profiles Baseline | introduce one bounded named profile baseline over the current host-neutral `CameraConfiguration` path | active lane | landed post-closure operational-readiness / selective-expansion slice; the CLI now resolves repo-local camera-class-first profiles through `configs/camera_configuration_profiles.json`, starting with a `default` profile and continuing to reuse the existing capability-aware configuration path | `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md` |
-| 46 | Camera Alias And ID Resolution Baseline | introduce one bounded alias-to-camera-id resolution layer above the current explicit camera-selection path | active lane | landed post-closure operational-readiness slice; the camera CLI now supports repo-local alias resolution through `configs/camera_aliases.json`, including the tested example alias `tested_camera`, while preserving direct explicit `camera_id` support and avoiding device-inventory scope | `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md` |
-| 47 | Traceability Control Context Extension | carry additive alias and profile-selection context into the existing snapshot and bounded-recording traceability path | active lane | landed post-closure data/logging follow-up; snapshot and bounded recording now preserve `camera_alias` and optional profile identity in stable traceability context when the current request path provides them, while the offline stable-context consumer exposes those fields additively | `docs/session_workpackages/wp47_traceability_control_context_extension.md` |
-| 50 | Display Geometry Service Extraction | extract reusable viewport geometry from the OpenCV preview so later UI and host-facing work can share one headless mapping core | active lane | implemented on the current architecture baseline; OpenCV preview now consumes a headless geometry service and dedicated geometry coverage exists | `docs/session_workpackages/wp50_display_geometry_service_extraction.md` |
-| 51 | Shared Preview Interaction Command Layer | introduce a shared preview interaction/action layer above geometry and below concrete UI event systems | active lane | implemented on the current architecture branch; OpenCV preview now translates HighGUI input into shared interaction commands with dedicated service coverage | `docs/session_workpackages/wp51_shared_preview_interaction_command_layer.md` |
-| 52 | Overlay And Preview Status Model Definition | define UI-agnostic overlay/status models once geometry and interaction ownership are separated | active lane | implemented on the current architecture baseline; OpenCV preview now formats and renders shared descriptive status / overlay models | `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md` |
-| 53 | Local Working UI Shell Baseline | add a first pragmatic local UI shell on top of the extracted geometry and interaction layers | active lane | implemented as a bounded wxPython local shell over the shared controller/preview/display stack while OpenCV remains the fallback/reference path | `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md` |
-| 54 | wx Shell Hardware Enablement | add one bounded real-hardware startup path for the existing wxPython shell | active lane | implemented; the wx shell now reuses the same headless source-selection, alias/profile, and configuration startup semantics on both simulated and hardware-backed paths | `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md` |
-| 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | active lane | implemented as an append-only hardware-audit baseline that records warnings, degraded startup states, and incidents separately from artifact traceability | `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
-| 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | active lane | landed CLI help and documentation polish; the bounded current command surface now has clearer argparse help and a compact human-readable reference | `docs/session_workpackages/wp56_cli_help_and_command_documentation.md` |
-| 60 | wx Recording Progress Status Baseline | surface bounded recording controls and progress in the wx shell through existing status models | active lane | landed bounded wx recording-control slice; recording controls, max-frames input, recording FPS input, and progress stay within the existing controller/status path | `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md` |
-| 61 | wx Feature Inventory And Core/UI Boundary Documentation | document the implemented wx shell surface and the shared-core / UI-local split | active lane | implemented wx shell inventory and boundary documentation, captured in `apps/local_shell/FEATURES.md` | `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md` |
-| 62 | wx Live Command Sync For Open Shell | let an already open wx shell observe CLI/API-driven changes without moving command ownership into the UI | active lane | implemented bounded local session-bridge sync; the open wx shell now reflects external save/configuration/recording commands through the existing controller path | `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md` |
-| 63 | Recording Append / Resume From Trace Log | stop reused save directories from overwriting prior recording outputs and derive the next sequence position from existing trace/log context | active lane | landed artifact-continuity slice; reused directories now continue snapshot and recording naming instead of overwriting | `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md` |
-| 64 | wx Menu And Settings Dialog Baseline | add one bounded menu/settings popup surface to the wx shell above the shared controller/configuration path | active lane | landed local-usability slice; wx shell now exposes working save-directory and recording-settings dialogs over the existing controller path | `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md` |
-| 65 | wx Recording Settings Guardrails And Format Picker | tighten the bounded recording-settings dialog with guided format selection instead of free-form extension typing | active lane | landed wx usability hardening; the recording-settings dialog now constrains format selection through a picker and aligns default recording output with `.bmp` | `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md` |
-| 66 | Recording Timestamp Anchor Alignment | add one explicit first-frame camera/system timestamp anchor per recording session while preserving per-image timing rows | active lane | landed logging-semantics hardening; recording and traceability logs now persist a first-frame camera/system anchor while keeping per-image timing rows | `docs/session_workpackages/wp66_recording_timestamp_anchor_alignment.md` |
-| 67 | Recording Log Policy Alignment | define and implement the intended recording-log reuse versus per-run split policy for repeated sessions in one save directory | active lane | landed log-usability hardening; repeated recording now appends to one deterministic recording log per save directory with explicit run boundaries | `docs/session_workpackages/wp67_recording_log_policy_alignment.md` |
-| 68 | Unified Artifact Recording Log Append Baseline | make snapshot and recording save into one directory-scoped `recording_log.csv` append stream | landed | landed logging-continuity slice so snapshots and recordings share the same append base for later resume logic | `docs/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md` |
-| 69 | wx Camera Settings Menu And Shortcut Baseline | expose the host-neutral camera configuration surface through the bounded wx shell and define the GUI shortcut map | landed | landed wx-shell seam slice for camera settings, menu coverage, and shortcut alignment | `docs/session_workpackages/wp69_wx_camera_settings_menu_and_shortcut_baseline.md` |
+| 11 | Additional Frontends | prepare desktop and later web-capable paths | dormant | keep for later continuity; not part of the current post-closure default lane | `docs/archive/session_workpackages/wp11_additional_frontends.md` |
+| 12 | Host Control Closure | prove and tighten the host-steerable command/response and status-polling baseline | dormant | closed Extended MVP lane; first narrow slice landed through `WP12` | `docs/archive/session_workpackages/wp12_host_control_closure.md` |
+| 13 | Experiment Reliability Closure | narrow runtime and hardware risk for experiment-relevant recording and control flows | dormant | closed Extended MVP lane; first narrow slice landed through `WP13` | `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md` |
+| 14 | Data And Logging Closure | make saved image, metadata, timestamp, and series structure experimentally usable | dormant | closed Extended MVP lane; first narrow slice landed through `WP14`, later extended by traceability follow-ups | `docs/archive/session_workpackages/wp14_data_logging_closure.md` |
+| 15 | Offline And Measurement Closure | prove that saved data is useful for offline focus and measurement-oriented follow-up | dormant | closed Extended MVP lane; first narrow slice landed through `WP15`, later extended by metadata-aware offline follow-ups | `docs/archive/session_workpackages/wp15_offline_measurement_closure.md` |
+| 16 | Data And Logging Traceability Extension | add one stable artifact-level metadata traceability path for saved snapshot and bounded recording outputs | active lane | first post-`WP14` extension slice; landed through `WP16` with one shared folder-local appendable trace log for snapshot and bounded recording | `docs/archive/session_workpackages/wp16_data_logging_traceability.md` |
+| 17 | Offline And Measurement Metadata Extension | reuse saved artifact metadata in the offline report path so artifact context and focus results stay linked | active lane | landed narrow metadata-aware offline slice; compact postprocess reporting now joins folder-local traceability rows by saved image name | `docs/archive/session_workpackages/wp17_offline_measurement_metadata_extension.md` |
+| 18 | Focus Metadata Artifact Extension | define one narrow reusable artifact-level focus and analysis-ROI metadata baseline above the traceability path | active lane | landed narrow extension after `WP16`; focus summary metadata now requires an explicit aggregation basis, while exact defaults/bounds still need later testing and definition | `docs/archive/session_workpackages/wp18_focus_metadata_artifact_extension.md` |
+| 19 | Focus Metadata Producer Wiring | wire the artifact-level focus metadata producer into normal save flows without freezing broader statistics policy | active lane | landed narrow follow-up after `WP18`; snapshot and bounded-recording flows can now emit focus metadata when explicitly configured | `docs/archive/session_workpackages/wp19_focus_metadata_producer_wiring.md` |
+| 20 | Focus Metadata Policy Hardening | define and test explicit defaults, bounds, and validation policy for artifact-level focus summary metadata | active lane | landed narrow post-`WP19` policy slice; current summary fields now require `focus_method`, a positive integer `focus_score_frame_interval`, and non-negative `focus_value_stddev` values | `docs/archive/session_workpackages/wp20_focus_metadata_policy_hardening.md` |
+| 21 | Offline Stable Context Exposure | expose one compact folder-level stable-context summary from traceability headers in the offline focus report | active lane | landed narrow post-`WP20` consumer slice; the additive report-bundle path now exposes stable header context while the existing list-return path stays usable | `docs/archive/session_workpackages/wp21_offline_stable_context_exposure.md` |
+| 22 | Host Status Polling Hardening | tighten one narrow host-readable status payload slice during active experiment runs | active lane | landed bounded post-`WP21` closure slice; the adapter-facing status family now exposes a conservative additive active-run polling subset without redesigning core status models | `docs/archive/session_workpackages/wp22_host_status_polling_hardening.md` |
+| 23 | Host Command Confirmation Hardening | return one more explicit confirmed-settings subset for host-triggered capture and recording commands | active lane | landed host-control follow-up after `WP22`; command results now expose a narrower explicit confirmed-settings subset without widening the transport surface | `docs/archive/session_workpackages/wp23_host_command_confirmation_hardening.md` |
+| 24 | Run Identity And Trace Linkage | align one deterministic run identity across host results, traceability blocks, and recording-side metadata outputs | active lane | landed cross-lane linkage slice; the current host path now reuses the same narrow `run_id` across snapshot / bounded-recording results and traceability blocks | `docs/archive/session_workpackages/wp24_run_identity_trace_linkage.md` |
+| 25 | Experiment Recovery Validation Extension | prove one tighter simulator-first recovery block over host-driven recording failures and repeated restart behavior | active lane | landed reliability-focused validation slice; the integrated bootstrap/controller path now proves write-failure recovery plus repeated stop/restart idempotence without runtime redesign | `docs/archive/session_workpackages/wp25_experiment_recovery_validation_extension.md` |
+| 26 | Hardware Revalidation Resume | resume one bounded real-hardware revalidation block once the camera is attached again | dormant | landed final bounded confidence rerun inside the closed Extended MVP phase; future reruns are residual-driven only | `docs/archive/session_workpackages/wp26_hardware_revalidation_resume.md` |
+| 27 | Hardware Lifecycle And Camera Release Hardening | narrow the remaining real-device lifecycle gap around camera release, process-to-process reuse, and cleanup determinism | active lane | landed first post-closure hardening slice after the bounded hardware baseline was already real | `docs/archive/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md` |
+| 28 | Capability-Aware ROI Constraint Reporting | make ROI width/height/offset constraint failures clearer and more host-usable on capability-backed camera paths | active lane | landed first post-closure diagnostics/polish slice; strict capability enforcement remains intact while host-readable guidance improved | `docs/archive/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md` |
+| 29 | Hardware Startup Warning Classification | classify and narrow the remaining real-device startup warnings so hardware runs distinguish actionable lifecycle issues from SDK-noise residuals | active lane | landed post-closure diagnostics slice; current March 30 evidence shows `VmbError.NotAvailable: -30` persists as a non-blocking SDK log residual during successful `status` / `snapshot` runs, while capability probing still succeeds and does not surface it as `capability_probe_error` | `docs/archive/session_workpackages/wp29_hardware_startup_warning_classification.md` |
+| 30 | Interval Capture Timing And Polling Tightening | tighten bounded interval-capture timing evidence and active-run polling meaning on the integrated baseline | active lane | landed hardening slice; active interval polling now exposes non-fatal timing warnings during skipped intervals and reports compact completion summaries such as `completed with skipped_intervals=N` instead of leaving the end state implicit | `docs/archive/session_workpackages/wp30_interval_capture_timing_polling_tightening.md` |
+| 31 | Python Baseline Operations Runbook | document the stable operating baseline, known-good commands, hardware assumptions, and residual rules for real use | active lane | landed first operational-readiness slice; the compact central runbook now lives in `docs/PYTHON_BASELINE_RUNBOOK.md` without changing product scope | `docs/archive/session_workpackages/wp31_python_baseline_operations_runbook.md` |
+| 32 | Entry-Point And Launch Readiness Baseline | tighten the practical startup surface for the Python baseline through clearer launch paths and bounded readiness polish | active lane | landed second operational-readiness slice; the compact startup-surface reference now lives in `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` without opening packaging work | `docs/archive/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md` |
+| 33 | Host Contract Stability And Deferred Surface Clarification | define which host-facing command/status/result fields are stable now and which broader surfaces remain intentionally deferred | active lane | landed later-handover/productization clarification slice; the compact stable-now / deferred-later reference now lives in `docs/HOST_CONTRACT_BASELINE.md` without widening transport scope | `docs/archive/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md` |
+| 34 | Interval-Capture Host Contract Normalization | bring the current bounded `interval-capture` path closer to the same host-envelope expectations used by the other bounded host commands | active lane | landed hardening slice; bounded `interval-capture` now returns selected save directory, frames written, stop reason, accepted capture bounds, and confirmed settings in the current host-envelope model | `docs/archive/session_workpackages/wp34_interval_capture_host_contract_normalization.md` |
+| 35 | Hardware Enumeration And Startup Residual Narrowing | narrow duplicate camera enumeration and remaining startup-log ambiguity on the tested hardware path | active lane | landed residual-driven hardware follow-up; raw Vimba X enumeration still duplicates `DEV_1AB22C046D81`, but the repository now prefers the richer candidate and preserves serial `067WH` in host-visible status while `VmbError.NotAvailable: -30` remains non-blocking residual noise | `docs/archive/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md` |
+| 36 | Detached Recording Lifecycle Decision Slice | document the current bounded recording meaning versus any later detached lifecycle control direction | active lane | landed decision-oriented handover slice; the stable-now versus deferred-later recording boundary now lives in `docs/RECORDING_LIFECYCLE_BOUNDARY.md` without implementing detached lifecycle control | `docs/archive/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md` |
+| 37 | Python Baseline Operator Start Helper | reduce repeated local startup friction with one bounded helper if justified | active lane | landed operational-readiness polish slice; `scripts/run_python_baseline.ps1` now provides one thin local convenience wrapper over the existing `.venv` plus `run_camera_cli.py` path without becoming a new startup contract | `docs/archive/session_workpackages/wp37_python_baseline_operator_start_helper.md` |
+| 38 | Selective Offline Follow-Up | preserve one bounded offline-expansion option only when a concrete user need appears | active lane | landed selective-expansion slice; the compact offline focus-report bundle now adds one additive summary line for entry count, traceability coverage, and the current highest-score image without widening into explorer or export scope | `docs/archive/session_workpackages/wp38_selective_offline_followup.md` |
+| 39 | Module Documentation Audit And Shrink Pass | refresh module-local docs, shrink stale local roadmaps, and reduce drift between local module docs and the post-closure baseline | active lane | landed bounded meta-documentation cleanup slice; active-module roadmaps were shrunk, stale transition wording reduced, and module-local doc roles clarified without central PM rewrite | `docs/archive/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md` |
+| 40 | Vision Platform Control And Imaging Physical Migration | move current control and optional imaging implementation behind the preferred `src/vision_platform` boundary while preserving compatibility imports | active lane | landed first post-closure architecture-convergence slice; `vision_platform` now owns bootstrap/control/imaging implementation directly while `camera_app` remains the compatibility shim layer | `docs/archive/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md` |
+| 41 | Vision Platform Storage Physical Migration | move storage and persistence helpers behind the preferred `src/vision_platform` boundary while preserving current behavior | active lane | landed second architecture-convergence slice; storage-facing legacy services now import platform-owned file-naming and frame-writer helpers directly while `camera_app.storage` remains the compatibility shim layer | `docs/archive/session_workpackages/wp41_vision_platform_storage_physical_migration.md` |
+| 42 | Vision Platform Namespace Coverage And Compatibility Audit | tighten trust in the preferred `vision_platform` import surface while keeping remaining compatibility shims explicit | active lane | landed trust-and-shim audit slice; current remaining `camera_app` dependencies are now bounded, tested, and documented as intentional compatibility seams rather than silent drift | `docs/archive/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md` |
+| 43 | Python Baseline Packaging Manifest And Environment Guardrails | make the bounded local Python baseline easier to set up and re-enter without pretending to solve full product packaging | active lane | landed operational-readiness follow-up; the package manifest now exposes `vision-platform-cli`, bootstrap output carries clearer install guardrails, and the bounded local install contract now lives in `docs/PYTHON_BASELINE_ENVIRONMENT.md` | `docs/archive/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md` |
+| 44 | Bounded API Adapter Command Surface | expose one narrow adapter-facing API slice only when a real integration consumer justifies it | active lane | landed selective-expansion slice; `api_service` now owns the bounded transport-neutral command-envelope payload family reused by the current CLI without introducing framework or transport runtime scope | `docs/archive/session_workpackages/wp44_bounded_api_adapter_command_surface.md` |
+| 45 | Stored Camera Configuration Profiles Baseline | introduce one bounded named profile baseline over the current host-neutral `CameraConfiguration` path | active lane | landed post-closure operational-readiness / selective-expansion slice; the CLI now resolves repo-local camera-class-first profiles through `configs/camera_configuration_profiles.json`, starting with a `default` profile and continuing to reuse the existing capability-aware configuration path | `docs/archive/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md` |
+| 46 | Camera Alias And ID Resolution Baseline | introduce one bounded alias-to-camera-id resolution layer above the current explicit camera-selection path | active lane | landed post-closure operational-readiness slice; the camera CLI now supports repo-local alias resolution through `configs/camera_aliases.json`, including the tested example alias `tested_camera`, while preserving direct explicit `camera_id` support and avoiding device-inventory scope | `docs/archive/session_workpackages/wp46_camera_alias_and_id_resolution.md` |
+| 47 | Traceability Control Context Extension | carry additive alias and profile-selection context into the existing snapshot and bounded-recording traceability path | active lane | landed post-closure data/logging follow-up; snapshot and bounded recording now preserve `camera_alias` and optional profile identity in stable traceability context when the current request path provides them, while the offline stable-context consumer exposes those fields additively | `docs/archive/session_workpackages/wp47_traceability_control_context_extension.md` |
+| 50 | Display Geometry Service Extraction | extract reusable viewport geometry from the OpenCV preview so later UI and host-facing work can share one headless mapping core | active lane | implemented on the current architecture baseline; OpenCV preview now consumes a headless geometry service and dedicated geometry coverage exists | `docs/archive/session_workpackages/wp50_display_geometry_service_extraction.md` |
+| 51 | Shared Preview Interaction Command Layer | introduce a shared preview interaction/action layer above geometry and below concrete UI event systems | active lane | implemented on the current architecture branch; OpenCV preview now translates HighGUI input into shared interaction commands with dedicated service coverage | `docs/archive/session_workpackages/wp51_shared_preview_interaction_command_layer.md` |
+| 52 | Overlay And Preview Status Model Definition | define UI-agnostic overlay/status models once geometry and interaction ownership are separated | active lane | implemented on the current architecture baseline; OpenCV preview now formats and renders shared descriptive status / overlay models | `docs/archive/session_workpackages/wp52_overlay_and_preview_status_model_definition.md` |
+| 53 | Local Working UI Shell Baseline | add a first pragmatic local UI shell on top of the extracted geometry and interaction layers | active lane | implemented as a bounded wxPython local shell over the shared controller/preview/display stack while OpenCV remains the fallback/reference path | `docs/archive/session_workpackages/wp53_local_working_ui_shell_baseline.md` |
+| 54 | wx Shell Hardware Enablement | add one bounded real-hardware startup path for the existing wxPython shell | active lane | implemented; the wx shell now reuses the same headless source-selection, alias/profile, and configuration startup semantics on both simulated and hardware-backed paths | `docs/archive/session_workpackages/wp54_wx_shell_hardware_enablement.md` |
+| 55 | Hardware Audit & Incident Logging Baseline | establish structured auditing for extraordinary camera states and incidents | active lane | implemented as an append-only hardware-audit baseline that records warnings, degraded startup states, and incidents separately from artifact traceability | `docs/archive/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md` |
+| 56 | CLI Help & Documentation | refine CLI help and human-readable command documentation | active lane | landed CLI help and documentation polish; the bounded current command surface now has clearer argparse help and a compact human-readable reference | `docs/archive/session_workpackages/wp56_cli_help_and_command_documentation.md` |
+| 60 | wx Recording Progress Status Baseline | surface bounded recording controls and progress in the wx shell through existing status models | active lane | landed bounded wx recording-control slice; recording controls, max-frames input, recording FPS input, and progress stay within the existing controller/status path | `docs/archive/session_workpackages/wp60_wx_recording_progress_status_baseline.md` |
+| 61 | wx Feature Inventory And Core/UI Boundary Documentation | document the implemented wx shell surface and the shared-core / UI-local split | active lane | implemented wx shell inventory and boundary documentation, captured in `apps/local_shell/FEATURES.md` | `docs/archive/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md` |
+| 62 | wx Live Command Sync For Open Shell | let an already open wx shell observe CLI/API-driven changes without moving command ownership into the UI | active lane | implemented bounded local session-bridge sync; the open wx shell now reflects external save/configuration/recording commands through the existing controller path | `docs/archive/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md` |
+| 63 | Recording Append / Resume From Trace Log | stop reused save directories from overwriting prior recording outputs and derive the next sequence position from existing trace/log context | active lane | landed artifact-continuity slice; reused directories now continue snapshot and recording naming instead of overwriting | `docs/archive/session_workpackages/wp63_recording_append_resume_from_trace_log.md` |
+| 64 | wx Menu And Settings Dialog Baseline | add one bounded menu/settings popup surface to the wx shell above the shared controller/configuration path | active lane | landed local-usability slice; wx shell now exposes working save-directory and recording-settings dialogs over the existing controller path | `docs/archive/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md` |
+| 65 | wx Recording Settings Guardrails And Format Picker | tighten the bounded recording-settings dialog with guided format selection instead of free-form extension typing | active lane | landed wx usability hardening; the recording-settings dialog now constrains format selection through a picker and aligns default recording output with `.bmp` | `docs/archive/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md` |
+| 66 | Recording Timestamp Anchor Alignment | add one explicit first-frame camera/system timestamp anchor per recording session while preserving per-image timing rows | active lane | landed logging-semantics hardening; recording and traceability logs now persist a first-frame camera/system anchor while keeping per-image timing rows | `docs/archive/session_workpackages/wp66_recording_timestamp_anchor_alignment.md` |
+| 67 | Recording Log Policy Alignment | define and implement the intended recording-log reuse versus per-run split policy for repeated sessions in one save directory | active lane | landed log-usability hardening; repeated recording now appends to one deterministic recording log per save directory with explicit run boundaries | `docs/archive/session_workpackages/wp67_recording_log_policy_alignment.md` |
+| 68 | Unified Artifact Recording Log Append Baseline | make snapshot and recording save into one directory-scoped `recording_log.csv` append stream | landed | landed logging-continuity slice so snapshots and recordings share the same append base for later resume logic | `docs/archive/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md` |
+| 69 | wx Camera Settings Menu And Shortcut Baseline | expose the host-neutral camera configuration surface through the bounded wx shell and define the GUI shortcut map | landed | landed wx-shell seam slice for camera settings, menu coverage, and shortcut alignment | `docs/archive/session_workpackages/wp69_wx_camera_settings_menu_and_shortcut_baseline.md` |
 | 70 | Control And Imaging Compatibility Cleanup | remove the redundant legacy control/imaging implementation files and keep only package-level compatibility shims | landed | landed compatibility cleanup; the remaining work is merge cleanup only | `docs/archive/session_workpackages/wp70_control_and_imaging_compatibility_cleanup.md` |
 | 71 | Reference Scenario Validation Narrowing | tighten the technical snapshot, bounded-recording, and interval-capture reference flows into one small repeatable validation block | landed | landed validation slice; the repository now provides one explicit three-test technical-reference-flow block plus a dedicated launcher wrapper | `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md` |
 | 75 | Reference Scenario Operator Path Tightening | make the validated technical reference flows easier to find and run through one small operator-facing run path | landed | landed doc/operator-path slice; the launch baseline and manuals index now expose one compact validated entry path for the current technical reference flows | `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md` |
-| 76 | wx Shell Status Feedback Tightening | improve one concrete shell feedback seam so local operators can read action outcome and current state more reliably | dormant | keep only as a fallback seam-specific follow-up if `WP80` through `WP82` expose one concrete shell-feedback blocker | `docs/session_workpackages/wp76_wx_shell_status_feedback_tightening.md` |
-| 77 | Host Result Envelope Naming Tightening | normalize one concrete confusing result, status, or error field in the host-facing command surface without widening transport scope | dormant | keep only as a fallback seam-specific follow-up if the workflow-first host path exposes one concrete naming ambiguity | `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md` |
-| 78 | Compatibility Shim Usage Inventory | record where remaining `camera_app` compatibility imports are still exercised so later retirement work can target real usage instead of guesswork | dormant | later evidence-only slice; explicitly outside the current workflow-first lane | `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md` |
-| 80 | Delamination Recording Workflow Narrowing | make the current `Delamination Recording` workflow the first explicit Hybrid Companion execution slice across host command, shell reflection, and shell settings use | landed | landed workflow-first package; the delamination path now has host-start defaults alignment, explicit shell/live recording reflection, save-path/run-state tightening, host-control smoke coverage, and failure reflection without widening architecture scope | `docs/session_workpackages/wp80_delamination_recording_workflow_narrowing.md` |
-| 81 | Geometry Capture Workflow Narrowing | make the current `Geometry Capture` workflow executable through the same Hybrid Companion host-plus-shell lens | landed | landed workflow-first package; the geometry-capture path now has explicit snapshot reflection, save-path/status readability, host-control smoke coverage, and failure reflection without widening product scope | `docs/session_workpackages/wp81_geometry_capture_workflow_narrowing.md` |
-| 82 | Setup Focus ROI Workflow Narrowing | make the current `Setup / Focus / ROI Adjustment` workflow practically usable as the setup path for the main test flows | landed | landed workflow-first package; the setup path now has explicit setup-state reflection, setup-oriented messaging, ROI/focus visibility, and host-control smoke coverage without widening scope | `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md` |
-| 83 | Host Result And Status Surface Consistency Narrowing | align the current live command result reading with the already published shell-status reflection model | landed | landed narrow host-surface slice; live command results now expose additive reflection-aligned subsets for setup, snapshot, recording, and save-directory paths, plus a more consistent failed-result placeholder shape | `docs/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md` |
-| 84 | Usable Failure Reflection Baseline | make current setup, snapshot, and recording failures readable enough in shell and published status without opening a broad error-platform lane | landed | landed narrow Hybrid Companion follow-up; shell status, published status, and failed command results now share one readable failure-reflection baseline across setup, snapshot, and recording | `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md` |
-| 85 | Stage-2 LabVIEW Contract Mapping Narrowing | map the current bounded Stage-1 host surface into one LabVIEW-near reading without widening transport scope | landed | landed narrow Stage-2 follow-up; the current `local_shell control` path now exposes one additive `labview_mapping` block for status and command reads, including bounded failure preservation | `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md` |
-| 86 | Headless Command Seam Extraction Baseline | extract one small shell-independent command/status seam from the bounded wx-shell bridge as the first true headless-preparation slice | landed | landed narrow structural slice; companion command-result and status-snapshot payload assembly now live in one shell-independent service seam consumed by the wx-shell bridge | `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md` |
+| 76 | wx Shell Status Feedback Tightening | improve one concrete shell feedback seam so local operators can read action outcome and current state more reliably | dormant | keep only as a fallback seam-specific follow-up if `WP80` through `WP82` expose one concrete shell-feedback blocker | `docs/archive/session_workpackages/wp76_wx_shell_status_feedback_tightening.md` |
+| 77 | Host Result Envelope Naming Tightening | normalize one concrete confusing result, status, or error field in the host-facing command surface without widening transport scope | dormant | keep only as a fallback seam-specific follow-up if the workflow-first host path exposes one concrete naming ambiguity | `docs/archive/session_workpackages/wp77_host_result_envelope_naming_tightening.md` |
+| 78 | Compatibility Shim Usage Inventory | record where remaining `camera_app` compatibility imports are still exercised so later retirement work can target real usage instead of guesswork | dormant | later evidence-only slice; explicitly outside the current workflow-first lane | `docs/archive/session_workpackages/wp78_compatibility_shim_usage_inventory.md` |
+| 80 | Delamination Recording Workflow Narrowing | make the current `Delamination Recording` workflow the first explicit Hybrid Companion execution slice across host command, shell reflection, and shell settings use | landed | landed workflow-first package; the delamination path now has host-start defaults alignment, explicit shell/live recording reflection, save-path/run-state tightening, host-control smoke coverage, and failure reflection without widening architecture scope | `docs/archive/session_workpackages/wp80_delamination_recording_workflow_narrowing.md` |
+| 81 | Geometry Capture Workflow Narrowing | make the current `Geometry Capture` workflow executable through the same Hybrid Companion host-plus-shell lens | landed | landed workflow-first package; the geometry-capture path now has explicit snapshot reflection, save-path/status readability, host-control smoke coverage, and failure reflection without widening product scope | `docs/archive/session_workpackages/wp81_geometry_capture_workflow_narrowing.md` |
+| 82 | Setup Focus ROI Workflow Narrowing | make the current `Setup / Focus / ROI Adjustment` workflow practically usable as the setup path for the main test flows | landed | landed workflow-first package; the setup path now has explicit setup-state reflection, setup-oriented messaging, ROI/focus visibility, and host-control smoke coverage without widening scope | `docs/archive/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md` |
+| 83 | Host Result And Status Surface Consistency Narrowing | align the current live command result reading with the already published shell-status reflection model | landed | landed narrow host-surface slice; live command results now expose additive reflection-aligned subsets for setup, snapshot, recording, and save-directory paths, plus a more consistent failed-result placeholder shape | `docs/archive/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md` |
+| 84 | Usable Failure Reflection Baseline | make current setup, snapshot, and recording failures readable enough in shell and published status without opening a broad error-platform lane | landed | landed narrow Hybrid Companion follow-up; shell status, published status, and failed command results now share one readable failure-reflection baseline across setup, snapshot, and recording | `docs/archive/session_workpackages/wp84_usable_failure_reflection_baseline.md` |
+| 85 | Stage-2 LabVIEW Contract Mapping Narrowing | map the current bounded Stage-1 host surface into one LabVIEW-near reading without widening transport scope | landed | landed narrow Stage-2 follow-up; the current `local_shell control` path now exposes one additive `labview_mapping` block for status and command reads, including bounded failure preservation | `docs/archive/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md` |
+| 86 | Headless Command Seam Extraction Baseline | extract one small shell-independent command/status seam from the bounded wx-shell bridge as the first true headless-preparation slice | landed | landed narrow structural slice; companion command-result and status-snapshot payload assembly now live in one shell-independent service seam consumed by the wx-shell bridge | `docs/archive/session_workpackages/wp86_headless_command_seam_extraction_baseline.md` |
 | 87 | Hybrid Companion Hardware Workflow Revalidation | revalidate the landed Hybrid Companion workflows on the tested hardware path through the current host-plus-shell mode | completed | reactivated and completed on April 10, 2026 after the earlier April 9 availability miss; hardware-backed `status`, `snapshot`, bounded `recording`, and integrated flow all succeeded on `DEV_1AB22C046D81` | `docs/archive/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md` |
 | 88 | Local Shell Test-Host And UI Validation | validate the current wx shell against a separate test-host process and confirm that the visible UI shell reflects host-driven actions correctly on the current tested hardware path | completed | completed narrow host-plus-UI smoke slice; bounded `local_shell control` commands were checked against the running wx shell for status, snapshot, save-directory, and recording reflection | `docs/archive/session_workpackages/wp88_local_shell_test_host_and_ui_validation.md` |
 | 89 | Local Shell Camera Settings Defaults And Limits Alignment | align the wx camera-settings dialog with the camera-class default JSON and capability limits so it opens with sensible values and bounded input guidance | completed | completed settings alignment slice; the camera-settings dialog now preloads defaults, shows capability hints, and normalizes width/height/ROI values to the allowed step/range before apply | `docs/archive/session_workpackages/wp89_local_shell_camera_settings_defaults_and_limits_alignment.md` |
@@ -508,41 +508,41 @@ Current prepared usable-subsystem sequence:
 
 Most recently landed detailed packages:
 
-- `docs/session_workpackages/wp30_interval_capture_timing_polling_tightening.md`
+- `docs/archive/session_workpackages/wp30_interval_capture_timing_polling_tightening.md`
   - landed narrow timing/polling follow-up; interval capture now surfaces non-fatal timing warnings while active and records a compact completion summary when skipped intervals occurred, with fresh March 30 real-device evidence showing active warnings plus a final `completed with skipped_intervals=7` status on `DEV_1AB22C046D81`
-- `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
+- `docs/archive/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
   - landed residual-narrowing follow-up; raw Vimba X enumeration still duplicates `DEV_1AB22C046D81`, but the repository now prefers the richer duplicate candidate and preserves the richer pre-open serial `067WH` in host-visible status even when the opened camera object degrades to `N/A`
-- `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
+- `docs/archive/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
   - landed decision-oriented handover slice; current `recording` is now explicitly documented as bounded in-process recording on one live subsystem boundary, while detached multi-invocation lifecycle control remains intentionally deferred
-- `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
+- `docs/archive/session_workpackages/wp37_python_baseline_operator_start_helper.md`
   - landed operational-readiness polish slice; `scripts/run_python_baseline.ps1` now gives one bounded PowerShell convenience helper for repeated local CLI startup without replacing the preferred package entry point
-- `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
+- `docs/archive/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
   - landed meta-documentation cleanup slice; stale module-local `ROADMAP.md` / `STATUS.md` wording was reduced and module-doc roles were tightened without broad doc rewrites
-- `docs/session_workpackages/wp29_hardware_startup_warning_classification.md`
+- `docs/archive/session_workpackages/wp29_hardware_startup_warning_classification.md`
   - landed narrow diagnostics follow-up; fresh March 30 serial hardware `status` and `snapshot(.bmp)` proofs showed that `vmbpyLog <VmbError.NotAvailable: -30>` still appears during successful runs, but the current host/status surface remains successful with `capabilities_available=True` and `capability_probe_error=None`, so the line is currently classified as non-blocking SDK/logging residual rather than active startup failure
-- `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
+- `docs/archive/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
   - landed narrow follow-up to improve host-usable ROI constraint reporting around width/height/offset increments and ranges, including clearer CLI-side configuration errors
-- `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
+- `docs/archive/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
   - landed narrow lifecycle hardening follow-up; hardware capability probing now reuses the already opened driver camera and the March 30 serial `status -> status`, `snapshot -> status`, and `recording -> status` proofs no longer reproduced `camera already in use`
-- `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
+- `docs/archive/session_workpackages/wp26_hardware_revalidation_resume.md`
   - landed the bounded March 30, 2026 real-device confidence rerun over the current integrated baseline, including preview readiness, snapshot, bounded recording, interval capture, active polling, traceability output, offline BMP reuse, and same-subsystem reuse without process restart
-- `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`
+- `docs/archive/session_workpackages/wp25_experiment_recovery_validation_extension.md`
   - landed the simulator-first integrated recovery proof for writer-side recording failure, repeated stop calls, and successful restart on the same subsystem path
-- `docs/session_workpackages/wp24_run_identity_trace_linkage.md`
+- `docs/archive/session_workpackages/wp24_run_identity_trace_linkage.md`
   - landed one deterministic `run_id` alignment across snapshot / bounded-recording host results, active bounded-recording polling, and saved-artifact traceability blocks
-- `docs/session_workpackages/wp23_host_command_confirmation_hardening.md`
+- `docs/archive/session_workpackages/wp23_host_command_confirmation_hardening.md`
   - landed the narrow confirmed-settings subset for `snapshot` and bounded `recording` command results in the current CLI host surface
-- `docs/session_workpackages/wp22_host_status_polling_hardening.md`
+- `docs/archive/session_workpackages/wp22_host_status_polling_hardening.md`
   - landed the additive active-run polling subset in the API-/CLI-facing status path for active bounded recording and interval capture
-- `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
+- `docs/archive/session_workpackages/wp21_offline_stable_context_exposure.md`
   - landed the additive compact stable-context exposure path for offline focus reporting
-- `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
+- `docs/archive/session_workpackages/wp20_focus_metadata_policy_hardening.md`
   - landed the first explicit shared validation policy for current focus-summary metadata fields
-- `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
+- `docs/archive/session_workpackages/wp17_offline_measurement_metadata_extension.md`
   - landed the consumer-side offline metadata join over folder-local traceability data
-- `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
+- `docs/archive/session_workpackages/wp18_focus_metadata_artifact_extension.md`
   - landed the explicit aggregation-basis requirement for stored focus-summary fields
-- `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
+- `docs/archive/session_workpackages/wp19_focus_metadata_producer_wiring.md`
   - landed the explicit producer wiring for snapshot and bounded-recording save flows
 
 Current explicitly activated detailed package state:
@@ -592,7 +592,7 @@ Detailed work-package files:
 - `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
 - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
-- `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
+- `docs/archive/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `docs/archive/session_workpackages/wp04_hardware_validation_phase_9.md`
 
 ### Layer 2: Historical Analysis MVP Boundary
@@ -631,19 +631,19 @@ Current closure lanes:
 
 Existing detailed support files:
 
-- `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
-- `docs/session_workpackages/wp12_host_control_closure.md`
-- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
-- `docs/session_workpackages/wp14_data_logging_closure.md`
-- `docs/session_workpackages/wp15_offline_measurement_closure.md`
+- `docs/archive/session_workpackages/wp04_hardware_revalidation_follow_up.md`
+- `docs/archive/session_workpackages/wp12_host_control_closure.md`
+- `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`
+- `docs/archive/session_workpackages/wp14_data_logging_closure.md`
+- `docs/archive/session_workpackages/wp15_offline_measurement_closure.md`
 
 Current activation note:
 
-- `Host Control Closure` is no longer only a planning lane and now has its first landed slice in `docs/session_workpackages/wp12_host_control_closure.md`
-- `Experiment Reliability Closure` now has its first landed slice in `docs/session_workpackages/wp13_experiment_reliability_closure.md`
-- `Data And Logging Closure` now has its first landed slice in `docs/session_workpackages/wp14_data_logging_closure.md`
+- `Host Control Closure` is no longer only a planning lane and now has its first landed slice in `docs/archive/session_workpackages/wp12_host_control_closure.md`
+- `Experiment Reliability Closure` now has its first landed slice in `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`
+- `Data And Logging Closure` now has its first landed slice in `docs/archive/session_workpackages/wp14_data_logging_closure.md`
 - that slice intentionally stayed narrow and centered `BMP` as an additional practical visible output format
-- `Offline And Measurement Closure` now has its first landed slice in `docs/session_workpackages/wp15_offline_measurement_closure.md`
+- `Offline And Measurement Closure` now has its first landed slice in `docs/archive/session_workpackages/wp15_offline_measurement_closure.md`
 - that slice intentionally stayed narrow and centered offline focus-report reuse of saved `BMP` artifacts
 - `WP16` is now landed and extends `Data And Logging Closure` at the traceability level with one shared folder-local appendable traceability log for snapshot and bounded recording
 - `WP17` is now landed as the corresponding offline/reporting consumer slice over that traceability baseline
@@ -691,7 +691,7 @@ Goal:
 
 Detailed work-package files:
 
-- `docs/session_workpackages/wp11_additional_frontends.md`
+- `docs/archive/session_workpackages/wp11_additional_frontends.md`
 
 ## Current Recommended Order
 
@@ -786,76 +786,76 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
 - `docs/archive/session_workpackages/wp03_opencv_ui_operator_block.md`
-- `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
+- `docs/archive/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `docs/archive/session_workpackages/wp05_roi_workflow_consolidation.md`
 - `docs/archive/session_workpackages/wp06_focus_method_expansion.md`
 - `docs/archive/session_workpackages/wp07_tracking_core_baseline.md`
 - `docs/archive/session_workpackages/wp08_api_surface_preparation.md`
 - `docs/archive/session_workpackages/wp09_csharp_handover_hardening.md`
 - `docs/archive/session_workpackages/wp10_postprocess_baseline.md`
-- `docs/session_workpackages/wp11_additional_frontends.md`
-- `docs/session_workpackages/wp12_host_control_closure.md`
-- `docs/session_workpackages/wp13_experiment_reliability_closure.md`
-- `docs/session_workpackages/wp14_data_logging_closure.md`
-- `docs/session_workpackages/wp15_offline_measurement_closure.md`
-- `docs/session_workpackages/wp16_data_logging_traceability.md`
-- `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
-- `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
-- `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
-- `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
-- `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
-- `docs/session_workpackages/wp22_host_status_polling_hardening.md`
-- `docs/session_workpackages/wp23_host_command_confirmation_hardening.md`
-- `docs/session_workpackages/wp24_run_identity_trace_linkage.md`
-- `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`
-- `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
-- `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
-- `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
-- `docs/session_workpackages/wp29_hardware_startup_warning_classification.md`
-- `docs/session_workpackages/wp30_interval_capture_timing_polling_tightening.md`
-- `docs/session_workpackages/wp31_python_baseline_operations_runbook.md`
-- `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md`
-- `docs/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md`
-- `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md`
-- `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
-- `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
-- `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
-- `docs/session_workpackages/wp38_selective_offline_followup.md`
-- `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
-- `docs/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md`
-- `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md`
-- `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
-- `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
-- `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
-- `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
-- `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md`
-- `docs/session_workpackages/wp47_traceability_control_context_extension.md`
-- `docs/session_workpackages/wp50_display_geometry_service_extraction.md`
-- `docs/session_workpackages/wp51_shared_preview_interaction_command_layer.md`
-- `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md`
-- `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md`
-- `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md`
-- `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
-- `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
-- `docs/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
-- `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
-- `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
-- `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
-- `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md`
-- `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md`
-- `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
-- `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
-- `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
-- `docs/session_workpackages/wp76_wx_shell_status_feedback_tightening.md`
-- `docs/session_workpackages/wp77_host_result_envelope_naming_tightening.md`
-- `docs/session_workpackages/wp78_compatibility_shim_usage_inventory.md`
-- `docs/session_workpackages/wp80_delamination_recording_workflow_narrowing.md`
-- `docs/session_workpackages/wp81_geometry_capture_workflow_narrowing.md`
-- `docs/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md`
-- `docs/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md`
-- `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md`
-- `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
-- `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
+- `docs/archive/session_workpackages/wp11_additional_frontends.md`
+- `docs/archive/session_workpackages/wp12_host_control_closure.md`
+- `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`
+- `docs/archive/session_workpackages/wp14_data_logging_closure.md`
+- `docs/archive/session_workpackages/wp15_offline_measurement_closure.md`
+- `docs/archive/session_workpackages/wp16_data_logging_traceability.md`
+- `docs/archive/session_workpackages/wp17_offline_measurement_metadata_extension.md`
+- `docs/archive/session_workpackages/wp18_focus_metadata_artifact_extension.md`
+- `docs/archive/session_workpackages/wp19_focus_metadata_producer_wiring.md`
+- `docs/archive/session_workpackages/wp20_focus_metadata_policy_hardening.md`
+- `docs/archive/session_workpackages/wp21_offline_stable_context_exposure.md`
+- `docs/archive/session_workpackages/wp22_host_status_polling_hardening.md`
+- `docs/archive/session_workpackages/wp23_host_command_confirmation_hardening.md`
+- `docs/archive/session_workpackages/wp24_run_identity_trace_linkage.md`
+- `docs/archive/session_workpackages/wp25_experiment_recovery_validation_extension.md`
+- `docs/archive/session_workpackages/wp26_hardware_revalidation_resume.md`
+- `docs/archive/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
+- `docs/archive/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
+- `docs/archive/session_workpackages/wp29_hardware_startup_warning_classification.md`
+- `docs/archive/session_workpackages/wp30_interval_capture_timing_polling_tightening.md`
+- `docs/archive/session_workpackages/wp31_python_baseline_operations_runbook.md`
+- `docs/archive/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md`
+- `docs/archive/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md`
+- `docs/archive/session_workpackages/wp34_interval_capture_host_contract_normalization.md`
+- `docs/archive/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
+- `docs/archive/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
+- `docs/archive/session_workpackages/wp37_python_baseline_operator_start_helper.md`
+- `docs/archive/session_workpackages/wp38_selective_offline_followup.md`
+- `docs/archive/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
+- `docs/archive/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md`
+- `docs/archive/session_workpackages/wp41_vision_platform_storage_physical_migration.md`
+- `docs/archive/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
+- `docs/archive/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
+- `docs/archive/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
+- `docs/archive/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
+- `docs/archive/session_workpackages/wp46_camera_alias_and_id_resolution.md`
+- `docs/archive/session_workpackages/wp47_traceability_control_context_extension.md`
+- `docs/archive/session_workpackages/wp50_display_geometry_service_extraction.md`
+- `docs/archive/session_workpackages/wp51_shared_preview_interaction_command_layer.md`
+- `docs/archive/session_workpackages/wp52_overlay_and_preview_status_model_definition.md`
+- `docs/archive/session_workpackages/wp53_local_working_ui_shell_baseline.md`
+- `docs/archive/session_workpackages/wp54_wx_shell_hardware_enablement.md`
+- `docs/archive/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
+- `docs/archive/session_workpackages/wp56_cli_help_and_command_documentation.md`
+- `docs/archive/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
+- `docs/archive/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
+- `docs/archive/session_workpackages/wp59_wx_anchor_drag_followup.md`
+- `docs/archive/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
+- `docs/archive/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md`
+- `docs/archive/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md`
+- `docs/archive/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
+- `docs/archive/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
+- `docs/archive/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
+- `docs/archive/session_workpackages/wp76_wx_shell_status_feedback_tightening.md`
+- `docs/archive/session_workpackages/wp77_host_result_envelope_naming_tightening.md`
+- `docs/archive/session_workpackages/wp78_compatibility_shim_usage_inventory.md`
+- `docs/archive/session_workpackages/wp80_delamination_recording_workflow_narrowing.md`
+- `docs/archive/session_workpackages/wp81_geometry_capture_workflow_narrowing.md`
+- `docs/archive/session_workpackages/wp82_setup_focus_roi_workflow_narrowing.md`
+- `docs/archive/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md`
+- `docs/archive/session_workpackages/wp84_usable_failure_reflection_baseline.md`
+- `docs/archive/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
+- `docs/archive/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
 - `docs/archive/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
@@ -864,69 +864,69 @@ New detailed execution-ready files should now be created only when a concrete us
 
 Current explicit activation:
 
-- `Host Control Closure` now has its first landed slice at `docs/session_workpackages/wp12_host_control_closure.md`
-- `Experiment Reliability Closure` now has its first landed slice at `docs/session_workpackages/wp13_experiment_reliability_closure.md`
-- `Data And Logging Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp14_data_logging_closure.md`
-- `Offline And Measurement Closure` now has its first landed implementation-oriented package at `docs/session_workpackages/wp15_offline_measurement_closure.md`
-- `Data And Logging Traceability Extension` now has its first landed implementation-oriented package at `docs/session_workpackages/wp16_data_logging_traceability.md`
-- `Offline And Measurement Metadata Extension` now has its landed execution-ready file at `docs/session_workpackages/wp17_offline_measurement_metadata_extension.md`
-- `Focus Metadata Artifact Extension` now has its landed execution-ready file at `docs/session_workpackages/wp18_focus_metadata_artifact_extension.md`
-- `Focus Metadata Producer Wiring` now has its landed execution-ready file at `docs/session_workpackages/wp19_focus_metadata_producer_wiring.md`
-- `Focus Metadata Policy Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp20_focus_metadata_policy_hardening.md`
-- `Offline Stable Context Exposure` now has its landed execution-ready file at `docs/session_workpackages/wp21_offline_stable_context_exposure.md`
-- `Host Status Polling Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp22_host_status_polling_hardening.md`
-- `Host Command Confirmation Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp23_host_command_confirmation_hardening.md`
-- `Run Identity And Trace Linkage` now has its landed execution-ready file at `docs/session_workpackages/wp24_run_identity_trace_linkage.md`
-- `Experiment Recovery Validation Extension` now has its landed execution-ready file at `docs/session_workpackages/wp25_experiment_recovery_validation_extension.md`
-- `Hardware Revalidation Resume` now has its landed execution-ready file at `docs/session_workpackages/wp26_hardware_revalidation_resume.md`
-- `Hardware Lifecycle And Camera Release Hardening` now has its landed execution-ready file at `docs/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
-- `Capability-Aware ROI Constraint Reporting` now has its landed execution-ready file at `docs/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
-- `Hardware Startup Warning Classification` now has its landed execution-ready file at `docs/session_workpackages/wp29_hardware_startup_warning_classification.md`
-- `Interval Capture Timing And Polling Tightening` now has its landed execution-ready file at `docs/session_workpackages/wp30_interval_capture_timing_polling_tightening.md`
-- `Python Baseline Operations Runbook` now has its landed execution-ready file at `docs/session_workpackages/wp31_python_baseline_operations_runbook.md`
-- `Entry-Point And Launch Readiness Baseline` now has its landed execution-ready file at `docs/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md`
-- `Host Contract Stability And Deferred Surface Clarification` now has its landed execution-ready file at `docs/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md`
-- `Interval-Capture Host Contract Normalization` now has its landed execution-ready file at `docs/session_workpackages/wp34_interval_capture_host_contract_normalization.md`
-- `Hardware Enumeration And Startup Residual Narrowing` now has its landed execution-ready file at `docs/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
-- `Detached Recording Lifecycle Decision Slice` now has its landed execution-ready file at `docs/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
-- `Python Baseline Operator Start Helper` now has its landed execution-ready file at `docs/session_workpackages/wp37_python_baseline_operator_start_helper.md`
-- `Selective Offline Follow-Up` now has its landed execution-ready file at `docs/session_workpackages/wp38_selective_offline_followup.md`
-- `Module Documentation Audit And Shrink Pass` now has its landed execution-ready file at `docs/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
-- `Vision Platform Control And Imaging Physical Migration` now has its landed execution-ready file at `docs/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md`
-- `Vision Platform Storage Physical Migration` now has its landed execution-ready file at `docs/session_workpackages/wp41_vision_platform_storage_physical_migration.md`
-- `Vision Platform Namespace Coverage And Compatibility Audit` now has its landed execution-ready file at `docs/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
-- `Python Baseline Packaging Manifest And Environment Guardrails` now has its landed execution-ready file at `docs/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
-- `Bounded API Adapter Command Surface` now has its landed execution-ready file at `docs/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
-- `Stored Camera Configuration Profiles Baseline` now has its landed execution-ready file at `docs/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
-- `Camera Alias And ID Resolution Baseline` now has its landed execution-ready file at `docs/session_workpackages/wp46_camera_alias_and_id_resolution.md`
-- `Traceability Control Context Extension` now has its landed execution-ready file at `docs/session_workpackages/wp47_traceability_control_context_extension.md`
-- `Display Geometry Service Extraction` now has its implementation and execution-ready file at `docs/session_workpackages/wp50_display_geometry_service_extraction.md`
-- `Shared Preview Interaction Command Layer` now has its implementation and execution-ready file at `docs/session_workpackages/wp51_shared_preview_interaction_command_layer.md`
-- `Overlay And Preview Status Model Definition` is now implemented on the architecture baseline through `docs/session_workpackages/wp52_overlay_and_preview_status_model_definition.md`
-- `Local Working UI Shell Baseline` is now implemented through `docs/session_workpackages/wp53_local_working_ui_shell_baseline.md`
-- `wx Shell Hardware Enablement` is now implemented through `docs/session_workpackages/wp54_wx_shell_hardware_enablement.md`
-- `Hardware Audit And Incident Logging Baseline` remains queued at `docs/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
-- `CLI Help And Command Documentation` is now implemented through `docs/session_workpackages/wp56_cli_help_and_command_documentation.md`
-- `wx Recording Progress Status Baseline` is now implemented through `docs/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
-- `wx Feature Inventory And Core/UI Boundary Documentation` is now implemented through `docs/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md`
-- `wx Focus Visibility And ROI Ownership` is now implemented through `docs/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
-- `wx Clipboard And Anchor Semantics Baseline` is now implemented through `docs/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
-- `wx Anchor Drag Follow-Up` is now implemented through `docs/session_workpackages/wp59_wx_anchor_drag_followup.md`
-- `wx Live Command Sync For Open Shell` is now implemented through `docs/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md`
-- `Recording Append / Resume From Trace Log` is now implemented through `docs/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
-- `wx Menu And Settings Dialog Baseline` is now implemented through `docs/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
-- `wx Recording Settings Guardrails And Format Picker` is now implemented through `docs/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
-- `Recording Timestamp Anchor Alignment` is now implemented through `docs/session_workpackages/wp66_recording_timestamp_anchor_alignment.md`
-- `Recording Log Policy Alignment` is now implemented through `docs/session_workpackages/wp67_recording_log_policy_alignment.md`
-- `Unified Artifact Recording Log Append Baseline` is now landed at `docs/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md`
-- `wx Camera Settings Menu And Shortcut Baseline` is now landed at `docs/session_workpackages/wp69_wx_camera_settings_menu_and_shortcut_baseline.md`
+- `Host Control Closure` now has its first landed slice at `docs/archive/session_workpackages/wp12_host_control_closure.md`
+- `Experiment Reliability Closure` now has its first landed slice at `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`
+- `Data And Logging Closure` now has its first landed implementation-oriented package at `docs/archive/session_workpackages/wp14_data_logging_closure.md`
+- `Offline And Measurement Closure` now has its first landed implementation-oriented package at `docs/archive/session_workpackages/wp15_offline_measurement_closure.md`
+- `Data And Logging Traceability Extension` now has its first landed implementation-oriented package at `docs/archive/session_workpackages/wp16_data_logging_traceability.md`
+- `Offline And Measurement Metadata Extension` now has its landed execution-ready file at `docs/archive/session_workpackages/wp17_offline_measurement_metadata_extension.md`
+- `Focus Metadata Artifact Extension` now has its landed execution-ready file at `docs/archive/session_workpackages/wp18_focus_metadata_artifact_extension.md`
+- `Focus Metadata Producer Wiring` now has its landed execution-ready file at `docs/archive/session_workpackages/wp19_focus_metadata_producer_wiring.md`
+- `Focus Metadata Policy Hardening` now has its landed execution-ready file at `docs/archive/session_workpackages/wp20_focus_metadata_policy_hardening.md`
+- `Offline Stable Context Exposure` now has its landed execution-ready file at `docs/archive/session_workpackages/wp21_offline_stable_context_exposure.md`
+- `Host Status Polling Hardening` now has its landed execution-ready file at `docs/archive/session_workpackages/wp22_host_status_polling_hardening.md`
+- `Host Command Confirmation Hardening` now has its landed execution-ready file at `docs/archive/session_workpackages/wp23_host_command_confirmation_hardening.md`
+- `Run Identity And Trace Linkage` now has its landed execution-ready file at `docs/archive/session_workpackages/wp24_run_identity_trace_linkage.md`
+- `Experiment Recovery Validation Extension` now has its landed execution-ready file at `docs/archive/session_workpackages/wp25_experiment_recovery_validation_extension.md`
+- `Hardware Revalidation Resume` now has its landed execution-ready file at `docs/archive/session_workpackages/wp26_hardware_revalidation_resume.md`
+- `Hardware Lifecycle And Camera Release Hardening` now has its landed execution-ready file at `docs/archive/session_workpackages/wp27_hardware_lifecycle_camera_release_hardening.md`
+- `Capability-Aware ROI Constraint Reporting` now has its landed execution-ready file at `docs/archive/session_workpackages/wp28_capability_aware_roi_constraint_reporting.md`
+- `Hardware Startup Warning Classification` now has its landed execution-ready file at `docs/archive/session_workpackages/wp29_hardware_startup_warning_classification.md`
+- `Interval Capture Timing And Polling Tightening` now has its landed execution-ready file at `docs/archive/session_workpackages/wp30_interval_capture_timing_polling_tightening.md`
+- `Python Baseline Operations Runbook` now has its landed execution-ready file at `docs/archive/session_workpackages/wp31_python_baseline_operations_runbook.md`
+- `Entry-Point And Launch Readiness Baseline` now has its landed execution-ready file at `docs/archive/session_workpackages/wp32_entrypoint_launch_readiness_baseline.md`
+- `Host Contract Stability And Deferred Surface Clarification` now has its landed execution-ready file at `docs/archive/session_workpackages/wp33_host_contract_stability_deferred_surface_clarification.md`
+- `Interval-Capture Host Contract Normalization` now has its landed execution-ready file at `docs/archive/session_workpackages/wp34_interval_capture_host_contract_normalization.md`
+- `Hardware Enumeration And Startup Residual Narrowing` now has its landed execution-ready file at `docs/archive/session_workpackages/wp35_hardware_enumeration_startup_residual_narrowing.md`
+- `Detached Recording Lifecycle Decision Slice` now has its landed execution-ready file at `docs/archive/session_workpackages/wp36_detached_recording_lifecycle_decision_slice.md`
+- `Python Baseline Operator Start Helper` now has its landed execution-ready file at `docs/archive/session_workpackages/wp37_python_baseline_operator_start_helper.md`
+- `Selective Offline Follow-Up` now has its landed execution-ready file at `docs/archive/session_workpackages/wp38_selective_offline_followup.md`
+- `Module Documentation Audit And Shrink Pass` now has its landed execution-ready file at `docs/archive/session_workpackages/wp39_module_documentation_audit_and_shrink_pass.md`
+- `Vision Platform Control And Imaging Physical Migration` now has its landed execution-ready file at `docs/archive/session_workpackages/wp40_vision_platform_control_imaging_physical_migration.md`
+- `Vision Platform Storage Physical Migration` now has its landed execution-ready file at `docs/archive/session_workpackages/wp41_vision_platform_storage_physical_migration.md`
+- `Vision Platform Namespace Coverage And Compatibility Audit` now has its landed execution-ready file at `docs/archive/session_workpackages/wp42_vision_platform_namespace_coverage_and_compatibility_audit.md`
+- `Python Baseline Packaging Manifest And Environment Guardrails` now has its landed execution-ready file at `docs/archive/session_workpackages/wp43_python_baseline_packaging_manifest_and_environment_guardrails.md`
+- `Bounded API Adapter Command Surface` now has its landed execution-ready file at `docs/archive/session_workpackages/wp44_bounded_api_adapter_command_surface.md`
+- `Stored Camera Configuration Profiles Baseline` now has its landed execution-ready file at `docs/archive/session_workpackages/wp45_stored_camera_configuration_profiles_baseline.md`
+- `Camera Alias And ID Resolution Baseline` now has its landed execution-ready file at `docs/archive/session_workpackages/wp46_camera_alias_and_id_resolution.md`
+- `Traceability Control Context Extension` now has its landed execution-ready file at `docs/archive/session_workpackages/wp47_traceability_control_context_extension.md`
+- `Display Geometry Service Extraction` now has its implementation and execution-ready file at `docs/archive/session_workpackages/wp50_display_geometry_service_extraction.md`
+- `Shared Preview Interaction Command Layer` now has its implementation and execution-ready file at `docs/archive/session_workpackages/wp51_shared_preview_interaction_command_layer.md`
+- `Overlay And Preview Status Model Definition` is now implemented on the architecture baseline through `docs/archive/session_workpackages/wp52_overlay_and_preview_status_model_definition.md`
+- `Local Working UI Shell Baseline` is now implemented through `docs/archive/session_workpackages/wp53_local_working_ui_shell_baseline.md`
+- `wx Shell Hardware Enablement` is now implemented through `docs/archive/session_workpackages/wp54_wx_shell_hardware_enablement.md`
+- `Hardware Audit And Incident Logging Baseline` remains queued at `docs/archive/session_workpackages/wp55_hardware_audit_and_incident_logging_baseline.md`
+- `CLI Help And Command Documentation` is now implemented through `docs/archive/session_workpackages/wp56_cli_help_and_command_documentation.md`
+- `wx Recording Progress Status Baseline` is now implemented through `docs/archive/session_workpackages/wp60_wx_recording_progress_status_baseline.md`
+- `wx Feature Inventory And Core/UI Boundary Documentation` is now implemented through `docs/archive/session_workpackages/wp61_wx_feature_inventory_and_core_ui_boundary_documentation.md`
+- `wx Focus Visibility And ROI Ownership` is now implemented through `docs/archive/session_workpackages/wp57_wx_focus_visibility_and_roi_ownership.md`
+- `wx Clipboard And Anchor Semantics Baseline` is now implemented through `docs/archive/session_workpackages/wp58_wx_clipboard_and_anchor_semantics_baseline.md`
+- `wx Anchor Drag Follow-Up` is now implemented through `docs/archive/session_workpackages/wp59_wx_anchor_drag_followup.md`
+- `wx Live Command Sync For Open Shell` is now implemented through `docs/archive/session_workpackages/wp62_wx_live_command_sync_for_open_shell.md`
+- `Recording Append / Resume From Trace Log` is now implemented through `docs/archive/session_workpackages/wp63_recording_append_resume_from_trace_log.md`
+- `wx Menu And Settings Dialog Baseline` is now implemented through `docs/archive/session_workpackages/wp64_wx_menu_and_settings_dialog_baseline.md`
+- `wx Recording Settings Guardrails And Format Picker` is now implemented through `docs/archive/session_workpackages/wp65_wx_recording_settings_guardrails_and_format_picker.md`
+- `Recording Timestamp Anchor Alignment` is now implemented through `docs/archive/session_workpackages/wp66_recording_timestamp_anchor_alignment.md`
+- `Recording Log Policy Alignment` is now implemented through `docs/archive/session_workpackages/wp67_recording_log_policy_alignment.md`
+- `Unified Artifact Recording Log Append Baseline` is now landed at `docs/archive/session_workpackages/wp68_unified_artifact_recording_log_append_baseline.md`
+- `wx Camera Settings Menu And Shortcut Baseline` is now landed at `docs/archive/session_workpackages/wp69_wx_camera_settings_menu_and_shortcut_baseline.md`
 - `Control And Imaging Compatibility Cleanup` is now landed at `docs/archive/session_workpackages/wp70_control_and_imaging_compatibility_cleanup.md`
 - `Reference Scenario Validation Narrowing` is now landed at `docs/archive/session_workpackages/wp71_reference_scenario_validation_narrowing.md`
 - `Reference Scenario Operator Path Tightening` is now landed at `docs/archive/session_workpackages/wp75_reference_scenario_operator_path_tightening.md`
-- `Host Result And Status Surface Consistency Narrowing` is now landed at `docs/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md`
-- `Usable Failure Reflection Baseline` is now landed at `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md`
-- `Stage-2 LabVIEW Contract Mapping Narrowing` is now landed at `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
-- `Headless Command Seam Extraction Baseline` is now landed at `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
+- `Host Result And Status Surface Consistency Narrowing` is now landed at `docs/archive/session_workpackages/wp83_host_result_and_status_surface_consistency_narrowing.md`
+- `Usable Failure Reflection Baseline` is now landed at `docs/archive/session_workpackages/wp84_usable_failure_reflection_baseline.md`
+- `Stage-2 LabVIEW Contract Mapping Narrowing` is now landed at `docs/archive/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
+- `Headless Command Seam Extraction Baseline` is now landed at `docs/archive/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
 - `Hybrid Companion Hardware Workflow Revalidation` is now completed at `docs/archive/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
 
 ## PM Refinement Rule
@@ -947,8 +947,3 @@ When a session work package is completed:
 - move it to `docs/archive/session_workpackages/`
 - update this PM file if that changes the current recommended order
 - update `docs/STATUS.md` if the repository baseline changed
-
-
-
-
-

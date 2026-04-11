@@ -127,7 +127,7 @@ Read these for every new session:
 - For host-neutral command-surface follow-up work:
   - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
 - For the next optional frontend-expansion work:
-  - `docs/session_workpackages/wp11_additional_frontends.md`
+  - `docs/archive/session_workpackages/wp11_additional_frontends.md`
 
 ## Working Defaults
 

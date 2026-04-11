@@ -107,7 +107,7 @@ The immediate remaining gap is:
    - `apps/postprocess_tool/STATUS.md`
    - `services/recording_service/README.md`
    - `services/recording_service/STATUS.md`
-   - `docs/session_workpackages/wp16_data_logging_traceability.md`
+   - `docs/archive/session_workpackages/wp16_data_logging_traceability.md`
 2. Inspect the current postprocess focus-report path and the shared traceability log helper for the narrowest metadata-consumption seam.
 3. Verify which per-image metadata fields are actually guaranteed by the current traceability log and freeze a conservative minimum joined field set before changing the report shape.
 4. Define one compact metadata-aware offline report shape that extends the existing per-image focus entry instead of replacing it.

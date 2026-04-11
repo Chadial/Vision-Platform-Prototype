@@ -86,7 +86,7 @@ This section only records useful starting points for the listed themes.
 - `hardware revalidation and operator guidance`
   - see status: `docs/STATUS.md`
   - see queue: `docs/WORKPACKAGES.md`
-  - see execution context: `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
+  - see execution context: `docs/archive/session_workpackages/wp04_hardware_revalidation_follow_up.md`
 - `later camera_app to vision_platform migration`
   - see status: `docs/STATUS.md`
   - see queue: `docs/WORKPACKAGES.md`
@@ -127,7 +127,7 @@ These are the most practical launch points when you want to inspect or exercise 
 - hardware revalidation and operator guidance:
   - `docs/STATUS.md`
   - `docs/WORKPACKAGES.md`
-  - `docs/session_workpackages/wp04_hardware_revalidation_follow_up.md`
+  - `docs/archive/session_workpackages/wp04_hardware_revalidation_follow_up.md`
   - `docs/PYTHON_BASELINE_RUNBOOK.md`
   - `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md`
   - `integrations/camera/STATUS.md`
