@@ -28,7 +28,10 @@ from vision_platform.apps.local_shell.live_command_sync import (
     write_live_command_result,
     write_live_status_snapshot,
 )
+from vision_platform.apps.local_shell.output_format_policy import choose_snapshot_file_extension
 from vision_platform.apps.local_shell.preview_shell_state import PreviewShellPresenter, PreviewShellViewModel
+from vision_platform.apps.local_shell.camera_settings_service import CameraSettingsService
+from vision_platform.apps.camera_cli.camera_configuration_profiles import normalize_camera_class_name
 from vision_platform.apps.local_shell.startup import (
     LocalShellLaunchOptions,
     LocalShellSession,
@@ -224,6 +227,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._session = session
         self._subsystem = session.subsystem
         self._focus_preview_service = session.focus_preview_service
+        self._camera_settings_service = CameraSettingsService()
         self._subsystem.stream_service.start_preview()
         self._presenter = PreviewShellPresenter(roi_state_service=self._subsystem.stream_service.get_roi_state_service())
         self._timer = wx.Timer(self)
@@ -351,7 +355,12 @@ class WxLocalPreviewShell(wx.Frame):
     def _on_snapshot(self, event) -> None:
         try:
             result = self._subsystem.command_controller.save_snapshot(
-                SaveSnapshotRequest(file_stem="wx_shell_snapshot", file_extension=".bmp")
+                SaveSnapshotRequest(
+                    file_stem="wx_shell_snapshot",
+                    file_extension=choose_snapshot_file_extension(
+                        pixel_format=self._get_current_pixel_format(),
+                    ),
+                )
             )
         except Exception as exc:
             self._snapshot_last_error = str(exc)
@@ -406,7 +415,10 @@ class WxLocalPreviewShell(wx.Frame):
             result = self._session.subsystem.command_controller.start_recording(
                 StartRecordingRequest(
                     file_stem=self._recording_file_stem,
-                    file_extension=self._recording_file_extension,
+                    file_extension=choose_snapshot_file_extension(
+                        pixel_format=self._get_current_pixel_format(),
+                        requested_extension=self._recording_file_extension,
+                    ),
                     save_directory=save_directory,
                     max_frame_count=frame_limit,
                     target_frame_rate=target_frame_rate,
@@ -623,6 +635,9 @@ class WxLocalPreviewShell(wx.Frame):
 
     def _build_accelerator_table(self) -> wx.AcceleratorTable:
         entries = [
+            wx.AcceleratorEntry(wx.ACCEL_CTRL, ord("1"), self._menu_zoom_in.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL, ord("2"), self._menu_zoom_out.GetId()),
+            wx.AcceleratorEntry(wx.ACCEL_CTRL, ord("3"), self._menu_fit.GetId()),
             wx.AcceleratorEntry(wx.ACCEL_CTRL, ord("P"), self._menu_snapshot.GetId()),
             wx.AcceleratorEntry(wx.ACCEL_CTRL | wx.ACCEL_SHIFT, ord("S"), self._menu_set_save_directory.GetId()),
             wx.AcceleratorEntry(wx.ACCEL_CTRL | wx.ACCEL_SHIFT, ord("C"), self._menu_camera_settings.GetId()),
@@ -636,24 +651,35 @@ class WxLocalPreviewShell(wx.Frame):
 
     def _on_menu_camera_settings(self, event) -> None:
         status = self._get_status()
+        capability_profile = self._subsystem.camera_service.get_capability_profile()
+        camera_class = getattr(self._session, "configuration_profile_camera_class", None)
+        status_camera = getattr(status, "camera", None)
+        if camera_class is None and status_camera is not None and getattr(status_camera, "camera_model", None):
+            camera_class = normalize_camera_class_name(status_camera.camera_model)
+        defaults = self._camera_settings_service.build_initial_request(
+            current_configuration=status.configuration,
+            profile_id=getattr(self._session, "configuration_profile_id", None),
+            camera_class=camera_class,
+            capability_profile=capability_profile,
+        )
+        field_hints = self._camera_settings_service.build_field_hints(capability_profile)
         dialog = _CameraSettingsDialog(
             self,
-            exposure_time_us=_format_optional_value(status.configuration.exposure_time_us if status.configuration else None),
-            gain=_format_optional_value(status.configuration.gain if status.configuration else None),
-            pixel_format=status.configuration.pixel_format if status.configuration and status.configuration.pixel_format else "",
-            acquisition_frame_rate=_format_optional_value(
-                status.configuration.acquisition_frame_rate if status.configuration else None
-            ),
-            roi_offset_x=_format_optional_value(status.configuration.roi_offset_x if status.configuration else None),
-            roi_offset_y=_format_optional_value(status.configuration.roi_offset_y if status.configuration else None),
-            roi_width=_format_optional_value(status.configuration.roi_width if status.configuration else None),
-            roi_height=_format_optional_value(status.configuration.roi_height if status.configuration else None),
+            exposure_time_us=self._format_optional_value(defaults.exposure_time_us),
+            gain=self._format_optional_value(defaults.gain),
+            pixel_format=defaults.pixel_format or "",
+            acquisition_frame_rate=self._format_optional_value(defaults.acquisition_frame_rate),
+            roi_offset_x=self._format_optional_value(defaults.roi_offset_x),
+            roi_offset_y=self._format_optional_value(defaults.roi_offset_y),
+            roi_width=self._format_optional_value(defaults.roi_width),
+            roi_height=self._format_optional_value(defaults.roi_height),
+            field_hints={field_name: hint.tooltip for field_name, hint in field_hints.items() if hint.tooltip},
         )
         try:
             if dialog.ShowModal() != wx.ID_OK:
                 return
-            values = dialog.get_values()
-            request = self._build_camera_settings_request(**values)
+            request = self._build_camera_settings_request(**dialog.get_values())
+            request = self._camera_settings_service.normalize_request(request, capability_profile)
             self._session.subsystem.command_controller.apply_configuration(request)
             self._cached_status = None
             self._last_status_refresh_time = 0.0
@@ -775,6 +801,14 @@ class WxLocalPreviewShell(wx.Frame):
             self._cached_status = self._subsystem.command_controller.get_status()
             self._last_status_refresh_time = now
         return self._cached_status
+
+    def _get_current_pixel_format(self) -> str | None:
+        try:
+            status = self._get_status()
+        except AttributeError:
+            return None
+        configuration = getattr(status, "configuration", None)
+        return getattr(configuration, "pixel_format", None)
 
     def _get_command_controller(self):
         session = getattr(self, "_session", None)
@@ -1260,7 +1294,7 @@ class WxLocalPreviewShell(wx.Frame):
     def _update_menu_state(self, status) -> None:
         menu_state = (
             ("_menu_snapshot", status.can_save_snapshot),
-            ("_menu_camera_settings", status.can_apply_configuration),
+            ("_menu_camera_settings", True),
             ("_menu_start_recording", status.can_start_recording),
             ("_menu_stop_recording", status.can_stop_recording),
             ("_menu_recording_settings", True),
@@ -1313,12 +1347,13 @@ class WxLocalPreviewShell(wx.Frame):
     def _build_shortcut_reference_text() -> str:
         return "\n".join(
             [
-                "OpenCV-style preview shortcuts:",
-                "  i=zoom in, o=zoom out, f=fit, x=crosshair, y=focus, r=rectangle ROI, e=ellipse ROI",
-                "  +=snapshot, Ctrl+C=copy selected point, Esc=cancel active drag",
-                "Menu accelerators:",
-                "  Ctrl+P=snapshot, Ctrl+Shift+S=set save directory, Ctrl+Shift+C=camera settings",
-                "  Ctrl+R=recording settings, Ctrl+Enter=start recording, Ctrl+Shift+Enter=stop recording, Ctrl+Q=exit",
+                "Preview:",
+                "  Ctrl+1=zoom in  Ctrl+2=zoom out  Ctrl+3=fit",
+                "  i=zoom in  o=zoom out  f=fit  x=crosshair  y=focus",
+                "  r=rectangle ROI  e=ellipse ROI  Ctrl+C=copy point  Esc=cancel drag",
+                "Menu:",
+                "  Ctrl+P=snapshot  Ctrl+Shift+S=set save directory  Ctrl+Shift+C=camera settings",
+                "  Ctrl+R=recording settings  Ctrl+Enter=start recording  Ctrl+Shift+Enter=stop recording  Ctrl+Q=exit",
             ]
         )
 
@@ -1504,7 +1539,10 @@ class WxLocalPreviewShell(wx.Frame):
                 result = controller.save_snapshot(
                     SaveSnapshotRequest(
                         file_stem=payload.get("file_stem", "wx_shell_snapshot"),
-                        file_extension=payload.get("file_extension", ".bmp"),
+                        file_extension=choose_snapshot_file_extension(
+                            pixel_format=self._get_current_pixel_format(),
+                            requested_extension=payload.get("file_extension"),
+                        ),
                         camera_id=self._session.resolved_camera_id,
                         configuration_profile_id=self._session.configuration_profile_id,
                         configuration_profile_camera_class=self._session.configuration_profile_camera_class,
@@ -1530,7 +1568,10 @@ class WxLocalPreviewShell(wx.Frame):
             )
         elif command.command_name == "start_recording":
             file_stem = payload["file_stem"] if "file_stem" in payload else self._recording_file_stem
-            file_extension = payload["file_extension"] if "file_extension" in payload else self._recording_file_extension
+            file_extension = choose_snapshot_file_extension(
+                pixel_format=self._get_current_pixel_format(),
+                requested_extension=payload["file_extension"] if "file_extension" in payload else self._recording_file_extension,
+            )
             frame_limit = (
                 payload["max_frame_count"]
                 if "max_frame_count" in payload
@@ -1889,19 +1930,23 @@ class _CameraSettingsDialog(wx.Dialog):
         roi_offset_y: str,
         roi_width: str,
         roi_height: str,
+        field_hints: dict[str, str] | None = None,
     ) -> None:
         super().__init__(parent, title="Camera Settings", style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         panel = wx.Panel(self)
         panel_sizer = wx.BoxSizer(wx.VERTICAL)
         grid = wx.FlexGridSizer(cols=2, vgap=8, hgap=8)
         grid.AddGrowableCol(1, 1)
+        field_hints = field_hints or {}
 
         grid.Add(wx.StaticText(panel, label="Exposure Time (us, blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
         self._exposure_time_us = wx.TextCtrl(panel, value=exposure_time_us)
+        self._set_tooltip(self._exposure_time_us, field_hints.get("exposure_time_us"))
         grid.Add(self._exposure_time_us, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="Gain (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
         self._gain = wx.TextCtrl(panel, value=gain)
+        self._set_tooltip(self._gain, field_hints.get("gain"))
         grid.Add(self._gain, 1, wx.EXPAND)
 
         pixel_format_choices = list(_WX_CAMERA_PIXEL_FORMATS)
@@ -1914,26 +1959,32 @@ class _CameraSettingsDialog(wx.Dialog):
             self._pixel_format.SetSelection(0)
         elif not pixel_format:
             self._pixel_format.SetSelection(0)
+        self._set_tooltip(self._pixel_format, field_hints.get("pixel_format"))
         grid.Add(self._pixel_format, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="Acquisition FPS (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
         self._acquisition_frame_rate = wx.TextCtrl(panel, value=acquisition_frame_rate)
+        self._set_tooltip(self._acquisition_frame_rate, field_hints.get("acquisition_frame_rate"))
         grid.Add(self._acquisition_frame_rate, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="ROI Offset X (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
         self._roi_offset_x = wx.TextCtrl(panel, value=roi_offset_x)
+        self._set_tooltip(self._roi_offset_x, field_hints.get("roi_offset_x"))
         grid.Add(self._roi_offset_x, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="ROI Offset Y (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
         self._roi_offset_y = wx.TextCtrl(panel, value=roi_offset_y)
+        self._set_tooltip(self._roi_offset_y, field_hints.get("roi_offset_y"))
         grid.Add(self._roi_offset_y, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="ROI Width (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
         self._roi_width = wx.TextCtrl(panel, value=roi_width)
+        self._set_tooltip(self._roi_width, field_hints.get("roi_width"))
         grid.Add(self._roi_width, 1, wx.EXPAND)
 
         grid.Add(wx.StaticText(panel, label="ROI Height (blank=unchanged)"), 0, wx.ALIGN_CENTER_VERTICAL)
         self._roi_height = wx.TextCtrl(panel, value=roi_height)
+        self._set_tooltip(self._roi_height, field_hints.get("roi_height"))
         grid.Add(self._roi_height, 1, wx.EXPAND)
 
         panel_sizer.Add(grid, 1, wx.EXPAND | wx.ALL, 10)
@@ -1944,6 +1995,11 @@ class _CameraSettingsDialog(wx.Dialog):
         if buttons is not None:
             root.Add(buttons, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         self.SetSizerAndFit(root)
+
+    @staticmethod
+    def _set_tooltip(control, tooltip: str | None) -> None:
+        if tooltip:
+            control.SetToolTip(tooltip)
 
     def get_values(self) -> dict[str, str]:
         return {

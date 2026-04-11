@@ -150,6 +150,13 @@ Boundary:
 - it is intended to mirror the shell-visible state rather than replace the shell
 - it should be read as the current host/shell collaboration pattern for the `Hybrid Companion` phase
 
+Interaction note:
+
+- `Crosshair` has priority over ROI entry and ROI dragging in the current wx shell
+- when crosshair is enabled, a click selects the point instead of starting a new ROI anchor
+- enabling crosshair aborts any in-progress ROI draft or ROI drag
+- `Camera Settings...` stays available as a modal shell dialog even when the apply path is currently unavailable
+
 ## Current Bounded Entry Surface
 
 The current practical startup surface is intentionally small:

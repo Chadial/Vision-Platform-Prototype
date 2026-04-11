@@ -89,9 +89,12 @@ class PreviewShellPresenter:
     ) -> None:
         self._coordinate_export_service = coordinate_export_service or CoordinateExportService()
         self._geometry_service = geometry_service or DisplayGeometryService()
-        self._interaction_service = interaction_service or PreviewInteractionService(self._geometry_service)
-        self._status_model_service = status_model_service or PreviewStatusModelService()
         self._roi_state_service = roi_state_service or RoiStateService()
+        self._interaction_service = interaction_service or PreviewInteractionService(
+            self._geometry_service,
+            self._roi_state_service,
+        )
+        self._status_model_service = status_model_service or PreviewStatusModelService()
         self._zoom_step = zoom_step
         self._min_zoom_scale = min_zoom_scale
         self._max_zoom_scale = max_zoom_scale
@@ -225,6 +228,11 @@ class PreviewShellPresenter:
         self.apply_command(
             PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y)),
         )
+        if self._state.interaction_state.crosshair_visible:
+            source_point = self._geometry_service.map_viewport_point_to_source(self._state.last_viewport_mapping, x, y)
+            return self.apply_command(
+                PreviewInteractionCommand(action="select_source_point", source_point=source_point),
+            )
         if self._toggle_locked_anchor_drag_if_active(x, y):
             return PreviewInteractionOutcome()
         if self._start_anchor_drag_if_hit(x, y):
@@ -289,6 +297,8 @@ class PreviewShellPresenter:
         self.apply_command(
             PreviewInteractionCommand(action="cursor_moved", viewport_point=(x, y), source_point=source_point),
         )
+        if self._state.interaction_state.crosshair_visible:
+            return
         active_anchor_drag_id = self._state.interaction_state.active_anchor_drag_id
         if active_anchor_drag_id is not None:
             self._state.interaction_state.hovered_anchor_id = active_anchor_drag_id
@@ -765,8 +775,8 @@ def render_viewport_image(frame: CapturedFrame, mapping: ViewportMapping) -> Ren
                 mapping=mapping,
             ),
         )
-    if pixel_format == "mono16":
-        mono8_bytes = _convert_mono16_to_mono8(source_bytes, frame.width, frame.height)
+    if pixel_format in {"mono10", "mono12", "mono14", "mono16"}:
+        mono8_bytes = _convert_high_bit_mono_to_mono8(source_bytes, frame.width, frame.height, pixel_format)
         return RenderedViewportImage(
             width=mapping.viewport_width,
             height=mapping.viewport_height,
@@ -933,10 +943,10 @@ def _require_numpy():
     return _NUMPY_MODULE
 
 
-def _convert_mono16_to_mono8(source_bytes: bytes, width: int, height: int) -> bytes:
+def _convert_high_bit_mono_to_mono8(source_bytes: bytes, width: int, height: int, pixel_format: str) -> bytes:
     expected_size = width * height * 2
     if len(source_bytes) < expected_size:
-        raise RuntimeError("Frame buffer is too small for Mono16 viewport rendering.")
+        raise RuntimeError(f"Frame buffer is too small for {pixel_format} viewport rendering.")
     if _is_numpy_available():
         numpy_module = _require_numpy()
         values = numpy_module.frombuffer(source_bytes, dtype=numpy_module.uint16, count=width * height)

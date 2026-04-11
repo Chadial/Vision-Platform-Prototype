@@ -115,8 +115,8 @@ class CameraCliTests(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(result.status.configuration.pixel_format, "Mono8")
-        self.assertEqual(result.status.configuration.exposure_time_us, 10031.291)
+        self.assertEqual(result.status.configuration.pixel_format, "Mono10")
+        self.assertEqual(result.status.configuration.exposure_time_us, 10013.862)
         self.assertEqual(result.status.configuration.gain, 3.0)
         self.assertEqual(result.status.configuration.roi_width, 2000)
         self.assertEqual(result.status.configuration.roi_height, 1500)
@@ -139,7 +139,7 @@ class CameraCliTests(unittest.TestCase):
 
             target_directory = Path(temp_dir) / "cli_run_001"
             self.assertEqual(result.selected_save_directory, target_directory)
-            self.assertEqual(result.snapshot_path, target_directory / "capture.png")
+            self.assertEqual(result.snapshot_path, target_directory / "capture_000000.png")
             self.assertTrue(result.snapshot_path.exists())
             self.assertEqual(result.status.default_save_directory, target_directory)
             self.assertTrue(result.status.can_save_snapshot)
@@ -169,9 +169,9 @@ class CameraCliTests(unittest.TestCase):
             payload = json.loads(stdout.getvalue())
             self.assertEqual(exit_code, 0)
             self.assertTrue(payload["success"])
-            self.assertEqual(payload["result"]["run_id"], "capture")
+            self.assertEqual(payload["result"]["run_id"], "capture_000000")
             self.assertEqual(payload["result"]["confirmed_settings"]["camera_id"], "sim-confirm")
-            self.assertEqual(payload["result"]["confirmed_settings"]["run_id"], "capture")
+            self.assertEqual(payload["result"]["confirmed_settings"]["run_id"], "capture_000000")
             self.assertEqual(payload["result"]["confirmed_settings"]["pixel_format"], "Mono8")
             self.assertEqual(payload["result"]["confirmed_settings"]["exposure_time_us"], 1500.0)
             self.assertEqual(payload["result"]["confirmed_settings"]["resolved_save_directory"], temp_dir)
@@ -294,7 +294,7 @@ class CameraCliTests(unittest.TestCase):
             self.assertFalse(payload["status"]["recording"]["is_recording"])
             self.assertTrue((Path(temp_dir) / "recording_000000.raw").exists())
             self.assertTrue((Path(temp_dir) / "recording_000001.raw").exists())
-            self.assertTrue((Path(temp_dir) / "recording_recording_log.csv").exists())
+            self.assertTrue((Path(temp_dir) / "recording_log.csv").exists())
 
     def test_run_cli_raises_camera_cli_error_for_invalid_recording_arguments(self) -> None:
         with self.assertRaises(CameraCliError) as exc_info:
@@ -430,7 +430,7 @@ class CameraCliTests(unittest.TestCase):
         command_controller.save_snapshot.return_value = SimpleNamespace(saved_path=Path("captures/profile/image.bmp"))
         command_controller.get_status.return_value = SimpleNamespace(
             camera=SimpleNamespace(camera_id="CAM-001"),
-            configuration=SimpleNamespace(pixel_format="Mono8", exposure_time_us=10031.291),
+            configuration=SimpleNamespace(pixel_format="Mono8", exposure_time_us=10013.862),
         )
         build_subsystem_mock.return_value = SimpleNamespace(
             camera_service=camera_service,
@@ -457,8 +457,8 @@ class CameraCliTests(unittest.TestCase):
 
         applied_request = command_controller.apply_configuration.call_args.args[0]
         snapshot_request = command_controller.save_snapshot.call_args.args[0]
-        self.assertEqual(applied_request.pixel_format, "Mono8")
-        self.assertEqual(applied_request.exposure_time_us, 10031.291)
+        self.assertEqual(applied_request.pixel_format, "Mono10")
+        self.assertEqual(applied_request.exposure_time_us, 10013.862)
         self.assertEqual(applied_request.gain, 5.0)
         self.assertEqual(applied_request.roi_width, 2000)
         self.assertEqual(snapshot_request.configuration_profile_id, "default")

@@ -4,7 +4,12 @@
 - implemented: bounded wxPython local working shell with simulated and hardware-backed startup paths under `vision_platform.apps.local_shell`
 - working now: the shell starts through the project `.venv`, opens a real wx window, polls the shared preview stream, and renders the latest simulated or hardware-backed frame in a bounded image area
 - working now: snapshot is triggered through the existing command-controller path and writes repo-local example output under `captures/`
-- working now: fit/zoom, crosshair toggle, focus toggle/status, and rectangle/ellipse ROI entry reuse the extracted display geometry, interaction, preview-status, and focus-preview layers instead of introducing UI-private business logic
+- working now: `Camera Settings...` opens as a real modal shell dialog even when configuration application is not currently available, preloads camera-class defaults from `configs/camera_configuration_profiles.json` when needed, and uses the current capability profile to expose and clamp field limits before apply; the shortcut help is now shell-oriented instead of OpenCV-branded
+- working now: the local preview path now renders `Mono10` and other high-bit grayscale frames instead of crashing the timer loop, and snapshot / recording output falls back to a hardware-safe extension when BMP is invalid for the current pixel format
+- next: if the tested hardware is still attached, one final live `Camera Settings...` / menu-path check on the current `Mono10` shell is the smallest remaining hardware slice; if not, stop hardware work and move to branch hygiene
+- working now: fit/zoom, crosshair toggle, focus toggle/status, and rectangle/ellipse ROI entry reuse the extracted display geometry, interaction, preview-status, and focus-preview layers instead of introducing UI-private business logic; when crosshair is enabled, it supersedes ROI entry/drag and aborts any in-progress ROI draft
+- working now: `Ctrl+1`, `Ctrl+2`, and `Ctrl+3` now map to zoom in, zoom out, and fit, while `R` and `E` toggle rectangle/ellipse ROI mode on and off and clear the visible ROI when turned off
+- working now: rectangle and ellipse ROIs are kept persistently in the core state, with only one shape active at a time and the inactive shape remaining stored but hidden until its toggle is selected again
 - working now: snapshot notices are rendered as transient status messages instead of pinning the status area after a successful save
 - working now: the wx shell now evaluates focus through the shared focus-preview service on a bounded downsampled work frame so the existing headless evaluator remains reusable on large live frames
 - working now: the wx canvas now renders one visible focus marker/label at the shared focus anchor instead of relying only on status text
@@ -50,10 +55,10 @@
 - working now: the current `local_shell control` status read now also exposes one additive `labview_mapping` block with flat camera/save/focus/ROI/recording/failure cues for the bounded Stage-2 host reading
 - working now: the current `local_shell control` command path now also exposes one additive `labview_mapping` block for both successful and failed command results, keeping current command name, phase, save-path/file cues, stop category, and failure ownership readable without changing the underlying live-sync result shape
 - working now: the current companion command-result payload shape, failed-result placeholder shape, and published status-snapshot payload shape now have one shell-independent home in `vision_platform.services.companion_contract_service`, and the wx-shell bridge consumes that seam instead of assembling those payloads inline
-- next: no unconditional local-shell `current next` is set; the hardware-focused `WP87` rerun remains conditional on the documented tested real camera path being attached again
+- next: no unconditional local-shell `current next` is set; the host-plus-UI validation lane now lives in the archived `WP88` note, and any further hardware work should be the smallest live `Camera Settings...` / menu-path check if the tested device is still attached
 - working now: the shell uses the current OpenCV preview path as the reference for the first feature cut: preview image, snapshot action, status area, zoom/fit, crosshair, and ROI entry
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
-- partial: the shell now has a bounded hardware-backed startup path, but no committed wx-specific real-device smoke evidence exists yet in the permanent test suite
-- partial: ROI visibility toggles, menu-driven settings entry, and broader operator controls are intentionally not part of this slice
+- working now: the shell now has bounded hardware-backed startup and host-plus-UI smoke evidence in the permanent test suite
+- partial: menu-driven settings entry and broader operator controls are intentionally not part of this slice
 - technical debt: the current shell keeps its viewport rendering in app-local helper code because no shared non-OpenCV image-presenter abstraction exists yet
 - risk: future non-OpenCV frontend growth may justify a shared renderer-facing display adapter above the current app-local bitmap conversion path

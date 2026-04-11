@@ -5,6 +5,7 @@ from unittest.mock import patch
 from types import SimpleNamespace
 
 from tests import _path_setup
+from vision_platform.apps.local_shell import wx_preview_shell as wx_preview_shell_module
 from vision_platform.apps.local_shell import PreviewShellPresenter
 from vision_platform.apps.local_shell.wx_preview_shell import (
     WxLocalPreviewShell,
@@ -32,6 +33,20 @@ class WxPreviewShellTests(unittest.TestCase):
             width=4,
             height=4,
             pixel_format="Mono8",
+        )
+        view = presenter.build_view(frame, viewport_width=4, viewport_height=4)
+
+        self.assertEqual(view.image.mime_family, "pgm")
+        self.assertEqual(len(view.image.payload), 16)
+        self.assertEqual(len(view.image.to_rgb_bytes()), 48)
+
+    def test_render_viewport_image_converts_mono10_to_rgb_bytes_for_wx(self) -> None:
+        presenter = PreviewShellPresenter()
+        frame = CapturedFrame(
+            raw_frame=bytes((value & 0xFF for value in range(32))),
+            width=4,
+            height=4,
+            pixel_format="Mono10",
         )
         view = presenter.build_view(frame, viewport_width=4, viewport_height=4)
 
@@ -135,6 +150,7 @@ class WxPreviewShellTests(unittest.TestCase):
         )
 
         presenter.build_view(frame, viewport_width=8, viewport_height=8)
+        presenter.apply_command(PreviewInteractionCommand(action="toggle_crosshair"))
         presenter.handle_pointer_move(4, 5)
         view = presenter.build_view(frame, viewport_width=8, viewport_height=8)
 
@@ -905,9 +921,102 @@ class WxPreviewShellTests(unittest.TestCase):
     def test_shortcut_reference_text_includes_camera_settings_and_recording_shortcuts(self) -> None:
         text = WxLocalPreviewShell._build_shortcut_reference_text()
 
+        self.assertIn("Preview:", text)
+        self.assertIn("Ctrl+1=zoom in", text)
+        self.assertIn("Ctrl+2=zoom out", text)
+        self.assertIn("Ctrl+3=fit", text)
         self.assertIn("Ctrl+Shift+C=camera settings", text)
         self.assertIn("Ctrl+Enter=start recording", text)
         self.assertIn("Ctrl+Shift+Enter=stop recording", text)
+        self.assertNotIn("OpenCV", text)
+
+    def test_camera_settings_menu_stays_enabled_independent_of_configuration_state(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        shell._menu_camera_settings = _StubMenuItem()
+        shell._menu_snapshot = _StubMenuItem()
+        shell._menu_start_recording = _StubMenuItem()
+        shell._menu_stop_recording = _StubMenuItem()
+        shell._menu_recording_settings = _StubMenuItem()
+        shell._menu_set_save_directory = _StubMenuItem()
+        shell._menu_zoom_in = _StubMenuItem()
+        shell._menu_zoom_out = _StubMenuItem()
+        shell._menu_fit = _StubMenuItem()
+        shell._menu_crosshair = _StubMenuItem()
+        shell._menu_focus = _StubMenuItem()
+        shell._menu_rect_roi = _StubMenuItem()
+        shell._menu_ellipse_roi = _StubMenuItem()
+        shell._menu_copy_point = _StubMenuItem()
+        shell._menu_cancel_drag = _StubMenuItem()
+        shell._menu_shortcuts = _StubMenuItem()
+
+        status = SimpleNamespace(
+            can_save_snapshot=False,
+            can_apply_configuration=False,
+            can_start_recording=False,
+            can_stop_recording=False,
+        )
+
+        shell._update_menu_state(status)
+
+        self.assertTrue(shell._menu_camera_settings.enabled)
+
+    def test_camera_settings_menu_populates_dialog_with_current_configuration_values(self) -> None:
+        shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+        status = SimpleNamespace(
+            configuration=SimpleNamespace(
+                exposure_time_us=1500.0,
+                gain=3.0,
+                pixel_format="Mono8",
+                acquisition_frame_rate=12.5,
+                roi_offset_x=10,
+                roi_offset_y=20,
+                roi_width=300,
+                roi_height=200,
+            )
+        )
+        shell._get_status = lambda: status
+        shell._build_camera_settings_request = lambda **kwargs: kwargs
+        shell._camera_settings_service = wx_preview_shell_module.CameraSettingsService()
+        shell._session = SimpleNamespace(
+            configuration_profile_id="default",
+            configuration_profile_camera_class="1800_u_1240m",
+            subsystem=SimpleNamespace(command_controller=SimpleNamespace(apply_configuration=lambda _request: None))
+        )
+        shell._subsystem = SimpleNamespace(
+            camera_service=SimpleNamespace(get_capability_profile=lambda: None),
+        )
+        shell._cached_status = None
+        shell._last_status_refresh_time = 0.0
+        shell._cached_focus_state = None
+        shell._last_focus_refresh_time = 0.0
+        shell._clear_failure_reflection_for_source = lambda _source: None
+        shell._set_transient_status_message = lambda _message: None
+        shell.request_refresh = lambda: None
+
+        created_dialogs: list = []
+
+        class _FakeDialog:
+            def __init__(self, parent, **kwargs):
+                created_dialogs.append(kwargs)
+
+            def ShowModal(self):
+                return 0
+
+            def Destroy(self):
+                pass
+
+        with patch.object(wx_preview_shell_module, "_CameraSettingsDialog", _FakeDialog):
+            shell._on_menu_camera_settings(None)
+
+        self.assertEqual(len(created_dialogs), 1)
+        self.assertEqual(created_dialogs[0]["exposure_time_us"], "10013.9")
+        self.assertEqual(created_dialogs[0]["gain"], "3")
+        self.assertEqual(created_dialogs[0]["pixel_format"], "Mono10")
+        self.assertEqual(created_dialogs[0]["acquisition_frame_rate"], "12.5")
+        self.assertEqual(created_dialogs[0]["roi_offset_x"], "0")
+        self.assertEqual(created_dialogs[0]["roi_offset_y"], "0")
+        self.assertEqual(created_dialogs[0]["roi_width"], "2000")
+        self.assertEqual(created_dialogs[0]["roi_height"], "1500")
 
     def test_recording_settings_dialog_uses_choice_string_selection(self) -> None:
         dialog = SimpleNamespace(
@@ -984,7 +1093,7 @@ class WxPreviewShellTests(unittest.TestCase):
 
         self.assertEqual(len(started_requests), 1)
         self.assertEqual(started_requests[0].file_stem, "menu_stem")
-        self.assertEqual(started_requests[0].file_extension, ".bmp")
+        self.assertEqual(started_requests[0].file_extension, ".raw")
 
     def test_external_start_recording_uses_current_shell_recording_settings_when_overrides_are_omitted(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
@@ -1021,7 +1130,7 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(result["command"], "start_recording")
         self.assertEqual(len(started_requests), 1)
         self.assertEqual(started_requests[0].file_stem, "shell_run")
-        self.assertEqual(started_requests[0].file_extension, ".bmp")
+        self.assertEqual(started_requests[0].file_extension, ".raw")
         self.assertEqual(started_requests[0].max_frame_count, 24)
         self.assertEqual(started_requests[0].target_frame_rate, 8.5)
         self.assertEqual(shell._recording_active_frame_limit, 24)
@@ -1126,12 +1235,12 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(result["command"], "save_snapshot")
         self.assertEqual(result["reflection_kind"], "snapshot")
         self.assertEqual(result["reflection"]["phase"], "saved")
-        self.assertEqual(result["reflection"]["file_name"], "geometry_000001.bmp")
-        self.assertEqual(shell._snapshot_last_saved_path, Path("captures/geometry/geometry_000001.bmp"))
+        self.assertEqual(result["reflection"]["file_name"], "geometry_000001.raw")
+        self.assertEqual(shell._snapshot_last_saved_path, Path("captures/geometry/geometry_000001.raw"))
         self.assertIsNone(shell._snapshot_last_error)
         self.assertEqual(
             transient_messages[-1],
-            f"External geometry snapshot saved: geometry_000001.bmp -> {Path('captures/geometry')}",
+            f"External geometry snapshot saved: geometry_000001.raw -> {Path('captures/geometry')}",
         )
 
     def test_build_live_command_result_uses_save_directory_reflection_for_set_save_directory(self) -> None:
@@ -1379,7 +1488,7 @@ class WxPreviewShellTests(unittest.TestCase):
                 self.assertEqual(session.resolved_camera_id, "DEV_1AB22C046D81")
                 self.assertEqual(session.configuration_profile_id, "default")
                 self.assertIsNotNone(session.focus_preview_service)
-                self.assertEqual(status.configuration.pixel_format, "Mono8")
+                self.assertEqual(status.configuration.pixel_format, "Mono10")
                 self.assertEqual(status.configuration.gain, 3.0)
                 self.assertEqual(status.configuration.roi_width, 2000)
                 self.assertEqual(status.default_save_directory, Path(temp_dir))
@@ -1422,6 +1531,14 @@ class _StubPresenter:
             (),
             {"interaction_state": type("InteractionState", (), {"focus_status_visible": focus_status_visible})()},
         )()
+
+
+class _StubMenuItem:
+    def __init__(self) -> None:
+        self.enabled = None
+
+    def Enable(self, enabled: bool) -> None:
+        self.enabled = enabled
 
 
 class _StubTextControl:

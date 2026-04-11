@@ -141,6 +141,12 @@ Typical sequence:
 4. let the shell execute those commands through the same command-controller path
 5. read the published shell status or command result JSON that the shell wrote back
 
+Interaction rule for the shell side:
+
+- `Crosshair` currently takes priority over ROI entry and ROI dragging
+- enabling crosshair aborts any in-progress ROI draft or ROI drag
+- `Camera Settings...` stays openable as a modal shell dialog even when apply is not currently available
+
 Common host-side examples:
 
 ```powershell

@@ -1,6 +1,7 @@
 import unittest
 
 from tests import _path_setup
+from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.services.display_service import (
     DisplayGeometryService,
     PreviewInteractionCommand,
@@ -8,12 +9,17 @@ from vision_platform.services.display_service import (
     PreviewInteractionState,
     ZoomPanState,
 )
+from vision_platform.services.stream_service import RoiStateService
 
 
 class PreviewInteractionServiceTests(unittest.TestCase):
     def setUp(self) -> None:
         self.geometry_service = DisplayGeometryService()
-        self.service = PreviewInteractionService(self.geometry_service)
+        self.roi_state_service = RoiStateService()
+        self.service = PreviewInteractionService(
+            self.geometry_service,
+            self.roi_state_service,
+        )
         self.interaction_state = PreviewInteractionState()
         self.geometry_state = ZoomPanState()
 
@@ -39,8 +45,8 @@ class PreviewInteractionServiceTests(unittest.TestCase):
     def test_toggle_crosshair_updates_shared_interaction_state(self) -> None:
         self._apply(PreviewInteractionCommand(action="toggle_crosshair"))
 
-        self.assertFalse(self.interaction_state.crosshair_visible)
-        self.assertEqual(self.interaction_state.last_status_message, "Crosshair hidden")
+        self.assertTrue(self.interaction_state.crosshair_visible)
+        self.assertEqual(self.interaction_state.last_status_message, "Crosshair shown")
 
     def test_toggle_focus_without_provider_reports_unavailable(self) -> None:
         self._apply(PreviewInteractionCommand(action="toggle_focus"))
@@ -69,6 +75,58 @@ class PreviewInteractionServiceTests(unittest.TestCase):
         self.assertEqual(outcome.committed_roi.points, ((10, 20), (40, 60)))
         self.assertIsNone(self.interaction_state.roi_anchor_point)
         self.assertEqual(self.interaction_state.last_status_message, "ROI saved as rectangle")
+
+    def test_select_source_point_prefers_crosshair_over_roi_entry_when_crosshair_is_visible(self) -> None:
+        self.interaction_state.roi_mode = "rectangle"
+        self.interaction_state.roi_anchor_point = (10, 20)
+        self.interaction_state.crosshair_visible = True
+
+        outcome = self._apply(PreviewInteractionCommand(action="select_source_point", source_point=(40, 60)))
+
+        self.assertIsNone(outcome.committed_roi)
+        self.assertEqual(self.interaction_state.selected_point, (40, 60))
+        self.assertIsNone(self.interaction_state.roi_anchor_point)
+        self.assertEqual(self.interaction_state.last_status_message, "Point selected")
+
+    def test_toggle_crosshair_on_aborts_active_roi_draft(self) -> None:
+        self.interaction_state.roi_mode = "rectangle"
+        self.interaction_state.roi_anchor_point = (10, 20)
+
+        self._apply(PreviewInteractionCommand(action="toggle_crosshair"))
+
+        self.assertTrue(self.interaction_state.crosshair_visible)
+        self.assertIsNone(self.interaction_state.roi_anchor_point)
+        self.assertIsNone(self.interaction_state.roi_preview_point)
+        self.assertEqual(self.interaction_state.last_status_message, "Crosshair shown")
+
+    def test_toggle_roi_mode_off_clears_visible_roi(self) -> None:
+        self.roi_state_service.set_active_roi(
+            RoiDefinition(roi_id="roi-1", shape="rectangle", points=((1, 2), (3, 4)))
+        )
+        self.interaction_state.roi_mode = "rectangle"
+
+        self._apply(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode="rectangle"))
+
+        self.assertIsNone(self.interaction_state.roi_mode)
+        self.assertIsNone(self.roi_state_service.get_active_roi())
+        self.assertIsNotNone(self.roi_state_service.get_roi("rectangle"))
+        self.assertFalse(self.roi_state_service.get_roi("rectangle").enabled)
+        self.assertEqual(self.interaction_state.last_status_message, "rectangle ROI hidden")
+
+    def test_toggle_roi_mode_switches_shapes_exclusively(self) -> None:
+        rectangle_roi = RoiDefinition(roi_id="roi-rect", shape="rectangle", points=((1, 2), (3, 4)))
+        ellipse_roi = RoiDefinition(roi_id="roi-ellipse", shape="ellipse", points=((5, 6), (7, 8)))
+        self.roi_state_service.set_active_roi(rectangle_roi)
+        self.roi_state_service.set_active_roi(ellipse_roi)
+
+        self._apply(PreviewInteractionCommand(action="toggle_roi_mode", roi_mode="rectangle"))
+
+        active_roi = self.roi_state_service.get_active_roi()
+        self.assertIsNotNone(active_roi)
+        self.assertEqual(active_roi.shape, "rectangle")
+        self.assertTrue(active_roi.enabled)
+        self.assertFalse(self.roi_state_service.get_roi("ellipse").enabled)
+        self.assertEqual(self.interaction_state.last_status_message, "rectangle ROI shown")
 
     def test_update_pan_returns_unhandled_without_active_pan_anchor(self) -> None:
         outcome = self._apply(PreviewInteractionCommand(action="update_pan", viewport_point=(20, 25)))

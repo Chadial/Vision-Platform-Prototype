@@ -454,14 +454,19 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 84 | Usable Failure Reflection Baseline | make current setup, snapshot, and recording failures readable enough in shell and published status without opening a broad error-platform lane | landed | landed narrow Hybrid Companion follow-up; shell status, published status, and failed command results now share one readable failure-reflection baseline across setup, snapshot, and recording | `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md` |
 | 85 | Stage-2 LabVIEW Contract Mapping Narrowing | map the current bounded Stage-1 host surface into one LabVIEW-near reading without widening transport scope | landed | landed narrow Stage-2 follow-up; the current `local_shell control` path now exposes one additive `labview_mapping` block for status and command reads, including bounded failure preservation | `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md` |
 | 86 | Headless Command Seam Extraction Baseline | extract one small shell-independent command/status seam from the bounded wx-shell bridge as the first true headless-preparation slice | landed | landed narrow structural slice; companion command-result and status-snapshot payload assembly now live in one shell-independent service seam consumed by the wx-shell bridge | `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md` |
-| 87 | Hybrid Companion Hardware Workflow Revalidation | revalidate the landed Hybrid Companion workflows on the tested hardware path through the current host-plus-shell mode | conditional | activated but blocked on April 9, 2026 because the tested camera `DEV_1AB22C046D81` was unavailable locally and only Vimba simulator devices were visible | `docs/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md` |
+| 87 | Hybrid Companion Hardware Workflow Revalidation | revalidate the landed Hybrid Companion workflows on the tested hardware path through the current host-plus-shell mode | completed | reactivated and completed on April 10, 2026 after the earlier April 9 availability miss; hardware-backed `status`, `snapshot`, bounded `recording`, and integrated flow all succeeded on `DEV_1AB22C046D81` | `docs/archive/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md` |
+| 88 | Local Shell Test-Host And UI Validation | validate the current wx shell against a separate test-host process and confirm that the visible UI shell reflects host-driven actions correctly on the current tested hardware path | completed | completed narrow host-plus-UI smoke slice; bounded `local_shell control` commands were checked against the running wx shell for status, snapshot, save-directory, and recording reflection | `docs/archive/session_workpackages/wp88_local_shell_test_host_and_ui_validation.md` |
+| 89 | Local Shell Camera Settings Defaults And Limits Alignment | align the wx camera-settings dialog with the camera-class default JSON and capability limits so it opens with sensible values and bounded input guidance | completed | completed settings alignment slice; the camera-settings dialog now preloads defaults, shows capability hints, and normalizes width/height/ROI values to the allowed step/range before apply | `docs/archive/session_workpackages/wp89_local_shell_camera_settings_defaults_and_limits_alignment.md` |
+| 90 | Local Shell Help Text Cleanup And OpenCV Hint Removal | replace the old OpenCV-flavored shortcut help with a shorter wx-shell-oriented reference that matches the current menu map | completed | completed help cleanup slice; the shell help text is now concise and no longer carries the obsolete OpenCV framing | `docs/archive/session_workpackages/wp90_local_shell_help_text_cleanup_and_opencv_hint_removal.md` |
+| 91 | Local Shell ROI And Crosshair Priority Alignment | make crosshair the superior interaction mode so it cancels or blocks ROI entry and dragging when enabled | completed | completed interaction slice; crosshair now wins over ROI entry and drag in the shell and is reflected in the shared interaction service | `docs/archive/session_workpackages/wp91_local_shell_roi_and_crosshair_priority_alignment.md` |
+| 92 | Local Shell Mono10 Rendering And Hardware Profile Alignment | keep the wx shell usable on the tested hardware path when the camera profile resolves to `Mono10` by making the renderer and stored profile defaults hardware-safe | completed | completed hardware-alignment slice; local preview now accepts high-bit grayscale frames, the stored exposure default is aligned to the tested increment grid, and snapshot / recording fall back to a hardware-safe output extension when BMP is invalid | `docs/archive/session_workpackages/wp92_local_shell_mono10_rendering_and_hardware_profile_alignment.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. reactivate `WP87` when the documented tested hardware path is attached again and the current bounded hardware command path resolves `DEV_1AB22C046D81`
-2. otherwise derive the next smallest justified non-hardware slice explicitly instead of pretending the hardware rerun is executable
+1. if hardware is still available, use one narrow follow-up slice to verify the live `Camera Settings...` / menu path on the current `Mono10` shell; otherwise do branch hygiene instead of opening a broad new hardware rerun
+2. derive the next smallest justified slice explicitly once the remaining hardware-dependent question is either answered or deferred
 3. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the new slices reveals a concrete seam that actually needs them
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
@@ -469,6 +474,7 @@ Documentation governance maintenance landed alongside the latest compatibility c
 - `docs/STATUS.md` is now the single authoritative repository status document
 - `docs/WORKPACKAGES.md` is now the single authoritative repository work queue
 - `docs/PRIORITIES.md` and `docs/TARGET_MAP.md` are now explicitly derived views only
+- `WP88` is now completed for the current host-plus-UI validation slice and archived with the other completed local-shell slices
 
 Current prepared usable-subsystem sequence:
 
@@ -496,7 +502,7 @@ Current prepared usable-subsystem sequence:
 - `WP84 Usable Failure Reflection Baseline` is now landed as the shared failure-reading baseline across setup, snapshot, and recording
 - `WP85` is now landed as the additive Stage-2 LabVIEW-near contract-mapping slice
 - `WP86` is now landed as the first shell-independent companion command/status seam
-- `WP87` is now conditional; April 9, 2026 reactivation was blocked because the tested real camera path was not available locally
+- `WP87` is now completed; the April 10, 2026 revalidation succeeded after the earlier April 9 availability miss and the detailed note now lives under `docs/archive/session_workpackages/`
 - keep the later headless-kernel preparation explicit: the current `WP62` file-backed session bridge is a bounded wx-shell solution, not the final host-neutral runtime-command model
 - keep `WP76`, `WP77`, and `WP78` visible only as dormant seam- or evidence-driven follow-ups while the workflow-first sequence is active
 
@@ -745,7 +751,7 @@ The current coarse PM order should be:
 52. treat `WP84` as landed; shell status, published status, and failed command results now share one readable failure-reflection baseline
 53. treat `WP85` as landed; the current test-host path now has one additive `labview_mapping` reading for status, command results, and bounded failures
 54. treat `WP86` as landed; the current companion payload assembly now has one shell-independent service seam
-55. treat `WP87` as conditional; the April 9, 2026 reactivation attempt was blocked because only Vimba simulator devices were visible locally
+55. treat `WP87` as completed; the April 10, 2026 revalidation succeeded after the earlier April 9 availability miss
 56. keep `WP76` and `WP77` dormant unless one of the new slices exposes a concrete shell-feedback or host-naming blocker
 57. keep `WP78` dormant as a later evidence-gathering slice rather than as immediate migration work
 58. when the later headless-kernel preparation starts, do not freeze the current wx-shell session bridge as the final command/session architecture; lift or replace it with a host-neutral service/protocol seam
@@ -757,7 +763,7 @@ No unconditional `current next` is set.
 Reason:
 
 - `WP80` through `WP86` are now landed and cover the workflow-first usable-subsystem chain, the first host-result/status consistency seam, one shared usable-failure baseline, one additive LabVIEW-near mapping seam, and one first shell-independent companion payload seam
-- `WP87` remains the next hardware-dependent confidence slice, but it should only be reactivated when the documented tested real-device path is actually attached again
+- `WP87` is complete for the current tested-path revalidation; any later hardware rerun should be derived only when new evidence is needed
 - until then, the repository should not pretend that a hardware rerun is the unconditional default next action
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
@@ -850,7 +856,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md`
 - `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
 - `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
-- `docs/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
+- `docs/archive/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
 
 The Extended MVP closure lanes are now historical context rather than the active PM lens.
 
@@ -921,7 +927,7 @@ Current explicit activation:
 - `Usable Failure Reflection Baseline` is now landed at `docs/session_workpackages/wp84_usable_failure_reflection_baseline.md`
 - `Stage-2 LabVIEW Contract Mapping Narrowing` is now landed at `docs/session_workpackages/wp85_stage2_labview_contract_mapping_narrowing.md`
 - `Headless Command Seam Extraction Baseline` is now landed at `docs/session_workpackages/wp86_headless_command_seam_extraction_baseline.md`
-- `Hybrid Companion Hardware Workflow Revalidation` remains conditional at `docs/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
+- `Hybrid Companion Hardware Workflow Revalidation` is now completed at `docs/archive/session_workpackages/wp87_hybrid_companion_hardware_workflow_revalidation.md`
 
 ## PM Refinement Rule
 

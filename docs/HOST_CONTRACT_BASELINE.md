@@ -77,6 +77,7 @@ The current phase-1 mandatory host surface includes at least:
 - settings for shutter/exposure, hardware ROI, and gain
 - ROI enable / disable
 - focus value and ROI-related state
+- crosshair display state with higher interaction priority than ROI entry/drag in the current wx shell
 
 Current interpretation notes:
 

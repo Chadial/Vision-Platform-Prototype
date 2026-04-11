@@ -121,6 +121,13 @@ Flow:
 4. let the shell execute the command through the same command-controller layer used locally
 5. read the result or the published status snapshot
 
+UI interaction notes:
+
+- `Crosshair` has priority over ROI entry and ROI dragging in the current shell
+- when crosshair is enabled, a click selects the point instead of starting a new ROI anchor
+- enabling crosshair aborts any in-progress ROI draft or ROI drag
+- `Camera Settings...` is a modal shell dialog and is not blocked by the configuration-apply menu state
+
 Reading rules:
 
 - `status` reads the latest published shell snapshot

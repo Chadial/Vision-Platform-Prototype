@@ -230,6 +230,33 @@ Latest availability check on April 9, 2026 before `WP87 Hybrid Companion Hardwar
   - no fresh real-device Hybrid Companion workflow evidence was collected on April 9, 2026
   - simulator-visible Vimba devices do not satisfy the current tested-hardware revalidation requirement
 
+Latest tested-path revalidation on April 10, 2026:
+
+- machine: current local development machine
+- camera id: `DEV_1AB22C046D81`
+- camera model: `Allied Vision 1800 U-1240m`
+- output directories:
+  - `captures/hardware_smoke/test_wp87_snapshot`
+  - `captures/hardware_smoke/test_wp87_recording`
+  - `captures/hardware_smoke/test_wp87_run_001`
+- command paths:
+  - `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-alias tested_camera`
+  - `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-alias tested_camera --configuration-profile default --base-directory .\captures\hardware_smoke\test_wp87_snapshot --file-extension .bmp`
+  - `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-alias tested_camera --configuration-profile default --base-directory .\captures\hardware_smoke\test_wp87_recording --frame-limit 3`
+  - `.\.venv\Scripts\python.exe .\scripts\launchers\run_hardware_command_flow.py --base-directory .\captures\hardware_smoke --run-name test_wp87_run_001 --camera-id DEV_1AB22C046D81 --pixel-format Mono8 --frame-limit 3 --interval-frame-count 3`
+
+Observed result:
+
+- hardware-backed `status` succeeded and reported the tested camera path as initialized
+- hardware-backed `snapshot` succeeded and wrote `captures\hardware_smoke\test_wp87_snapshot\snapshot_000000.bmp`
+- hardware-backed bounded `recording` succeeded and wrote 3 frames to `captures\hardware_smoke\test_wp87_recording`
+- the integrated hardware command flow succeeded on the same camera path
+
+Residual observations:
+
+- `vmbpyLog <VmbError.NotAvailable: -30>` still appeared during otherwise successful runs
+- the bounded recording path also emitted an `Unexpected access mode change` warning after completion, but the command still returned success
+
 - invalid camera id: explicit failure, `No Camera with Id 'DOES_NOT_EXIST' available.`
 - unsupported pixel format: explicit failure when trying `Mono16`, with `No Entry associated with 'Mono16'`
 - unsupported ROI combination: explicit failure for width `2001`, with device-side increment guidance `not a multiple of 8`

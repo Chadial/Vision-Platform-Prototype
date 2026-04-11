@@ -45,6 +45,43 @@ class RoiStateServiceTests(unittest.TestCase):
 
         self.assertIsNone(resolved_roi)
 
+    def test_clear_active_roi_preserves_stored_shape_in_inactive_state(self) -> None:
+        service = RoiStateService()
+        shared_roi = RoiDefinition(
+            roi_id="state-roi",
+            shape="rectangle",
+            points=((1.0, 1.0), (5.0, 1.0), (5.0, 5.0), (1.0, 5.0)),
+        )
+        service.set_active_roi(shared_roi)
+
+        service.clear_active_roi()
+
+        self.assertIsNone(service.get_active_roi())
+        stored_roi = service.get_roi("rectangle")
+        self.assertIsNotNone(stored_roi)
+        self.assertFalse(stored_roi.enabled)
+        self.assertEqual(stored_roi.points, shared_roi.points)
+
+    def test_set_active_roi_switches_active_shape_exclusively(self) -> None:
+        service = RoiStateService()
+        rectangle_roi = RoiDefinition(
+            roi_id="rect",
+            shape="rectangle",
+            points=((1.0, 1.0), (5.0, 1.0), (5.0, 5.0), (1.0, 5.0)),
+        )
+        ellipse_roi = RoiDefinition(
+            roi_id="ellipse",
+            shape="ellipse",
+            points=((2.0, 2.0), (6.0, 2.0), (6.0, 6.0), (2.0, 6.0)),
+        )
+        service.set_active_roi(rectangle_roi)
+        service.set_active_roi(ellipse_roi)
+
+        self.assertEqual(service.get_active_roi(), ellipse_roi)
+        self.assertTrue(service.get_roi("ellipse").enabled)
+        self.assertFalse(service.get_roi("rectangle").enabled)
+        self.assertEqual(service.get_active_roi_shape(), "ellipse")
+
 
 if __name__ == "__main__":
     unittest.main()

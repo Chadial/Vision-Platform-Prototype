@@ -5,6 +5,7 @@ from typing import Callable, Literal
 
 from vision_platform.libraries.common_models import RoiDefinition
 from vision_platform.services.display_service.display_geometry_service import DisplayGeometryService, ZoomPanState
+from vision_platform.services.stream_service import RoiStateService
 
 PreviewInteractionAction = Literal[
     "cursor_moved",
@@ -28,7 +29,7 @@ PreviewInteractionAction = Literal[
 class PreviewInteractionState:
     selected_point: tuple[int, int] | None = None
     last_status_message: str | None = None
-    crosshair_visible: bool = True
+    crosshair_visible: bool = False
     focus_status_visible: bool = True
     roi_mode: str | None = None
     roi_anchor_point: tuple[int, int] | None = None
@@ -67,8 +68,13 @@ class PreviewInteractionOutcome:
 class PreviewInteractionService:
     """Applies reusable preview interaction semantics independently of a concrete UI toolkit."""
 
-    def __init__(self, geometry_service: DisplayGeometryService | None = None) -> None:
+    def __init__(
+        self,
+        geometry_service: DisplayGeometryService | None = None,
+        roi_state_service: RoiStateService | None = None,
+    ) -> None:
         self._geometry_service = geometry_service or DisplayGeometryService()
+        self._roi_state_service = roi_state_service or RoiStateService()
 
     def apply_command(
         self,
@@ -129,6 +135,8 @@ class PreviewInteractionService:
 
         if action == "toggle_crosshair":
             interaction_state.crosshair_visible = not interaction_state.crosshair_visible
+            if interaction_state.crosshair_visible:
+                self._abort_roi_interaction(interaction_state)
             interaction_state.last_status_message = (
                 "Crosshair shown" if interaction_state.crosshair_visible else "Crosshair hidden"
             )
@@ -146,15 +154,24 @@ class PreviewInteractionService:
 
         if action == "toggle_roi_mode":
             roi_mode = command.roi_mode
-            if interaction_state.roi_mode == roi_mode:
+            active_roi = self._roi_state_service.get_active_roi()
+            stored_roi = self._roi_state_service.get_roi(roi_mode) if roi_mode is not None else None
+            if interaction_state.roi_mode == roi_mode and active_roi is not None and active_roi.shape == roi_mode:
                 interaction_state.roi_mode = None
                 interaction_state.roi_anchor_point = None
                 interaction_state.roi_preview_point = None
-                interaction_state.last_status_message = "ROI mode cleared"
+                self._roi_state_service.clear_active_roi()
+                interaction_state.last_status_message = f"{roi_mode} ROI hidden"
                 return PreviewInteractionOutcome()
             interaction_state.roi_mode = roi_mode
             interaction_state.roi_anchor_point = None
             interaction_state.roi_preview_point = None
+            if stored_roi is not None:
+                self._roi_state_service.set_active_roi(stored_roi)
+                interaction_state.last_status_message = f"{roi_mode} ROI shown"
+                return PreviewInteractionOutcome()
+            if active_roi is not None and active_roi.shape != roi_mode:
+                self._roi_state_service.clear_active_roi()
             interaction_state.last_status_message = f"ROI mode set to {roi_mode}"
             return PreviewInteractionOutcome()
 
@@ -227,6 +244,11 @@ class PreviewInteractionService:
         if action == "select_source_point":
             if command.source_point is None:
                 return PreviewInteractionOutcome(handled=False)
+            if interaction_state.roi_mode is not None and interaction_state.crosshair_visible:
+                self._abort_roi_interaction(interaction_state)
+                interaction_state.selected_point = command.source_point
+                interaction_state.last_status_message = "Point selected"
+                return PreviewInteractionOutcome()
             if interaction_state.roi_mode is not None:
                 return self._apply_roi_selection(
                     interaction_state,
@@ -234,11 +256,25 @@ class PreviewInteractionService:
                     coordinate_formatter=coordinate_formatter,
                     roi_builder=roi_builder,
                 )
-            interaction_state.selected_point = command.source_point
-            interaction_state.last_status_message = "Point selected"
-            return PreviewInteractionOutcome()
+        interaction_state.selected_point = command.source_point
+        interaction_state.last_status_message = "Point selected"
+        return PreviewInteractionOutcome()
 
-        raise ValueError(f"Unsupported preview interaction action '{action}'.")
+    def _abort_roi_interaction(self, interaction_state: PreviewInteractionState) -> None:
+        interaction_state.roi_anchor_point = None
+        interaction_state.roi_preview_point = None
+        active_drag_id = interaction_state.active_anchor_drag_id
+        if active_drag_id is not None and interaction_state.active_drag_start_roi is not None:
+            self._roi_state_service.set_active_roi(interaction_state.active_drag_start_roi)
+        interaction_state.active_anchor_drag_id = None
+        interaction_state.active_anchor_drag_mode = None
+        interaction_state.active_drag_origin_source_point = None
+        interaction_state.active_drag_initial_roi = None
+        interaction_state.active_drag_start_roi = None
+        interaction_state.active_drag_start_selected_point = None
+        interaction_state.active_drag_shift_down = False
+        interaction_state.active_drag_locked_axis = None
+        interaction_state.hovered_anchor_id = None
 
     def _apply_zoom(
         self,

@@ -59,7 +59,7 @@ class LocalShellControlCliTests(unittest.TestCase):
             command_name="save_snapshot",
             payload={
                 "file_stem": "geometry_000001",
-                "file_extension": ".bmp",
+                "file_extension": ".raw",
             },
         )
 
@@ -196,11 +196,11 @@ class LocalShellControlCliTests(unittest.TestCase):
             self.assertTrue(mapped_result["labview_mapping"]["command_ok"])
             self.assertEqual(mapped_result["labview_mapping"]["reflection_kind"], "snapshot")
             self.assertEqual(mapped_result["labview_mapping"]["phase"], "saved")
-            self.assertEqual(mapped_result["labview_mapping"]["file_name"], "geometry_000001.bmp")
+            self.assertEqual(mapped_result["labview_mapping"]["file_name"], "geometry_000001.raw")
 
             status_snapshot = read_live_status_snapshot(session)
             self.assertEqual(status_snapshot["snapshot_reflection"]["phase"], "saved")
-            self.assertEqual(status_snapshot["snapshot_reflection"]["file_name"], "geometry_000001.bmp")
+            self.assertEqual(status_snapshot["snapshot_reflection"]["file_name"], "geometry_000001.raw")
             self.assertEqual(status_snapshot["snapshot_reflection"]["save_directory"], str(Path("captures/geometry")))
 
     def test_host_control_smoke_covers_setup_status_for_setup_path(self) -> None:

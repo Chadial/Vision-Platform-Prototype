@@ -12,12 +12,13 @@ from vision_platform.apps.local_shell.labview_mapping import (
 )
 from vision_platform.apps.local_shell.live_command_sync import (
     LocalShellLiveSyncError,
-    append_live_command,
     read_live_status_snapshot,
+    append_live_command,
     resolve_active_live_sync_session,
     to_serializable,
     wait_for_live_command_result,
 )
+from vision_platform.apps.local_shell.output_format_policy import choose_snapshot_file_extension
 
 _DEFAULT_SESSION_ROOT = Path("captures/wx_shell_sessions")
 
@@ -81,7 +82,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
         help="Trigger a snapshot through the open wx shell core.",
     )
     snapshot_parser.add_argument("--file-stem", default="wx_shell_snapshot")
-    snapshot_parser.add_argument("--file-extension", default=".bmp")
+    snapshot_parser.add_argument("--file-extension", default=None)
     snapshot_parser.set_defaults(command_handler=_handle_snapshot_command)
 
     start_recording_parser = subparsers.add_parser(
@@ -174,12 +175,21 @@ def _handle_apply_configuration_command(args: argparse.Namespace) -> dict:
 
 
 def _handle_snapshot_command(args: argparse.Namespace) -> dict:
+    session = resolve_active_live_sync_session(args.session_root)
+    live_status = None
+    try:
+        live_status = read_live_status_snapshot(session)
+    except LocalShellLiveSyncError:
+        live_status = None
     return _send_command(
         args.session_root,
         command_name="save_snapshot",
         payload={
             "file_stem": args.file_stem,
-            "file_extension": args.file_extension,
+            "file_extension": choose_snapshot_file_extension(
+                pixel_format=_extract_live_pixel_format(live_status),
+                requested_extension=args.file_extension,
+            ),
         },
     )
 
@@ -227,6 +237,18 @@ def _send_command(session_root: Path, *, command_name: str, payload: dict) -> di
 
 def _emit(payload: dict) -> None:
     print(json.dumps(to_serializable(payload), indent=2, sort_keys=True), file=sys.stdout)
+
+
+def _extract_live_pixel_format(live_status: dict | None) -> str | None:
+    if not isinstance(live_status, dict):
+        return None
+    configuration = live_status.get("configuration")
+    if not isinstance(configuration, dict):
+        return None
+    pixel_format = configuration.get("pixel_format")
+    if pixel_format is None:
+        return None
+    return str(pixel_format)
 
 
 __all__ = ["build_argument_parser", "main"]
