@@ -86,23 +86,23 @@ Expected concrete outputs:
 
 ## Status
 
-- queued as the follow-up after `WP95`
+- completed as the first code-backed runtime-event semantics baseline after `WP95`
 
 ## Sub-Packages
 
 ### WP96.A Event Family Naming
 
-- status: planned
+- status: completed
 - purpose: define the smallest first-class runtime-event family for the current repo phase
 
 ### WP96.B Producer Place Mapping
 
-- status: planned
+- status: completed
 - purpose: identify where the current repo already emits or semantically implies those events
 
 ### WP96.C Event Boundary Clarification
 
-- status: planned
+- status: completed
 - purpose: keep the line explicit between runtime events, state, traceability, and audit output
 
 ## Open Questions
@@ -151,10 +151,22 @@ Expected concrete outputs:
 
 ## Merge Gate
 
-- `WP96` is visible from `docs/WORKPACKAGES.md` as the queued follow-up after `WP95`
+- `WP96` is visible from `docs/WORKPACKAGES.md` as the completed runtime-event baseline after `WP95`
 - the package keeps the event family intentionally small
 - the package distinguishes runtime events from status, artifact traceability, result envelopes, and audit output
 - event transport, bus, and delivery semantics remain deferred
+
+## Outcome
+
+- the repo now has first-class runtime-event types in `vision_platform.models.camera_runtime_event`
+- the repo now has narrow event builders in `vision_platform.services.camera_runtime_event_service` for:
+  - `CameraConfigurationApplied`
+  - `CameraSnapshotSaved`
+  - `CameraRecordingStarted`
+  - `CameraRecordingStopped`
+  - `CameraFaulted`
+  - `CameraHealthChanged`
+- the event slice stays transport-free and explicitly separate from traceability, status snapshots, and audit output
 
 ## Recovery Note
 

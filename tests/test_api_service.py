@@ -4,11 +4,16 @@ import unittest
 
 from tests import _path_setup
 from vision_platform.models import CameraConfiguration, CameraStatus, IntervalCaptureStatus, RecordingStatus, SubsystemStatus
+from vision_platform.models import CameraCapabilities, CameraHealth, CapabilityState
 from vision_platform.services.api_service import (
     ApiCommandEnvelopePayload,
+    ApiCameraCapabilitiesPayload,
+    ApiCameraHealthPayload,
     ApiSubsystemStatusPayload,
     build_error_command_payload,
     build_success_command_payload,
+    map_camera_capabilities_to_api_payload,
+    map_camera_health_to_api_payload,
     map_subsystem_status_to_api_payload,
 )
 
@@ -178,6 +183,47 @@ class ApiServiceTests(unittest.TestCase):
         self.assertEqual(payload.error.code, "configuration_error")
         self.assertEqual(payload.error.message, "roi_width invalid")
         self.assertEqual(payload.error.details["stage"], "apply_configuration")
+
+    def test_map_camera_health_to_api_payload_is_dataclass_serializable(self) -> None:
+        payload = map_camera_health_to_api_payload(
+            CameraHealth(
+                availability=True,
+                readiness=True,
+                degraded=False,
+                faulted=False,
+                last_error=None,
+                capabilities_available=True,
+                recording_impaired=None,
+            )
+        )
+
+        self.assertIsInstance(payload, ApiCameraHealthPayload)
+        self.assertEqual(asdict(payload)["availability"], True)
+        self.assertIn("recording_impaired", asdict(payload))
+
+    def test_map_camera_capabilities_to_api_payload_preserves_supported_available_enabled_split(self) -> None:
+        payload = map_camera_capabilities_to_api_payload(
+            CameraCapabilities(
+                capability_profile_available=True,
+                capability_probe_warning="probe warning",
+                exposure_time_control=CapabilityState(True, True, True),
+                gain_control=CapabilityState(True, True, False),
+                pixel_format_control=CapabilityState(True, True, True),
+                acquisition_frame_rate_control=CapabilityState(True, False, False),
+                roi_control=CapabilityState(True, True, False),
+                snapshot=CapabilityState(True, True, True),
+                recording=CapabilityState(True, True, False),
+                interval_capture=CapabilityState(False, False, False),
+            )
+        )
+
+        self.assertIsInstance(payload, ApiCameraCapabilitiesPayload)
+        self.assertTrue(payload.capability_profile_available)
+        self.assertEqual(payload.capability_probe_warning, "probe warning")
+        self.assertTrue(payload.exposure_time_control.currently_enabled)
+        self.assertFalse(payload.gain_control.currently_enabled)
+        self.assertFalse(payload.acquisition_frame_rate_control.currently_available)
+        self.assertFalse(payload.interval_capture.supported)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from vision_platform.models import SubsystemStatus
+from vision_platform.models import CameraCapabilities, CameraHealth, CapabilityState, SubsystemStatus
 
 
 @dataclass(slots=True)
@@ -82,6 +82,38 @@ class ApiSubsystemStatusPayload:
     can_stop_recording: bool
     can_start_interval_capture: bool
     can_stop_interval_capture: bool
+
+
+@dataclass(slots=True)
+class ApiCameraHealthPayload:
+    availability: bool
+    readiness: bool
+    degraded: bool
+    faulted: bool
+    last_error: str | None
+    capabilities_available: bool
+    recording_impaired: bool | None
+
+
+@dataclass(slots=True)
+class ApiCapabilityStatePayload:
+    supported: bool
+    currently_available: bool
+    currently_enabled: bool
+
+
+@dataclass(slots=True)
+class ApiCameraCapabilitiesPayload:
+    capability_profile_available: bool
+    capability_probe_warning: str | None
+    exposure_time_control: ApiCapabilityStatePayload
+    gain_control: ApiCapabilityStatePayload
+    pixel_format_control: ApiCapabilityStatePayload
+    acquisition_frame_rate_control: ApiCapabilityStatePayload
+    roi_control: ApiCapabilityStatePayload
+    snapshot: ApiCapabilityStatePayload
+    recording: ApiCapabilityStatePayload
+    interval_capture: ApiCapabilityStatePayload
 
 
 def map_subsystem_status_to_api_payload(status: SubsystemStatus) -> ApiSubsystemStatusPayload:
@@ -179,3 +211,38 @@ def _map_active_run_status(status: SubsystemStatus) -> ApiActiveRunStatusPayload
         )
 
     return None
+
+
+def map_camera_health_to_api_payload(health: CameraHealth) -> ApiCameraHealthPayload:
+    return ApiCameraHealthPayload(
+        availability=health.availability,
+        readiness=health.readiness,
+        degraded=health.degraded,
+        faulted=health.faulted,
+        last_error=health.last_error,
+        capabilities_available=health.capabilities_available,
+        recording_impaired=health.recording_impaired,
+    )
+
+
+def map_camera_capabilities_to_api_payload(capabilities: CameraCapabilities) -> ApiCameraCapabilitiesPayload:
+    return ApiCameraCapabilitiesPayload(
+        capability_profile_available=capabilities.capability_profile_available,
+        capability_probe_warning=capabilities.capability_probe_warning,
+        exposure_time_control=_map_capability_state(capabilities.exposure_time_control),
+        gain_control=_map_capability_state(capabilities.gain_control),
+        pixel_format_control=_map_capability_state(capabilities.pixel_format_control),
+        acquisition_frame_rate_control=_map_capability_state(capabilities.acquisition_frame_rate_control),
+        roi_control=_map_capability_state(capabilities.roi_control),
+        snapshot=_map_capability_state(capabilities.snapshot),
+        recording=_map_capability_state(capabilities.recording),
+        interval_capture=_map_capability_state(capabilities.interval_capture),
+    )
+
+
+def _map_capability_state(state: CapabilityState) -> ApiCapabilityStatePayload:
+    return ApiCapabilityStatePayload(
+        supported=state.supported,
+        currently_available=state.currently_available,
+        currently_enabled=state.currently_enabled,
+    )

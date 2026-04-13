@@ -8,8 +8,10 @@ from vision_platform.control import CommandController
 from vision_platform.models import (
     ApplyConfigurationCommandResult,
     ApplyConfigurationRequest,
+    CameraCapabilities,
     CameraCapabilityProfile,
     CameraConfiguration,
+    CameraHealth,
     CameraStatus,
     FeatureCapability,
     IntervalCaptureCommandResult,
@@ -268,6 +270,114 @@ class CommandControllerTests(unittest.TestCase):
         self.assertFalse(status.has_interval_capture_service)
         self.assertFalse(status.can_start_interval_capture)
         self.assertFalse(status.can_stop_interval_capture)
+
+    def test_get_health_returns_compact_current_health_state(self) -> None:
+        camera_service = MagicMock()
+        snapshot_service = MagicMock()
+        recording_service = MagicMock()
+        controller = CommandController(camera_service, snapshot_service, recording_service)
+
+        camera_service.get_status.return_value = CameraStatus(
+            is_initialized=True,
+            source_kind="hardware",
+            capabilities_available=False,
+            capability_probe_error="probe warning",
+        )
+        camera_service.get_last_configuration.return_value = None
+        recording_service.get_status.return_value = RecordingStatus(
+            is_recording=False,
+            last_error="writer recovered",
+        )
+
+        health = controller.get_health()
+
+        self.assertIsInstance(health, CameraHealth)
+        self.assertTrue(health.availability)
+        self.assertTrue(health.readiness)
+        self.assertTrue(health.degraded)
+        self.assertFalse(health.faulted)
+        self.assertEqual(health.last_error, "writer recovered")
+        self.assertFalse(health.capabilities_available)
+        self.assertTrue(health.recording_impaired)
+
+    def test_get_health_marks_camera_error_as_faulted(self) -> None:
+        camera_service = MagicMock()
+        recording_service = MagicMock()
+        controller = CommandController(camera_service, MagicMock(), recording_service)
+
+        camera_service.get_status.return_value = CameraStatus(
+            is_initialized=True,
+            source_kind="hardware",
+            last_error="camera lost",
+            capabilities_available=True,
+        )
+        camera_service.get_last_configuration.return_value = None
+        recording_service.get_status.return_value = RecordingStatus()
+
+        health = controller.get_health()
+
+        self.assertTrue(health.faulted)
+        self.assertFalse(health.degraded)
+        self.assertFalse(health.readiness)
+        self.assertEqual(health.last_error, "camera lost")
+
+    def test_get_capabilities_distinguishes_supported_available_and_enabled(self) -> None:
+        camera_service = MagicMock()
+        snapshot_service = MagicMock()
+        recording_service = MagicMock()
+        interval_capture_service = MagicMock()
+        capability_profile = self._build_capability_profile(
+            ExposureTime=FeatureCapability(name="ExposureTime", feature_type="FloatFeature", is_writeable=True),
+            Gain=FeatureCapability(name="Gain", feature_type="FloatFeature", is_writeable=True),
+            PixelFormat=FeatureCapability(name="PixelFormat", feature_type="EnumFeature", is_writeable=True),
+            AcquisitionFrameRate=FeatureCapability(
+                name="AcquisitionFrameRate",
+                feature_type="FloatFeature",
+                is_writeable=True,
+            ),
+            OffsetX=FeatureCapability(name="OffsetX", feature_type="IntFeature", is_writeable=True),
+            OffsetY=FeatureCapability(name="OffsetY", feature_type="IntFeature", is_writeable=True),
+            Width=FeatureCapability(name="Width", feature_type="IntFeature", is_writeable=True),
+            Height=FeatureCapability(name="Height", feature_type="IntFeature", is_writeable=True),
+        )
+        controller = CommandController(
+            camera_service,
+            snapshot_service,
+            recording_service,
+            interval_capture_service,
+            capability_profile=capability_profile,
+        )
+        controller.set_save_directory(Path("captures/default"))
+
+        camera_service.get_status.return_value = CameraStatus(
+            is_initialized=True,
+            source_kind="hardware",
+            capabilities_available=True,
+        )
+        camera_service.get_last_configuration.return_value = CameraConfiguration(
+            exposure_time_us=1000.0,
+            pixel_format="Mono8",
+            roi_width=320,
+            roi_height=200,
+        )
+        recording_service.get_status.return_value = RecordingStatus(is_recording=True)
+        interval_capture_service.get_status.return_value = IntervalCaptureStatus(is_capturing=False)
+
+        capabilities = controller.get_capabilities()
+
+        self.assertIsInstance(capabilities, CameraCapabilities)
+        self.assertTrue(capabilities.capability_profile_available)
+        self.assertTrue(capabilities.exposure_time_control.supported)
+        self.assertTrue(capabilities.exposure_time_control.currently_available)
+        self.assertTrue(capabilities.exposure_time_control.currently_enabled)
+        self.assertTrue(capabilities.gain_control.supported)
+        self.assertFalse(capabilities.gain_control.currently_enabled)
+        self.assertTrue(capabilities.recording.supported)
+        self.assertTrue(capabilities.recording.currently_available)
+        self.assertTrue(capabilities.recording.currently_enabled)
+        self.assertTrue(capabilities.interval_capture.supported)
+        self.assertTrue(capabilities.interval_capture.currently_available)
+        self.assertFalse(capabilities.interval_capture.currently_enabled)
 
     def test_apply_configuration_rejects_invalid_roi(self) -> None:
         controller = CommandController(MagicMock(), MagicMock(), MagicMock())

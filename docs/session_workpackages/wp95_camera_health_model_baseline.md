@@ -102,23 +102,23 @@ Expected concrete outputs:
 
 ## Status
 
-- active as the direct follow-up after the implemented `WP94` surface-contract slice
+- completed as the first code-backed internal health-model baseline after the implemented `WP94` surface-contract slice
 
 ## Sub-Packages
 
 ### WP95.A Health Field Baseline
 
-- status: planned
+- status: completed
 - purpose: define the minimal internal `CameraHealth` field set and semantic meaning
 
 ### WP95.B Derivation Source Mapping
 
-- status: planned
+- status: completed
 - purpose: map current status, warning, and recording/capability signals into the internal health model
 
 ### WP95.C Deferred Fault And Safety Boundary
 
-- status: planned
+- status: completed
 - purpose: keep the line explicit between this internal model and later safety, orchestrator, and runtime-event work
 
 ## Open Questions
@@ -174,12 +174,22 @@ Expected concrete outputs:
 
 ## Merge Gate
 
-- `WP95` is visible from `docs/WORKPACKAGES.md` as the queued follow-up after `WP94`
+- `WP95` is visible from `docs/WORKPACKAGES.md` as the completed internal-model slice between `WP94` and `WP96`
 - the note explicitly preserves `WP94 = surface contract` and `WP95 = internal derivation model`
 - the package defines one minimal internal health model and its derivation sources
 - the package keeps the stable-now field set intentionally small
 - the package keeps `last_error` contextual and does not turn `CameraHealth` into an audit mirror
 - safety-policy, transport, and runtime-event design remain deferred
+
+## Outcome
+
+- the repo now has one explicit internal `CameraHealth` derivation service in `vision_platform.services.camera_health_service`
+- `CommandController.get_health()` now delegates to that internal derivation model instead of carrying ad-hoc health logic inline
+- focused tests now cover:
+  - the small stable-now field set
+  - the explicit `degraded` / `faulted` distinction
+  - `last_error` as context field only
+  - audit-related inputs as derivation input only
 
 ## Recovery Note
 

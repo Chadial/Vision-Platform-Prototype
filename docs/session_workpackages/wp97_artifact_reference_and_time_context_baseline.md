@@ -99,23 +99,23 @@ Expected concrete outputs:
 
 ## Status
 
-- queued as the follow-up after `WP96`
+- completed as the first code-backed artifact-reference and minimal-time-context baseline after `WP96`
 
 ## Sub-Packages
 
 ### WP97.A ArtifactReference Baseline
 
-- status: planned
+- status: completed
 - purpose: define the smallest useful `ArtifactReference` meaning for the current repo phase
 
 ### WP97.B Minimal Time Context
 
-- status: planned
+- status: completed
 - purpose: define the smallest useful time-context field set without opening a broad clock model
 
 ### WP97.C Boundary Clarification
 
-- status: planned
+- status: completed
 - purpose: keep the line explicit between artifact reference, traceability, logging, and event semantics
 
 ## Open Questions
@@ -168,12 +168,23 @@ Expected concrete outputs:
 
 ## Merge Gate
 
-- `WP97` is visible from `docs/WORKPACKAGES.md` as the queued follow-up after `WP96`
+- `WP97` is visible from `docs/WORKPACKAGES.md` as the completed artifact/time baseline after `WP96`
 - the package keeps artifact reference distinct from logging
 - the package keeps the time-context baseline intentionally small
 - the package keeps `run_id` and `frame_id` explicitly optional
 - the package keeps traceability outputs out of the `ArtifactReference` definition itself
 - broad metadata, clock, and logging redesign remain deferred
+
+## Outcome
+
+- the repo now has a small `ArtifactReference` model in `vision_platform.models.artifact_reference`
+- the repo now has a small `ArtifactTimeContext` model in `vision_platform.models.artifact_time_context`
+- the repo now has narrow builders in `vision_platform.services.artifact_reference_service` for:
+  - generic artifact references
+  - trace-row-derived references
+  - minimal time context from captured frames
+- `run_id` and `frame_id` are implemented as optional `when present` enrichments only
+- traceability remains source material or evidence, not the definition of `ArtifactReference`
 
 ## Recovery Note
 

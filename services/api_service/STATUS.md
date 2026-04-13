@@ -8,5 +8,6 @@
 - working now: adapter layers no longer need to serialize shared core status models directly to get one stable status payload family
 - working now: the first Host Control Closure slices now reuse this status mapper in the camera CLI envelope, so host polling for the selected command slices already consumes the adapter-facing status payload family
 - working now: the camera CLI now also reuses this module's bounded command-envelope builders, so both polling payloads and the narrow current command envelope family share adapter-facing ownership
+- working now: the adapter layer also exposes bounded payload mappers for `CameraHealth` and `CameraCapabilities`, including the explicit `supported` / `currently_available` / `currently_enabled` split for capability states
 - partial: the bounded command-envelope family now exists, but broader command-result DTO families, feeds, and framework wiring remain open
 - local direction: keep command and status shaping narrow and adapter-facing; only add more payload families when a concrete transport or host need exists

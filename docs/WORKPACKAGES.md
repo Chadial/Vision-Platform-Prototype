@@ -767,7 +767,7 @@ The current coarse PM order should be:
 
 ## Recommended Next Detailed Work Package
 
-`WP95 Camera Health Model Baseline` is now the `current next` package.
+No unconditional `current next` is set after the implemented `WP94` through `WP97` camera-integration fore-stage sequence.
 
 Reason:
 
@@ -776,14 +776,15 @@ Reason:
 - the repo now also has a documented bigger-picture camera fore-stage, but that fore-stage should enter the active PM layer through one narrow mapping slice rather than through a broad multi-WP activation wave
 - `WP93` has now completed that gatekeeper role by making the current surface and boundary/source-of-truth reading explicit
 - `WP94` has now closed the first two explicit surface gaps by implementing `GetHealth` and `GetCapabilities` above the existing core
-- `WP95` is therefore now the smallest justified next slice because it defines the internal `CameraHealth` derivation model beneath the already implemented surface contract
-- `WP96` should remain the queued follow-up after `WP95` because the minimal runtime-event family should attach to the clarified surface and the internal health model instead of preceding them
-- `WP97` should remain the queued follow-up after `WP96` because artifact-reference and minimal time-context clarification belong after surface, health, and event semantics, but before any broader logging or metadata expansion
+- `WP95` has now implemented the internal `CameraHealth` derivation model beneath the surface contract
+- `WP96` has now implemented the minimal runtime-event family as a transport-free semantic baseline
+- `WP97` has now implemented the minimal artifact-reference and time-context baseline without widening into logging or clock architecture
+- the remaining failure in `tests.test_vision_platform_namespace` is now treated as one explicit narrow residual lane through `WP98`, but that lane is intentionally separate from the completed camera-integration fore-stage
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
 Detailed file:
 
-- `docs/session_workpackages/wp95_camera_health_model_baseline.md`
+- no new unconditional detailed package is selected yet; the known namespace-boundary residual is prepared as queued `WP98` at `docs/session_workpackages/wp98_vision_platform_namespace_boundary_alignment.md`
 
 ## Fresh Agent Decision Rule
 
@@ -806,6 +807,7 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp95_camera_health_model_baseline.md`
 - `docs/session_workpackages/wp96_runtime_event_family_baseline.md`
 - `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
+- `docs/session_workpackages/wp98_vision_platform_namespace_boundary_alignment.md`
 
 - `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
@@ -890,10 +892,10 @@ Current explicit activation:
 
 - `WP93 Camera Integration Surface v0.1 Contract Mapping` is now completed as the gatekeeper slice at `docs/session_workpackages/wp93_camera_integration_surface_v0_1_contract_mapping.md`
 - `WP94 Health And Capabilities Surface Contract` is now completed as the first code-backed surface-contract slice at `docs/session_workpackages/wp94_health_and_capabilities_surface_contract.md`
-- `WP95 Camera Health Model Baseline` is now active at `docs/session_workpackages/wp95_camera_health_model_baseline.md`
-- this is now the next narrow internal-model slice; runtime-event semantics stay deferred to `WP96`
-- `WP96 Runtime Event Family Baseline` is now prepared as the queued runtime-event follow-up at `docs/session_workpackages/wp96_runtime_event_family_baseline.md`
-- `WP97 Artifact Reference And Time Context Baseline` is now prepared as the queued artifact/time follow-up at `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
+- `WP95 Camera Health Model Baseline` is now completed at `docs/session_workpackages/wp95_camera_health_model_baseline.md`
+- `WP96 Runtime Event Family Baseline` is now completed at `docs/session_workpackages/wp96_runtime_event_family_baseline.md`
+- `WP97 Artifact Reference And Time Context Baseline` is now completed at `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
+- `WP98 Vision Platform Namespace Boundary Alignment` is now prepared as a queued narrow follow-up at `docs/session_workpackages/wp98_vision_platform_namespace_boundary_alignment.md`; it exists to isolate the still-open `tests.test_vision_platform_namespace` residual from the completed camera-integration fore-stage
 
 - `Host Control Closure` now has its first landed slice at `docs/archive/session_workpackages/wp12_host_control_closure.md`
 - `Experiment Reliability Closure` now has its first landed slice at `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`

@@ -16,8 +16,11 @@ from camera_app.validation.request_validation import (
 from vision_platform.models import (
     ApplyConfigurationCommandResult,
     ApplyConfigurationRequest,
+    CameraCapabilities,
     CameraCapabilityProfile,
     CameraConfiguration,
+    CameraHealth,
+    CapabilityState,
     IntervalCaptureCommandResult,
     IntervalCaptureRequest,
     IntervalCaptureStatus,
@@ -35,6 +38,7 @@ from vision_platform.models import (
     StopRecordingRequest,
     SubsystemStatus,
 )
+from vision_platform.services.camera_health_service import CameraHealthService
 from vision_platform.services.hardware_audit_service import HardwareAuditService
 from vision_platform.services.camera_configuration_validation_service import CameraConfigurationValidationService
 
@@ -57,6 +61,7 @@ class CommandController:
         self._default_save_directory: Optional[Path] = None
         self._capability_profile = capability_profile
         self._configuration_validation_service = configuration_validation_service or CameraConfigurationValidationService()
+        self._camera_health_service = CameraHealthService()
         self._hardware_audit_service = hardware_audit_service
 
     def apply_configuration(
@@ -230,6 +235,74 @@ class CommandController:
         )
         return status
 
+    def get_health(self) -> CameraHealth:
+        status = self.get_status()
+        return self._camera_health_service.build_health(status)
+
+    def get_capabilities(self) -> CameraCapabilities:
+        status = self.get_status()
+        capability_profile = self._get_effective_capability_profile()
+        configuration = status.configuration
+        capability_profile_available = capability_profile is not None
+
+        return CameraCapabilities(
+            capability_profile_available=capability_profile_available,
+            capability_probe_warning=status.camera.capability_probe_error,
+            exposure_time_control=self._build_profile_capability_state(
+                capability_profile=capability_profile,
+                feature_names=("ExposureTime",),
+                enabled=configuration is not None and configuration.exposure_time_us is not None,
+            ),
+            gain_control=self._build_profile_capability_state(
+                capability_profile=capability_profile,
+                feature_names=("Gain",),
+                enabled=configuration is not None and configuration.gain is not None,
+            ),
+            pixel_format_control=self._build_profile_capability_state(
+                capability_profile=capability_profile,
+                feature_names=("PixelFormat",),
+                enabled=configuration is not None and configuration.pixel_format is not None,
+            ),
+            acquisition_frame_rate_control=self._build_profile_capability_state(
+                capability_profile=capability_profile,
+                feature_names=("AcquisitionFrameRate",),
+                enabled=configuration is not None and configuration.acquisition_frame_rate is not None,
+            ),
+            roi_control=self._build_profile_capability_state(
+                capability_profile=capability_profile,
+                feature_names=("OffsetX", "OffsetY", "Width", "Height"),
+                enabled=configuration is not None
+                and any(
+                    value is not None
+                    for value in (
+                        configuration.roi_offset_x,
+                        configuration.roi_offset_y,
+                        configuration.roi_width,
+                        configuration.roi_height,
+                    )
+                ),
+            ),
+            snapshot=CapabilityState(
+                supported=True,
+                currently_available=status.camera.is_initialized and status.is_save_directory_configured,
+                currently_enabled=status.can_save_snapshot,
+            ),
+            recording=CapabilityState(
+                supported=True,
+                currently_available=status.camera.is_initialized and status.is_save_directory_configured,
+                currently_enabled=status.recording.is_recording,
+            ),
+            interval_capture=CapabilityState(
+                supported=status.has_interval_capture_service,
+                currently_available=(
+                    status.has_interval_capture_service
+                    and status.camera.is_initialized
+                    and status.is_save_directory_configured
+                ),
+                currently_enabled=status.interval_capture.is_capturing,
+            ),
+        )
+
     def _resolve_snapshot_request(self, request: SnapshotRequest) -> SnapshotRequest:
         resolved_save_directory = request.save_directory or self._default_save_directory
         if resolved_save_directory is None:
@@ -262,6 +335,29 @@ class CommandController:
         if isinstance(capability_profile, CameraCapabilityProfile):
             return capability_profile
         return None
+
+    def _build_profile_capability_state(
+        self,
+        *,
+        capability_profile: CameraCapabilityProfile | None,
+        feature_names: tuple[str, ...],
+        enabled: bool,
+    ) -> CapabilityState:
+        if capability_profile is None:
+            return CapabilityState(
+                supported=False,
+                currently_available=False,
+                currently_enabled=False,
+            )
+
+        features = [capability_profile.get_feature(name) for name in feature_names]
+        supported = all(feature is not None and not feature.missing for feature in features)
+        currently_available = supported
+        return CapabilityState(
+            supported=supported,
+            currently_available=currently_available,
+            currently_enabled=supported and enabled,
+        )
 
     def _record_hardware_status(self, *, stage: str, status: SubsystemStatus) -> None:
         if self._hardware_audit_service is None:
