@@ -12,10 +12,10 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- current checked-out branch: `docs/camera-embedding-analysis`
+- current checked-out branch: `main`
 - `main` remains the integration branch
-- the current local-shell documentation and UI-alignment slice has been completed on its topic branch and merged back to `main`
-- the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, `test/hardware-companion-smokes`, and the manuals-alignment slice `docs/manuals-host-shell-flow-apr10`
+- the latest camera fore-stage documentation and implementation slice from `docs/camera-embedding-analysis` is now merged into `main`
+- the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, `test/hardware-companion-smokes`, the manuals-alignment slice `docs/manuals-host-shell-flow-apr10`, and the camera fore-stage slice `docs/camera-embedding-analysis`
 - short-lived topic branches are created per active work package or hygiene slice and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual repository state
 
