@@ -144,8 +144,9 @@ Combined interpretation:
 2. prioritize practical host control of the running wx shell over broad transport or platform speculation
 3. treat visible shell reflection of host-driven behavior as a first-order requirement, not as secondary polish
 4. preserve the confirmed functional workflows as the anchor for operational confidence
-5. treat hardware work as recurring evidence-driven validation rather than as a separate strategic stream
-6. keep tracking, broad API expansion, MCP-oriented growth, C# handover widening, and further frontends visible as later lanes rather than the next default step
+5. insert one small integration-v0.1 clarification step before broader headless or larger-system architecture widening
+6. treat hardware work as recurring evidence-driven validation rather than as a separate strategic stream
+7. keep tracking, broad API expansion, MCP-oriented growth, C# handover widening, and further frontends visible as later lanes rather than the next default step
 
 ## Phase Transition
 
@@ -248,6 +249,13 @@ This phase should optimize for four near-term priorities:
    - once the companion app is locally and host-side usable enough, prepare a truly headless kernel
    - keep that kernel shared by local UI, host control, and later automation or agent flows
 
+Add one small preparatory step before broader headless widening:
+
+- `Integration Surface v0.1 and role clarity`
+  - define the minimal camera integration categories over the existing repo
+  - clarify core versus companion versus transition path
+  - define the smallest stable Health- and Zeitkontext baseline
+
 This phase should **not** be treated as:
 
 - another generic MVP-closure backlog
@@ -270,7 +278,8 @@ This phase should also be read as the practical camera-project contribution to t
 1. host commands to the running `Vision App / wxShell`
 2. visible shell reflection of host-driven actions and state
 3. wx shell settings support and practical workflow usability
-4. then headless preparation
+4. one small `Camera Integration Surface v0.1` / role-and-boundaries clarification slice
+5. then headless preparation
 
 ## Current Usable Definition
 
@@ -758,14 +767,23 @@ The current coarse PM order should be:
 
 ## Recommended Next Detailed Work Package
 
-No unconditional `current next` is set.
+`WP95 Camera Health Model Baseline` is now the `current next` package.
 
 Reason:
 
 - `WP80` through `WP86` are now landed and cover the workflow-first usable-subsystem chain, the first host-result/status consistency seam, one shared usable-failure baseline, one additive LabVIEW-near mapping seam, and one first shell-independent companion payload seam
 - `WP87` is complete for the current tested-path revalidation; any later hardware rerun should be derived only when new evidence is needed
-- until then, the repository should not pretend that a hardware rerun is the unconditional default next action
+- the repo now also has a documented bigger-picture camera fore-stage, but that fore-stage should enter the active PM layer through one narrow mapping slice rather than through a broad multi-WP activation wave
+- `WP93` has now completed that gatekeeper role by making the current surface and boundary/source-of-truth reading explicit
+- `WP94` has now closed the first two explicit surface gaps by implementing `GetHealth` and `GetCapabilities` above the existing core
+- `WP95` is therefore now the smallest justified next slice because it defines the internal `CameraHealth` derivation model beneath the already implemented surface contract
+- `WP96` should remain the queued follow-up after `WP95` because the minimal runtime-event family should attach to the clarified surface and the internal health model instead of preceding them
+- `WP97` should remain the queued follow-up after `WP96` because artifact-reference and minimal time-context clarification belong after surface, health, and event semantics, but before any broader logging or metadata expansion
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
+
+Detailed file:
+
+- `docs/session_workpackages/wp95_camera_health_model_baseline.md`
 
 ## Fresh Agent Decision Rule
 
@@ -782,6 +800,12 @@ When a fresh agent is not explicitly assigned a package:
 ## Detailed Package Inventory
 
 The repository currently has explicit detailed session work-package files for the historical baseline packages and the still-valid later frontend/hardware placeholders:
+
+- `docs/session_workpackages/wp93_camera_integration_surface_v0_1_contract_mapping.md`
+- `docs/session_workpackages/wp94_health_and_capabilities_surface_contract.md`
+- `docs/session_workpackages/wp95_camera_health_model_baseline.md`
+- `docs/session_workpackages/wp96_runtime_event_family_baseline.md`
+- `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
 
 - `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
@@ -863,6 +887,13 @@ The Extended MVP closure lanes are now historical context rather than the active
 New detailed execution-ready files should now be created only when a concrete usable-subsystem, headless-preparation, or later-expansion slice is actually chosen.
 
 Current explicit activation:
+
+- `WP93 Camera Integration Surface v0.1 Contract Mapping` is now completed as the gatekeeper slice at `docs/session_workpackages/wp93_camera_integration_surface_v0_1_contract_mapping.md`
+- `WP94 Health And Capabilities Surface Contract` is now completed as the first code-backed surface-contract slice at `docs/session_workpackages/wp94_health_and_capabilities_surface_contract.md`
+- `WP95 Camera Health Model Baseline` is now active at `docs/session_workpackages/wp95_camera_health_model_baseline.md`
+- this is now the next narrow internal-model slice; runtime-event semantics stay deferred to `WP96`
+- `WP96 Runtime Event Family Baseline` is now prepared as the queued runtime-event follow-up at `docs/session_workpackages/wp96_runtime_event_family_baseline.md`
+- `WP97 Artifact Reference And Time Context Baseline` is now prepared as the queued artifact/time follow-up at `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
 
 - `Host Control Closure` now has its first landed slice at `docs/archive/session_workpackages/wp12_host_control_closure.md`
 - `Experiment Reliability Closure` now has its first landed slice at `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`

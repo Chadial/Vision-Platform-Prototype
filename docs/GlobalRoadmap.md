@@ -70,7 +70,12 @@ This active phase is not primarily about:
 1. host commands to the running `Vision App / wxShell`
 2. visible reflection of host-driven behavior and state in the wx shell
 3. wx shell settings support and practical execution of the confirmed workflows
-4. then headless-kernel preparation
+4. one small camera-integration pre-step inside the current repo phase:
+   - minimal `Camera Integration Surface v0.1`
+   - explicit role/boundary clarification
+   - minimal Health- and Zeitkontext baseline
+   - shell-bridge marked as transition path
+5. then headless-kernel preparation
 
 ## Historical Platform-Building Structure
 

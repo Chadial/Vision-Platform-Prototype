@@ -22,6 +22,34 @@ That phase is now considered closed:
 - the remaining work is no longer primarily about proving the MVP is real
 - the active phase is now `Usable Camera Subsystem / Pre-Product Baseline`, focused on a host-steerable `Hybrid Companion` product direction, operational readiness, controlled productization, and selective expansion
 
+## Immediate Structural Pre-Step Inside The Current Phase
+
+Before broader headless extraction or larger-system integration work is opened, the repository should first complete one small explicit pre-step inside the current phase:
+
+**Camera Integration Surface v0.1 / role-and-boundaries clarification**
+
+This pre-step should:
+- keep the current `Hybrid Companion` baseline intact
+- make the camera explicitly readable as:
+  - `Camera Core / Subsystem`
+  - `Camera Integration Surface`
+  - `optionale Companion-Schicht`
+- define the minimal integration categories:
+  - `Commands`
+  - `State`
+  - `Events`
+  - `Artifacts`
+  - `Health`
+- define one minimal Health- and Zeitkontext baseline
+- mark the wx-shell file bridge explicitly as a bounded transition path, not as final architecture
+
+This pre-step should not:
+- force a final transport architecture
+- force a final Event-Bus model
+- force a full Orchestrator model into the repo
+- move Logging or Safety ownership into Camera
+- replace the shell bridge immediately
+
 ## Phase 0: Repository Reorganization Toward The Vision Platform
 
 - align the repository with `docs/ProjectDescription.md` and `docs/ProjectAgents.md`
@@ -238,6 +266,21 @@ This phase should mean:
    - keep a truly headless kernel as the next structural step after local and host usability are strong enough
    - keep broader productization and handover directions visible, but secondary
 
+### Short-Term Integration Pre-Step
+
+Inside this current phase, the first structural refinement should now be:
+
+1. `Integration Surface v0.1`
+   - define the minimal camera integration categories over the existing repo reality
+2. `Role and boundary clarity`
+   - make `Camera Core`, `Camera Integration Surface`, and `Companion` explicit
+3. `Minimal Health and time baseline`
+   - define the smallest stable export shape that avoids later architectural drift
+4. `Shell-bridge de-mystification`
+   - keep the bridge for current operation, but mark it explicitly as transitional
+
+This is a pre-step inside the current phase, not a replacement for the current workflow-first Hybrid Companion reading.
+
 This phase should not mean:
 
 - reopening MVP-closure logic as the default planning lens
@@ -250,11 +293,21 @@ This phase should not mean:
 
 From the current repository state, the practical next steps are:
 
-1. treat the real-hardware baseline as already established on the tested camera path
-2. pick the next slice from concrete Hybrid Companion usability needs:
+1. complete the small integration pre-step inside the current phase:
+   - `Camera Integration Surface v0.1`
+   - role-and-boundaries clarification
+   - minimal Health and time baseline
+   - shell-bridge-as-transition clarification
+2. treat the real-hardware baseline as already established on the tested camera path
+3. pick the next slice from concrete Hybrid Companion usability needs:
    - host command clarity
    - shell reflection of host-driven state
    - settings/workflow usability
-3. validate the already implemented optional OpenCV path against real hardware only if that inspection path is actively needed
-4. structure any next UI, transport, offline, or C#-handover work as deliberate post-closure expansion, not as unfinished MVP proof work
-5. keep the Python core stable as the working reference baseline for later headless extraction and selective productization
+4. after that, use the clarified integration surface as the basis for:
+   - runtime-event expansion
+   - lifecycle-language expansion
+   - sharper artifact-versus-logging boundaries
+   - later orchestrator-facing hardening
+5. validate the already implemented optional OpenCV path against real hardware only if that inspection path is actively needed
+6. structure any next UI, transport, offline, or C#-handover work as deliberate post-closure expansion, not as unfinished MVP proof work
+7. keep the Python core stable as the working reference baseline for later headless extraction and selective productization

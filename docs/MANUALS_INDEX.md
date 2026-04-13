@@ -89,6 +89,25 @@ Use for:
 - what is landed
 - what remains deferred or conditional
 
+### Understand Bigger-Picture Camera Alignment
+
+- `docs/BiggerPictureNotes/13_Camera.md`
+- `docs/BiggerPictureNotes/13.1_Camera.md`
+- `docs/BiggerPictureNotes/camera_einbindung_analyse_fuer_planung.md`
+- `docs/BiggerPictureNotes/camera_repo_integrationsanalyse_fuer_multi_modul_system.md`
+- `docs/BiggerPictureNotes/kamera_und_grossprojekt_kompatibilitaetseinschaetzung.md`
+- `docs/BiggerPictureNotes/Camera_Repo_Strategieplanung_fuer_Gesamtprojekt.md`
+- `docs/BiggerPictureNotes/camera_integration_surface_v0.1.md`
+- `docs/BiggerPictureNotes/camera_subsystem_role_and_boundaries.md`
+
+Use for:
+
+- larger-system camera-role questions
+- architecture and integration-boundary sharpening
+- strategy and transformation planning from the current repo toward a later multi-module camera subsystem
+- compatibility reading between the current repository and the broader project direction
+- the deliberately small camera-integration fore-stage that should precede broader end-architecture work in this repo
+
 ## Practical Rule
 
 Start with the smallest doc set that matches your question:

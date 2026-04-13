@@ -12,7 +12,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 ## Current Branch
 
-- `main` remains the current integration branch
+- current checked-out branch: `docs/camera-embedding-analysis`
+- `main` remains the integration branch
 - the current local-shell documentation and UI-alignment slice has been completed on its topic branch and merged back to `main`
 - the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, `test/hardware-companion-smokes`, and the manuals-alignment slice `docs/manuals-host-shell-flow-apr10`
 - short-lived topic branches are created per active work package or hygiene slice and merged back after local validation
@@ -54,7 +55,7 @@ Each status update should state progress and gaps against both roadmaps.
 - `WP85 Stage-2 LabVIEW Contract Mapping Narrowing` is now landed on `main`.
 - `WP86 Headless Command Seam Extraction Baseline` is now landed on `main`.
 - `WP87 Hybrid Companion Hardware Workflow Revalidation` was reactivated in this session and completed on April 10, 2026; hardware-backed `status`, `snapshot`, bounded `recording`, and the integrated command-flow run all succeeded on `DEV_1AB22C046D81`.
-- no unconditional `current next` is set after that hardware-validation slice.
+- after the hardware-validation slice, no unconditional next had been set until the current camera-integration fore-stage was made explicit through `WP93` and `WP94`.
 - `WP88 Local Shell Test-Host And UI Validation` is now completed; the running wx shell and separate test-host process agreed on status, snapshot, save-directory, and bounded recording state on the tested hardware path.
 - `WP89 Local Shell Camera Settings Defaults And Limits Alignment` is now completed; the running wx shell and separate test-host process agreed on status, snapshot, save-directory, and bounded recording state on the tested hardware path, and the current hardware profile defaults now use a valid `Mono10` / `10013.862us` baseline.
 - `WP90 Local Shell Help Text Cleanup And OpenCV Hint Removal` is now completed; the running wx shell help text is now concise and no longer carries the obsolete OpenCV hint.
@@ -62,11 +63,20 @@ Each status update should state progress and gaps against both roadmaps.
 - `WP92 Local Shell Mono10 Rendering And Hardware Profile Alignment` is now completed; the hardware-backed wx shell now renders `Mono10` frames instead of crashing, falls back to hardware-safe snapshot / recording output when BMP is invalid, and the tested hardware shell completed status, snapshot, and bounded recording on `DEV_1AB22C046D81` after the profile correction.
 - next if more hardware time is available: do one last live `Camera Settings...` / menu-path check on the current `Mono10` shell; if the camera is no longer attached, stop hardware work and move to branch hygiene instead of opening a broad new rerun lane.
 - default next-step derivation should now use the confirmed `Hybrid Companion` product reading through the three functional workflows rather than a broad generic subsystem-hardening lens.
+- `WP93 Camera Integration Surface v0.1 Contract Mapping` is now completed as the gatekeeper documentation/contract slice; its detailed file lives at `docs/session_workpackages/wp93_camera_integration_surface_v0_1_contract_mapping.md`
+- `WP94 Health And Capabilities Surface Contract` is now completed as the first code-backed surface-contract slice; its detailed file lives at `docs/session_workpackages/wp94_health_and_capabilities_surface_contract.md`
+- the repo now exposes `CommandController.get_health()` and `CommandController.get_capabilities()` as narrow surface calls above the existing core, and the adapter layer now has matching API-service payload mappers for health and capabilities
+- `WP95 Camera Health Model Baseline` is now the active next slice; it is intentionally the internal derivation-model step after the implemented `WP94` surface contract, not another surface-contract pass
+- `WP96 Runtime Event Family Baseline` is now prepared as the queued follow-up after `WP95`; it is intentionally the first event-semantics slice after surface and health-model clarification, not an event-bus or transport package
+- `WP97 Artifact Reference And Time Context Baseline` is now prepared as the queued follow-up after `WP96`; it is intentionally the small artifact/time clarification slice before any broader logging, metadata, or clock-architecture widening
 - the repo-level orientation cleanup now also extends beyond the central PM docs: `README.md`, `docs/WORKFLOW.md`, `docs/NEXT_SESSION_ORDER.md`, `docs/project_overview.md`, and the secondary summary notes now point at the same current product reading instead of older post-closure wording
 - `WP75 Reference Scenario Operator Path Tightening` is now landed; `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and `docs/MANUALS_INDEX.md` now expose one compact validated entry path for the official current workflows.
 - `WP71 Reference Scenario Validation Narrowing` is now landed; the repository has one explicit repeatable validation block for the current technical anchor flows through `tests.test_reference_scenarios` and `scripts/launchers/run_reference_scenario_validation.py`.
 - `WP70 Control And Imaging Compatibility Cleanup` remains complete on the topic branch and already archived as a finished refactor slice.
 - the latest documentation-governance maintenance also landed: `docs/STATUS.md` is the authoritative repository status, `docs/WORKPACKAGES.md` is the authoritative repository queue, and `docs/PRIORITIES.md` / `docs/TARGET_MAP.md` are derived views only
+- the broader architecture/planning note cluster is now grouped under `docs/BiggerPictureNotes/`; it currently includes the moved baseline note `13_Camera.md`, the sharper follow-up `13.1_Camera.md`, the repo transformation note `Camera_Repo_Strategieplanung_fuer_Gesamtprojekt.md`, and the supporting integration/compatibility analyses for bigger-picture camera planning
+- the same `docs/BiggerPictureNotes/` cluster now also includes the new narrow pre-step notes `camera_integration_surface_v0.1.md` and `camera_subsystem_role_and_boundaries.md`, which deliberately define a small camera-integration fore-stage without forcing full end-architecture into the current repo phase
+- those `docs/BiggerPictureNotes/` files should be read as architecture/context and strategy material for larger-system alignment, not as the current implementation-truth layer; `docs/STATUS.md` and `docs/WORKPACKAGES.md` remain the authoritative repository-state carriers
 - `WP81` now also has landed geometry-capture slices for snapshot reflection, save-path readability, host-triggered snapshot smoke coverage, and explicit snapshot failure reflection
 - `WP82` now also has landed setup slices for setup-state reflection, setup-oriented messaging, ROI/focus visibility, and host-triggered setup smoke coverage
 - `WP83` now also has landed completion slices for reflection-aligned command results, save-directory result consistency, host/result smoke coverage, and a more consistent failed-result placeholder shape
