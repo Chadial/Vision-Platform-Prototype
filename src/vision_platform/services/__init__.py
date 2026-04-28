@@ -22,6 +22,12 @@ from vision_platform.services.companion_contract_service import (
     build_failed_companion_command_result,
 )
 from vision_platform.services.hardware_audit_service import HardwareAuditService
+from vision_platform.services.local_shell_session_protocol import (
+    LocalShellActiveSessionMetadata,
+    LocalShellLiveCommandResult,
+    LocalShellLiveStatusSnapshot,
+    LocalShellSessionMetadata,
+)
 from vision_platform.services.local_shell_session_service import (
     LocalShellLiveCommand,
     LocalShellLiveSyncError,
@@ -42,9 +48,13 @@ __all__ = [
     "CameraCapabilityService",
     "CameraConfigurationValidationService",
     "HardwareAuditService",
+    "LocalShellActiveSessionMetadata",
     "LocalShellLiveCommand",
+    "LocalShellLiveCommandResult",
     "LocalShellLiveSyncError",
     "LocalShellLiveSyncSession",
+    "LocalShellLiveStatusSnapshot",
+    "LocalShellSessionMetadata",
     "append_live_command",
     "build_artifact_reference",
     "build_artifact_reference_from_trace_row",

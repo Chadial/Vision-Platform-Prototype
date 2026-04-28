@@ -8,6 +8,14 @@ from time import sleep
 from typing import Any
 from uuid import uuid4
 
+from vision_platform.services.local_shell_session_protocol import (
+    LocalShellActiveSessionMetadata,
+    LocalShellLiveCommand,
+    LocalShellLiveCommandResult,
+    LocalShellLiveStatusSnapshot,
+    LocalShellSessionMetadata,
+)
+
 
 @dataclass(slots=True)
 class LocalShellLiveSyncSession:
@@ -19,14 +27,6 @@ class LocalShellLiveSyncSession:
     commands_file: Path
     results_directory: Path
     status_file: Path
-
-
-@dataclass(slots=True)
-class LocalShellLiveCommand:
-    command_id: str
-    command_name: str
-    payload: dict[str, Any]
-    created_at: str
 
 
 class LocalShellLiveSyncError(Exception):
@@ -59,29 +59,29 @@ def create_live_sync_session(
     )
     write_json(
         session.session_file,
-        {
-            "session_id": session.session_id,
-            "source": source,
-            "camera_id": camera_id,
-            "configuration_profile_id": configuration_profile_id,
-            "state": "running",
-            "created_at": _utc_now(),
-            "session_directory": session.session_directory,
-            "commands_file": session.commands_file,
-            "status_file": session.status_file,
-        },
+        LocalShellSessionMetadata(
+            session_id=session.session_id,
+            source=source,
+            camera_id=camera_id,
+            configuration_profile_id=configuration_profile_id,
+            state="running",
+            created_at=_utc_now(),
+            session_directory=session.session_directory,
+            commands_file=session.commands_file,
+            status_file=session.status_file,
+        ).to_dict(),
     )
     write_json(
         session.active_session_file,
-        {
-            "session_id": session.session_id,
-            "session_directory": session.session_directory,
-            "source": source,
-            "camera_id": camera_id,
-            "configuration_profile_id": configuration_profile_id,
-            "state": "running",
-            "updated_at": _utc_now(),
-        },
+        LocalShellActiveSessionMetadata(
+            session_id=session.session_id,
+            session_directory=session.session_directory,
+            source=source,
+            camera_id=camera_id,
+            configuration_profile_id=configuration_profile_id,
+            state="running",
+            updated_at=_utc_now(),
+        ).to_dict(),
     )
     session.commands_file.touch(exist_ok=True)
     return session
@@ -91,10 +91,10 @@ def resolve_active_live_sync_session(root_directory: Path) -> LocalShellLiveSync
     active_session_file = root_directory / "active_session.json"
     if not active_session_file.exists():
         raise LocalShellLiveSyncError("No active wx shell session is registered.")
-    active_payload = read_json(active_session_file)
-    session_directory = Path(active_payload["session_directory"])
+    active_payload = LocalShellActiveSessionMetadata.from_dict(read_json(active_session_file))
+    session_directory = active_payload.session_directory
     session = LocalShellLiveSyncSession(
-        session_id=active_payload["session_id"],
+        session_id=active_payload.session_id,
         root_directory=root_directory,
         session_directory=session_directory,
         session_file=session_directory / "session.json",
@@ -103,20 +103,20 @@ def resolve_active_live_sync_session(root_directory: Path) -> LocalShellLiveSync
         results_directory=session_directory / "results",
         status_file=session_directory / "status.json",
     )
-    session_payload = read_json(session.session_file)
-    if session_payload.get("state") != "running":
+    session_payload = LocalShellSessionMetadata.from_dict(read_json(session.session_file))
+    if session_payload.state != "running":
         raise LocalShellLiveSyncError("The active wx shell session is not running anymore.")
     return session
 
 
 def close_live_sync_session(session: LocalShellLiveSyncSession) -> None:
-    payload = read_json(session.session_file)
-    payload["state"] = "closed"
-    payload["closed_at"] = _utc_now()
-    write_json(session.session_file, payload)
+    payload = LocalShellSessionMetadata.from_dict(read_json(session.session_file))
+    payload.state = "closed"
+    payload.closed_at = _utc_now()
+    write_json(session.session_file, payload.to_dict())
     if session.active_session_file.exists():
-        active_payload = read_json(session.active_session_file)
-        if active_payload.get("session_id") == session.session_id:
+        active_payload = LocalShellActiveSessionMetadata.from_dict(read_json(session.active_session_file))
+        if active_payload.session_id == session.session_id:
             session.active_session_file.unlink()
 
 
@@ -132,7 +132,7 @@ def append_live_command(
         payload=payload or {},
         created_at=_utc_now(),
     )
-    line = json.dumps(to_serializable(asdict(command)), sort_keys=True)
+    line = json.dumps(to_serializable(command.to_dict()), sort_keys=True)
     with session.commands_file.open("a", encoding="utf-8") as handle:
         handle.write(f"{line}\n")
     return command
@@ -147,15 +147,7 @@ def read_pending_live_commands(
         return [], processed_count
     lines = session.commands_file.read_text(encoding="utf-8").splitlines()
     pending_lines = lines[processed_count:]
-    commands = [
-        LocalShellLiveCommand(
-            command_id=payload["command_id"],
-            command_name=payload["command_name"],
-            payload=payload.get("payload", {}),
-            created_at=payload["created_at"],
-        )
-        for payload in (json.loads(line) for line in pending_lines if line.strip())
-    ]
+    commands = [LocalShellLiveCommand.from_dict(json.loads(line)) for line in pending_lines if line.strip()]
     return commands, len(lines)
 
 
@@ -171,14 +163,14 @@ def write_live_command_result(
     result_path = session.results_directory / f"{command_id}.json"
     write_json(
         result_path,
-        {
-            "command_id": command_id,
-            "command_name": command_name,
-            "success": success,
-            "result": result,
-            "error": error,
-            "updated_at": _utc_now(),
-        },
+        LocalShellLiveCommandResult(
+            command_id=command_id,
+            command_name=command_name,
+            success=success,
+            result=result,
+            error=error,
+            updated_at=_utc_now(),
+        ).to_dict(),
     )
     return result_path
 
@@ -194,26 +186,26 @@ def wait_for_live_command_result(
     elapsed = 0.0
     while elapsed <= timeout_seconds:
         if result_path.exists():
-            return read_json(result_path)
+            return LocalShellLiveCommandResult.from_dict(read_json(result_path)).to_dict()
         sleep(poll_interval_seconds)
         elapsed += poll_interval_seconds
     raise LocalShellLiveSyncError(f"Timed out waiting for wx shell command result '{command_id}'.")
 
 
 def write_live_status_snapshot(session: LocalShellLiveSyncSession, payload: dict[str, Any]) -> None:
-    write_json(session.status_file, payload)
+    write_json(session.status_file, LocalShellLiveStatusSnapshot.from_dict(payload).to_dict())
     if session.active_session_file.exists():
-        active_payload = read_json(session.active_session_file)
-        if active_payload.get("session_id") == session.session_id:
-            active_payload["updated_at"] = _utc_now()
-            active_payload["state"] = "running"
-            write_json(session.active_session_file, active_payload)
+        active_payload = LocalShellActiveSessionMetadata.from_dict(read_json(session.active_session_file))
+        if active_payload.session_id == session.session_id:
+            active_payload.updated_at = _utc_now()
+            active_payload.state = "running"
+            write_json(session.active_session_file, active_payload.to_dict())
 
 
 def read_live_status_snapshot(session: LocalShellLiveSyncSession) -> dict[str, Any]:
     if not session.status_file.exists():
         raise LocalShellLiveSyncError("The active wx shell has not published a status snapshot yet.")
-    return read_json(session.status_file)
+    return LocalShellLiveStatusSnapshot.from_dict(read_json(session.status_file)).to_dict()
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:

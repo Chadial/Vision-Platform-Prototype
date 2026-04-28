@@ -16,7 +16,16 @@ from vision_platform.apps.local_shell.live_command_sync import (
     write_live_command_result,
     write_live_status_snapshot,
 )
-from vision_platform.services.local_shell_session_service import create_live_sync_session as create_live_sync_session_service
+from vision_platform.services.local_shell_session_protocol import (
+    LocalShellActiveSessionMetadata,
+    LocalShellLiveCommandResult,
+    LocalShellLiveStatusSnapshot,
+    LocalShellSessionMetadata,
+)
+from vision_platform.services.local_shell_session_service import (
+    create_live_sync_session as create_live_sync_session_service,
+    read_json,
+)
 from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShell
 
 
@@ -73,6 +82,67 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             close_live_sync_session(session)
             with self.assertRaises(LocalShellLiveSyncError):
                 resolve_active_live_sync_session(Path(temp_dir))
+
+    def test_protocol_files_round_trip_through_typed_metadata_models(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id="DEV_123",
+                configuration_profile_id="default",
+            )
+
+            session_record = LocalShellSessionMetadata.from_dict(read_json(session.session_file))
+            active_record = LocalShellActiveSessionMetadata.from_dict(read_json(session.active_session_file))
+
+            self.assertEqual(session_record.session_id, session.session_id)
+            self.assertEqual(session_record.camera_id, "DEV_123")
+            self.assertEqual(active_record.session_id, session.session_id)
+            self.assertEqual(active_record.configuration_profile_id, "default")
+
+    def test_protocol_command_result_round_trip_uses_typed_result_model(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            command = append_live_command(session, command_name="save_snapshot", payload={"file_stem": "geometry_000001"})
+            write_live_command_result(
+                session,
+                command_id=command.command_id,
+                command_name="save_snapshot",
+                success=True,
+                result={"ok": True},
+            )
+
+            result_record = LocalShellLiveCommandResult.from_dict(read_json(session.results_directory / f"{command.command_id}.json"))
+
+            self.assertEqual(result_record.command_name, "save_snapshot")
+            self.assertTrue(result_record.success)
+            self.assertEqual(result_record.result, {"ok": True})
+
+    def test_protocol_status_snapshot_round_trip_uses_typed_snapshot_model(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            write_live_status_snapshot(
+                session,
+                {
+                    "session_id": session.session_id,
+                    "status_lines": ["preview=running"],
+                },
+            )
+
+            snapshot_record = LocalShellLiveStatusSnapshot.from_dict(read_json(session.status_file))
+
+            self.assertEqual(snapshot_record.payload["session_id"], session.session_id)
+            self.assertEqual(snapshot_record.payload["status_lines"], ["preview=running"])
 
     def test_execute_live_start_recording_updates_shell_tracking_state(self) -> None:
         controller = _StubController()
