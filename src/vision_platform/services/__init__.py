@@ -22,12 +22,30 @@ from vision_platform.services.companion_contract_service import (
     build_failed_companion_command_result,
 )
 from vision_platform.services.hardware_audit_service import HardwareAuditService
+from vision_platform.services.local_shell_session_service import (
+    LocalShellLiveCommand,
+    LocalShellLiveSyncError,
+    LocalShellLiveSyncSession,
+    append_live_command,
+    close_live_sync_session,
+    create_live_sync_session,
+    read_live_status_snapshot,
+    read_pending_live_commands,
+    resolve_active_live_sync_session,
+    wait_for_live_command_result,
+    write_live_command_result,
+    write_live_status_snapshot,
+)
 
 __all__ = [
     "CameraHealthService",
     "CameraCapabilityService",
     "CameraConfigurationValidationService",
     "HardwareAuditService",
+    "LocalShellLiveCommand",
+    "LocalShellLiveSyncError",
+    "LocalShellLiveSyncSession",
+    "append_live_command",
     "build_artifact_reference",
     "build_artifact_reference_from_trace_row",
     "build_time_context_from_captured_frame",
@@ -40,4 +58,12 @@ __all__ = [
     "build_recording_started_event",
     "build_recording_stopped_event",
     "build_snapshot_saved_event",
+    "close_live_sync_session",
+    "create_live_sync_session",
+    "read_live_status_snapshot",
+    "read_pending_live_commands",
+    "resolve_active_live_sync_session",
+    "wait_for_live_command_result",
+    "write_live_command_result",
+    "write_live_status_snapshot",
 ]

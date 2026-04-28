@@ -12,7 +12,7 @@ from vision_platform.apps.camera_cli.camera_configuration_profiles import (
     normalize_camera_class_name,
     resolve_camera_configuration_profile,
 )
-from vision_platform.apps.local_shell.live_command_sync import (
+from vision_platform.services.local_shell_session_service import (
     LocalShellLiveSyncSession,
     create_live_sync_session,
 )

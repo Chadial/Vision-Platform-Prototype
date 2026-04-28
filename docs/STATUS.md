@@ -14,9 +14,8 @@ Each status update should state progress and gaps against both roadmaps.
 
 - current checked-out branch: `main`
 - `main` remains the integration branch
-- the active topic branch for the completed namespace-boundary cleanup slice is `refactor/wp98-vision-platform-namespace-boundary-alignment`
 - the latest camera fore-stage documentation and implementation slice from `docs/camera-embedding-analysis` is now merged into `main`
-- the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, `test/hardware-companion-smokes`, the manuals-alignment slice `docs/manuals-host-shell-flow-apr10`, and the camera fore-stage slice `docs/camera-embedding-analysis`
+- the latest merged topic branches on top of the current usable-subsystem baseline include `feature/wp86-headless-seam`, `test/simulated-companion-smokes`, `test/hardware-companion-smokes`, the manuals-alignment slice `docs/manuals-host-shell-flow-apr10`, the camera fore-stage slice `docs/camera-embedding-analysis`, and `refactor/wp99-live-sync-service-extraction`
 - short-lived topic branches are created per active work package or hygiene slice and merged back after local validation
 - branch or general git housekeeping that changes repository-state truth must be reflected here when this section would otherwise drift from the actual repository state
 
@@ -72,7 +71,8 @@ Each status update should state progress and gaps against both roadmaps.
 - `WP97 Artifact Reference And Time Context Baseline` is now completed as the first code-backed artifact/time slice after `WP96`; the repo now has explicit `ArtifactReference` and `ArtifactTimeContext` models plus narrow builder helpers
 - no unconditional next slice is set after `WP97`; the next selection should be derived from the now-implemented camera-integration fore-stage baseline and the smallest justified follow-up seam
 - `WP98 Vision Platform Namespace Boundary Alignment` is now landed on `main`; the remaining `tests.test_vision_platform_namespace` residual was closed by aligning hardware-audit model ownership with `vision_platform.models` and by removing the wx-shell-local logging and snapshot-extension drift back into `camera_app`
-- no unconditional next slice is set after `WP98`; future selection should return to the smallest justified follow-up seam after the now-closed namespace-boundary residual
+- `WP99 Live Sync Service Extraction` is now landed on `main`; the file-backed local-shell session bridge mechanics now live in `vision_platform.services.local_shell_session_service`, while `vision_platform.apps.local_shell.live_command_sync` remains as a thin compatibility wrapper for the existing import surface
+- no unconditional next slice is set after `WP99`; future selection should return to the smallest justified follow-up seam after the now-cleaner local-shell bridge ownership boundary
 - the repo-level orientation cleanup now also extends beyond the central PM docs: `README.md`, `docs/WORKFLOW.md`, `docs/NEXT_SESSION_ORDER.md`, `docs/project_overview.md`, and the secondary summary notes now point at the same current product reading instead of older post-closure wording
 - `WP75 Reference Scenario Operator Path Tightening` is now landed; `docs/ENTRYPOINT_AND_LAUNCH_BASELINE.md` and `docs/MANUALS_INDEX.md` now expose one compact validated entry path for the official current workflows.
 - `WP71 Reference Scenario Validation Narrowing` is now landed; the repository has one explicit repeatable validation block for the current technical anchor flows through `tests.test_reference_scenarios` and `scripts/launchers/run_reference_scenario_validation.py`.

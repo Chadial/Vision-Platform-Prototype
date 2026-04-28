@@ -12,7 +12,7 @@ from vision_platform.apps.local_shell import control_cli
 from vision_platform.apps.local_shell.labview_mapping import (
     attach_labview_mapping_to_command_result,
 )
-from vision_platform.apps.local_shell.live_command_sync import (
+from vision_platform.services.local_shell_session_service import (
     append_live_command,
     create_live_sync_session,
     read_live_status_snapshot,

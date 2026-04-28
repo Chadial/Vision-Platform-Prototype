@@ -469,6 +469,7 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 90 | Local Shell Help Text Cleanup And OpenCV Hint Removal | replace the old OpenCV-flavored shortcut help with a shorter wx-shell-oriented reference that matches the current menu map | completed | completed help cleanup slice; the shell help text is now concise and no longer carries the obsolete OpenCV framing | `docs/archive/session_workpackages/wp90_local_shell_help_text_cleanup_and_opencv_hint_removal.md` |
 | 91 | Local Shell ROI And Crosshair Priority Alignment | make crosshair the superior interaction mode so it cancels or blocks ROI entry and dragging when enabled | completed | completed interaction slice; crosshair now wins over ROI entry and drag in the shell and is reflected in the shared interaction service | `docs/archive/session_workpackages/wp91_local_shell_roi_and_crosshair_priority_alignment.md` |
 | 92 | Local Shell Mono10 Rendering And Hardware Profile Alignment | keep the wx shell usable on the tested hardware path when the camera profile resolves to `Mono10` by making the renderer and stored profile defaults hardware-safe | completed | completed hardware-alignment slice; local preview now accepts high-bit grayscale frames, the stored exposure default is aligned to the tested increment grid, and snapshot / recording fall back to a hardware-safe output extension when BMP is invalid | `docs/archive/session_workpackages/wp92_local_shell_mono10_rendering_and_hardware_profile_alignment.md` |
+| 99 | Live Sync Service Extraction | move the bounded file-backed local-shell session bridge out of the wx app package into a service seam while preserving the current import and runtime behavior | landed | landed headless-preparation follow-up; the service layer now owns the file-backed session mechanics while the app package keeps a thin compatibility wrapper | `docs/archive/session_workpackages/wp99_live_sync_service_extraction.md` |
 
 ## Immediate PM Backlog
 
@@ -476,6 +477,7 @@ These are the work-package groups PM should treat as the current actionable usab
 
 1. if hardware is still available, use one narrow follow-up slice to verify the live `Camera Settings...` / menu path on the current `Mono10` shell; otherwise do branch hygiene instead of opening a broad new hardware rerun
 2. derive the next smallest justified slice explicitly once the remaining hardware-dependent question is either answered or deferred
+3. keep the bounded local-shell session bridge explicitly transitional: `WP99` moved its mechanics out of the app package, but it did not widen the runtime or transport model
 3. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the new slices reveals a concrete seam that actually needs them
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
@@ -767,7 +769,7 @@ The current coarse PM order should be:
 
 ## Recommended Next Detailed Work Package
 
-No unconditional `current next` is set after the implemented `WP94` through `WP97` camera-integration fore-stage sequence.
+No unconditional `current next` is set after the implemented `WP94` through `WP99` follow-up sequence.
 
 Reason:
 
@@ -780,11 +782,12 @@ Reason:
 - `WP96` has now implemented the minimal runtime-event family as a transport-free semantic baseline
 - `WP97` has now implemented the minimal artifact-reference and time-context baseline without widening into logging or clock architecture
 - `WP98` is now completed as one explicit narrow residual lane for the last known `tests.test_vision_platform_namespace` failure, and that cleanup remains intentionally separate from the completed camera-integration fore-stage
+- `WP99` has now completed one narrow ownership-cleanup follow-up by moving the bounded file-backed local-shell session mechanics into the service layer while keeping the current app import surface stable
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
 Detailed file:
 
-- no new unconditional detailed package is selected yet after `WP98`; derive the next slice from concrete residuals or the user's explicit direction
+- no new unconditional detailed package is selected yet after `WP99`; derive the next slice from concrete residuals or the user's explicit direction
 
 ## Fresh Agent Decision Rule
 
@@ -895,6 +898,7 @@ Current explicit activation:
 - `WP96 Runtime Event Family Baseline` is now completed at `docs/session_workpackages/wp96_runtime_event_family_baseline.md`
 - `WP97 Artifact Reference And Time Context Baseline` is now completed at `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
 - `WP98 Vision Platform Namespace Boundary Alignment` is now completed at `docs/archive/session_workpackages/wp98_vision_platform_namespace_boundary_alignment.md`; it closed the still-open `tests.test_vision_platform_namespace` residual without reopening the broader camera-integration fore-stage
+- `WP99 Live Sync Service Extraction` is now completed at `docs/archive/session_workpackages/wp99_live_sync_service_extraction.md`; it moved the bounded local-shell live-sync/session mechanics into the service layer while preserving the current app import path through a compatibility wrapper
 
 - `Host Control Closure` now has its first landed slice at `docs/archive/session_workpackages/wp12_host_control_closure.md`
 - `Experiment Reliability Closure` now has its first landed slice at `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`

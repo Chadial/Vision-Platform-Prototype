@@ -3,6 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 
+from vision_platform.apps.local_shell import live_command_sync as compatibility_live_command_sync
 from vision_platform.apps.local_shell.live_command_sync import (
     LocalShellLiveSyncError,
     append_live_command,
@@ -15,10 +16,14 @@ from vision_platform.apps.local_shell.live_command_sync import (
     write_live_command_result,
     write_live_status_snapshot,
 )
+from vision_platform.services.local_shell_session_service import create_live_sync_session as create_live_sync_session_service
 from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShell
 
 
 class LocalShellLiveCommandSyncTests(unittest.TestCase):
+    def test_compatibility_module_reexports_service_entrypoints(self) -> None:
+        self.assertIs(compatibility_live_command_sync.create_live_sync_session, create_live_sync_session_service)
+
     def test_live_sync_session_round_trip_tracks_commands_results_and_status(self) -> None:
         with TemporaryDirectory() as temp_dir:
             session = create_live_sync_session(

@@ -44,6 +44,7 @@ See [`FEATURES.md`](FEATURES.md) for the full implemented wx shell inventory.
 - shared headless core responsibilities: bootstrap, command controller, stream service, display geometry, preview interaction, preview-status models, and focus preview evaluation
 - UI-local responsibilities: wx windowing, button layout, bitmap rendering, event translation, status text presentation, clipboard integration, and menu/shortcut affordances
 - the shell is allowed to decide how to draw and route input, but it should not own camera semantics, recording semantics, or duplicate shared status models
+- the file-backed live-sync/session mechanics now live in `vision_platform.services.local_shell_session_service`, and the app package keeps only a thin compatibility adapter for the old import path
 - future live command sync should observe shared state instead of pushing new camera logic into the UI layer
 - the current live command sync baseline is intentionally local and file-backed; it is not a broad transport framework
 

@@ -20,7 +20,7 @@ from vision_platform.services.companion_contract_service import (
 from vision_platform.services.display_service import PreviewInteractionCommand, format_focus_score
 
 from vision_platform.apps.local_shell.control_cli import main as run_local_shell_control_cli
-from vision_platform.apps.local_shell.live_command_sync import (
+from vision_platform.services.local_shell_session_service import (
     LocalShellLiveCommand,
     close_live_sync_session,
     read_pending_live_commands,

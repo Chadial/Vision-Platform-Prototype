@@ -10,7 +10,7 @@ from vision_platform.apps.local_shell.labview_mapping import (
     attach_labview_mapping_to_command_result,
     attach_labview_mapping_to_status_snapshot,
 )
-from vision_platform.apps.local_shell.live_command_sync import (
+from vision_platform.services.local_shell_session_service import (
     LocalShellLiveSyncError,
     read_live_status_snapshot,
     append_live_command,
