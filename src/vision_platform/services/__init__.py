@@ -36,6 +36,7 @@ from vision_platform.services.local_shell_command_execution_service import (
     LocalShellRecordingDefaults,
     execute_local_shell_companion_command,
 )
+from vision_platform.services.local_shell_companion_facade import LocalShellCompanionFacade
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
 from vision_platform.services.local_shell_failure_reflection_state_service import (
     FailureReflectionPayload,
@@ -90,6 +91,7 @@ __all__ = [
     "LocalShellCompanionCommandExecutionContext",
     "LocalShellCompanionCommandExecutionError",
     "LocalShellCompanionCommandExecutionOutcome",
+    "LocalShellCompanionFacade",
     "LocalShellLiveCommand",
     "LocalShellLiveCommandResult",
     "LocalShellLiveSyncError",

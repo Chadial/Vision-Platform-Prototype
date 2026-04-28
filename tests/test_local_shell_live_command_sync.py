@@ -16,6 +16,7 @@ from vision_platform.apps.local_shell.live_command_sync import (
     write_live_command_result,
     write_live_status_snapshot,
 )
+from vision_platform.services.local_shell_companion_facade import LocalShellCompanionFacade
 from vision_platform.services.local_shell_session_protocol import (
     LocalShellActiveSessionMetadata,
     LocalShellLiveCommandResult,
@@ -23,6 +24,10 @@ from vision_platform.services.local_shell_session_protocol import (
     LocalShellSessionMetadata,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_command_execution_service import (
+    LocalShellCompanionCommandExecutionContext,
+    LocalShellRecordingDefaults,
+)
 from vision_platform.services.local_shell_failure_reflection_state_service import LocalShellFailureReflectionState
 from vision_platform.services.local_shell_projection_input_builder_service import (
     build_local_shell_status_projection_input,
@@ -62,6 +67,44 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
 
         state.clear_for_source("snapshot")
         self.assertIsNone(state.snapshot())
+
+    def test_companion_facade_executes_command_and_builds_result_without_new_semantics(self) -> None:
+        applied_outcomes: list[LocalShellCompanionCommandExecutionOutcome] = []
+        facade = LocalShellCompanionFacade()
+
+        result = facade.execute_command(
+            command=SimpleNamespace(command_name="set_save_directory", payload={"base_directory": "captures/new_run"}),
+            build_execution_context=lambda: LocalShellCompanionCommandExecutionContext(
+                command_controller=SimpleNamespace(
+                    set_save_directory=lambda request: SimpleNamespace(selected_directory=request.base_directory)
+                ),
+                resolved_camera_id=None,
+                configuration_profile_id=None,
+                configuration_profile_camera_class=None,
+                current_pixel_format=None,
+                recording_defaults=LocalShellRecordingDefaults(
+                    file_stem="wx_recording",
+                    file_extension=".bmp",
+                    max_frame_count=None,
+                    target_frame_rate=None,
+                    save_directory=None,
+                ),
+                format_snapshot_saved_message=lambda saved_path: str(saved_path),
+                format_snapshot_failure_message=lambda error: error,
+                format_recording_started_message=lambda file_stem, save_directory: f"{file_stem}:{save_directory}",
+                format_recording_stopped_message=lambda frames_written, recording_summary, stop_reason, save_directory: str(frames_written),
+                format_recording_failure_message=lambda action, error: f"{action}:{error}",
+            ),
+            apply_outcome=applied_outcomes.append,
+            build_result=lambda command_name, raw_result: {
+                "command_name": command_name,
+                "selected_directory": str(raw_result.selected_directory),
+            },
+        )
+
+        self.assertEqual(result["command_name"], "set_save_directory")
+        self.assertEqual(result["selected_directory"], str(Path("captures/new_run")))
+        self.assertEqual(applied_outcomes[0].selected_save_directory, Path("captures/new_run"))
 
     def test_status_projection_input_builder_preserves_existing_projection_shape(self) -> None:
         status = SimpleNamespace(recording=SimpleNamespace(is_recording=True, frames_written=4))

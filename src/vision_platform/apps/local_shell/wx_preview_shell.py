@@ -11,14 +11,12 @@ from typing import Sequence
 
 from vision_platform.models import ApplyConfigurationRequest, SaveSnapshotRequest, SetSaveDirectoryRequest
 from vision_platform.models import StartRecordingRequest, StopRecordingRequest
-from vision_platform.services.companion_contract_service import build_failed_companion_command_result
 from vision_platform.services.local_shell_command_execution_service import (
     LocalShellCompanionCommandExecutionContext,
-    LocalShellCompanionCommandExecutionError,
     LocalShellCompanionCommandExecutionOutcome,
     LocalShellRecordingDefaults,
-    execute_local_shell_companion_command,
 )
+from vision_platform.services.local_shell_companion_facade import LocalShellCompanionFacade
 from vision_platform.services.local_shell_failure_reflection_state_service import LocalShellFailureReflectionState
 from vision_platform.services.local_shell_projection_input_builder_service import (
     build_local_shell_recording_projection_input,
@@ -26,9 +24,7 @@ from vision_platform.services.local_shell_projection_input_builder_service impor
     build_local_shell_snapshot_projection_input,
     build_local_shell_status_projection_input,
 )
-from vision_platform.services.local_shell_runtime_tick_coordinator import LocalShellRuntimeTickCoordinator
 from vision_platform.services.local_shell_status_projection_service import (
-    build_local_shell_live_command_result,
     build_local_shell_recording_reflection,
     build_local_shell_setup_reflection,
     build_local_shell_snapshot_reflection,
@@ -280,9 +276,8 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_file_stem = "wx_recording"
         self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
-        self._companion_runtime_tick_coordinator = LocalShellRuntimeTickCoordinator(
-            processed_count=self._live_sync_processed_count,
-        )
+        self._companion_facade = LocalShellCompanionFacade()
+        self._companion_facade.processed_count = self._live_sync_processed_count
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
 
@@ -376,24 +371,23 @@ class WxLocalPreviewShell(wx.Frame):
     def _on_timer(self, event) -> None:
         self._run_companion_runtime_tick()
 
-    def _get_companion_runtime_tick_coordinator(self) -> LocalShellRuntimeTickCoordinator:
-        coordinator = getattr(self, "_companion_runtime_tick_coordinator", None)
-        if coordinator is None:
-            coordinator = LocalShellRuntimeTickCoordinator(
-                processed_count=getattr(self, "_live_sync_processed_count", 0),
-            )
-            self._companion_runtime_tick_coordinator = coordinator
-        return coordinator
+    def _get_companion_facade(self) -> LocalShellCompanionFacade:
+        facade = getattr(self, "_companion_facade", None)
+        if facade is None:
+            facade = LocalShellCompanionFacade()
+            facade.processed_count = getattr(self, "_live_sync_processed_count", 0)
+            self._companion_facade = facade
+        return facade
 
     def _run_companion_runtime_tick(self) -> None:
-        coordinator = self._get_companion_runtime_tick_coordinator()
-        coordinator.run_timer_tick(
+        facade = self._get_companion_facade()
+        facade.run_timer_tick(
             session=getattr(self._session, "live_sync_session", None),
             execute_command=self._execute_live_command,
             build_failed_result=self._build_live_command_poll_failure_result,
             request_refresh=lambda: self.request_refresh(),
         )
-        self._live_sync_processed_count = coordinator.processed_count
+        self._live_sync_processed_count = facade.processed_count
 
     def _on_snapshot(self, event) -> None:
         try:
@@ -1273,7 +1267,7 @@ class WxLocalPreviewShell(wx.Frame):
             )
         focus_summary = self._build_focus_summary(getattr(self, "_cached_focus_state", None))
         recording_summary = self._build_recording_summary(status)
-        return build_local_shell_live_command_result(
+        return self._get_companion_facade().build_live_command_result(
             command_name=command_name,
             result=result,
             status_projection=self._build_status_projection_input(
@@ -1488,13 +1482,13 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_target_frame_rate_value = parsed_recording_fps
 
     def _poll_live_commands(self) -> None:
-        coordinator = self._get_companion_runtime_tick_coordinator()
-        coordinator.poll_commands(
+        facade = self._get_companion_facade()
+        facade.poll_commands(
             session=getattr(self._session, "live_sync_session", None),
             execute_command=self._execute_live_command,
             build_failed_result=self._build_live_command_poll_failure_result,
         )
-        self._live_sync_processed_count = coordinator.processed_count
+        self._live_sync_processed_count = facade.processed_count
 
     def _build_live_command_poll_failure_result(
         self,
@@ -1504,22 +1498,21 @@ class WxLocalPreviewShell(wx.Frame):
         self._cached_status = None
         self._last_status_refresh_time = 0.0
         self._set_transient_status_message(f"External command failed: {command.command_name}")
-        return build_failed_companion_command_result(
+        return self._get_companion_facade().build_failed_command_result(
             command_name=command.command_name,
             failure_reflection=self._build_failure_reflection(),
         )
 
     def _execute_live_command(self, command: LocalShellLiveCommand) -> dict:
-        try:
-            outcome = execute_local_shell_companion_command(
-                command,
-                context=self._build_live_command_execution_context(),
-            )
-        except LocalShellCompanionCommandExecutionError as exc:
-            self._apply_live_command_outcome(exc.outcome)
-            raise RuntimeError(str(exc)) from exc
-        self._apply_live_command_outcome(outcome)
-        return self._build_live_command_result(command_name=command.command_name, result=outcome.result)
+        return self._get_companion_facade().execute_command(
+            command=command,
+            build_execution_context=self._build_live_command_execution_context,
+            apply_outcome=self._apply_live_command_outcome,
+            build_result=lambda command_name, result: self._build_live_command_result(
+                command_name=command_name,
+                result=result,
+            ),
+        )
 
     def _build_live_command_execution_context(self) -> LocalShellCompanionCommandExecutionContext:
         recording_file_stem = getattr(self, "_recording_file_stem", "wx_recording")
@@ -1624,8 +1617,7 @@ class WxLocalPreviewShell(wx.Frame):
             self._set_transient_status_message(outcome.transient_status_message)
 
     def _publish_live_status_snapshot(self, status, *, focus_summary: str | None, recording_summary: str | None) -> None:
-        coordinator = self._get_companion_runtime_tick_coordinator()
-        coordinator.publish_status(
+        self._get_companion_facade().publish_status(
             session=getattr(self._session, "live_sync_session", None),
             projection=self._build_status_projection_input(
                 status,
