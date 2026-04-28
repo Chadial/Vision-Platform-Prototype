@@ -475,15 +475,15 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 102 | Companion Status Projection Service Extraction | move published companion-status derivation out of the wx shell into one reusable projection seam | landed | landed follow-up after `WP101`; current status content stayed stable while app-local reflection and status-snapshot projection moved into one service seam | `docs/archive/session_workpackages/wp102_companion_status_projection_service_extraction.md` |
 | 103 | wx Camera Settings Live Path Revalidation | rerun one narrow live `Camera Settings...` / menu-path check on the current `Mono10` hardware shell when the tested camera is physically attached | conditional | keep as the smallest remaining hardware evidence slice only when the documented camera is available locally | `docs/session_workpackages/wp103_wx_camera_settings_live_path_revalidation.md` |
 | 104 | Companion Command Polling Service Extraction | move the bounded file-backed pending-command polling and result-write loop out of the wx shell into one service seam | landed | landed direct non-hardware follow-up after `WP102`; keeps command execution semantics stable while removing app-local polling-loop ownership | `docs/archive/session_workpackages/wp104_companion_command_polling_service_extraction.md` |
-| 105 | Companion Status Publication Service Extraction | move the bounded file-backed live-status publication write path out of the wx shell into one service seam | current next | follow-up after landed `WP104`; keeps landed status projection semantics stable while removing app-local publication ownership | `docs/session_workpackages/wp105_companion_status_publication_service_extraction.md` |
-| 106 | Companion Runtime Tick Coordinator Baseline | introduce one minimal coordinator seam that composes extracted command polling and status publication for the open shell tick | queued | follow-up after landed `WP104` and `WP105`; narrows runtime orchestration ownership without opening a daemon or transport lane | `docs/session_workpackages/wp106_companion_runtime_tick_coordinator_baseline.md` |
+| 105 | Companion Status Publication Service Extraction | move the bounded file-backed live-status publication write path out of the wx shell into one service seam | landed | landed follow-up after `WP104`; keeps landed status projection semantics stable while removing app-local publication ownership | `docs/archive/session_workpackages/wp105_companion_status_publication_service_extraction.md` |
+| 106 | Companion Runtime Tick Coordinator Baseline | introduce one minimal coordinator seam that composes extracted command polling and status publication for the open shell tick | current next | follow-up after landed `WP104` and `WP105`; narrows runtime orchestration ownership without opening a daemon or transport lane | `docs/session_workpackages/wp106_companion_runtime_tick_coordinator_baseline.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. execute `WP105 Companion Status Publication Service Extraction` as the default non-hardware next slice
-2. keep `WP106` as the prepared follow-up sequence behind that publication-path extraction
+1. execute `WP106 Companion Runtime Tick Coordinator Baseline` as the default non-hardware next slice
+2. keep `WP103` conditional and separate from that structural lane
 3. activate `WP103` only when the tested hardware is physically available and one narrow live `Camera Settings...` / menu-path rerun is actually possible
 4. keep the bounded local-shell session bridge explicitly transitional: `WP99` through `WP106` should continue narrowing ownership without widening runtime or transport scope
 5. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the newer slices reveals a concrete seam that actually needs them
@@ -778,7 +778,7 @@ The current coarse PM order should be:
 
 ## Recommended Next Detailed Work Package
 
-`WP105 Companion Status Publication Service Extraction` is now the unconditional `current next` detailed package after landed `WP104`.
+`WP106 Companion Runtime Tick Coordinator Baseline` is now the unconditional `current next` detailed package after landed `WP105`.
 
 Reason:
 
@@ -796,14 +796,14 @@ Reason:
 - `WP101` is now landed and closes the app-local command-execution ownership gap without widening the bounded command set
 - `WP102` is now landed and closes the app-local status-projection ownership gap without changing the published companion payload semantics
 - `WP104` is now landed and closes the file-backed pending-command polling/result-write ownership gap without introducing retries, queue policy, or runtime widening
-- `WP105` is now the next smallest non-hardware residual because the wx shell still owns the file-backed live-status publication write path above the landed status-projection seam
-- `WP106` remains the narrow queued continuation after that publication extraction, keeping runtime-tick orchestration bounded and transitional
+- `WP105` is now landed and closes the file-backed live-status publication write-path ownership gap without introducing status-field, eventing, or timing changes
+- `WP106` is now the next smallest non-hardware residual because the wx shell still composes the bounded command-polling and status-publication steps directly in its tick path
 - `WP103` stays conditional because it depends on physical hardware presence rather than on the structural non-hardware lane
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
 Detailed file:
 
-- `docs/session_workpackages/wp105_companion_status_publication_service_extraction.md`
+- `docs/session_workpackages/wp106_companion_runtime_tick_coordinator_baseline.md`
 
 ## Fresh Agent Decision Rule
 
@@ -924,8 +924,8 @@ Current explicit activation:
 - `WP102 Companion Status Projection Service Extraction` is now completed at `docs/archive/session_workpackages/wp102_companion_status_projection_service_extraction.md`; companion setup, snapshot, recording, and failure reflection projection now execute through one service seam while the wx shell passes explicit projection inputs and keeps the published payload semantics unchanged
 - `WP103 wx Camera Settings Live Path Revalidation` is now the smallest remaining conditional hardware evidence slice when the tested device is attached again
 - `WP104 Companion Command Polling Service Extraction` is now completed at `docs/archive/session_workpackages/wp104_companion_command_polling_service_extraction.md`; the bounded file-backed pending-command polling/result-write loop now executes through one service seam while the wx shell supplies the executor and failure-result shaping
-- `WP105 Companion Status Publication Service Extraction` is now prepared as the default next non-hardware execution-ready package
-- `WP106 Companion Runtime Tick Coordinator Baseline` is now prepared as the next queued follow-up after landed `WP105`
+- `WP105 Companion Status Publication Service Extraction` is now completed at `docs/archive/session_workpackages/wp105_companion_status_publication_service_extraction.md`; the bounded file-backed live-status publication write path now executes through one service seam while the wx shell supplies only the explicit projection input
+- `WP106 Companion Runtime Tick Coordinator Baseline` is now prepared as the default next non-hardware execution-ready package
 
 - `Host Control Closure` now has its first landed slice at `docs/archive/session_workpackages/wp12_host_control_closure.md`
 - `Experiment Reliability Closure` now has its first landed slice at `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`

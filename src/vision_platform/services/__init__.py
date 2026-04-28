@@ -37,6 +37,7 @@ from vision_platform.services.local_shell_command_execution_service import (
     execute_local_shell_companion_command,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_status_publication_service import publish_local_shell_status_snapshot
 from vision_platform.services.local_shell_status_projection_service import (
     LocalShellRecordingProjectionInput,
     LocalShellSetupProjectionInput,
@@ -114,6 +115,7 @@ __all__ = [
     "get_local_shell_recording_stop_category",
     "get_local_shell_snapshot_phase",
     "poll_local_shell_live_commands",
+    "publish_local_shell_status_snapshot",
     "read_live_status_snapshot",
     "read_pending_live_commands",
     "resolve_active_live_sync_session",

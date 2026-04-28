@@ -20,6 +20,7 @@ from vision_platform.services.local_shell_command_execution_service import (
     execute_local_shell_companion_command,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_status_publication_service import publish_local_shell_status_snapshot
 from vision_platform.services.local_shell_status_projection_service import (
     LocalShellRecordingProjectionInput,
     LocalShellSetupProjectionInput,
@@ -29,7 +30,6 @@ from vision_platform.services.local_shell_status_projection_service import (
     build_local_shell_recording_reflection,
     build_local_shell_setup_reflection,
     build_local_shell_snapshot_reflection,
-    build_local_shell_status_snapshot,
     categorize_local_shell_recording_stop_reason,
     get_local_shell_recording_stop_category,
     get_local_shell_snapshot_phase,
@@ -40,7 +40,6 @@ from vision_platform.apps.local_shell.control_cli import main as run_local_shell
 from vision_platform.services.local_shell_session_service import (
     LocalShellLiveCommand,
     close_live_sync_session,
-    write_live_status_snapshot,
 )
 from vision_platform.apps.local_shell.output_format_policy import choose_snapshot_file_extension
 from vision_platform.apps.local_shell.preview_shell_state import PreviewShellPresenter, PreviewShellViewModel
@@ -1590,14 +1589,12 @@ class WxLocalPreviewShell(wx.Frame):
         live_sync_session = self._session.live_sync_session
         if live_sync_session is None:
             return
-        write_live_status_snapshot(
-            live_sync_session,
-            build_local_shell_status_snapshot(
-                self._build_status_projection_input(
-                    status,
-                    focus_summary=focus_summary,
-                    recording_summary=recording_summary,
-                )
+        publish_local_shell_status_snapshot(
+            session=live_sync_session,
+            projection=self._build_status_projection_input(
+                status,
+                focus_summary=focus_summary,
+                recording_summary=recording_summary,
             ),
         )
 

@@ -23,6 +23,13 @@ from vision_platform.services.local_shell_session_protocol import (
     LocalShellSessionMetadata,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_status_publication_service import publish_local_shell_status_snapshot
+from vision_platform.services.local_shell_status_projection_service import (
+    LocalShellRecordingProjectionInput,
+    LocalShellSetupProjectionInput,
+    LocalShellSnapshotProjectionInput,
+    LocalShellStatusProjectionInput,
+)
 from vision_platform.services.local_shell_session_service import (
     create_live_sync_session as create_live_sync_session_service,
     read_json,
@@ -197,6 +204,57 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             self.assertEqual(result["error"], "camera rejected roi")
             self.assertEqual(result["result"]["command"], "apply_configuration")
             self.assertEqual(result["result"]["failure_reflection"]["source"], "setup")
+
+    def test_status_publication_service_writes_projected_snapshot_without_semantic_changes(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id="DEV_123",
+                configuration_profile_id="default",
+            )
+
+            publish_local_shell_status_snapshot(
+                session=session,
+                projection=LocalShellStatusProjectionInput(
+                    session_id=session.session_id,
+                    source="simulated",
+                    camera_id="DEV_123",
+                    configuration_profile_id="default",
+                    focus_summary="hidden",
+                    setup=LocalShellSetupProjectionInput(
+                        focus_visibility="visible",
+                        focus_summary="hidden",
+                        active_roi=SimpleNamespace(shape="rectangle", points=((10, 20), (110, 70))),
+                        configuration_summary=None,
+                    ),
+                    failure_reflection=None,
+                    snapshot=LocalShellSnapshotProjectionInput(
+                        last_saved_path=Path("captures/geometry/geometry_000001.bmp"),
+                        last_error=None,
+                    ),
+                    recording=LocalShellRecordingProjectionInput(
+                        is_recording=False,
+                        frames_written=3,
+                        active_file_stem=None,
+                        active_save_directory=None,
+                        last_file_stem="delam_run",
+                        last_save_directory=Path("captures/delam"),
+                        last_stop_reason="external_cli",
+                        last_error=None,
+                        recording_summary="3/n",
+                    ),
+                    status_lines=["source=simulated | preview=running", "FPS 25.0"],
+                    status=SimpleNamespace(camera=SimpleNamespace(is_initialized=True)),
+                ),
+            )
+
+            snapshot = read_live_status_snapshot(session)
+            self.assertEqual(snapshot["focus_summary"], "hidden")
+            self.assertEqual(snapshot["setup_reflection"]["roi_bounds"], [10, 20, 110, 70])
+            self.assertEqual(snapshot["snapshot_reflection"]["file_name"], "geometry_000001.bmp")
+            self.assertEqual(snapshot["recording_reflection"]["file_stem"], "delam_run")
+            self.assertEqual(snapshot["recording_reflection"]["stop_category"], "host_stop")
 
     def test_execute_live_start_recording_updates_shell_tracking_state(self) -> None:
         controller = _StubController()
