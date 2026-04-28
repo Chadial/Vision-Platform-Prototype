@@ -23,6 +23,7 @@ from vision_platform.services.local_shell_session_protocol import (
     LocalShellSessionMetadata,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_runtime_tick_coordinator import LocalShellRuntimeTickCoordinator
 from vision_platform.services.local_shell_status_publication_service import publish_local_shell_status_snapshot
 from vision_platform.services.local_shell_status_projection_service import (
     LocalShellRecordingProjectionInput,
@@ -255,6 +256,55 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             self.assertEqual(snapshot["snapshot_reflection"]["file_name"], "geometry_000001.bmp")
             self.assertEqual(snapshot["recording_reflection"]["file_stem"], "delam_run")
             self.assertEqual(snapshot["recording_reflection"]["stop_category"], "host_stop")
+
+    def test_runtime_tick_coordinator_polls_commands_and_requests_refresh(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            command = append_live_command(session, command_name="save_snapshot", payload={"file_stem": "geometry_000001"})
+            coordinator = LocalShellRuntimeTickCoordinator()
+            refresh_calls: list[str] = []
+
+            coordinator.run_timer_tick(
+                session=session,
+                execute_command=lambda live_command: {"command": live_command.command_name, "ok": True},
+                build_failed_result=lambda _command, _exc: None,
+                request_refresh=lambda: refresh_calls.append("refresh"),
+            )
+
+            result = wait_for_live_command_result(session, command_id=command.command_id, timeout_seconds=0.2)
+            self.assertEqual(coordinator.processed_count, 1)
+            self.assertEqual(refresh_calls, ["refresh"])
+            self.assertTrue(result["success"])
+
+    def test_on_timer_uses_runtime_tick_coordinator_and_updates_processed_count(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            command = append_live_command(session, command_name="save_snapshot", payload={"file_stem": "geometry_000001"})
+            shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
+            shell._session = SimpleNamespace(live_sync_session=session)
+            shell._live_sync_processed_count = 0
+            shell._cached_status = None
+            shell._last_status_refresh_time = 0.0
+            shell._set_transient_status_message = lambda _message: None
+            shell._execute_live_command = lambda live_command: {"command": live_command.command_name, "ok": True}
+            shell.request_refresh = lambda: setattr(shell, "_refresh_requested", True)
+
+            shell._on_timer(None)
+
+            result = wait_for_live_command_result(session, command_id=command.command_id, timeout_seconds=0.2)
+            self.assertEqual(shell._live_sync_processed_count, 1)
+            self.assertTrue(shell._refresh_requested)
+            self.assertTrue(result["success"])
 
     def test_execute_live_start_recording_updates_shell_tracking_state(self) -> None:
         controller = _StubController()

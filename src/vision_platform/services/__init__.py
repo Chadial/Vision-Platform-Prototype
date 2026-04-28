@@ -37,6 +37,7 @@ from vision_platform.services.local_shell_command_execution_service import (
     execute_local_shell_companion_command,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_runtime_tick_coordinator import LocalShellRuntimeTickCoordinator
 from vision_platform.services.local_shell_status_publication_service import publish_local_shell_status_snapshot
 from vision_platform.services.local_shell_status_projection_service import (
     LocalShellRecordingProjectionInput,
@@ -85,6 +86,7 @@ __all__ = [
     "LocalShellLiveStatusSnapshot",
     "LocalShellRecordingDefaults",
     "LocalShellRecordingProjectionInput",
+    "LocalShellRuntimeTickCoordinator",
     "LocalShellSessionMetadata",
     "LocalShellSetupProjectionInput",
     "LocalShellSnapshotProjectionInput",

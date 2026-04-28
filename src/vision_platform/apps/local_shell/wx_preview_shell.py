@@ -19,8 +19,7 @@ from vision_platform.services.local_shell_command_execution_service import (
     LocalShellRecordingDefaults,
     execute_local_shell_companion_command,
 )
-from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
-from vision_platform.services.local_shell_status_publication_service import publish_local_shell_status_snapshot
+from vision_platform.services.local_shell_runtime_tick_coordinator import LocalShellRuntimeTickCoordinator
 from vision_platform.services.local_shell_status_projection_service import (
     LocalShellRecordingProjectionInput,
     LocalShellSetupProjectionInput,
@@ -278,6 +277,9 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_file_stem = "wx_recording"
         self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
+        self._companion_runtime_tick_coordinator = LocalShellRuntimeTickCoordinator(
+            processed_count=self._live_sync_processed_count,
+        )
         # Focus starts hidden to avoid heavy per-frame computation by default.
         self._presenter.state.interaction_state.focus_status_visible = False
 
@@ -369,8 +371,26 @@ class WxLocalPreviewShell(wx.Frame):
         self._publish_live_status_snapshot(status, focus_summary=focus_summary, recording_summary=recording_summary)
 
     def _on_timer(self, event) -> None:
-        self._poll_live_commands()
-        self.request_refresh()
+        self._run_companion_runtime_tick()
+
+    def _get_companion_runtime_tick_coordinator(self) -> LocalShellRuntimeTickCoordinator:
+        coordinator = getattr(self, "_companion_runtime_tick_coordinator", None)
+        if coordinator is None:
+            coordinator = LocalShellRuntimeTickCoordinator(
+                processed_count=getattr(self, "_live_sync_processed_count", 0),
+            )
+            self._companion_runtime_tick_coordinator = coordinator
+        return coordinator
+
+    def _run_companion_runtime_tick(self) -> None:
+        coordinator = self._get_companion_runtime_tick_coordinator()
+        coordinator.run_timer_tick(
+            session=getattr(self._session, "live_sync_session", None),
+            execute_command=self._execute_live_command,
+            build_failed_result=self._build_live_command_poll_failure_result,
+            request_refresh=lambda: self.request_refresh(),
+        )
+        self._live_sync_processed_count = coordinator.processed_count
 
     def _on_snapshot(self, event) -> None:
         try:
@@ -1448,15 +1468,13 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_target_frame_rate_value = parsed_recording_fps
 
     def _poll_live_commands(self) -> None:
-        live_sync_session = self._session.live_sync_session
-        if live_sync_session is None:
-            return
-        self._live_sync_processed_count = poll_local_shell_live_commands(
-            session=live_sync_session,
-            processed_count=self._live_sync_processed_count,
+        coordinator = self._get_companion_runtime_tick_coordinator()
+        coordinator.poll_commands(
+            session=getattr(self._session, "live_sync_session", None),
             execute_command=self._execute_live_command,
             build_failed_result=self._build_live_command_poll_failure_result,
         )
+        self._live_sync_processed_count = coordinator.processed_count
 
     def _build_live_command_poll_failure_result(
         self,
@@ -1586,11 +1604,9 @@ class WxLocalPreviewShell(wx.Frame):
             self._set_transient_status_message(outcome.transient_status_message)
 
     def _publish_live_status_snapshot(self, status, *, focus_summary: str | None, recording_summary: str | None) -> None:
-        live_sync_session = self._session.live_sync_session
-        if live_sync_session is None:
-            return
-        publish_local_shell_status_snapshot(
-            session=live_sync_session,
+        coordinator = self._get_companion_runtime_tick_coordinator()
+        coordinator.publish_status(
+            session=getattr(self._session, "live_sync_session", None),
             projection=self._build_status_projection_input(
                 status,
                 focus_summary=focus_summary,
