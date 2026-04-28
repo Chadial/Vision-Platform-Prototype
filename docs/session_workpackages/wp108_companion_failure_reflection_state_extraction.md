@@ -30,9 +30,25 @@ Move the bounded latest-failure reflection state helper out of the wx shell into
 - do not widen failure fields or add severity/category policy
 - keep this package bounded to helper ownership only
 
+## Policy Preservation
+
+The current failure-reflection policy must remain exactly unchanged:
+
+- one latest failure only
+- overwrite-on-newer-failure behavior
+- clear-on-success only for the same relevant lane/source
+- copy behavior unchanged
+- no persistence beyond the current companion state
+- no incident / audit / history interpretation
+
+If any ambiguity appears around failure policy, do not decide it inside this package.
+Record it as a follow-up question instead.
+
 ## Out Of Scope
 
 - no incident history
+- no severity or category semantics
+- no audit interpretation
 - no retry/recovery policy
 - no new status fields
 - no host protocol changes
@@ -56,3 +72,6 @@ Move the bounded latest-failure reflection state helper out of the wx shell into
 ## Recommended Follow-Up
 
 - only after projection-input and failure-state ownership are both narrowed, reassess whether one bounded app-facing companion facade is justified
+- after `WP107` through `WP109`, do not derive further companion extraction work from cleanup momentum alone
+- any later headless, runtime, host-contract, or LabVIEW-facing slice must be justified by a concrete residual, integration need, test failure, or user-observed workflow friction
+- read `WP107` through `WP109` as the final bounded cleanup of the current companion-service extraction lane, not as the start of a broader facade/runtime architecture push

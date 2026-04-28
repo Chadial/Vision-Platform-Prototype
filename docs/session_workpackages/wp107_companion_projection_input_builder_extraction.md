@@ -23,6 +23,22 @@ Move explicit companion status-projection input assembly out of the wx shell int
 - keep the current projection payload semantics unchanged
 - keep shell-owned live timing, rendering, and UI-local text formatting unchanged
 
+## Ownership Boundary
+
+The new builder owns only construction of `LocalShellStatusProjectionInput`.
+
+It must not own:
+
+- shell-local runtime state
+- UI text formatting
+- timer / tick cadence
+- status publication timing
+- reflection semantics
+- failure policy
+
+The wx shell remains the source of current app-local state.
+The builder only converts explicitly supplied state into the existing projection-input structure.
+
 ## Guardrails
 
 - treat this package as ownership extraction only
@@ -56,3 +72,6 @@ Move explicit companion status-projection input assembly out of the wx shell int
 ## Recommended Follow-Up
 
 - extract the bounded failure-reflection state helper next only if that state still blocks further headless narrowing
+- after `WP107` through `WP109`, do not derive further companion extraction work from cleanup momentum alone
+- any later headless, runtime, host-contract, or LabVIEW-facing slice must be justified by a concrete residual, integration need, test failure, or user-observed workflow friction
+- read `WP107` through `WP109` as the final bounded cleanup of the current companion-service extraction lane, not as the start of a broader facade/runtime architecture push
