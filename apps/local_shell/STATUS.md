@@ -70,5 +70,5 @@
 - working now: startup configuration for `source`, camera alias/id resolution, configuration profiles, and direct configuration overrides reuses the same headless bootstrap/controller semantics as the current CLI path
 - working now: the shell now has bounded hardware-backed startup and host-plus-UI smoke evidence in the permanent test suite
 - partial: menu-driven settings entry and broader operator controls are intentionally not part of this slice
-- technical debt: the current shell keeps its viewport rendering in app-local helper code because no shared non-OpenCV image-presenter abstraction exists yet
-- risk: future non-OpenCV frontend growth may justify a shared renderer-facing display adapter above the current app-local bitmap conversion path
+- technical debt: the current shell still owns wx.Bitmap painting and canvas repainting, but the viewport-image rendering helper now lives in `vision_platform.services.display_service.viewport_rendering_service`; a broader non-OpenCV image-presenter abstraction is still deferred
+- risk: future non-OpenCV frontend growth may still justify a shared renderer-facing display adapter above the current wx bitmap lifecycle, but the image-conversion path is now centralized

@@ -480,17 +480,18 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 107 | Companion Projection Input Builder Extraction | move explicit companion status-projection input assembly out of the wx shell into one bounded service seam | landed | landed direct non-hardware follow-up after `WP106`; keeps projection payload semantics stable while removing app-local input-builder ownership | `docs/archive/session_workpackages/wp107_companion_projection_input_builder_extraction.md` |
 | 108 | Companion Failure Reflection State Extraction | move the bounded latest-failure reflection helper state out of the wx shell into one explicit service seam | landed | landed follow-up after `WP107`; keeps current single-latest-failure behavior stable while removing app-local helper ownership | `docs/archive/session_workpackages/wp108_companion_failure_reflection_state_extraction.md` |
 | 109 | Companion App-Facing Facade Baseline | introduce one bounded app-facing facade that composes the already extracted companion services for the wx shell | landed | landed follow-up after `WP107` and `WP108`; narrows app/service composition without opening a transport or daemon lane | `docs/archive/session_workpackages/wp109_companion_app_facing_facade_baseline.md` |
+| 110 | Local Shell Viewport Rendering Adapter Baseline | move the wx viewport-image rendering helper out of the shell module into one bounded display-service seam while keeping the bitmap painting path local | landed | landed non-hardware follow-up after `WP109`; narrows the viewport-image rendering boundary without introducing a generic renderer framework | `docs/archive/session_workpackages/wp110_local_shell_viewport_rendering_adapter_baseline.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. there is now no unconditional non-hardware `current next` after landed `WP109`
+1. there is now no unconditional non-hardware `current next` after landed `WP110`
 2. derive any further headless, runtime, host-contract, or LabVIEW-facing slice only from a concrete residual, integration need, test failure, or user-observed workflow friction
 3. activate `WP103` only when the tested hardware is physically available and one narrow live `Camera Settings...` / menu-path rerun is actually possible
 4. keep the bounded local-shell session bridge explicitly transitional: `WP99` through `WP109` should continue narrowing ownership without widening runtime or transport scope
 5. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the newer slices reveals a concrete seam that actually needs them
-6. treat landed `WP100` as typed protocol baseline only, landed `WP101` as existing-command extraction only, landed `WP102` as ownership extraction only, landed `WP104` through `WP106` as bounded orchestration extraction only, and derived `WP107` through `WP109` as bounded residual cleanup only
+6. treat landed `WP100` as typed protocol baseline only, landed `WP101` as existing-command extraction only, landed `WP102` as ownership extraction only, landed `WP104` through `WP106` as bounded orchestration extraction only, derived `WP107` through `WP109` as bounded residual cleanup only, and `WP110` as bounded display-boundary cleanup only
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
 
@@ -781,7 +782,7 @@ The current coarse PM order should be:
 
 ## Recommended Next Detailed Work Package
 
-There is now no unconditional `current next` detailed package after landed `WP109`.
+There is now no unconditional `current next` detailed package after landed `WP110`.
 
 Reason:
 
@@ -804,12 +805,14 @@ Reason:
 - `WP107` is now landed and closes the remaining app-local `LocalShellStatusProjectionInput` assembly gap by moving that builder ownership into one bounded service seam without changing projection semantics
 - `WP108` is now landed and closes the bounded latest-failure helper-state ownership gap without changing the single-latest-failure, overwrite, same-source clear, or copy behavior
 - `WP109` is now landed and closes the final prepared cleanup of this companion extraction lane by moving app-facing companion composition into one bounded facade without changing payload or runtime semantics
+- `WP110` is now landed and closes the remaining viewport-image rendering helper gap by moving that helper into one shared display-service seam without changing bitmap painting or overlay semantics
+- `WP110` is now landed and closes the last simulator-only viewport-rendering helper gap by moving the viewport-image rendering helper into one shared display-service seam without changing bitmap painting or overlay semantics
 - `WP103` stays conditional because it depends on physical hardware presence rather than on the structural non-hardware lane
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
 Detailed file:
 
-- `docs/session_workpackages/wp107_companion_projection_input_builder_extraction.md`
+- `docs/archive/session_workpackages/wp110_local_shell_viewport_rendering_adapter_baseline.md`
 
 ## Fresh Agent Decision Rule
 
