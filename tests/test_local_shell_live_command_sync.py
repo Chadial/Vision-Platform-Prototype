@@ -23,6 +23,9 @@ from vision_platform.services.local_shell_session_protocol import (
     LocalShellSessionMetadata,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_projection_input_builder_service import (
+    build_local_shell_status_projection_input,
+)
 from vision_platform.services.local_shell_runtime_tick_coordinator import LocalShellRuntimeTickCoordinator
 from vision_platform.services.local_shell_status_publication_service import publish_local_shell_status_snapshot
 from vision_platform.services.local_shell_status_projection_service import (
@@ -39,6 +42,43 @@ from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShel
 
 
 class LocalShellLiveCommandSyncTests(unittest.TestCase):
+    def test_status_projection_input_builder_preserves_existing_projection_shape(self) -> None:
+        status = SimpleNamespace(recording=SimpleNamespace(is_recording=True, frames_written=4))
+
+        projection = build_local_shell_status_projection_input(
+            session_id="session-123",
+            source="simulated",
+            camera_id="DEV_123",
+            configuration_profile_id="default",
+            focus_summary="1.234e-02",
+            setup_focus_visibility="visible",
+            active_roi=SimpleNamespace(shape="rectangle"),
+            configuration_summary="exp=1500us gain=3.0",
+            failure_reflection={"phase": "failed", "source": "setup"},
+            snapshot_last_saved_path=Path("captures/geometry/geometry_000001.bmp"),
+            snapshot_last_error=None,
+            is_recording=True,
+            frames_written=4,
+            active_file_stem="delam_run",
+            active_save_directory=Path("captures/delam"),
+            last_file_stem="delam_prev",
+            last_save_directory=Path("captures/prev"),
+            last_stop_reason="host_shutdown",
+            last_error=None,
+            recording_summary="4/n",
+            status_lines=["preview=running"],
+            status=status,
+        )
+
+        self.assertEqual(projection.session_id, "session-123")
+        self.assertEqual(projection.setup.focus_visibility, "visible")
+        self.assertEqual(projection.setup.focus_summary, "1.234e-02")
+        self.assertEqual(projection.snapshot.last_saved_path, Path("captures/geometry/geometry_000001.bmp"))
+        self.assertTrue(projection.recording.is_recording)
+        self.assertEqual(projection.recording.active_file_stem, "delam_run")
+        self.assertEqual(projection.status_lines, ["preview=running"])
+        self.assertIs(projection.status, status)
+
     def test_compatibility_module_reexports_service_entrypoints(self) -> None:
         self.assertIs(compatibility_live_command_sync.create_live_sync_session, create_live_sync_session_service)
 

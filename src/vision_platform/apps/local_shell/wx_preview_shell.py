@@ -19,12 +19,14 @@ from vision_platform.services.local_shell_command_execution_service import (
     LocalShellRecordingDefaults,
     execute_local_shell_companion_command,
 )
+from vision_platform.services.local_shell_projection_input_builder_service import (
+    build_local_shell_recording_projection_input,
+    build_local_shell_setup_projection_input,
+    build_local_shell_snapshot_projection_input,
+    build_local_shell_status_projection_input,
+)
 from vision_platform.services.local_shell_runtime_tick_coordinator import LocalShellRuntimeTickCoordinator
 from vision_platform.services.local_shell_status_projection_service import (
-    LocalShellRecordingProjectionInput,
-    LocalShellSetupProjectionInput,
-    LocalShellSnapshotProjectionInput,
-    LocalShellStatusProjectionInput,
     build_local_shell_live_command_result,
     build_local_shell_recording_reflection,
     build_local_shell_setup_reflection,
@@ -1007,8 +1009,8 @@ class WxLocalPreviewShell(wx.Frame):
             return None
         return dict(failure_reflection)
 
-    def _build_setup_projection_input(self, status, *, focus_summary: str | None) -> LocalShellSetupProjectionInput:
-        return LocalShellSetupProjectionInput(
+    def _build_setup_projection_input(self, status, *, focus_summary: str | None):
+        return build_local_shell_setup_projection_input(
             focus_visibility=self._get_setup_focus_visibility(),
             focus_summary=focus_summary,
             active_roi=self._get_active_setup_roi(),
@@ -1179,8 +1181,8 @@ class WxLocalPreviewShell(wx.Frame):
             "selected_directory": None if selected_directory is None else str(selected_directory),
         }
 
-    def _build_snapshot_projection_input(self) -> LocalShellSnapshotProjectionInput:
-        return LocalShellSnapshotProjectionInput(
+    def _build_snapshot_projection_input(self):
+        return build_local_shell_snapshot_projection_input(
             last_saved_path=getattr(self, "_snapshot_last_saved_path", None),
             last_error=getattr(self, "_snapshot_last_error", None),
         )
@@ -1190,9 +1192,9 @@ class WxLocalPreviewShell(wx.Frame):
         status,
         *,
         recording_summary: str | None,
-    ) -> LocalShellRecordingProjectionInput:
+    ):
         recording_status = getattr(status, "recording", None)
-        return LocalShellRecordingProjectionInput(
+        return build_local_shell_recording_projection_input(
             is_recording=bool(getattr(recording_status, "is_recording", False)),
             frames_written=getattr(recording_status, "frames_written", 0),
             active_file_stem=getattr(recording_status, "active_file_stem", None),
@@ -1210,19 +1212,31 @@ class WxLocalPreviewShell(wx.Frame):
         *,
         focus_summary: str | None,
         recording_summary: str | None,
-    ) -> LocalShellStatusProjectionInput:
+    ):
         session = getattr(self, "_session", None)
         live_sync_session = getattr(session, "live_sync_session", None)
-        return LocalShellStatusProjectionInput(
+        recording_status = getattr(status, "recording", None)
+        return build_local_shell_status_projection_input(
             session_id="" if live_sync_session is None else live_sync_session.session_id,
             source=getattr(session, "source", "unknown"),
             camera_id=getattr(session, "resolved_camera_id", None),
             configuration_profile_id=getattr(session, "configuration_profile_id", None),
             focus_summary=focus_summary,
-            setup=self._build_setup_projection_input(status, focus_summary=focus_summary),
+            setup_focus_visibility=self._get_setup_focus_visibility(),
+            active_roi=self._get_active_setup_roi(),
+            configuration_summary=self._format_camera_configuration_summary(getattr(status, "configuration", None)),
             failure_reflection=self._build_failure_reflection(),
-            snapshot=self._build_snapshot_projection_input(),
-            recording=self._build_recording_projection_input(status, recording_summary=recording_summary),
+            snapshot_last_saved_path=getattr(self, "_snapshot_last_saved_path", None),
+            snapshot_last_error=getattr(self, "_snapshot_last_error", None),
+            is_recording=bool(getattr(recording_status, "is_recording", False)),
+            frames_written=getattr(recording_status, "frames_written", 0),
+            active_file_stem=getattr(recording_status, "active_file_stem", None),
+            active_save_directory=getattr(recording_status, "save_directory", None),
+            last_file_stem=getattr(self, "_recording_last_file_stem", None),
+            last_save_directory=getattr(self, "_recording_last_save_directory", None),
+            last_stop_reason=getattr(self, "_recording_last_stop_reason", None),
+            last_error=self._get_recording_last_error(status),
+            recording_summary=recording_summary,
             status_lines=list(getattr(self, "_status_lines", [])),
             status=status,
         )

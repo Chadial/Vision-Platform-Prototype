@@ -477,16 +477,16 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 104 | Companion Command Polling Service Extraction | move the bounded file-backed pending-command polling and result-write loop out of the wx shell into one service seam | landed | landed direct non-hardware follow-up after `WP102`; keeps command execution semantics stable while removing app-local polling-loop ownership | `docs/archive/session_workpackages/wp104_companion_command_polling_service_extraction.md` |
 | 105 | Companion Status Publication Service Extraction | move the bounded file-backed live-status publication write path out of the wx shell into one service seam | landed | landed follow-up after `WP104`; keeps landed status projection semantics stable while removing app-local publication ownership | `docs/archive/session_workpackages/wp105_companion_status_publication_service_extraction.md` |
 | 106 | Companion Runtime Tick Coordinator Baseline | introduce one minimal coordinator seam that composes extracted command polling and status publication for the open shell tick | landed | landed follow-up after `WP104` and `WP105`; narrows runtime orchestration ownership without opening a daemon or transport lane | `docs/archive/session_workpackages/wp106_companion_runtime_tick_coordinator_baseline.md` |
-| 107 | Companion Projection Input Builder Extraction | move explicit companion status-projection input assembly out of the wx shell into one bounded service seam | current next | direct non-hardware follow-up after landed `WP106`; keeps projection payload semantics stable while removing app-local input-builder ownership | `docs/session_workpackages/wp107_companion_projection_input_builder_extraction.md` |
-| 108 | Companion Failure Reflection State Extraction | move the bounded latest-failure reflection helper state out of the wx shell into one explicit service seam | queued | follow-up after `WP107`; keeps current single-latest-failure behavior stable while removing app-local helper ownership | `docs/session_workpackages/wp108_companion_failure_reflection_state_extraction.md` |
+| 107 | Companion Projection Input Builder Extraction | move explicit companion status-projection input assembly out of the wx shell into one bounded service seam | landed | landed direct non-hardware follow-up after `WP106`; keeps projection payload semantics stable while removing app-local input-builder ownership | `docs/archive/session_workpackages/wp107_companion_projection_input_builder_extraction.md` |
+| 108 | Companion Failure Reflection State Extraction | move the bounded latest-failure reflection helper state out of the wx shell into one explicit service seam | current next | follow-up after landed `WP107`; keeps current single-latest-failure behavior stable while removing app-local helper ownership | `docs/session_workpackages/wp108_companion_failure_reflection_state_extraction.md` |
 | 109 | Companion App-Facing Facade Baseline | introduce one bounded app-facing facade that composes the already extracted companion services for the wx shell | queued | follow-up after landed `WP107` and `WP108`; narrows app/service composition without opening a transport or daemon lane | `docs/session_workpackages/wp109_companion_app_facing_facade_baseline.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. execute `WP107 Companion Projection Input Builder Extraction` as the default non-hardware next slice
-2. keep `WP108` and `WP109` as the prepared follow-up sequence behind that projection-input ownership extraction
+1. execute `WP108 Companion Failure Reflection State Extraction` as the default non-hardware next slice
+2. keep `WP109` as the prepared follow-up after the landed projection-input extraction and the current failure-state slice
 3. activate `WP103` only when the tested hardware is physically available and one narrow live `Camera Settings...` / menu-path rerun is actually possible
 4. keep the bounded local-shell session bridge explicitly transitional: `WP99` through `WP109` should continue narrowing ownership without widening runtime or transport scope
 5. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the newer slices reveals a concrete seam that actually needs them
@@ -781,7 +781,7 @@ The current coarse PM order should be:
 
 ## Recommended Next Detailed Work Package
 
-`WP107 Companion Projection Input Builder Extraction` is now the unconditional `current next` detailed package after landed `WP106`.
+`WP108 Companion Failure Reflection State Extraction` is now the unconditional `current next` detailed package after landed `WP107`.
 
 Reason:
 
@@ -801,8 +801,9 @@ Reason:
 - `WP104` is now landed and closes the file-backed pending-command polling/result-write ownership gap without introducing retries, queue policy, or runtime widening
 - `WP105` is now landed and closes the file-backed live-status publication write-path ownership gap without introducing status-field, eventing, or timing changes
 - `WP106` is now landed and closes the bounded open-shell tick orchestration ownership gap without introducing daemon, lifecycle, or transport semantics
-- `WP107` is now the next smallest non-hardware residual because the wx shell still assembles `LocalShellStatusProjectionInput` and its sub-inputs directly even though projection, publication, and tick orchestration were already extracted
-- `WP108` and `WP109` now form the narrow queued continuation after that input-builder extraction, keeping failure-state and app-facing composition cleanup bounded and non-architectural
+- `WP107` is now landed and closes the remaining app-local `LocalShellStatusProjectionInput` assembly gap by moving that builder ownership into one bounded service seam without changing projection semantics
+- `WP108` is now the next smallest non-hardware residual because the wx shell still owns the bounded latest-failure helper state even after the projection-input builder extraction
+- `WP109` remains the narrow queued continuation after that failure-state extraction, keeping app-facing composition cleanup bounded and non-architectural
 - `WP103` stays conditional because it depends on physical hardware presence rather than on the structural non-hardware lane
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
@@ -931,8 +932,8 @@ Current explicit activation:
 - `WP104 Companion Command Polling Service Extraction` is now completed at `docs/archive/session_workpackages/wp104_companion_command_polling_service_extraction.md`; the bounded file-backed pending-command polling/result-write loop now executes through one service seam while the wx shell supplies the executor and failure-result shaping
 - `WP105 Companion Status Publication Service Extraction` is now completed at `docs/archive/session_workpackages/wp105_companion_status_publication_service_extraction.md`; the bounded file-backed live-status publication write path now executes through one service seam while the wx shell supplies only the explicit projection input
 - `WP106 Companion Runtime Tick Coordinator Baseline` is now completed at `docs/archive/session_workpackages/wp106_companion_runtime_tick_coordinator_baseline.md`; the bounded open-shell tick now composes the extracted polling and publication seams through one minimal coordinator without widening runtime semantics
-- `WP107 Companion Projection Input Builder Extraction` is now prepared as the default next non-hardware execution-ready package
-- `WP108 Companion Failure Reflection State Extraction` is now prepared as the next queued follow-up after `WP107`
+- `WP107 Companion Projection Input Builder Extraction` is now completed at `docs/archive/session_workpackages/wp107_companion_projection_input_builder_extraction.md`; explicit `LocalShellStatusProjectionInput` and subset assembly now live in one bounded builder seam while the wx shell remains the source of current app-local state
+- `WP108 Companion Failure Reflection State Extraction` is now prepared as the default next non-hardware execution-ready package
 - `WP109 Companion App-Facing Facade Baseline` is now prepared as the next queued follow-up after landed `WP107` and `WP108`
 
 - `Host Control Closure` now has its first landed slice at `docs/archive/session_workpackages/wp12_host_control_closure.md`
