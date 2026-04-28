@@ -9,20 +9,29 @@ from time import monotonic
 from types import SimpleNamespace
 from typing import Sequence
 
-from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.models import ApplyConfigurationRequest, SaveSnapshotRequest, SetSaveDirectoryRequest
 from vision_platform.models import StartRecordingRequest, StopRecordingRequest
-from vision_platform.services.companion_contract_service import (
-    build_companion_command_result,
-    build_companion_status_snapshot,
-    build_failed_companion_command_result,
-)
+from vision_platform.services.companion_contract_service import build_failed_companion_command_result
 from vision_platform.services.local_shell_command_execution_service import (
     LocalShellCompanionCommandExecutionContext,
     LocalShellCompanionCommandExecutionError,
     LocalShellCompanionCommandExecutionOutcome,
     LocalShellRecordingDefaults,
     execute_local_shell_companion_command,
+)
+from vision_platform.services.local_shell_status_projection_service import (
+    LocalShellRecordingProjectionInput,
+    LocalShellSetupProjectionInput,
+    LocalShellSnapshotProjectionInput,
+    LocalShellStatusProjectionInput,
+    build_local_shell_live_command_result,
+    build_local_shell_recording_reflection,
+    build_local_shell_setup_reflection,
+    build_local_shell_snapshot_reflection,
+    build_local_shell_status_snapshot,
+    categorize_local_shell_recording_stop_reason,
+    get_local_shell_recording_stop_category,
+    get_local_shell_snapshot_phase,
 )
 from vision_platform.services.display_service import PreviewInteractionCommand, format_focus_score
 
@@ -31,7 +40,6 @@ from vision_platform.services.local_shell_session_service import (
     LocalShellLiveCommand,
     close_live_sync_session,
     read_pending_live_commands,
-    to_serializable,
     write_live_command_result,
     write_live_status_snapshot,
 )
@@ -959,18 +967,7 @@ class WxLocalPreviewShell(wx.Frame):
         return getattr(active_roi, "shape", None)
 
     def _build_setup_reflection(self, *, focus_summary: str | None, status) -> dict[str, object | None]:
-        active_roi = self._get_active_setup_roi()
-        active_roi_bounds = roi_bounds(active_roi) if active_roi is not None else None
-        configuration_summary = self._format_camera_configuration_summary(getattr(status, "configuration", None))
-        return {
-            "phase": "ready",
-            "focus_visibility": self._get_setup_focus_visibility(),
-            "focus_summary": focus_summary,
-            "roi_active": active_roi is not None,
-            "roi_shape": getattr(active_roi, "shape", None) if active_roi is not None else None,
-            "roi_bounds": None if active_roi_bounds is None else [int(round(value)) for value in active_roi_bounds],
-            "configuration_summary": configuration_summary,
-        }
+        return build_local_shell_setup_reflection(self._build_setup_projection_input(status, focus_summary=focus_summary))
 
     def _set_failure_reflection(self, *, source: str, action: str, message: str, external: bool) -> None:
         self._failure_reflection = {
@@ -991,6 +988,14 @@ class WxLocalPreviewShell(wx.Frame):
         if failure_reflection is None:
             return None
         return dict(failure_reflection)
+
+    def _build_setup_projection_input(self, status, *, focus_summary: str | None) -> LocalShellSetupProjectionInput:
+        return LocalShellSetupProjectionInput(
+            focus_visibility=self._get_setup_focus_visibility(),
+            focus_summary=focus_summary,
+            active_roi=self._get_active_setup_roi(),
+            configuration_summary=self._format_camera_configuration_summary(getattr(status, "configuration", None)),
+        )
 
     def _build_status_prefix(self, status) -> list[str]:
         prefix = [
@@ -1108,27 +1113,11 @@ class WxLocalPreviewShell(wx.Frame):
         return str(save_directory)
 
     def _get_recording_stop_category(self, status) -> str | None:
-        recording_status = getattr(status, "recording", None)
-        if bool(getattr(recording_status, "is_recording", False)):
-            return None
-        stop_reason = getattr(self, "_recording_last_stop_reason", None)
-        last_error = self._get_recording_last_error(status)
-        categorized = self._categorize_recording_stop_reason(stop_reason)
-        if categorized is None and last_error is not None:
-            return "failure_termination"
-        return categorized
+        return get_local_shell_recording_stop_category(self._build_recording_projection_input(status, recording_summary=None))
 
     @staticmethod
     def _categorize_recording_stop_reason(stop_reason: str | None) -> str | None:
-        if stop_reason is None:
-            return None
-        if stop_reason in {"bounded_completion", "max_frames_reached"}:
-            return "max_frames_reached"
-        if stop_reason in {"post_failure_cleanup", "duplicate_cleanup"}:
-            return "failure_termination"
-        if stop_reason in {"wx_shell_button", "external_cli", "external_request", "operator_cancelled", "host_shutdown"}:
-            return "host_stop"
-        return stop_reason
+        return categorize_local_shell_recording_stop_reason(stop_reason)
 
     def _get_recording_last_error(self, status) -> str | None:
         recording_status = getattr(status, "recording", None)
@@ -1160,20 +1149,10 @@ class WxLocalPreviewShell(wx.Frame):
         return str(saved_path.parent)
 
     def _get_snapshot_reflection_phase(self) -> str:
-        if getattr(self, "_snapshot_last_error", None) is not None:
-            return "failed"
-        if getattr(self, "_snapshot_last_saved_path", None) is not None:
-            return "saved"
-        return "idle"
+        return get_local_shell_snapshot_phase(self._build_snapshot_projection_input())
 
     def _build_snapshot_reflection(self) -> dict[str, object | None]:
-        return {
-            "phase": self._get_snapshot_reflection_phase(),
-            "file_name": self._get_snapshot_reflection_file_name(),
-            "file_stem": None if getattr(self, "_snapshot_last_saved_path", None) is None else self._snapshot_last_saved_path.stem,
-            "save_directory": self._get_snapshot_reflection_save_directory(),
-            "last_error": getattr(self, "_snapshot_last_error", None),
-        }
+        return build_local_shell_snapshot_reflection(self._build_snapshot_projection_input())
 
     @staticmethod
     def _build_save_directory_reflection(selected_directory: Path | None) -> dict[str, object | None]:
@@ -1182,24 +1161,53 @@ class WxLocalPreviewShell(wx.Frame):
             "selected_directory": None if selected_directory is None else str(selected_directory),
         }
 
-    def _build_live_command_reflection(
+    def _build_snapshot_projection_input(self) -> LocalShellSnapshotProjectionInput:
+        return LocalShellSnapshotProjectionInput(
+            last_saved_path=getattr(self, "_snapshot_last_saved_path", None),
+            last_error=getattr(self, "_snapshot_last_error", None),
+        )
+
+    def _build_recording_projection_input(
         self,
-        *,
-        command_name: str,
         status,
+        *,
+        recording_summary: str | None,
+    ) -> LocalShellRecordingProjectionInput:
+        recording_status = getattr(status, "recording", None)
+        return LocalShellRecordingProjectionInput(
+            is_recording=bool(getattr(recording_status, "is_recording", False)),
+            frames_written=getattr(recording_status, "frames_written", 0),
+            active_file_stem=getattr(recording_status, "active_file_stem", None),
+            active_save_directory=getattr(recording_status, "save_directory", None),
+            last_file_stem=getattr(self, "_recording_last_file_stem", None),
+            last_save_directory=getattr(self, "_recording_last_save_directory", None),
+            last_stop_reason=getattr(self, "_recording_last_stop_reason", None),
+            last_error=self._get_recording_last_error(status),
+            recording_summary=recording_summary,
+        )
+
+    def _build_status_projection_input(
+        self,
+        status,
+        *,
         focus_summary: str | None,
         recording_summary: str | None,
-    ) -> tuple[str | None, dict[str, object | None] | None]:
-        if command_name == "apply_configuration":
-            return "setup", self._build_setup_reflection(focus_summary=focus_summary, status=status)
-        if command_name == "set_save_directory":
-            selected_directory = getattr(self._session, "selected_save_directory", None)
-            return "save_directory", self._build_save_directory_reflection(selected_directory)
-        if command_name == "save_snapshot":
-            return "snapshot", self._build_snapshot_reflection()
-        if command_name in {"start_recording", "stop_recording"}:
-            return "recording", self._build_recording_reflection(status, recording_summary=recording_summary)
-        return None, None
+    ) -> LocalShellStatusProjectionInput:
+        session = getattr(self, "_session", None)
+        live_sync_session = getattr(session, "live_sync_session", None)
+        return LocalShellStatusProjectionInput(
+            session_id="" if live_sync_session is None else live_sync_session.session_id,
+            source=getattr(session, "source", "unknown"),
+            camera_id=getattr(session, "resolved_camera_id", None),
+            configuration_profile_id=getattr(session, "configuration_profile_id", None),
+            focus_summary=focus_summary,
+            setup=self._build_setup_projection_input(status, focus_summary=focus_summary),
+            failure_reflection=self._build_failure_reflection(),
+            snapshot=self._build_snapshot_projection_input(),
+            recording=self._build_recording_projection_input(status, recording_summary=recording_summary),
+            status_lines=list(getattr(self, "_status_lines", [])),
+            status=status,
+        )
 
     def _build_live_command_result(
         self,
@@ -1227,18 +1235,15 @@ class WxLocalPreviewShell(wx.Frame):
             )
         focus_summary = self._build_focus_summary(getattr(self, "_cached_focus_state", None))
         recording_summary = self._build_recording_summary(status)
-        reflection_kind, reflection = self._build_live_command_reflection(
+        return build_local_shell_live_command_result(
             command_name=command_name,
-            status=status,
-            focus_summary=focus_summary,
-            recording_summary=recording_summary,
-        )
-        return build_companion_command_result(
-            command_name=command_name,
-            reflection_kind=reflection_kind,
-            reflection=reflection,
-            failure_reflection=self._build_failure_reflection(),
-            result=to_serializable(result),
+            result=result,
+            status_projection=self._build_status_projection_input(
+                status,
+                focus_summary=focus_summary,
+                recording_summary=recording_summary,
+            ),
+            selected_save_directory=getattr(self._session, "selected_save_directory", None),
         )
 
     @staticmethod
@@ -1278,26 +1283,9 @@ class WxLocalPreviewShell(wx.Frame):
         return f"{prefix} {action} failed: {error}"
 
     def _build_recording_reflection(self, status, *, recording_summary: str | None) -> dict[str, object | None]:
-        recording_status = getattr(status, "recording", None)
-        save_directory = self._get_recording_reflection_save_directory(status)
-        stop_reason = getattr(self, "_recording_last_stop_reason", None)
-        is_recording = bool(getattr(recording_status, "is_recording", False))
-        last_error = self._get_recording_last_error(status)
-        if is_recording:
-            stop_reason = None
-        stop_category = self._categorize_recording_stop_reason(stop_reason)
-        if stop_category is None and last_error is not None:
-            stop_category = "failure_termination"
-        return {
-            "phase": "running" if is_recording else ("failed" if last_error is not None else "idle"),
-            "summary": recording_summary,
-            "file_stem": self._get_recording_reflection_file_stem(status),
-            "save_directory": save_directory,
-            "stop_reason": stop_reason,
-            "stop_category": stop_category,
-            "frames_written": getattr(recording_status, "frames_written", 0),
-            "last_error": last_error,
-        }
+        return build_local_shell_recording_reflection(
+            self._build_recording_projection_input(status, recording_summary=recording_summary)
+        )
 
     def _update_recording_controls(self, status) -> None:
         if hasattr(self, "_start_recording_button"):
@@ -1615,24 +1603,14 @@ class WxLocalPreviewShell(wx.Frame):
         live_sync_session = self._session.live_sync_session
         if live_sync_session is None:
             return
-        setup_reflection = self._build_setup_reflection(focus_summary=focus_summary, status=status)
-        recording_reflection = self._build_recording_reflection(status, recording_summary=recording_summary)
-        snapshot_reflection = self._build_snapshot_reflection()
         write_live_status_snapshot(
             live_sync_session,
-            build_companion_status_snapshot(
-                session_id=live_sync_session.session_id,
-                source=self._session.source,
-                camera_id=self._session.resolved_camera_id,
-                configuration_profile_id=self._session.configuration_profile_id,
-                focus_summary=focus_summary,
-                setup_reflection=setup_reflection,
-                failure_reflection=self._build_failure_reflection(),
-                snapshot_reflection=snapshot_reflection,
-                recording_summary=recording_summary,
-                recording_reflection=recording_reflection,
-                status_lines=self._status_lines,
-                status=to_serializable(status),
+            build_local_shell_status_snapshot(
+                self._build_status_projection_input(
+                    status,
+                    focus_summary=focus_summary,
+                    recording_summary=recording_summary,
+                )
             ),
         )
 
