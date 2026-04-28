@@ -22,6 +22,7 @@ from vision_platform.services.local_shell_session_protocol import (
     LocalShellLiveStatusSnapshot,
     LocalShellSessionMetadata,
 )
+from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
 from vision_platform.services.local_shell_session_service import (
     create_live_sync_session as create_live_sync_session_service,
     read_json,
@@ -143,6 +144,59 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
 
             self.assertEqual(snapshot_record.payload["session_id"], session.session_id)
             self.assertEqual(snapshot_record.payload["status_lines"], ["preview=running"])
+
+    def test_polling_service_executes_pending_commands_and_writes_success_results(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            command = append_live_command(session, command_name="save_snapshot", payload={"file_stem": "geometry_000001"})
+
+            next_processed_count = poll_local_shell_live_commands(
+                session=session,
+                processed_count=0,
+                execute_command=lambda live_command: {"command": live_command.command_name, "ok": True},
+                build_failed_result=lambda _command, _exc: None,
+            )
+
+            result = wait_for_live_command_result(session, command_id=command.command_id, timeout_seconds=0.2)
+            self.assertEqual(next_processed_count, 1)
+            self.assertTrue(result["success"])
+            self.assertEqual(result["command_name"], "save_snapshot")
+            self.assertEqual(result["result"], {"command": "save_snapshot", "ok": True})
+
+    def test_polling_service_uses_injected_failure_result_shape(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            session = create_live_sync_session(
+                root_directory=Path(temp_dir),
+                source="simulated",
+                camera_id=None,
+                configuration_profile_id=None,
+            )
+            command = append_live_command(session, command_name="apply_configuration", payload={"gain": 5.0})
+
+            next_processed_count = poll_local_shell_live_commands(
+                session=session,
+                processed_count=0,
+                execute_command=lambda _live_command: (_ for _ in ()).throw(RuntimeError("camera rejected roi")),
+                build_failed_result=lambda live_command, _exc: {
+                    "command": live_command.command_name,
+                    "reflection_kind": None,
+                    "reflection": None,
+                    "failure_reflection": {"source": "setup", "action": "apply_configuration", "external": True},
+                    "result": None,
+                },
+            )
+
+            result = wait_for_live_command_result(session, command_id=command.command_id, timeout_seconds=0.2)
+            self.assertEqual(next_processed_count, 1)
+            self.assertFalse(result["success"])
+            self.assertEqual(result["error"], "camera rejected roi")
+            self.assertEqual(result["result"]["command"], "apply_configuration")
+            self.assertEqual(result["result"]["failure_reflection"]["source"], "setup")
 
     def test_execute_live_start_recording_updates_shell_tracking_state(self) -> None:
         controller = _StubController()

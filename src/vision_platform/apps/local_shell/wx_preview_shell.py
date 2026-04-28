@@ -19,6 +19,7 @@ from vision_platform.services.local_shell_command_execution_service import (
     LocalShellRecordingDefaults,
     execute_local_shell_companion_command,
 )
+from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
 from vision_platform.services.local_shell_status_projection_service import (
     LocalShellRecordingProjectionInput,
     LocalShellSetupProjectionInput,
@@ -39,8 +40,6 @@ from vision_platform.apps.local_shell.control_cli import main as run_local_shell
 from vision_platform.services.local_shell_session_service import (
     LocalShellLiveCommand,
     close_live_sync_session,
-    read_pending_live_commands,
-    write_live_command_result,
     write_live_status_snapshot,
 )
 from vision_platform.apps.local_shell.output_format_policy import choose_snapshot_file_extension
@@ -1453,37 +1452,25 @@ class WxLocalPreviewShell(wx.Frame):
         live_sync_session = self._session.live_sync_session
         if live_sync_session is None:
             return
-        commands, processed_count = read_pending_live_commands(
-            live_sync_session,
+        self._live_sync_processed_count = poll_local_shell_live_commands(
+            session=live_sync_session,
             processed_count=self._live_sync_processed_count,
+            execute_command=self._execute_live_command,
+            build_failed_result=self._build_live_command_poll_failure_result,
         )
-        self._live_sync_processed_count = processed_count
-        for command in commands:
-            try:
-                result = self._execute_live_command(command)
-            except Exception as exc:
-                self._cached_status = None
-                self._last_status_refresh_time = 0.0
-                write_live_command_result(
-                    live_sync_session,
-                    command_id=command.command_id,
-                    success=False,
-                    command_name=command.command_name,
-                    result=build_failed_companion_command_result(
-                        command_name=command.command_name,
-                        failure_reflection=self._build_failure_reflection(),
-                    ),
-                    error=str(exc),
-                )
-                self._set_transient_status_message(f"External command failed: {command.command_name}")
-                continue
-            write_live_command_result(
-                live_sync_session,
-                command_id=command.command_id,
-                success=True,
-                command_name=command.command_name,
-                result=result,
-            )
+
+    def _build_live_command_poll_failure_result(
+        self,
+        command: LocalShellLiveCommand,
+        _exc: Exception,
+    ) -> dict[str, object | None]:
+        self._cached_status = None
+        self._last_status_refresh_time = 0.0
+        self._set_transient_status_message(f"External command failed: {command.command_name}")
+        return build_failed_companion_command_result(
+            command_name=command.command_name,
+            failure_reflection=self._build_failure_reflection(),
+        )
 
     def _execute_live_command(self, command: LocalShellLiveCommand) -> dict:
         try:
