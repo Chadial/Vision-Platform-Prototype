@@ -17,6 +17,13 @@ from vision_platform.services.companion_contract_service import (
     build_companion_status_snapshot,
     build_failed_companion_command_result,
 )
+from vision_platform.services.local_shell_command_execution_service import (
+    LocalShellCompanionCommandExecutionContext,
+    LocalShellCompanionCommandExecutionError,
+    LocalShellCompanionCommandExecutionOutcome,
+    LocalShellRecordingDefaults,
+    execute_local_shell_companion_command,
+)
 from vision_platform.services.display_service import PreviewInteractionCommand, format_focus_score
 
 from vision_platform.apps.local_shell.control_cli import main as run_local_shell_control_cli
@@ -1491,184 +1498,118 @@ class WxLocalPreviewShell(wx.Frame):
             )
 
     def _execute_live_command(self, command: LocalShellLiveCommand) -> dict:
-        controller = self._session.subsystem.command_controller
-        payload = command.payload
+        try:
+            outcome = execute_local_shell_companion_command(
+                command,
+                context=self._build_live_command_execution_context(),
+            )
+        except LocalShellCompanionCommandExecutionError as exc:
+            self._apply_live_command_outcome(exc.outcome)
+            raise RuntimeError(str(exc)) from exc
+        self._apply_live_command_outcome(outcome)
+        return self._build_live_command_result(command_name=command.command_name, result=outcome.result)
 
-        if command.command_name == "apply_configuration":
-            try:
-                result = controller.apply_configuration(
-                    ApplyConfigurationRequest(
-                        exposure_time_us=payload.get("exposure_time_us"),
-                        gain=payload.get("gain"),
-                        pixel_format=payload.get("pixel_format"),
-                        acquisition_frame_rate=payload.get("acquisition_frame_rate"),
-                        roi_offset_x=payload.get("roi_offset_x"),
-                        roi_offset_y=payload.get("roi_offset_y"),
-                        roi_width=payload.get("roi_width"),
-                        roi_height=payload.get("roi_height"),
-                    )
-                )
-            except Exception as exc:
-                self._set_failure_reflection(
-                    source="setup",
-                    action="apply_configuration",
-                    message=str(exc),
-                    external=True,
-                )
-                self._set_transient_status_message(f"External setup configuration failed: {exc}")
-                raise
+    def _build_live_command_execution_context(self) -> LocalShellCompanionCommandExecutionContext:
+        recording_file_stem = getattr(self, "_recording_file_stem", "wx_recording")
+        recording_file_extension = getattr(self, "_recording_file_extension", ".bmp")
+        recording_max_frames_control = getattr(self, "_recording_max_frames", None)
+        recording_target_frame_rate_control = getattr(self, "_recording_target_frame_rate_input", None)
+        recording_max_frames = (
+            self._parse_optional_positive_int(recording_max_frames_control.GetValue())
+            if recording_max_frames_control is not None
+            else None
+        )
+        recording_target_frame_rate = (
+            self._parse_optional_positive_float(recording_target_frame_rate_control.GetValue())
+            if recording_target_frame_rate_control is not None
+            else None
+        )
+        active_recording_frame_limit_value = getattr(self, "_recording_active_frame_limit", None)
+        active_recording_target_frame_rate_value = getattr(self, "_recording_target_frame_rate_value", None)
+        active_recording_frame_limit = (
+            active_recording_frame_limit_value
+            if active_recording_frame_limit_value is not None
+            else recording_max_frames
+        )
+        active_recording_target_frame_rate = (
+            active_recording_target_frame_rate_value
+            if active_recording_target_frame_rate_value is not None
+            else recording_target_frame_rate
+        )
+        return LocalShellCompanionCommandExecutionContext(
+            command_controller=self._session.subsystem.command_controller,
+            resolved_camera_id=self._session.resolved_camera_id,
+            configuration_profile_id=self._session.configuration_profile_id,
+            configuration_profile_camera_class=self._session.configuration_profile_camera_class,
+            current_pixel_format=self._get_current_pixel_format(),
+            recording_defaults=LocalShellRecordingDefaults(
+                file_stem=recording_file_stem,
+                file_extension=recording_file_extension,
+                max_frame_count=active_recording_frame_limit,
+                target_frame_rate=active_recording_target_frame_rate,
+                save_directory=self._get_recording_save_directory_for_external_commands(),
+            ),
+            format_snapshot_saved_message=lambda saved_path: self._format_snapshot_saved_message(saved_path, external=True),
+            format_snapshot_failure_message=lambda error: self._format_snapshot_failure_message(error, external=True),
+            format_recording_started_message=lambda file_stem, save_directory: self._format_recording_started_message(
+                file_stem=file_stem,
+                save_directory=save_directory,
+                external=True,
+            ),
+            format_recording_stopped_message=lambda frames_written, recording_summary, stop_reason, save_directory: self._format_recording_stopped_message(
+                frames_written=frames_written,
+                recording_summary=recording_summary,
+                stop_reason=stop_reason,
+                save_directory=save_directory,
+                external=True,
+            ),
+            format_recording_failure_message=lambda action, error: self._format_recording_failure_message(
+                action,
+                error,
+                external=True,
+            ),
+        )
+
+    def _get_recording_save_directory_for_external_commands(self) -> Path | None:
+        try:
+            return self._get_recording_save_directory()
+        except Exception:
+            return getattr(self._session, "selected_save_directory", None)
+
+    def _apply_live_command_outcome(self, outcome: LocalShellCompanionCommandExecutionOutcome) -> None:
+        if outcome.clear_cached_focus_state:
             self._cached_focus_state = None
-            self._clear_failure_reflection_for_source("setup")
-            self._set_transient_status_message("External setup configuration applied")
-        elif command.command_name == "set_save_directory":
-            try:
-                result = controller.set_save_directory(
-                    SetSaveDirectoryRequest(
-                        base_directory=Path(payload["base_directory"]),
-                        mode=payload.get("mode", "append"),
-                        subdirectory_name=payload.get("subdirectory_name"),
-                    )
-                )
-            except Exception as exc:
-                self._set_failure_reflection(
-                    source="setup",
-                    action="set_save_directory",
-                    message=str(exc),
-                    external=True,
-                )
-                self._set_transient_status_message(f"External save directory failed: {exc}")
-                raise
-            self._session.selected_save_directory = result.selected_directory
-            self._clear_failure_reflection_for_source("setup")
-            self._set_transient_status_message(f"External save directory: {result.selected_directory}")
-        elif command.command_name == "save_snapshot":
-            try:
-                result = controller.save_snapshot(
-                    SaveSnapshotRequest(
-                        file_stem=payload.get("file_stem", "wx_shell_snapshot"),
-                        file_extension=choose_snapshot_file_extension(
-                            pixel_format=self._get_current_pixel_format(),
-                            requested_extension=payload.get("file_extension"),
-                        ),
-                        camera_id=self._session.resolved_camera_id,
-                        configuration_profile_id=self._session.configuration_profile_id,
-                        configuration_profile_camera_class=self._session.configuration_profile_camera_class,
-                    )
-                )
-            except Exception as exc:
-                self._snapshot_last_error = str(exc)
-                self._set_failure_reflection(
-                    source="snapshot",
-                    action="save_snapshot",
-                    message=self._snapshot_last_error,
-                    external=True,
-                )
-                self._set_transient_status_message(
-                    self._format_snapshot_failure_message(self._snapshot_last_error, external=True)
-                )
-                raise
-            self._snapshot_last_saved_path = result.saved_path
-            self._snapshot_last_error = None
-            self._clear_failure_reflection_for_source("snapshot")
-            self._set_transient_status_message(
-                self._format_snapshot_saved_message(result.saved_path, external=True)
+        if outcome.selected_save_directory is not outcome.__dataclass_fields__["selected_save_directory"].default:
+            self._session.selected_save_directory = outcome.selected_save_directory
+        if outcome.snapshot_saved_path is not outcome.__dataclass_fields__["snapshot_saved_path"].default:
+            self._snapshot_last_saved_path = outcome.snapshot_saved_path
+        if outcome.snapshot_last_error is not outcome.__dataclass_fields__["snapshot_last_error"].default:
+            self._snapshot_last_error = outcome.snapshot_last_error
+        if outcome.recording_active_frame_limit is not outcome.__dataclass_fields__["recording_active_frame_limit"].default:
+            self._recording_active_frame_limit = outcome.recording_active_frame_limit
+        if outcome.recording_target_frame_rate_value is not outcome.__dataclass_fields__["recording_target_frame_rate_value"].default:
+            self._recording_target_frame_rate_value = outcome.recording_target_frame_rate_value
+        if outcome.recording_last_summary is not outcome.__dataclass_fields__["recording_last_summary"].default:
+            self._recording_last_summary = outcome.recording_last_summary
+        if outcome.recording_last_file_stem is not outcome.__dataclass_fields__["recording_last_file_stem"].default:
+            self._recording_last_file_stem = outcome.recording_last_file_stem
+        if outcome.recording_last_save_directory is not outcome.__dataclass_fields__["recording_last_save_directory"].default:
+            self._recording_last_save_directory = outcome.recording_last_save_directory
+        if outcome.recording_last_stop_reason is not outcome.__dataclass_fields__["recording_last_stop_reason"].default:
+            self._recording_last_stop_reason = outcome.recording_last_stop_reason
+        if outcome.recording_last_error is not outcome.__dataclass_fields__["recording_last_error"].default:
+            self._recording_last_error = outcome.recording_last_error
+        if outcome.failure_reflection_to_set is not None:
+            self._set_failure_reflection(
+                source=outcome.failure_reflection_to_set.source,
+                action=outcome.failure_reflection_to_set.action,
+                message=outcome.failure_reflection_to_set.message,
+                external=outcome.failure_reflection_to_set.external,
             )
-        elif command.command_name == "start_recording":
-            file_stem = payload["file_stem"] if "file_stem" in payload else self._recording_file_stem
-            file_extension = choose_snapshot_file_extension(
-                pixel_format=self._get_current_pixel_format(),
-                requested_extension=payload["file_extension"] if "file_extension" in payload else self._recording_file_extension,
-            )
-            frame_limit = (
-                payload["max_frame_count"]
-                if "max_frame_count" in payload
-                else self._parse_optional_positive_int(self._recording_max_frames.GetValue())
-            )
-            target_frame_rate = (
-                payload["target_frame_rate"]
-                if "target_frame_rate" in payload
-                else self._parse_optional_positive_float(self._recording_target_frame_rate_input.GetValue())
-            )
-            save_directory = self._get_recording_save_directory()
-            try:
-                result = controller.start_recording(
-                    StartRecordingRequest(
-                        file_stem=file_stem,
-                        file_extension=file_extension,
-                        save_directory=save_directory,
-                        max_frame_count=frame_limit,
-                        target_frame_rate=target_frame_rate,
-                        camera_id=self._session.resolved_camera_id,
-                        configuration_profile_id=self._session.configuration_profile_id,
-                        configuration_profile_camera_class=self._session.configuration_profile_camera_class,
-                    )
-                )
-            except Exception as exc:
-                self._recording_last_error = str(exc)
-                self._recording_last_stop_reason = None
-                self._set_failure_reflection(
-                    source="recording",
-                    action="start_recording",
-                    message=self._recording_last_error,
-                    external=True,
-                )
-                self._set_transient_status_message(
-                    self._format_recording_failure_message("start", self._recording_last_error, external=True)
-                )
-                raise
-            self._recording_active_frame_limit = frame_limit
-            self._recording_target_frame_rate_value = target_frame_rate
-            self._recording_last_summary = None
-            self._recording_last_file_stem = result.status.active_file_stem or file_stem
-            self._recording_last_save_directory = save_directory
-            self._recording_last_stop_reason = None
-            self._recording_last_error = None
-            self._clear_failure_reflection_for_source("recording")
-            self._set_transient_status_message(
-                self._format_recording_started_message(
-                    file_stem=result.status.active_file_stem or file_stem,
-                    save_directory=save_directory,
-                    external=True,
-                )
-            )
-        elif command.command_name == "stop_recording":
-            try:
-                result = controller.stop_recording(
-                    StopRecordingRequest(reason=payload.get("reason", "external_cli"))
-                )
-            except Exception as exc:
-                self._recording_last_error = str(exc)
-                self._set_failure_reflection(
-                    source="recording",
-                    action="stop_recording",
-                    message=self._recording_last_error,
-                    external=True,
-                )
-                self._set_transient_status_message(
-                    self._format_recording_failure_message("stop", self._recording_last_error, external=True)
-                )
-                raise
-            self._recording_last_summary = self._format_recording_summary(
-                frames_written=result.status.frames_written,
-                frame_limit=self._recording_active_frame_limit,
-            )
-            self._recording_last_stop_reason = result.stop_reason
-            self._recording_last_error = None
-            self._recording_active_frame_limit = None
-            self._clear_failure_reflection_for_source("recording")
-            self._set_transient_status_message(
-                self._format_recording_stopped_message(
-                    frames_written=result.status.frames_written,
-                    recording_summary=self._recording_last_summary,
-                    stop_reason=result.stop_reason,
-                    save_directory=getattr(self, "_recording_last_save_directory", None),
-                    external=True,
-                )
-            )
-        else:
-            raise RuntimeError(f"Unsupported live command '{command.command_name}'.")
-
-        return self._build_live_command_result(command_name=command.command_name, result=result)
+        if outcome.failure_reflection_source_to_clear is not None:
+            self._clear_failure_reflection_for_source(outcome.failure_reflection_source_to_clear)
+        if outcome.transient_status_message is not None:
+            self._set_transient_status_message(outcome.transient_status_message)
 
     def _publish_live_status_snapshot(self, status, *, focus_summary: str | None, recording_summary: str | None) -> None:
         live_sync_session = self._session.live_sync_session
