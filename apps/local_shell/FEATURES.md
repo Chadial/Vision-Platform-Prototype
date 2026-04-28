@@ -59,5 +59,5 @@ These responsibilities stay in the wx shell:
 - full configuration UI is still deferred
 - menu-driven settings flows are still deferred
 - append/resume naming for reused recording directories is still deferred
-- non-OpenCV renderer abstraction is still deferred
+- non-OpenCV renderer abstraction is still deferred, although the viewport-image rendering helper is now centralized in the shared display-service package
 

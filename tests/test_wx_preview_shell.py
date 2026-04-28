@@ -13,7 +13,6 @@ from vision_platform.apps.local_shell.wx_preview_shell import (
     _normalize_wx_camera_pixel_format,
     _normalize_wx_recording_file_extension,
 )
-from vision_platform.apps.local_shell.preview_shell_state import render_viewport_image
 from vision_platform.apps.local_shell.startup import (
     LocalShellLaunchOptions,
     LocalShellStartupError,
@@ -23,6 +22,7 @@ from vision_platform.integrations.camera import SimulatedCameraDriver
 from vision_platform.libraries.common_models import FocusOverlayData, FocusPreviewState, FocusResult, RoiDefinition
 from vision_platform.models import CapturedFrame
 from vision_platform.services.display_service import PreviewInteractionCommand
+from vision_platform.services.display_service import render_viewport_image
 
 
 class WxPreviewShellTests(unittest.TestCase):

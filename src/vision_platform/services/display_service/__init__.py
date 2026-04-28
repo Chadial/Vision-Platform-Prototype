@@ -24,6 +24,10 @@ from vision_platform.services.display_service.preview_status_model_service impor
     PreviewStatusModel,
     PreviewStatusModelService,
 )
+from vision_platform.services.display_service.viewport_rendering_service import (
+    RenderedViewportImage,
+    render_viewport_image,
+)
 
 PreviewAnchorHandle = PreviewOverlayModel.AnchorHandle
 
@@ -45,6 +49,8 @@ __all__ = [
     "PreviewStatusLineModel",
     "PreviewStatusModel",
     "PreviewStatusModelService",
+    "RenderedViewportImage",
     "ViewportMapping",
+    "render_viewport_image",
     "ZoomPanState",
 ]
