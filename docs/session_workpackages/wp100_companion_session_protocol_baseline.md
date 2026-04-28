@@ -35,6 +35,15 @@ Define one explicit, typed session-protocol baseline above the current bounded l
 - no command semantics expansion
 - no detached recording lifecycle work
 - no wx-shell UI changes
+- no generic IPC/session framework extraction
+- no reusable transport abstraction beyond the current bounded file-backed companion path
+
+## Guardrails
+
+- keep this package a typed protocol baseline only
+- do not silently widen it into a generic session, IPC, daemon, or transport model
+- preserve the existing bounded collaboration mechanism and file layout
+- if a proposed change would introduce broader subscription, routing, multi-session, or transport concerns, defer it to a later package instead of absorbing it here
 
 ## Affected Modules
 
@@ -65,6 +74,7 @@ Replace the remaining ad-hoc live-session JSON shapes with one explicit typed pr
 - protocol ownership is explicit and local to one seam
 - current control CLI and wx-shell behavior remain unchanged
 - focused tests cover typed round-trip behavior
+- the package still reads as a bounded protocol clarification layer rather than as a transport redesign
 
 ## Recommended Follow-Up
 

@@ -23,6 +23,13 @@ Move published companion-status derivation and projection out of the wx shell in
 - extract published status-snapshot assembly inputs that are currently spread across shell-local state
 - keep current published status content and file-backed publication timing unchanged
 
+## Guardrails
+
+- treat this package as ownership extraction only
+- do not use it to redesign status semantics, rename fields, or add “small” status improvements opportunistically
+- keep setup, snapshot, recording, and failure reflection meaning stable while moving their assembly into a service seam
+- if a status improvement is genuinely needed, queue it as a separate follow-up after the ownership extraction is complete
+
 ## Out Of Scope
 
 - no new status fields by default
@@ -45,6 +52,7 @@ Move published companion-status derivation and projection out of the wx shell in
 - published companion-status projection no longer depends on a wx-shell-local assembler method
 - shell-local state needed for projection is passed explicitly into the new service seam
 - existing status/readback behavior remains unchanged
+- the package does not introduce semantic status drift while moving ownership
 
 ## Recommended Follow-Up
 

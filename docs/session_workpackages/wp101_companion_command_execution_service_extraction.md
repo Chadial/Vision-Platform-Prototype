@@ -29,6 +29,13 @@ Move the bounded external companion-command execution path out of the wx shell i
 - keep the current file-backed session bridge unchanged
 - keep the wx shell responsible only for invoking the service and reflecting the returned result
 
+## Guardrails
+
+- keep the command set exactly to the currently implemented bounded companion commands
+- do not add opportunistic extra commands while touching the extraction
+- do not widen command semantics, lifecycle meaning, or host contract vocabulary in this package
+- if a new command looks desirable, record it as a later separate package instead of folding it into `WP101`
+
 ## Out Of Scope
 
 - no new commands
@@ -51,6 +58,7 @@ Move the bounded external companion-command execution path out of the wx shell i
 - the wx shell no longer owns the concrete external companion-command execution logic
 - the extracted service consumes the typed protocol introduced by `WP100`
 - current command behavior and result semantics remain unchanged
+- no new companion commands were introduced as part of the extraction
 
 ## Recommended Follow-Up
 

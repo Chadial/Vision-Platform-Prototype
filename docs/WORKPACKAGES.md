@@ -485,6 +485,7 @@ These are the work-package groups PM should treat as the current actionable usab
 4. activate `WP103` only when the tested hardware is physically available and one narrow live `Camera Settings...` / menu-path rerun is actually possible
 5. keep the bounded local-shell session bridge explicitly transitional: `WP99` moved its mechanics out of the app package, and `WP100` through `WP102` should narrow protocol and ownership without widening runtime or transport scope
 6. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the new slices reveals a concrete seam that actually needs them
+7. treat `WP100` as typed protocol baseline only, `WP101` as existing-command extraction only, and `WP102` as ownership extraction only; do not hide semantic widening inside those packages
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
 
