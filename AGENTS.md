@@ -44,12 +44,14 @@ Interpret the other central planning docs as derived or supporting views:
 - `docs/TARGET_MAP.md`: compact orientation card derived from `docs/STATUS.md` and `docs/WORKPACKAGES.md`
 - `docs/PRIORITIES.md`: lightweight prioritization aid derived from code reality plus the two central docs
 - `docs/ROADMAP.md` and `docs/GlobalRoadmap.md`: sequencing and long-range direction, not the current implementation truth
+- `docs/StatusHistory.md`: append-only repository-status history moved out of the fast reading layer in `docs/STATUS.md`
 
 Agent update rule:
 
 - when repository implementation truth changes, update `docs/STATUS.md`
 - when current-next ordering or work-package completion changes, update `docs/WORKPACKAGES.md`
 - update derived-view docs only when their own role is affected, and keep them explicitly secondary
+- when a repository phase changes or 20 additional work packages have landed since the last history snapshot, archive the older status chronology into `docs/StatusHistory.md`
 
 ---
 

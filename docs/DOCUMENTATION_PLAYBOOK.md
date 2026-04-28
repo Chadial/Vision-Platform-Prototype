@@ -104,6 +104,7 @@ Current examples:
 - `docs/WORKPACKAGES.md`
 - `docs/ROADMAP.md`
 - `docs/GlobalRoadmap.md`
+- `docs/StatusHistory.md`
 - `docs/StatusReport.md`
 - active files under `docs/session_workpackages/`
 
@@ -116,6 +117,7 @@ Single-source rule inside this class:
 
 - `docs/STATUS.md` is the only authoritative repository status document
 - `docs/WORKPACKAGES.md` is the only authoritative repository work queue
+- `docs/StatusHistory.md` is supporting history only, not the authoritative current-state carrier
 - other current-state docs should be treated as derived, supporting, historical, or long-range views unless explicitly stated otherwise
 
 ### 4. Deferred and boundary docs
@@ -339,6 +341,19 @@ Priority order for avoiding drift:
 2. update `docs/WORKPACKAGES.md` if the queue or completion state changed
 3. update `docs/session_workpackages/...` only for the selected slice
 4. update `docs/TARGET_MAP.md`, `docs/PRIORITIES.md`, or other compact views only if their derived summary would otherwise mislead
+
+### 6a. Offload status history deliberately
+
+When `docs/STATUS.md` starts accumulating too much landed chronology in its upper reading path:
+
+- move older chronology into `docs/StatusHistory.md`
+- preserve the moved wording there when practical
+- keep `docs/STATUS.md` focused on current truth and the fast decision layer
+
+Default history cadence:
+
+1. append a history snapshot when the repository phase changes
+2. append another history snapshot every 20 additional landed/completed work packages
 
 ### 7. Minor change rule
 

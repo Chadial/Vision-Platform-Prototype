@@ -45,6 +45,7 @@ Read this first to get from zero context to a workable repository overview witho
 - legacy compatibility surface: `src/camera_app/...`
 - `docs/STATUS.md` is the single authoritative repository status document
 - `docs/WORKPACKAGES.md` is the single authoritative repository work queue
+- `docs/StatusHistory.md` is the supporting repository-status archive when older chronology is needed without bloating the fast status read
 - module docs live in the root module folders under `apps/`, `integrations/`, `services/`, and `libraries/`
 - module `README.md`: purpose, boundaries, intended contract surface
 - module `STATUS.md`: current implemented state, residuals, and local known limits
@@ -85,6 +86,8 @@ Read these for every new session:
   - `docs/WORKPACKAGES.md`
 - For planning or next-step decisions:
   - `docs/ROADMAP.md`
+- For older repository-status chronology that no longer belongs in the fast current-status read:
+  - `docs/StatusHistory.md`
 - For long-range architecture or migration questions:
   - `docs/GlobalRoadmap.md`
   - `docs/ProjectDescription.md`
