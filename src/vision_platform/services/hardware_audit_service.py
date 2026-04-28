@@ -6,10 +6,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from camera_app.models.camera_status import CameraStatus
-from camera_app.models.interval_capture_status import IntervalCaptureStatus
-from camera_app.models.recording_status import RecordingStatus
-from camera_app.models.subsystem_status import SubsystemStatus
+from vision_platform.models import CameraStatus
+from vision_platform.models import IntervalCaptureStatus
+from vision_platform.models import RecordingStatus
+from vision_platform.models import SubsystemStatus
 
 
 @dataclass(slots=True)

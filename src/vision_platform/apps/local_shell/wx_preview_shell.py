@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import Future, ThreadPoolExecutor
+import logging
 from pathlib import Path
 import sys
 from time import monotonic
 from types import SimpleNamespace
 from typing import Sequence
 
-from camera_app.logging.log_service import configure_logging
 from vision_platform.libraries.roi_core import roi_bounds
 from vision_platform.models import ApplyConfigurationRequest, SaveSnapshotRequest, SetSaveDirectoryRequest
 from vision_platform.models import StartRecordingRequest, StopRecordingRequest
@@ -46,6 +46,13 @@ except ImportError as exc:  # pragma: no cover - installation is validated separ
 
 _WX_RECORDING_FILE_EXTENSIONS = (".bmp", ".png", ".tiff", ".raw")
 _WX_CAMERA_PIXEL_FORMATS = ("<unchanged>", "Mono8", "Mono10", "Mono12", "Mono16", "Rgb8", "Rgb16")
+
+
+def configure_logging(level: int = logging.INFO) -> None:
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
 
 
 class PreviewCanvas(wx.Panel):
