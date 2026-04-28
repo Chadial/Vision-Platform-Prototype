@@ -23,6 +23,7 @@ from vision_platform.services.local_shell_session_protocol import (
     LocalShellSessionMetadata,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_failure_reflection_state_service import LocalShellFailureReflectionState
 from vision_platform.services.local_shell_projection_input_builder_service import (
     build_local_shell_status_projection_input,
 )
@@ -42,6 +43,26 @@ from vision_platform.apps.local_shell.wx_preview_shell import WxLocalPreviewShel
 
 
 class LocalShellLiveCommandSyncTests(unittest.TestCase):
+    def test_failure_reflection_state_preserves_latest_overwrite_clear_and_copy_policy(self) -> None:
+        state = LocalShellFailureReflectionState()
+
+        state.set_failure(source="setup", action="apply_configuration", message="camera rejected roi", external=True)
+        first_snapshot = state.snapshot()
+        state.set_failure(source="snapshot", action="save_snapshot", message="disk full", external=True)
+        state.clear_for_source("setup")
+        second_snapshot = state.snapshot()
+
+        self.assertEqual(first_snapshot["source"], "setup")
+        self.assertEqual(second_snapshot["source"], "snapshot")
+        self.assertEqual(second_snapshot["action"], "save_snapshot")
+
+        assert second_snapshot is not None
+        second_snapshot["source"] = "mutated"
+        self.assertEqual(state.snapshot()["source"], "snapshot")
+
+        state.clear_for_source("snapshot")
+        self.assertIsNone(state.snapshot())
+
     def test_status_projection_input_builder_preserves_existing_projection_shape(self) -> None:
         status = SimpleNamespace(recording=SimpleNamespace(is_recording=True, frames_written=4))
 
@@ -666,13 +687,12 @@ class LocalShellLiveCommandSyncTests(unittest.TestCase):
             shell._recording_last_error = None
             shell._snapshot_last_saved_path = None
             shell._snapshot_last_error = None
-            shell._failure_reflection = {
-                "phase": "failed",
-                "source": "setup",
-                "action": "apply_configuration",
-                "message": "camera rejected roi",
-                "external": True,
-            }
+            shell._set_failure_reflection(
+                source="setup",
+                action="apply_configuration",
+                message="camera rejected roi",
+                external=True,
+            )
             shell._status_lines = ["source=simulated | preview=running | failure=setup", "FPS 25.0"]
 
             shell._publish_live_status_snapshot(

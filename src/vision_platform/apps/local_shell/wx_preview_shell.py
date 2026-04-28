@@ -19,6 +19,7 @@ from vision_platform.services.local_shell_command_execution_service import (
     LocalShellRecordingDefaults,
     execute_local_shell_companion_command,
 )
+from vision_platform.services.local_shell_failure_reflection_state_service import LocalShellFailureReflectionState
 from vision_platform.services.local_shell_projection_input_builder_service import (
     build_local_shell_recording_projection_input,
     build_local_shell_setup_projection_input,
@@ -275,7 +276,7 @@ class WxLocalPreviewShell(wx.Frame):
         self._recording_last_error: str | None = None
         self._snapshot_last_saved_path: Path | None = None
         self._snapshot_last_error: str | None = None
-        self._failure_reflection: dict[str, object | None] | None = None
+        self._failure_reflection_state = LocalShellFailureReflectionState()
         self._recording_file_stem = "wx_recording"
         self._recording_file_extension = ".bmp"
         self._live_sync_processed_count = 0
@@ -990,24 +991,29 @@ class WxLocalPreviewShell(wx.Frame):
         return build_local_shell_setup_reflection(self._build_setup_projection_input(status, focus_summary=focus_summary))
 
     def _set_failure_reflection(self, *, source: str, action: str, message: str, external: bool) -> None:
-        self._failure_reflection = {
-            "phase": "failed",
-            "source": source,
-            "action": action,
-            "message": message,
-            "external": external,
-        }
+        self._get_failure_reflection_state().set_failure(
+            source=source,
+            action=action,
+            message=message,
+            external=external,
+        )
 
     def _clear_failure_reflection_for_source(self, source: str) -> None:
-        current = getattr(self, "_failure_reflection", None)
-        if current is not None and current.get("source") == source:
-            self._failure_reflection = None
+        self._get_failure_reflection_state().clear_for_source(source)
 
     def _build_failure_reflection(self) -> dict[str, object | None] | None:
-        failure_reflection = getattr(self, "_failure_reflection", None)
-        if failure_reflection is None:
-            return None
-        return dict(failure_reflection)
+        return self._get_failure_reflection_state().snapshot()
+
+    def _get_failure_reflection_state(self) -> LocalShellFailureReflectionState:
+        state = getattr(self, "_failure_reflection_state", None)
+        if state is None:
+            state = LocalShellFailureReflectionState(
+                getattr(self, "_failure_reflection", None)
+            )
+            self._failure_reflection_state = state
+            if hasattr(self, "_failure_reflection"):
+                delattr(self, "_failure_reflection")
+        return state
 
     def _build_setup_projection_input(self, status, *, focus_summary: str | None):
         return build_local_shell_setup_projection_input(

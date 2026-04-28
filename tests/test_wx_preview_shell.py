@@ -799,13 +799,12 @@ class WxPreviewShellTests(unittest.TestCase):
             stream_service=SimpleNamespace(is_preview_running=True),
         )
         shell._ui_refresh_fps = None
-        shell._failure_reflection = {
-            "phase": "failed",
-            "source": "setup",
-            "action": "apply_configuration",
-            "message": "camera rejected roi",
-            "external": True,
-        }
+        shell._set_failure_reflection(
+            source="setup",
+            action="apply_configuration",
+            message="camera rejected roi",
+            external=True,
+        )
 
         status = SimpleNamespace(
             camera=SimpleNamespace(is_initialized=True, reported_acquisition_frame_rate=15.966),
@@ -1279,13 +1278,12 @@ class WxPreviewShellTests(unittest.TestCase):
     def test_build_live_command_result_carries_failure_reflection_when_present(self) -> None:
         shell = WxLocalPreviewShell.__new__(WxLocalPreviewShell)
         shell._cached_focus_state = None
-        shell._failure_reflection = {
-            "phase": "failed",
-            "source": "snapshot",
-            "action": "save_snapshot",
-            "message": "disk full",
-            "external": True,
-        }
+        shell._set_failure_reflection(
+            source="snapshot",
+            action="save_snapshot",
+            message="disk full",
+            external=True,
+        )
         shell._session = SimpleNamespace(
             selected_save_directory=Path("captures/new_run"),
         )
@@ -1341,10 +1339,11 @@ class WxPreviewShellTests(unittest.TestCase):
                 )
             )
 
-        self.assertEqual(shell._failure_reflection["source"], "setup")
-        self.assertEqual(shell._failure_reflection["action"], "apply_configuration")
-        self.assertEqual(shell._failure_reflection["message"], "camera rejected roi")
-        self.assertTrue(shell._failure_reflection["external"])
+        failure_reflection = shell._build_failure_reflection()
+        self.assertEqual(failure_reflection["source"], "setup")
+        self.assertEqual(failure_reflection["action"], "apply_configuration")
+        self.assertEqual(failure_reflection["message"], "camera rejected roi")
+        self.assertTrue(failure_reflection["external"])
         self.assertEqual(transient_messages[-1], "External setup configuration failed: camera rejected roi")
 
     def test_build_snapshot_reflection_uses_failed_phase_when_last_error_exists(self) -> None:

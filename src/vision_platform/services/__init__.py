@@ -37,6 +37,10 @@ from vision_platform.services.local_shell_command_execution_service import (
     execute_local_shell_companion_command,
 )
 from vision_platform.services.local_shell_command_polling_service import poll_local_shell_live_commands
+from vision_platform.services.local_shell_failure_reflection_state_service import (
+    FailureReflectionPayload,
+    LocalShellFailureReflectionState,
+)
 from vision_platform.services.local_shell_projection_input_builder_service import (
     build_local_shell_recording_projection_input,
     build_local_shell_setup_projection_input,
@@ -80,6 +84,7 @@ __all__ = [
     "CameraCapabilityService",
     "CameraConfigurationValidationService",
     "HardwareAuditService",
+    "FailureReflectionPayload",
     "FailureReflectionUpdate",
     "LocalShellActiveSessionMetadata",
     "LocalShellCompanionCommandExecutionContext",
@@ -90,6 +95,7 @@ __all__ = [
     "LocalShellLiveSyncError",
     "LocalShellLiveSyncSession",
     "LocalShellLiveStatusSnapshot",
+    "LocalShellFailureReflectionState",
     "LocalShellRecordingDefaults",
     "LocalShellRecordingProjectionInput",
     "LocalShellRuntimeTickCoordinator",
