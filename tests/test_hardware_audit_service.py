@@ -4,10 +4,10 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from tests import _path_setup
-from camera_app.models.camera_status import CameraStatus
-from camera_app.models.interval_capture_status import IntervalCaptureStatus
-from camera_app.models.recording_status import RecordingStatus
-from camera_app.models.subsystem_status import SubsystemStatus
+from vision_platform.models import CameraStatus
+from vision_platform.models import IntervalCaptureStatus
+from vision_platform.models import RecordingStatus
+from vision_platform.models import SubsystemStatus
 from vision_platform.services.hardware_audit_service import HardwareAuditService
 
 
