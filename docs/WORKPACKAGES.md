@@ -470,15 +470,21 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 | 91 | Local Shell ROI And Crosshair Priority Alignment | make crosshair the superior interaction mode so it cancels or blocks ROI entry and dragging when enabled | completed | completed interaction slice; crosshair now wins over ROI entry and drag in the shell and is reflected in the shared interaction service | `docs/archive/session_workpackages/wp91_local_shell_roi_and_crosshair_priority_alignment.md` |
 | 92 | Local Shell Mono10 Rendering And Hardware Profile Alignment | keep the wx shell usable on the tested hardware path when the camera profile resolves to `Mono10` by making the renderer and stored profile defaults hardware-safe | completed | completed hardware-alignment slice; local preview now accepts high-bit grayscale frames, the stored exposure default is aligned to the tested increment grid, and snapshot / recording fall back to a hardware-safe output extension when BMP is invalid | `docs/archive/session_workpackages/wp92_local_shell_mono10_rendering_and_hardware_profile_alignment.md` |
 | 99 | Live Sync Service Extraction | move the bounded file-backed local-shell session bridge out of the wx app package into a service seam while preserving the current import and runtime behavior | landed | landed headless-preparation follow-up; the service layer now owns the file-backed session mechanics while the app package keeps a thin compatibility wrapper | `docs/archive/session_workpackages/wp99_live_sync_service_extraction.md` |
+| 100 | Companion Session Protocol Baseline | replace the remaining ad-hoc local-shell session JSON/dict shapes with one explicit typed protocol baseline above the current file-backed bridge | current next | next smallest non-hardware headless-preparation seam after `WP99`; preserves the current bridge behavior while making session, command, result, and status shapes explicit | `docs/session_workpackages/wp100_companion_session_protocol_baseline.md` |
+| 101 | Companion Command Execution Service Extraction | move external companion-command execution out of the wx shell into one service seam above the shared controller | queued | follow-up after `WP100`; keeps the current bounded command set and file-backed bridge while removing app-local command ownership from the shell | `docs/session_workpackages/wp101_companion_command_execution_service_extraction.md` |
+| 102 | Companion Status Projection Service Extraction | move published companion-status derivation out of the wx shell into one reusable projection seam | queued | follow-up after `WP101`; keeps current status content but removes app-local ownership of status projection and publication shaping | `docs/session_workpackages/wp102_companion_status_projection_service_extraction.md` |
+| 103 | wx Camera Settings Live Path Revalidation | rerun one narrow live `Camera Settings...` / menu-path check on the current `Mono10` hardware shell when the tested camera is physically attached | conditional | keep as the smallest remaining hardware evidence slice only when the documented camera is available locally | `docs/session_workpackages/wp103_wx_camera_settings_live_path_revalidation.md` |
 
 ## Immediate PM Backlog
 
 These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
 
-1. if hardware is still available, use one narrow follow-up slice to verify the live `Camera Settings...` / menu path on the current `Mono10` shell; otherwise do branch hygiene instead of opening a broad new hardware rerun
-2. derive the next smallest justified slice explicitly once the remaining hardware-dependent question is either answered or deferred
-3. keep the bounded local-shell session bridge explicitly transitional: `WP99` moved its mechanics out of the app package, but it did not widen the runtime or transport model
-3. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the new slices reveals a concrete seam that actually needs them
+1. execute `WP100 Companion Session Protocol Baseline` as the default non-hardware next slice
+2. then execute `WP101 Companion Command Execution Service Extraction`
+3. then execute `WP102 Companion Status Projection Service Extraction`
+4. activate `WP103` only when the tested hardware is physically available and one narrow live `Camera Settings...` / menu-path rerun is actually possible
+5. keep the bounded local-shell session bridge explicitly transitional: `WP99` moved its mechanics out of the app package, and `WP100` through `WP102` should narrow protocol and ownership without widening runtime or transport scope
+6. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the new slices reveals a concrete seam that actually needs them
 
 Documentation governance maintenance landed alongside the latest compatibility cleanup:
 
@@ -769,7 +775,7 @@ The current coarse PM order should be:
 
 ## Recommended Next Detailed Work Package
 
-No unconditional `current next` is set after the implemented `WP94` through `WP99` follow-up sequence.
+`WP100 Companion Session Protocol Baseline` is now the unconditional `current next` after the implemented `WP94` through `WP99` follow-up sequence.
 
 Reason:
 
@@ -783,11 +789,14 @@ Reason:
 - `WP97` has now implemented the minimal artifact-reference and time-context baseline without widening into logging or clock architecture
 - `WP98` is now completed as one explicit narrow residual lane for the last known `tests.test_vision_platform_namespace` failure, and that cleanup remains intentionally separate from the completed camera-integration fore-stage
 - `WP99` has now completed one narrow ownership-cleanup follow-up by moving the bounded file-backed local-shell session mechanics into the service layer while keeping the current app import surface stable
+- `WP100` is the next justified seam because the bridge ownership is cleaner now, but the persisted session/command/result/status protocol still depends on ad-hoc JSON/dict shapes
+- `WP101` and `WP102` then follow as the next two ownership-extraction steps above that typed protocol baseline
+- `WP103` stays conditional because it depends on physical hardware presence rather than on the structural non-hardware lane
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 
 Detailed file:
 
-- no new unconditional detailed package is selected yet after `WP99`; derive the next slice from concrete residuals or the user's explicit direction
+- `docs/session_workpackages/wp100_companion_session_protocol_baseline.md`
 
 ## Fresh Agent Decision Rule
 
@@ -810,6 +819,10 @@ The repository currently has explicit detailed session work-package files for th
 - `docs/session_workpackages/wp95_camera_health_model_baseline.md`
 - `docs/session_workpackages/wp96_runtime_event_family_baseline.md`
 - `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
+- `docs/session_workpackages/wp100_companion_session_protocol_baseline.md`
+- `docs/session_workpackages/wp101_companion_command_execution_service_extraction.md`
+- `docs/session_workpackages/wp102_companion_status_projection_service_extraction.md`
+- `docs/session_workpackages/wp103_wx_camera_settings_live_path_revalidation.md`
 - `docs/archive/session_workpackages/wp01_camera_cli.md`
 - `docs/archive/session_workpackages/wp98_vision_platform_namespace_boundary_alignment.md`
 - `docs/archive/session_workpackages/wp02_host_integration_command_surface.md`
@@ -899,6 +912,9 @@ Current explicit activation:
 - `WP97 Artifact Reference And Time Context Baseline` is now completed at `docs/session_workpackages/wp97_artifact_reference_and_time_context_baseline.md`
 - `WP98 Vision Platform Namespace Boundary Alignment` is now completed at `docs/archive/session_workpackages/wp98_vision_platform_namespace_boundary_alignment.md`; it closed the still-open `tests.test_vision_platform_namespace` residual without reopening the broader camera-integration fore-stage
 - `WP99 Live Sync Service Extraction` is now completed at `docs/archive/session_workpackages/wp99_live_sync_service_extraction.md`; it moved the bounded local-shell live-sync/session mechanics into the service layer while preserving the current app import path through a compatibility wrapper
+- `WP100 Companion Session Protocol Baseline` is now prepared as the default next execution-ready package at `docs/session_workpackages/wp100_companion_session_protocol_baseline.md`
+- `WP101 Companion Command Execution Service Extraction` and `WP102 Companion Status Projection Service Extraction` are now the queued structural follow-ups after `WP100`
+- `WP103 wx Camera Settings Live Path Revalidation` is now the smallest remaining conditional hardware evidence slice when the tested device is attached again
 
 - `Host Control Closure` now has its first landed slice at `docs/archive/session_workpackages/wp12_host_control_closure.md`
 - `Experiment Reliability Closure` now has its first landed slice at `docs/archive/session_workpackages/wp13_experiment_reliability_closure.md`
