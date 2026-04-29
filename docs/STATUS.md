@@ -566,14 +566,10 @@ The repository currently provides a structured Python prototype for the vision p
 
 ## Next Recommended Steps
 
-1. Treat this documentation pass as the product-direction alignment layer: future package selection should now default to the `Hybrid Companion` reading of the current phase.
-2. Keep `WP75` as the compact operator-facing path for the current functional workflows and `WP71` as the technical validation anchor for the underlying execution modes.
-3. Execute the workflow-first sequence through `WP80`, then `WP81`, then `WP82` so future work is selected from the three confirmed functional workflows rather than from older residual buckets.
-4. Keep shell-side follow-up work conditional and product-facing: reactivate `WP76` only when one of those workflow packages exposes a concrete host-reflection, status, or settings-feedback blocker.
-5. Keep host-surface follow-up work conditional and product-facing: reactivate `WP77` only when a concrete AMB/test-host naming or interpretation ambiguity appears in the current phase-1 command surface.
-6. Keep compatibility-seam work evidence-first: `WP78` is acceptable later, but not ahead of the workflow-first Hybrid Companion slices.
-7. Keep broader API growth, additional frontends, larger offline tooling, MCP-oriented orchestration, and C# handover visible as later directions rather than current default obligations.
-8. When the later headless-kernel work starts, revisit the current wx-shell live-sync bridge explicitly and lift or replace it with a host-neutral command/session seam instead of freezing the app-local file bridge as the long-term architecture.
+1. Hold the repository at the current post-`WP110` Hybrid Companion baseline unless hardware evidence, integration need, test failure, or observed workflow friction justifies a new slice.
+2. Keep `WP103` conditional on the tested camera being physically attached and a narrow live `Camera Settings...` rerun being possible.
+3. Treat headless-kernel, LabVIEW-facing, renderer-facing, runtime, and broader host-contract work as later directions, not as an automatic next lane.
+4. When a later headless-kernel slice is explicitly justified, revisit the current wx-shell live-sync bridge and lift or replace it with a host-neutral command/session seam instead of freezing the app-local file bridge as the long-term architecture.
 
 ## Deferred Profile-System Bucket List
 

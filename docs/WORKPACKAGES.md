@@ -484,12 +484,12 @@ Current packages should now be read against the usable-subsystem phase lens, wit
 
 ## Immediate PM Backlog
 
-These are the work-package groups PM should treat as the current actionable usable-subsystem backlog categories:
+These are the current activation and deferral rules for post-`WP110` package selection:
 
 1. there is now no unconditional non-hardware `current next` after landed `WP110`
 2. derive any further headless, runtime, host-contract, or LabVIEW-facing slice only from a concrete residual, integration need, test failure, or user-observed workflow friction
 3. activate `WP103` only when the tested hardware is physically available and one narrow live `Camera Settings...` / menu-path rerun is actually possible
-4. keep the bounded local-shell session bridge explicitly transitional: `WP99` through `WP109` should continue narrowing ownership without widening runtime or transport scope
+4. keep the bounded local-shell session bridge explicitly transitional: `WP99` through `WP109` narrowed ownership without widening runtime or transport scope, but they do not create a continuing cleanup lane by default
 5. keep `WP76`, `WP77`, and `WP78` explicitly outside the default lane unless one of the newer slices reveals a concrete seam that actually needs them
 6. treat landed `WP100` as typed protocol baseline only, landed `WP101` as existing-command extraction only, landed `WP102` as ownership extraction only, landed `WP104` through `WP106` as bounded orchestration extraction only, derived `WP107` through `WP109` as bounded residual cleanup only, and `WP110` as bounded display-boundary cleanup only
 
@@ -806,7 +806,6 @@ Reason:
 - `WP108` is now landed and closes the bounded latest-failure helper-state ownership gap without changing the single-latest-failure, overwrite, same-source clear, or copy behavior
 - `WP109` is now landed and closes the final prepared cleanup of this companion extraction lane by moving app-facing companion composition into one bounded facade without changing payload or runtime semantics
 - `WP110` is now landed and closes the remaining viewport-image rendering helper gap by moving that helper into one shared display-service seam without changing bitmap painting or overlay semantics
-- `WP110` is now landed and closes the last simulator-only viewport-rendering helper gap by moving the viewport-image rendering helper into one shared display-service seam without changing bitmap painting or overlay semantics
 - `WP103` stays conditional because it depends on physical hardware presence rather than on the structural non-hardware lane
 - `WP76`, `WP77`, and `WP78` remain available only if one of those newer slices reveals a concrete seam that truly needs one of those narrower follow-ups
 

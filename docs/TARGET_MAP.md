@@ -118,14 +118,14 @@ Reading rule:
 - treat the separate `control` process as the host-side command source
 - treat the JSON files under `captures/wx_shell_sessions/` as the current collaboration mechanism, not as a full transport contract
 
-## Next
+## Conditional Later Direction
 
-- truly headless kernel preparation
+- truly headless kernel preparation, only when justified by hardware evidence, integration need, test failure, or observed workflow friction
 
 Meaning:
 
 - prepare one kernel shared by local UI, host control, and later automation or agent flows
-- do this after local and host usability are real enough, not before
+- do this after local and host usability are real enough and a concrete need has been identified
 
 ## Later
 
