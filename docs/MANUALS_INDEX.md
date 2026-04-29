@@ -14,6 +14,28 @@ This is an index, not a new manual layer.
 
 ## Recommended Reading By Need
 
+### Start Here
+
+- `docs/USER_MANUAL.md`
+
+Use for:
+
+- the current goal in plain terms
+- which app or command to start
+- CLI, wx shell, and host-style shell-control examples
+- what is implemented now versus deferred
+
+### Understand The Service Structure
+
+- `docs/SERVICE_OVERVIEW.md`
+
+Use for:
+
+- the difference between apps, control layer, services, integrations, models, and libraries
+- where CLI behavior ends and shared service behavior starts
+- where companion-shell command/session mechanics live
+- what to change where
+
 ### Operate The Current Python Baseline
 
 - `docs/PYTHON_BASELINE_RUNBOOK.md`
@@ -112,7 +134,9 @@ Use for:
 
 Start with the smallest doc set that matches your question:
 
+- overview question -> user manual
 - operation question -> runbook or launch baseline
+- service ownership question -> service overview
 - architecture question -> architecture baseline
 - host/contract question -> host baseline and commands
 - hardware question -> hardware docs

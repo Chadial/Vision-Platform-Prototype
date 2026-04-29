@@ -4,6 +4,8 @@
 
 - `docs/SESSION_START.md`: compact session bootstrap and reading map
 - `docs/MANUALS_INDEX.md`: compact index for manuals, boundary notes, and operating references
+- `docs/USER_MANUAL.md`: practical first-read manual for current goal, entry points, CLI, wx shell, and host-style shell control
+- `docs/SERVICE_OVERVIEW.md`: service/module ownership map for apps, control, services, integrations, models, and libraries
 - `docs/ARCHITECTURE_BASELINE.md`: compact architecture reference for the current baseline
 - `docs/WORKFLOW.md`: operational execution flow for agents
 - `docs/DOCUMENTATION_PLAYBOOK.md`: documentation model and maintenance rules

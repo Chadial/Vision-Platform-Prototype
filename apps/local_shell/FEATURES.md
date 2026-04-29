@@ -56,8 +56,6 @@ These responsibilities stay in the wx shell:
 
 ## Known Gaps
 
-- full configuration UI is still deferred
-- menu-driven settings flows are still deferred
-- append/resume naming for reused recording directories is still deferred
+- live hardware revalidation of the current `Camera Settings...` path remains conditional on tested-camera availability
 - non-OpenCV renderer abstraction is still deferred, although the viewport-image rendering helper is now centralized in the shared display-service package
 
