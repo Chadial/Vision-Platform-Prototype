@@ -25,6 +25,22 @@ Current layering:
 4. integrations own camera driver implementations
 5. libraries and models own portable contracts and reusable domain helpers
 
+Compact shape:
+
+```text
+apps
+  camera_cli / local_shell / opencv_prototype
+        |
+control.command_controller
+        |
+services
+  recording / stream / display / companion / api payload
+        |
+integrations.camera
+        |
+hardware or simulator
+```
+
 The goal is to keep the Python prototype portable toward a later headless kernel, C#/.NET reuse, and additional frontends.
 
 ## Main App Surfaces

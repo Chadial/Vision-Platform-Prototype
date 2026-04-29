@@ -28,7 +28,7 @@
 | `integrations/camera` | active core | drivers implemented, with bounded tested-path hardware validation present; broader hardware matrix coverage remains open |
 | `services/stream_service` | active core | preview/shared acquisition implemented |
 | `services/recording_service` | active core | snapshot, interval capture, recording implemented |
-| `services/display_service` | active baseline | UI-free overlay composition implemented; lightweight payload demo exists, renderer-facing adapter still open |
+| `services/display_service` | active baseline | UI-free overlay composition and viewport/display helpers implemented; actual wx bitmap painting remains app-local |
 | `apps/opencv_prototype` | active prototype | simulator and first real-hardware preview path available; viewport-based preview controls now implemented |
 | `apps/local_shell` | active prototype | bounded wxPython local working shell above the shared controller/preview/display layers; see `FEATURES.md` for the implemented-shell inventory |
 | `libraries/common_models` | active foundation | portable contracts and overlay/display payloads added; some target-facing contract elements are intentionally ahead of implementation and must be marked in module status |

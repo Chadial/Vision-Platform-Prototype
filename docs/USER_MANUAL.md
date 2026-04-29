@@ -27,6 +27,34 @@ That means:
 
 The current system is not a finished product installer, a broad API server, or a final LabVIEW integration. It is a usable Python reference baseline with a narrow host-control path.
 
+## Quick Start: Simulator Smoke
+
+Use this sequence when you want to prove the current baseline is runnable without hardware.
+
+1. Run status:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source simulated
+```
+
+2. Save one snapshot:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source simulated --base-directory .\captures\manual_snapshot --file-stem manual_snapshot --file-extension .bmp
+```
+
+3. Start the wx shell:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --snapshot-directory .\captures\wx_shell_snapshot
+```
+
+4. Keep the wx shell running. Open a second terminal from the repository root and read shell status:
+
+```powershell
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
+```
+
 ## Current Functional Workflows
 
 ### Delamination Recording
@@ -98,6 +126,16 @@ Use the reference scenario validation when you want one quick simulator-backed c
 
 Use hardware mode only when the tested camera is physically attached and the Vimba X environment is available.
 
+## Typical Lab Workflow
+
+1. Start the wx shell.
+2. Set the save directory.
+3. Adjust exposure, gain, ROI, and focus.
+4. Save one geometry or control snapshot.
+5. Start delamination recording from the host or shell.
+6. Stop recording after the test, or let `max frames` stop it.
+7. Review the output directory, recording log, and traceability files.
+
 ## Environment Basics
 
 Run commands from the repository root.
@@ -121,6 +159,17 @@ Current tested hardware shortcut when the camera is attached:
 ```
 
 The known tested camera path is the Allied Vision device behind alias `tested_camera`. Hardware availability is session-dependent.
+
+## Hardware Warning
+
+Use hardware mode only when:
+
+- the Allied Vision camera is physically attached
+- Vimba X is installed and visible to the environment
+- the project `.venv` is used
+- the alias `tested_camera` is still valid
+
+If hardware is unavailable, hardware commands may fail or conditional hardware tests may skip cleanly.
 
 ## Camera CLI
 
@@ -172,6 +221,17 @@ Hardware snapshot example when the tested camera is attached:
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli snapshot --source hardware --camera-alias tested_camera --configuration-profile default --base-directory .\captures\hardware_manual_snapshot --file-stem hardware_manual_snapshot --file-extension .bmp
 ```
 
+## Recording Meaning
+
+Current recording is bounded recording.
+
+That means:
+
+- recording is started through the current process or shell-session boundary
+- it writes a finite image series
+- it stops through explicit stop, `max frames`, duration, or configured limits
+- it is not yet a detached long-running recording service that can be independently resumed across unrelated processes
+
 ## wx Local Shell
 
 The wx shell is the current visible companion app.
@@ -215,7 +275,7 @@ Start the wx shell first. It registers one active local session under:
 captures/wx_shell_sessions/
 ```
 
-Then send commands from another terminal:
+Keep the wx shell running. Open a second terminal from the repository root and send commands there:
 
 ```powershell
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
