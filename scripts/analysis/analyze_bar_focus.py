@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
+import math
 from pathlib import Path
 import sys
 
@@ -264,12 +265,21 @@ def _format_result(result: dict[str, object]) -> str:
     for method in ("laplace", "tenengrad"):
         method_result = focus[method]
         lines.append(
-            f"{method}: full={method_result['full_score']:.9f} "
-            f"bar_roi={method_result['bar_roi_score']:.9f} "
+            f"{method}: full={_format_scientific_score(method_result['full_score'])} "
+            f"bar_roi={_format_scientific_score(method_result['bar_roi_score'])} "
             f"metric={method_result['metric_name']} "
             f"valid={str(method_result['bar_roi_valid']).lower()}"
         )
     return "\n".join(lines)
+
+
+def _format_scientific_score(value: object) -> str:
+    score = float(value)
+    if score == 0.0:
+        return "0"
+    exponent = int(math.floor(math.log10(abs(score))))
+    mantissa = score / (10**exponent)
+    return f"{mantissa:.3f} x 10^{exponent}"
 
 
 def main() -> int:
