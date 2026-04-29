@@ -125,6 +125,8 @@ Current meaning:
 - `recording` means bounded in-process recording that starts and completes within one invocation
 - `interval-capture` means bounded in-process timed capture that starts and completes within one invocation and now returns the same bounded result-ownership style as the other host-oriented commands
 
+For the camera CLI, bounded `recording` starts and completes within one invocation. For the current `local_shell control` companion path, recording is controlled across the open shell session through `start-recording` and `stop-recording`, while still remaining bounded to that running shell/session and not becoming detached lifecycle control.
+
 ### Host / Shell Collaboration
 
 The current `Hybrid Companion` host flow is intentionally file-backed and narrow.

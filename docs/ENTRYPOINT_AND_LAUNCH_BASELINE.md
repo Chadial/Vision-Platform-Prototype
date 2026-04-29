@@ -193,6 +193,8 @@ Preferred hardware-backed command examples on the tested path:
 .\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli recording --source hardware --camera-id DEV_1AB22C046D81 --base-directory .\captures\hardware_smoke --frame-limit 5
 ```
 
+Prefer `--camera-alias tested_camera --configuration-profile default` for the documented tested path when the repo-local alias and profile files are trusted. Use the explicit `--camera-id DEV_1AB22C046D81` form when validating direct camera-id selection.
+
 Use the launcher-script form when shell or operator convenience outweighs direct module invocation:
 
 ```powershell
