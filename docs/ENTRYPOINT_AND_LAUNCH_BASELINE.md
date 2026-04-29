@@ -52,8 +52,6 @@ Why this is preferred:
 - it avoids relying on ad-hoc path bootstrapping when not needed
 - it matches the module-oriented shape that later handover paths should preserve
 
-### 2. Camera CLI launcher fallback
-
 ### 2. Installed console script
 
 Use this when the editable install is already trusted and a shorter local command is useful:
@@ -134,7 +132,7 @@ Use this when a running visible wx shell should be controlled from a separate ho
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control snapshot --file-stem geometry_000001 --file-extension .bmp
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control apply-configuration --exposure-time-us 8000 --gain 2.0
-.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control start-recording --max-frames 0 --recording-fps 12.5
+.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control start-recording --max-frames 3 --recording-fps 12.5
 .\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control stop-recording --reason external_cli
 ```
 
@@ -152,6 +150,7 @@ Boundary:
 
 Interaction note:
 
+- keep the wx shell running and send these commands from a second terminal or host-side process rooted at the repository
 - `Crosshair` has priority over ROI entry and ROI dragging in the current wx shell
 - when crosshair is enabled, a click selects the point instead of starting a new ROI anchor
 - enabling crosshair aborts any in-progress ROI draft or ROI drag
@@ -267,7 +266,7 @@ Before bounded hardware use:
 - camera is physically attached
 - Vimba X SDK is installed
 - the local SDK wheel is installed into the same `.venv`
-- the camera id is known
+- the camera id is known, or the repo-local `tested_camera` alias and `default` configuration profile are still valid
 - commands are run serially
 
 ## Current Readiness Boundaries

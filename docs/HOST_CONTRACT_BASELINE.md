@@ -132,7 +132,7 @@ The current `Hybrid Companion` host flow is intentionally file-backed and narrow
 Typical collaboration sequence:
 
 1. the visible wx shell starts and registers one active session under `captures/wx_shell_sessions/`
-2. a separate host process sends a bounded command through `vision_platform.apps.local_shell control ...`
+2. a separate host process or second terminal sends a bounded command through `vision_platform.apps.local_shell control ...`
 3. the shell reads the queued command, executes it through the same command-controller layer used locally, and writes a JSON result
 4. the shell also publishes a current status snapshot so the host can read reflection state without restarting the UI
 
