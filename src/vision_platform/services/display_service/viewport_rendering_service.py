@@ -227,11 +227,47 @@ def _convert_high_bit_mono_to_mono8(source_bytes: bytes, width: int, height: int
     expected_size = width * height * 2
     if len(source_bytes) < expected_size:
         raise RuntimeError(f"Frame buffer is too small for {pixel_format} viewport rendering.")
+    shift = _high_bit_to_mono8_shift(pixel_format)
     if _is_numpy_available():
         numpy_module = _require_numpy()
         values = numpy_module.frombuffer(source_bytes, dtype=numpy_module.uint16, count=width * height)
-        return (values >> 8).astype(numpy_module.uint8).tobytes()
-    return source_bytes[1:expected_size:2]
+        scaled = values >> shift
+        return _stretch_mono_values_to_uint8_numpy(scaled, numpy_module).tobytes()
+
+    values: list[int] = []
+    for pixel_index in range(width * height):
+        byte_index = pixel_index * 2
+        value = source_bytes[byte_index] | (source_bytes[byte_index + 1] << 8)
+        values.append(value >> shift)
+    if not values:
+        return b""
+    minimum = min(values)
+    maximum = max(values)
+    if maximum <= minimum:
+        return bytes(min(255, value) for value in values)
+    scale = 255.0 / float(maximum - minimum)
+    return bytes(min(255, max(0, int(round((value - minimum) * scale)))) for value in values)
+
+
+def _high_bit_to_mono8_shift(pixel_format: str) -> int:
+    shifts = {
+        "mono10": 2,
+        "mono12": 4,
+        "mono14": 6,
+        "mono16": 8,
+    }
+    return shifts[pixel_format.lower()]
+
+
+def _stretch_mono_values_to_uint8_numpy(values, numpy_module):
+    if values.size == 0:
+        return values.astype(numpy_module.uint8)
+    minimum = int(values.min())
+    maximum = int(values.max())
+    if maximum <= minimum:
+        return numpy_module.clip(values, 0, 255).astype(numpy_module.uint8)
+    stretched = (values.astype(numpy_module.float32) - float(minimum)) * (255.0 / float(maximum - minimum))
+    return numpy_module.clip(stretched.round(), 0, 255).astype(numpy_module.uint8)
 
 
 __all__ = [
