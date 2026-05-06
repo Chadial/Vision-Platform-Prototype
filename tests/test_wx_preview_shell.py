@@ -42,17 +42,47 @@ class WxPreviewShellTests(unittest.TestCase):
 
     def test_render_viewport_image_converts_mono10_to_rgb_bytes_for_wx(self) -> None:
         presenter = PreviewShellPresenter()
+        values = (0, 256, 512, 1023)
         frame = CapturedFrame(
-            raw_frame=bytes((value & 0xFF for value in range(32))),
-            width=4,
-            height=4,
+            raw_frame=b"".join(value.to_bytes(2, "little") for value in values),
+            width=2,
+            height=2,
             pixel_format="Mono10",
         )
-        view = presenter.build_view(frame, viewport_width=4, viewport_height=4)
+        view = presenter.build_view(frame, viewport_width=2, viewport_height=2)
 
         self.assertEqual(view.image.mime_family, "pgm")
-        self.assertEqual(len(view.image.payload), 16)
-        self.assertEqual(len(view.image.to_rgb_bytes()), 48)
+        self.assertEqual(list(view.image.payload), [0, 64, 128, 255])
+        self.assertEqual(len(view.image.to_rgb_bytes()), 12)
+
+    def test_render_viewport_image_converts_mono16_to_rgb_bytes_for_wx(self) -> None:
+        presenter = PreviewShellPresenter()
+        values = (0, 16384, 32768, 65535)
+        frame = CapturedFrame(
+            raw_frame=b"".join(value.to_bytes(2, "little") for value in values),
+            width=4,
+            height=1,
+            pixel_format="Mono16",
+        )
+        view = presenter.build_view(frame, viewport_width=4, viewport_height=1)
+
+        self.assertEqual(view.image.mime_family, "pgm")
+        self.assertEqual(list(view.image.payload), [0, 64, 128, 255])
+        self.assertEqual(len(view.image.to_rgb_bytes()), 12)
+
+    def test_render_viewport_image_stretches_low_contrast_mono10_for_preview_visibility(self) -> None:
+        presenter = PreviewShellPresenter()
+        values = (40, 80, 160, 320)
+        frame = CapturedFrame(
+            raw_frame=b"".join(value.to_bytes(2, "little") for value in values),
+            width=2,
+            height=2,
+            pixel_format="Mono10",
+        )
+
+        view = presenter.build_view(frame, viewport_width=2, viewport_height=2)
+
+        self.assertEqual(list(view.image.payload), [0, 36, 109, 255])
 
     def test_presenter_reuses_shared_interaction_state_for_zoom_and_roi(self) -> None:
         presenter = PreviewShellPresenter()

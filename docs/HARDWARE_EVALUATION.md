@@ -273,12 +273,15 @@ Observed result:
 - the wx shell started on the tested hardware path, published live status, and kept preview running with `Mono10`, gain `3`, ROI `0,0,2000,1500`, and the configured save directory
 - the real `Camera Settings...` menu path opened the modal dialog in the running shell
 - confirming the dialog completed without `failure_reflection`, left preview running, and preserved the full effective configuration in the published status
+- follow-up visual inspection in the same May 6, 2026 hardware session confirmed that status-only preview validation was insufficient: the original `Mono10` wx renderer produced an effectively black image because it downshifted all high-bit grayscale formats by 8 bits
+- after the display-only high-bit scaling fix, a real wx window screenshot at `captures\hardware_smoke\visible_preview_shell\wx_shell_screenshot.png` showed visible camera content; sampled window pixels had mean brightness `62.31` with `2139/2992` sampled pixels above the visibility threshold
 
 Implementation note from this rerun:
 
 - the fixed exposure value in the shared `default` profile was removed because live capability probes showed state-dependent exposure increments where `10013.862` and `10031.291` can each be valid in different current camera states
 - the `default` profile now keeps the stable `Mono10` / gain / ROI baseline and leaves exposure unset
 - partial configuration updates now preserve previously known effective configuration fields in status
+- `Mono10` / `Mono12` / `Mono14` / `Mono16` rendering now uses format-aware conversion plus display-only contrast stretching for the wx preview path; saved raw/snapshot data is not altered by that UI rendering step
 
 Residual observations:
 
