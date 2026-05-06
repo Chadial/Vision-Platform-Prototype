@@ -21,7 +21,7 @@ class CameraSettingsServiceTests(unittest.TestCase):
         )
 
         self.assertEqual(request.pixel_format, "Mono10")
-        self.assertEqual(request.exposure_time_us, 10013.862)
+        self.assertIsNone(request.exposure_time_us)
         self.assertEqual(request.gain, 3.0)
         self.assertEqual(request.roi_width, 2000)
         self.assertEqual(request.roi_height, 1500)

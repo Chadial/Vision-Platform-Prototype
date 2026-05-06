@@ -717,6 +717,12 @@ class WxLocalPreviewShell(wx.Frame):
                 return
             request = self._build_camera_settings_request(**dialog.get_values())
             request = self._camera_settings_service.normalize_request(request, capability_profile)
+            request = self._suppress_unchanged_camera_settings(request, status.configuration)
+            if not self._camera_settings_request_has_values(request):
+                self._clear_failure_reflection_for_source("setup")
+                self._set_transient_status_message("Camera settings unchanged")
+                self.request_refresh()
+                return
             self._session.subsystem.command_controller.apply_configuration(request)
             self._cached_status = None
             self._last_status_refresh_time = 0.0
@@ -1413,6 +1419,47 @@ class WxLocalPreviewShell(wx.Frame):
             roi_offset_y=self._parse_optional_int(roi_offset_y),
             roi_width=self._parse_optional_int(roi_width),
             roi_height=self._parse_optional_int(roi_height),
+        )
+
+    @staticmethod
+    def _suppress_unchanged_camera_settings(
+        request: ApplyConfigurationRequest,
+        current_configuration,
+    ) -> ApplyConfigurationRequest:
+        if current_configuration is None:
+            return request
+
+        field_names = (
+            "exposure_time_us",
+            "gain",
+            "pixel_format",
+            "acquisition_frame_rate",
+            "roi_offset_x",
+            "roi_offset_y",
+            "roi_width",
+            "roi_height",
+        )
+        values = {}
+        for field_name in field_names:
+            value = getattr(request, field_name)
+            current_value = getattr(current_configuration, field_name, None)
+            values[field_name] = None if value is not None and value == current_value else value
+        return ApplyConfigurationRequest(**values)
+
+    @staticmethod
+    def _camera_settings_request_has_values(request: ApplyConfigurationRequest) -> bool:
+        return any(
+            getattr(request, field_name) is not None
+            for field_name in (
+                "exposure_time_us",
+                "gain",
+                "pixel_format",
+                "acquisition_frame_rate",
+                "roi_offset_x",
+                "roi_offset_y",
+                "roi_width",
+                "roi_height",
+            )
         )
 
     def _get_recording_save_directory(self) -> Path | None:

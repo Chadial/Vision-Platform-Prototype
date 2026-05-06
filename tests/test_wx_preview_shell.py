@@ -1008,7 +1008,7 @@ class WxPreviewShellTests(unittest.TestCase):
             shell._on_menu_camera_settings(None)
 
         self.assertEqual(len(created_dialogs), 1)
-        self.assertEqual(created_dialogs[0]["exposure_time_us"], "10013.9")
+        self.assertEqual(created_dialogs[0]["exposure_time_us"], "1500")
         self.assertEqual(created_dialogs[0]["gain"], "3")
         self.assertEqual(created_dialogs[0]["pixel_format"], "Mono10")
         self.assertEqual(created_dialogs[0]["acquisition_frame_rate"], "12.5")
@@ -1016,6 +1016,48 @@ class WxPreviewShellTests(unittest.TestCase):
         self.assertEqual(created_dialogs[0]["roi_offset_y"], "0")
         self.assertEqual(created_dialogs[0]["roi_width"], "2000")
         self.assertEqual(created_dialogs[0]["roi_height"], "1500")
+
+    def test_suppress_unchanged_camera_settings_keeps_only_changed_fields(self) -> None:
+        current_configuration = SimpleNamespace(
+            exposure_time_us=10031.291,
+            gain=3.0,
+            pixel_format="Mono10",
+            acquisition_frame_rate=None,
+            roi_offset_x=0,
+            roi_offset_y=0,
+            roi_width=2000,
+            roi_height=1500,
+        )
+        request = wx_preview_shell_module.ApplyConfigurationRequest(
+            exposure_time_us=10031.291,
+            gain=4.0,
+            pixel_format="Mono10",
+            acquisition_frame_rate=None,
+            roi_offset_x=0,
+            roi_offset_y=0,
+            roi_width=2000,
+            roi_height=1500,
+        )
+
+        filtered = WxLocalPreviewShell._suppress_unchanged_camera_settings(request, current_configuration)
+
+        self.assertIsNone(filtered.exposure_time_us)
+        self.assertEqual(filtered.gain, 4.0)
+        self.assertIsNone(filtered.pixel_format)
+        self.assertIsNone(filtered.roi_width)
+        self.assertIsNone(filtered.roi_height)
+
+    def test_camera_settings_request_has_values_detects_empty_request(self) -> None:
+        self.assertFalse(
+            WxLocalPreviewShell._camera_settings_request_has_values(
+                wx_preview_shell_module.ApplyConfigurationRequest()
+            )
+        )
+        self.assertTrue(
+            WxLocalPreviewShell._camera_settings_request_has_values(
+                wx_preview_shell_module.ApplyConfigurationRequest(gain=3.0)
+            )
+        )
 
     def test_recording_settings_dialog_uses_choice_string_selection(self) -> None:
         dialog = SimpleNamespace(

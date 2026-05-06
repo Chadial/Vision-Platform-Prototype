@@ -140,6 +140,7 @@ Implication:
 
 - exposure and gain are viable camera-side controls for later UI or host integration
 - both manual and auto-mode concepts are available on this device
+- May 6, 2026 live wx settings rerun showed that exact exposure increment alignment can be state-dependent across the current hardware path, so the shared `default` configuration profile no longer pins one exposure value; it keeps the stable `Mono10` / gain / ROI baseline and leaves exposure unset until an operator or host explicitly requests it
 
 ## Acquisition Rate Control
 

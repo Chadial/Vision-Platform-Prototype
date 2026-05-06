@@ -257,6 +257,33 @@ Residual observations:
 - `vmbpyLog <VmbError.NotAvailable: -30>` still appeared during otherwise successful runs
 - the bounded recording path also emitted an `Unexpected access mode change` warning after completion, but the command still returned success
 
+Latest wx camera-settings live-path rerun on May 6, 2026:
+
+- machine: current local development machine
+- camera id: `DEV_1AB22C046D81`
+- camera model: `Allied Vision 1800 U-1240m`
+- command paths:
+  - `.\.venv\Scripts\python.exe -m vision_platform.apps.camera_cli status --source hardware --camera-alias tested_camera`
+  - `.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell --source hardware --camera-alias tested_camera --configuration-profile default --snapshot-directory .\captures\hardware_smoke\wp103_wx_shell_snapshot`
+  - `.\.venv\Scripts\python.exe -m vision_platform.apps.local_shell control status`
+
+Observed result:
+
+- hardware-backed `status` succeeded with serial `067WH`, `capabilities_available=true`, and `capability_probe_error=null`
+- the wx shell started on the tested hardware path, published live status, and kept preview running with `Mono10`, gain `3`, ROI `0,0,2000,1500`, and the configured save directory
+- the real `Camera Settings...` menu path opened the modal dialog in the running shell
+- confirming the dialog completed without `failure_reflection`, left preview running, and preserved the full effective configuration in the published status
+
+Implementation note from this rerun:
+
+- the fixed exposure value in the shared `default` profile was removed because live capability probes showed state-dependent exposure increments where `10013.862` and `10031.291` can each be valid in different current camera states
+- the `default` profile now keeps the stable `Mono10` / gain / ROI baseline and leaves exposure unset
+- partial configuration updates now preserve previously known effective configuration fields in status
+
+Residual observations:
+
+- `vmbpyLog <VmbError.NotAvailable: -30>` still appeared during otherwise successful hardware status/startup attempts and remains classified as the known non-blocking SDK/logging residual
+
 - invalid camera id: explicit failure, `No Camera with Id 'DOES_NOT_EXIST' available.`
 - unsupported pixel format: explicit failure when trying `Mono16`, with `No Entry associated with 'Mono16'`
 - unsupported ROI combination: explicit failure for width `2001`, with device-side increment guidance `not a multiple of 8`

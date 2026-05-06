@@ -116,7 +116,7 @@ class CameraCliTests(unittest.TestCase):
         )
 
         self.assertEqual(result.status.configuration.pixel_format, "Mono10")
-        self.assertEqual(result.status.configuration.exposure_time_us, 10013.862)
+        self.assertIsNone(result.status.configuration.exposure_time_us)
         self.assertEqual(result.status.configuration.gain, 3.0)
         self.assertEqual(result.status.configuration.roi_width, 2000)
         self.assertEqual(result.status.configuration.roi_height, 1500)
@@ -430,7 +430,7 @@ class CameraCliTests(unittest.TestCase):
         command_controller.save_snapshot.return_value = SimpleNamespace(saved_path=Path("captures/profile/image.bmp"))
         command_controller.get_status.return_value = SimpleNamespace(
             camera=SimpleNamespace(camera_id="CAM-001"),
-            configuration=SimpleNamespace(pixel_format="Mono8", exposure_time_us=10013.862),
+            configuration=SimpleNamespace(pixel_format="Mono8", exposure_time_us=None),
         )
         build_subsystem_mock.return_value = SimpleNamespace(
             camera_service=camera_service,
@@ -458,7 +458,7 @@ class CameraCliTests(unittest.TestCase):
         applied_request = command_controller.apply_configuration.call_args.args[0]
         snapshot_request = command_controller.save_snapshot.call_args.args[0]
         self.assertEqual(applied_request.pixel_format, "Mono10")
-        self.assertEqual(applied_request.exposure_time_us, 10013.862)
+        self.assertIsNone(applied_request.exposure_time_us)
         self.assertEqual(applied_request.gain, 5.0)
         self.assertEqual(applied_request.roi_width, 2000)
         self.assertEqual(snapshot_request.configuration_profile_id, "default")
