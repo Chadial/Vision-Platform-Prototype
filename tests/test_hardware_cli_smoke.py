@@ -44,19 +44,19 @@ class HardwareCliSmokeTests(unittest.TestCase):
                         "--file-stem",
                         "hardware_smoke_snapshot",
                         "--file-extension",
-                        ".bmp",
+                        ".raw",
                     ]
                 )
             except (CameraCliError, RuntimeError) as exc:
                 _skip_if_tested_hardware_is_unavailable(exc)
                 raise
 
-        self.assertEqual(result.operation, "snapshot")
-        self.assertEqual(result.source, "hardware")
-        self.assertTrue(result.snapshot_path.exists())
-        self.assertEqual(result.snapshot_path.suffix, ".bmp")
-        self.assertEqual(result.status.camera.camera_id, "DEV_1AB22C046D81")
-        self.assertEqual(result.selected_save_directory, Path(temp_dir))
+            self.assertEqual(result.operation, "snapshot")
+            self.assertEqual(result.source, "hardware")
+            self.assertTrue(result.snapshot_path.exists())
+            self.assertEqual(result.snapshot_path.suffix, ".raw")
+            self.assertEqual(result.status.camera.camera_id, "DEV_1AB22C046D81")
+            self.assertEqual(result.selected_save_directory, Path(temp_dir))
 
 
 def _skip_if_tested_hardware_is_unavailable(exc: Exception) -> None:

@@ -3,7 +3,6 @@
     "1800_u_1240m": {
       "default": {
         "pixel_format": "Mono10",
-        "exposure_time_us": 10013.862,
         "gain": 3.0,
         "roi_offset_x": 0,
         "roi_offset_y": 0,
@@ -14,7 +13,6 @@
     "alvium_1800_u_1240m": {
       "default": {
         "pixel_format": "Mono10",
-        "exposure_time_us": 10013.862,
         "gain": 3.0,
         "roi_offset_x": 0,
         "roi_offset_y": 0,

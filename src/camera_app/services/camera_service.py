@@ -1,4 +1,5 @@
 from copy import deepcopy
+from dataclasses import fields
 
 from camera_app.drivers.camera_driver import CameraDriver
 from camera_app.models.camera_capability_profile import CameraCapabilityProfile
@@ -55,7 +56,7 @@ class CameraService:
                 details={"configuration": repr(config)},
             )
             raise
-        self._last_configuration = deepcopy(config)
+        self._last_configuration = self._merge_with_last_configuration(config)
 
     def shutdown(self) -> None:
         self._driver.shutdown()
@@ -66,6 +67,16 @@ class CameraService:
         if self._last_configuration is None:
             return None
         return deepcopy(self._last_configuration)
+
+    def _merge_with_last_configuration(self, config: CameraConfiguration) -> CameraConfiguration:
+        if self._last_configuration is None:
+            return deepcopy(config)
+
+        values = {}
+        for field in fields(CameraConfiguration):
+            value = getattr(config, field.name)
+            values[field.name] = value if value is not None else getattr(self._last_configuration, field.name)
+        return CameraConfiguration(**values)
 
     def get_capability_profile(self) -> CameraCapabilityProfile | None:
         if self._capability_profile is None:

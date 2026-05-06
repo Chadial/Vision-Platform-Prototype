@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from tests import _path_setup
-from vision_platform.models import CameraCapabilityProfile, CameraStatus, FeatureCapability
+from vision_platform.models import CameraCapabilityProfile, CameraConfiguration, CameraStatus, FeatureCapability
 from vision_platform.services.recording_service import CameraService
 
 
@@ -163,6 +163,34 @@ class CameraServiceTests(unittest.TestCase):
         capability_service.probe_live.assert_not_called()
         self.assertFalse(status.capabilities_available)
         self.assertIsNone(status.capability_probe_error)
+
+    def test_apply_configuration_merges_partial_updates_into_last_configuration(self) -> None:
+        driver = MagicMock()
+        driver.initialize.return_value = CameraStatus(is_initialized=True, source_kind="simulation")
+        driver.get_status.return_value = CameraStatus(is_initialized=True, source_kind="simulation")
+        service = CameraService(driver)
+        service.initialize()
+
+        service.apply_configuration(
+            CameraConfiguration(
+                pixel_format="Mono10",
+                exposure_time_us=1000.0,
+                gain=3.0,
+                roi_offset_x=0,
+                roi_offset_y=0,
+                roi_width=2000,
+                roi_height=1500,
+            )
+        )
+        service.apply_configuration(CameraConfiguration(gain=4.0))
+
+        last_configuration = service.get_last_configuration()
+        self.assertIsNotNone(last_configuration)
+        self.assertEqual(last_configuration.pixel_format, "Mono10")
+        self.assertEqual(last_configuration.exposure_time_us, 1000.0)
+        self.assertEqual(last_configuration.gain, 4.0)
+        self.assertEqual(last_configuration.roi_width, 2000)
+        self.assertEqual(last_configuration.roi_height, 1500)
 
 
 if __name__ == "__main__":
